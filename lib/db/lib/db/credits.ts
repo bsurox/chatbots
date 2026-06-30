@@ -1,6 +1,7 @@
-import { db } from './queries';
-import { userCredits } from './schema';
-import { eq, sql } from 'drizzle-orm';
+import "server-only";
+import { eq, sql } from "drizzle-orm";
+import { db } from "./queries";
+import { userCredits } from "./schema";
 
 export async function getUserCredits(userId: string): Promise<number> {
   const result = await db
@@ -27,12 +28,18 @@ export async function addCredits(userId: string, amount: number) {
   } else {
     await db
       .update(userCredits)
-      .set({ credits: sql`${userCredits.credits} + ${amount}`, updatedAt: new Date() })
+      .set({
+        credits: sql`${userCredits.credits} + ${amount}`,
+        updatedAt: new Date(),
+      })
       .where(eq(userCredits.userId, userId));
   }
 }
 
-export async function deductCredits(userId: string, amount: number): Promise<boolean> {
+export async function deductCredits(
+  userId: string,
+  amount: number,
+): Promise<boolean> {
   const current = await getUserCredits(userId);
 
   if (current < amount) {
@@ -41,7 +48,10 @@ export async function deductCredits(userId: string, amount: number): Promise<boo
 
   await db
     .update(userCredits)
-    .set({ credits: sql`${userCredits.credits} - ${amount}`, updatedAt: new Date() })
+    .set({
+      credits: sql`${userCredits.credits} - ${amount}`,
+      updatedAt: new Date(),
+    })
     .where(eq(userCredits.userId, userId));
 
   return true;
