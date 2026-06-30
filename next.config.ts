@@ -1,8 +1,5 @@
-import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
-
 const basePath = process.env.IS_DEMO === "1" ? "/demo" : "";
-
 const nextConfig: NextConfig = {
   ...(basePath
     ? {
@@ -50,5 +47,4 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForDev: true,
   },
 };
-
-export default withBotId(nextConfig);
+export default nextConfig;
