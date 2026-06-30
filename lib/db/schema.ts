@@ -9,6 +9,7 @@ import {
   timestamp,
   uuid,
   varchar,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("User", {
@@ -134,3 +135,11 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+export const userCredits = pgTable('UserCredits', {
+  userId: uuid('userId')
+    .notNull()
+    .references(() => user.id)
+    .primaryKey(),
+  credits: integer('credits').notNull().default(0),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+});
