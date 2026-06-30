@@ -8,7 +8,7 @@ export default function CreditsSuccessPage() {
         Your credits have been added to your account.
       </p>
       
-        href="/"
+       <a href="/"
         style={{
           display: "inline-block",
           marginTop: 24,
