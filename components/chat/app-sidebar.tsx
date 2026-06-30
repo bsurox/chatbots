@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  CreditCardIcon,
   MessageSquareIcon,
   PanelLeftIcon,
   PenSquareIcon,
+  SparklesIcon,
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -117,6 +119,21 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     <span className="font-medium">New chat</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem className="mt-1.5 mb-1">
+                  <SidebarMenuButton
+                    asChild
+                    className="h-9 rounded-lg border border-transparent bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 text-[13px] font-semibold text-amber-600 shadow-sm transition-all duration-150 hover:border-amber-500/30 hover:from-amber-500/25 hover:via-amber-400/20 hover:to-amber-500/25 hover:shadow-md dark:text-amber-400"
+                    tooltip="Buy Credits"
+                  >
+                    <Link
+                      href="/credits"
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <SparklesIcon className="size-4" />
+                      <span>Buy Credits</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 {user && (
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -153,7 +170,6 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteAll}>
               Delete All
             </AlertDialogAction>
