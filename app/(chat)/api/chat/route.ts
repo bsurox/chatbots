@@ -84,10 +84,7 @@ export async function POST(request: Request) {
     const hasCredits = await deductCredits(session.user.id, 1);
 
     if (!hasCredits) {
-      return Response.json(
-        { error: "Out of credits. Please purchase more to continue." },
-        { status: 402 }
-      );
+      return new ChatbotError("payment_required:credits").toResponse();
     }
 
     const chatModel = allowedModelIds.has(selectedChatModel)
