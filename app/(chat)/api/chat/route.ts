@@ -37,6 +37,7 @@ import {
   updateChatTitleById,
   updateMessage,
 } from "@/lib/db/queries";
+import { deductCredits } from "@/lib/db/credits";
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
 import { checkIpRateLimit } from "@/lib/ratelimit";
@@ -78,6 +79,15 @@ export async function POST(request: Request) {
 
     if (!session?.user) {
       return new ChatbotError("unauthorized:chat").toResponse();
+    }
+
+    const hasCredits = await deductCredits(session.user.id, 1);
+
+    if (!hasCredits) {
+      return Response.json(
+        { error: "Out of credits. Please purchase more to continue." },
+        { status: 402 }
+      );
     }
 
     const chatModel = allowedModelIds.has(selectedChatModel)
