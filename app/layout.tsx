@@ -6,12 +6,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+export const metadata: Metadata = new URL("https://www.askevo.ai"),
+  title: "AskEvo",
+  description: "AI-powered chat, image generation, and voice tools.",
 };
-
 export const viewport = {
   maximumScale: 1,
 };
