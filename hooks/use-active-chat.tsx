@@ -3,7 +3,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   type Dispatch,
@@ -27,6 +27,41 @@ import type { Vote } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+
+const IMAGE_KEYWORDS = [
+  "generate an image",
+  "create an image",
+  "make an image",
+  "draw",
+  "generate a picture",
+  "create a picture",
+  "make a picture",
+  "generate a photo",
+  "create a photo",
+  "image of",
+  "picture of",
+  "photo of",
+  "illustration of",
+  "render",
+];
+
+const VOICE_KEYWORDS = [
+  "read this out loud",
+  "say this",
+  "speak this",
+  "text to speech",
+  "convert to speech",
+  "read aloud",
+  "voice this",
+  "narrate",
+];
+
+function detectIntent(text: string): "image" | "voice" | null {
+  const lower = text.toLowerCase();
+  if (IMAGE_KEYWORDS.some((kw) => lower.includes(kw))) return "image";
+  if (VOICE_KEYWORDS.some((kw) => lower.includes(kw))) return "voice";
+  return null;
+}
 
 type ActiveChatContextValue = {
   chatId: string;
@@ -58,6 +93,7 @@ function extractChatId(pathname: string): string | null {
 
 export function ActiveChatProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { setDataStream } = useDataStream();
   const { mutate } = useSWRConfig();
 
@@ -100,7 +136,7 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
   const {
     messages,
     setMessages,
-    sendMessage,
+    sendMessage: originalSendMessage,
     status,
     stop,
     regenerate,
@@ -157,7 +193,7 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
     onFinish: () => {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
-  onError: (error) => {
+    onError: (error) => {
       if (error.message?.includes("AI Gateway requires a valid credit card")) {
         setShowCreditCardAlert(true);
       } else if (
@@ -176,6 +212,30 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
       }
     },
   });
+
+  const sendMessage: typeof originalSendMessage = (message, options) => {
+    const text =
+      message.parts
+        ?.filter((p) => p.type === "text")
+        .map((p) => (p as { type: "text"; text: string }).text)
+        .join(" ") ?? "";
+
+    const intent = detectIntent(text);
+
+    if (intent === "image") {
+      const encoded = encodeURIComponent(text);
+      router.push(`/image?prompt=${encoded}`);
+      return;
+    }
+
+    if (intent === "voice") {
+      const encoded = encodeURIComponent(text);
+      router.push(`/voice?prompt=${encoded}`);
+      return;
+    }
+
+    return originalSendMessage(message, options);
+  };
 
   const loadedChatIds = useRef(new Set<string>());
 
