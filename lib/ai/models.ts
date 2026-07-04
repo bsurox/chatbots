@@ -61,3 +61,13 @@ export function getActiveModels(): ChatModel[] {
 export const allowedModelIds = new Set(chatModels.map((m) => m.id));
 
 export const modelsByProvider =
+chatModels.reduce(
+  (acc, model) => {
+    if (!acc[model.provider]) {
+      acc[model.provider] = [];
+    }
+    acc[model.provider].push(model);
+    return acc;
+  },
+  {} as Record<string, ChatModel[]>
+);
