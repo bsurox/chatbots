@@ -18,7 +18,12 @@ const PRESET_SIZES = [
 ];
 
 export default function ImagePage() {
-  const [prompt, setPrompt] = useState("");
+const [prompt, setPrompt] = useState(() => {
+    if (typeof window !== "undefined") {
+      return decodeURIComponent(new URLSearchParams(window.location.search).get("prompt") ?? "");
+    }
+    return "";
+  });
   const [quality, setQuality] = useState("core");
   const [selectedPreset, setSelectedPreset] = useState(0);
   const [width, setWidth] = useState(1024);
