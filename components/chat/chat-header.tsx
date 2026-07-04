@@ -51,26 +51,16 @@ function PureChatHeader({
       >
         <SparklesIcon
           className={isLow ? "" : "text-amber-600 dark:text-amber-400"}
-          style={{
-            width: 16,
-            height: 16,
-            color: isLow ? "#ef4444" : undefined,
-          }}
+          style={{ width: 16, height: 16, color: isLow ? "#ef4444" : undefined }}
         />
-        <span
-          style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: isLow ? "#ef4444" : "#22c55e",
-          }}
-        >
+        <span style={{ fontSize: 15, fontWeight: 600, color: isLow ? "#ef4444" : "#22c55e" }}>
           {credits.toLocaleString()} credits
         </span>
       </Link>
 
       <Link
         href="/credits"
-        className="hidden md:ml-auto md:flex items-center gap-1.5 text-amber-600 dark:text-amber-400"
+        className="hidden md:ml-auto md:flex items-center gap-1.5 text-amber-600 dark:text-amber-400 transition-all duration-150"
         style={{
           padding: "6px 16px",
           borderRadius: 8,
@@ -79,6 +69,14 @@ function PureChatHeader({
           fontWeight: 600,
           textDecoration: "none",
           border: "1px solid rgba(245,158,11,0.3)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "linear-gradient(to right, rgba(245,158,11,0.25), rgba(251,191,36,0.20), rgba(245,158,11,0.25))";
+          e.currentTarget.style.borderColor = "rgba(245,158,11,0.5)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "linear-gradient(to right, rgba(245,158,11,0.15), rgba(251,191,36,0.10), rgba(245,158,11,0.15))";
+          e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)";
         }}
       >
         <SparklesIcon style={{ width: 13, height: 13 }} />
