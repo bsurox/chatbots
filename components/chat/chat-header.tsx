@@ -1,12 +1,12 @@
 "use client";
-
 import { PanelLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
-import { VercelIcon } from "./icons";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
+import { fetcher } from "@/lib/utils";
 
 function PureChatHeader({
   chatId,
@@ -18,6 +18,9 @@ function PureChatHeader({
   isReadonly: boolean;
 }) {
   const { state, toggleSidebar, isMobile } = useSidebar();
+
+  const { data: creditsData } = useSWR("/api/credits", fetcher, { refreshInterval: 30000 });
+  const credits = creditsData?.credits ?? 0;
 
   if (state === "collapsed" && !isMobile) {
     return null;
@@ -34,15 +37,6 @@ function PureChatHeader({
         <PanelLeftIcon className="size-4" />
       </Button>
 
-      <Link
-        className="flex size-8 items-center justify-center rounded-lg md:hidden"
-        href="https://vercel.com/templates/next.js/chatbot"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        <VercelIcon size={14} />
-      </Link>
-
       {!isReadonly && (
         <VisibilitySelector
           chatId={chatId}
@@ -50,26 +44,36 @@ function PureChatHeader({
         />
       )}
 
-      <Button
-        asChild
-        className="hidden rounded-lg bg-foreground px-4 text-background hover:bg-foreground/90 md:ml-auto md:flex"
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+        <span style={{ color: "#22c55e", fontSize: 18 }}>⚡</span>
+        <span style={{ fontSize: 15, fontWeight: 600, color: "#22c55e" }}>
+          {credits.toLocaleString()} credits
+        </span>
+      </div>
+
+      <Link
+        href="/credits"
+        className="hidden md:ml-auto md:flex"
+        style={{
+          padding: "6px 16px",
+          borderRadius: 8,
+          background: "rgba(34,197,94,0.15)",
+          color: "#22c55e",
+          fontSize: 13,
+          fontWeight: 600,
+          textDecoration: "none",
+          border: "1px solid rgba(34,197,94,0.3)",
+        }}
       >
-        <Link
-          href="https://vercel.com/templates/next.js/chatbot"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <VercelIcon size={16} />
-          Deploy with Vercel
-        </Link>
-      </Button>
+        Buy Credits
+      </Link>
     </header>
   );
 }
 
 export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
   return (
-    prevProps.chatId === nextProps.chatId &&
+    prevProps.chatId === nextProps.chatProps &&
     prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
     prevProps.isReadonly === nextProps.isReadonly
   );
