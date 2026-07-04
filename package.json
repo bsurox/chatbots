@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@ai-sdk/provider": "^3.0.3",
-    "@ai-sdk/anthropic": "^1.0.0",
+    "@ai-sdk/anthropic": "^2.0.0",
     "@ai-sdk/react": "3.0.118",
     "stripe": "^17.0.0",
     "@codemirror/lang-python": "^6.1.6",
