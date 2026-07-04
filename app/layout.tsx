@@ -2,30 +2,26 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-
-export const metadata: Metadata = new URL("https://www.askevo.ai"),
+export const metadata: Metadata = {
+  metadataBase: new URL("https://www.askevo.ai"),
   title: "AskEvo",
   description: "AI-powered chat, image generation, and voice tools.",
 };
 export const viewport = {
   maximumScale: 1,
 };
-
 const geist = Geist({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-geist",
 });
-
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-geist-mono",
 });
-
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
 const DARK_THEME_COLOR = "hsl(240deg 10% 3.92%)";
 const THEME_COLOR_SCRIPT = `\
@@ -45,7 +41,6 @@ const THEME_COLOR_SCRIPT = `\
   observer.observe(html, { attributes: true, attributeFilter: ['class'] });
   updateThemeColor();
 })();`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
