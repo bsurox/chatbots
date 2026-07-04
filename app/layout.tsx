@@ -52,7 +52,8 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <head>
+    <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
