@@ -213,7 +213,7 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const sendMessage = (message: Parameters<typeof originalSendMessage>[0], options?: Parameters<typeof originalSendMessage>[1]): Promise<void> => {
+  const sendMessage = async (message: Parameters<typeof originalSendMessage>[0], options?: Parameters<typeof originalSendMessage>[1]): Promise<void> => {
     const text =
       message?.parts
         ?.filter((p) => p.type === "text")
