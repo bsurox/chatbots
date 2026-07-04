@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-
 export const Greeting = () => {
   return (
     <div className="flex flex-col items-center px-4" key="overview">
@@ -8,6 +7,14 @@ export const Greeting = () => {
         className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      >
+        Hello, I&apos;m Evo.
+      </motion.div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-2 text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
+        initial={{ opacity: 0, y: 10 }}
+        transition={{ delay: 0.42, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
         What can I help with?
       </motion.div>
