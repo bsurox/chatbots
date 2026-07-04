@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CreditCardIcon,
   PanelLeftIcon,
   PenSquareIcon,
   SparklesIcon,
@@ -14,6 +13,7 @@ import type { User } from "next-auth";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
+import useSWR from "swr";
 import { unstable_serialize } from "swr/infinite";
 import {
   getChatHistoryPaginationKey,
@@ -45,12 +45,21 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { fetcher } from "@/lib/utils";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile, toggleSidebar } = useSidebar();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+
+  const { data: creditsData } = useSWR(
+    user ? "/api/credits" : null,
+    fetcher,
+    { refreshInterval: 30000 }
+  );
+
+  const credits = creditsData?.credits ?? 0;
 
   const handleDeleteAll = () => {
     setShowDeleteAllDialog(false);
@@ -76,7 +85,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <SidebarMenuButton
                   asChild
                   className="size-8 !px-0 items-center justify-center group-data-[collapsible=icon]:group-hover/logo:opacity-0"
-                  tooltip="Chatbot"
+                  tooltip="AskEvo"
                 >
                   <Link href="/" onClick={() => setOpenMobile(false)}>
                     <Image src="/logo.png" alt="AskEvo" width={28} height={28} className="rounded-full" />
@@ -119,7 +128,15 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     <span className="font-medium">New chat</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem className="mt-1.5 mb-1">
+                {user && (
+                  <SidebarMenuItem className="mt-1">
+                    <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] text-sidebar-foreground/50">
+                      <span>⚡</span>
+                      <span>{credits.toLocaleString()} credits</span>
+                    </div>
+                  </SidebarMenuItem>
+                )}
+                <SidebarMenuItem className="mt-0.5 mb-1">
                   <SidebarMenuButton
                     asChild
                     className="h-9 rounded-lg border border-transparent bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 text-[13px] font-semibold text-amber-600 shadow-sm transition-all duration-150 hover:border-amber-500/30 hover:from-amber-500/25 hover:via-amber-400/20 hover:to-amber-500/25 hover:shadow-md dark:text-amber-400"
