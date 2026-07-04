@@ -213,7 +213,10 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const sendMessage = async (message: Parameters<typeof originalSendMessage>[0], options?: Parameters<typeof originalSendMessage>[1]): Promise<void> => {
+  const sendMessage = async (
+    message: Parameters<typeof originalSendMessage>[0],
+    options?: Parameters<typeof originalSendMessage>[1]
+  ): Promise<void> => {
     const text =
       message?.parts
         ?.filter((p) => p.type === "text")
@@ -234,7 +237,7 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    return originalSendMessage(message, options);
+    await originalSendMessage(message, options);
   };
 
   const loadedChatIds = useRef(new Set<string>());
