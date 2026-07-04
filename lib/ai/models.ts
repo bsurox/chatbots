@@ -43,9 +43,7 @@ export const chatModels: ChatModel[] = [
   },
 ];
 
-export async function getCapabilities(): Promise
-  Record<string, ModelCapabilities>
-> {
+export async function getCapabilities(): Promise<Record<string, ModelCapabilities>> {
   return Object.fromEntries(
     chatModels.map((model) => [
       model.id,
