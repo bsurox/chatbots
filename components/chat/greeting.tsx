@@ -26,17 +26,25 @@ export const Greeting = () => {
 
   return (
     <div className="flex flex-col items-center px-4" key="overview">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+
       <div
         style={{
-          fontFamily: "'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif",
-          fontSize: "clamp(1.5rem, 4vw, 2.2rem)",
-          fontWeight: 500,
-          fontStyle: "italic",
-          letterSpacing: "0.02em",
-          color: "inherit",
-          minHeight: "2.5rem",
+          fontFamily: "'Dancing Script', cursive",
+          fontSize: "clamp(2rem, 5vw, 3rem)",
+          fontWeight: 700,
+          color: "#4ade80",
+          textShadow: "0 0 12px rgba(74,222,128,0.4)",
+          minHeight: "3.5rem",
           textAlign: "center",
-          marginBottom: 8,
+          marginBottom: 24,
+          letterSpacing: "0.01em",
         }}
       >
         {displayed}
@@ -46,7 +54,7 @@ export const Greeting = () => {
               display: "inline-block",
               width: 2,
               height: "1em",
-              background: "currentColor",
+              background: "#4ade80",
               marginLeft: 2,
               verticalAlign: "middle",
               animation: "blink 0.7s step-end infinite",
@@ -54,13 +62,6 @@ export const Greeting = () => {
           />
         )}
       </div>
-
-      <style>{`
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-      `}</style>
 
       <motion.div
         animate={{ opacity: 1, y: 0 }}
