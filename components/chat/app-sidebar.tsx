@@ -79,7 +79,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   tooltip="Chatbot"
                 >
                   <Link href="/" onClick={() => setOpenMobile(false)}>
-                    <MessageSquareIcon className="size-4 text-sidebar-foreground/50" />
+                    <Image src="/logo.png" alt="AskEvo" width={28} height={28} className="rounded-full" />
                   </Link>
                 </SidebarMenuButton>
                 <Tooltip>
