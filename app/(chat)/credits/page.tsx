@@ -1,6 +1,7 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const BUNDLES = [
   { id: "starter", name: "Starter", price: "$5", credits: 220 },
@@ -9,7 +10,34 @@ const BUNDLES = [
 ];
 
 export default function CreditsPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session?.user) {
+      router.push("/register?redirectUrl=/credits");
+      return;
+    }
+    const isGuest = /^guest-\d+$/.test(session.user.email ?? "");
+    if (isGuest) {
+      router.push("/register?redirectUrl=/credits");
+    }
+  }, [session, status, router]);
+
+  if (status === "loading") {
+    return (
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+        <p style={{ color: "#888" }}>Loading...</p>
+      </div>
+    );
+  }
+
+  const isGuest = /^guest-\d+$/.test(session?.user?.email ?? "");
+  if (!session?.user || isGuest) {
+    return null;
+  }
 
   async function handleBuy(bundleId: string) {
     setLoading(bundleId);
@@ -36,7 +64,6 @@ export default function CreditsPage() {
       <p style={{ color: "#888", marginBottom: 32 }}>
         Use credits for chat, images, and voice generation.
       </p>
-
       <div
         style={{
           display: "grid",
