@@ -1,152 +1,183 @@
 "use client";
 
-import {
-  ImageIcon,
-  PanelLeftIcon,
-  PenSquareIcon,
-  SparklesIcon,
-  TrashIcon,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { User } from "next-auth";
 import { useState } from "react";
-import { toast } from "sonner";
-import useSWR from "swr";
-import { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
-import { getChatHistoryPaginationKey, SidebarHistory } from "@/components/chat/sidebar-history";
-import { SidebarUserNav } from "@/components/chat/sidebar-user-nav";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { fetcher } from "@/lib/utils";
+import Link from "next/link";
 
-export function AppSidebar({ user }: { user: User | undefined }) {
-  const router = useRouter();
-  const { setOpenMobile, toggleSidebar } = useSidebar();
-  const { mutate } = useSWRConfig();
-  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+const QUALITY_OPTIONS = [
+  { id: "core", name: "Standard", description: "Fast, great quality", credits: 8 },
+  { id: "ultra", name: "Ultra", description: "Highest quality, more detail", credits: 18 },
+];
 
-  const { data: creditsData } = useSWR(
-    user ? "/api/credits" : null,
-    fetcher,
-    { refreshInterval: 30000 }
-  );
+const PRESET_SIZES = [
+  { label: "Square", width: 1024, height: 1024 },
+  { label: "Wide (16:9)", width: 1344, height: 768 },
+  { label: "Tall (9:16)", width: 768, height: 1344 },
+  { label: "Portrait (4:5)", width: 896, height: 1120 },
+  { label: "Landscape (3:2)", width: 1216, height: 832 },
+  { label: "Custom", width: 0, height: 0 },
+];
 
-  const credits = creditsData?.credits ?? 0;
+export default function ImagePage() {
+  const [prompt, setPrompt] = useState("");
+  const [quality, setQuality] = useState("core");
+  const [selectedPreset, setSelectedPreset] = useState(0);
+  const [width, setWidth] = useState(1024);
+  const [height, setHeight] = useState(1024);
+  const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleDeleteAll = () => {
-    setShowDeleteAllDialog(false);
-    router.replace("/");
-    mutate(unstable_serialize(getChatHistoryPaginationKey), [], { revalidate: false });
-    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/history`, { method: "DELETE" });
-    toast.success("All chats deleted");
-  };
+  const creditCost = quality === "ultra" ? 18 : 8;
+
+  function handlePresetChange(index: number) {
+    setSelectedPreset(index);
+    if (PRESET_SIZES[index].width !== 0) {
+      setWidth(PRESET_SIZES[index].width);
+      setHeight(PRESET_SIZES[index].height);
+    }
+  }
+
+  async function handleGenerate() {
+    if (!prompt.trim()) return;
+    setLoading(true);
+    setError(null);
+    setImage(null);
+
+    try {
+      const res = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, width, height, quality }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 402) {
+          setError("Not enough credits. Please buy more credits to continue.");
+        } else {
+          setError(data.error || "Something went wrong. Please try again.");
+        }
+        return;
+      }
+
+      setImage(data.image);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <>
-      <Sidebar collapsible="icon">
-        <SidebarHeader className="pb-0 pt-3">
-          <SidebarMenu>
-            <SidebarMenuItem className="flex flex-row items-center justify-between">
-              <div className="group/logo relative flex items-center justify-center">
-                <SidebarMenuButton asChild className="size-8 !px-0 items-center justify-center group-data-[collapsible=icon]:group-hover/logo:opacity-0" tooltip="AskEvo">
-                  <Link href="/" onClick={() => setOpenMobile(false)}>
-                    <Image src="/logo.png" alt="AskEvo" width={28} height={28} className="rounded-full" />
-                  </Link>
-                </SidebarMenuButton>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <SidebarMenuButton className="pointer-events-none absolute inset-0 size-8 opacity-0 group-data-[collapsible=icon]:pointer-events-auto group-data-[collapsible=icon]:group-hover/logo:opacity-100" onClick={() => toggleSidebar()}>
-                      <PanelLeftIcon className="size-4" />
-                    </SidebarMenuButton>
-                  </TooltipTrigger>
-                  <TooltipContent className="hidden md:block" side="right">Open sidebar</TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="group-data-[collapsible=icon]:hidden">
-                <SidebarTrigger className="text-sidebar-foreground/60 transition-colors duration-150 hover:text-sidebar-foreground" />
-              </div>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup className="pt-1">
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                    onClick={() => { setOpenMobile(false); router.push("/"); }}
-                    tooltip="New Chat"
-                  >
-                    <PenSquareIcon className="size-4" />
-                    <span className="font-medium">New chat</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground" tooltip="Image Generator">
-                    <Link href="/image" onClick={() => setOpenMobile(false)}>
-                      <ImageIcon className="size-4" />
-                      <span className="font-medium">Image Generator</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {user && (
-                  <SidebarMenuItem className="mt-1">
-                    <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] text-sidebar-foreground/50">
-                      <span>⚡</span>
-                      <span>{credits.toLocaleString()} credits</span>
-                    </div>
-                  </SidebarMenuItem>
-                )}
-                <SidebarMenuItem className="mt-0.5 mb-1">
-                  <SidebarMenuButton asChild className="h-9 rounded-lg border border-transparent bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 text-[13px] font-semibold text-amber-600 shadow-sm transition-all duration-150 hover:border-amber-500/30 hover:from-amber-500/25 hover:via-amber-400/20 hover:to-amber-500/25 hover:shadow-md dark:text-amber-400" tooltip="Buy Credits">
-                    <Link href="/credits" onClick={() => setOpenMobile(false)}>
-                      <SparklesIcon className="size-4" />
-                      <span>Buy Credits</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {user && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className="rounded-lg text-sidebar-foreground/40 transition-colors duration-150 hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => setShowDeleteAllDialog(true)}
-                      tooltip="Delete All Chats"
-                    >
-                      <TrashIcon className="size-4" />
-                      <span className="text-[13px]">Delete all</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarHistory user={user} />
-        </SidebarContent>
-        <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
-          {user && <SidebarUserNav user={user} />}
-        </SidebarFooter>
-        <SidebarRail />
-      </Sidebar>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Image Generator</h1>
+        <p style={{ color: "#888" }}>Ask Evo and generate stunning images using text descriptions. Powered by Stable Diffusion.</p>
+      </div>
 
-      <AlertDialog onOpenChange={setShowDeleteAllDialog} open={showDeleteAllDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete all chats?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete all your chats and remove them from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAll}>Delete All</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+        <div>
+          <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Describe your image</label>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="A futuristic city at sunset with neon lights reflecting on wet streets..."
+            rows={4}
+            style={{ width: "100%", padding: "12px", borderRadius: 8, border: "1px solid #333", background: "transparent", color: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
+          />
+        </div>
+
+        <div>
+          <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Quality</label>
+          <div style={{ display: "flex", gap: 12 }}>
+            {QUALITY_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setQuality(option.id)}
+                style={{ flex: 1, padding: "12px", borderRadius: 8, border: quality === option.id ? "2px solid #22c55e" : "1px solid #333", background: quality === option.id ? "rgba(34,197,94,0.1)" : "transparent", color: "inherit", cursor: "pointer", textAlign: "left" }}
+              >
+                <div style={{ fontWeight: 600, marginBottom: 2 }}>{option.name}</div>
+                <div style={{ fontSize: 12, color: "#888" }}>{option.description}</div>
+                <div style={{ fontSize: 12, color: "#22c55e", marginTop: 4 }}>{option.credits} credits</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Size</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+            {PRESET_SIZES.map((preset, index) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => handlePresetChange(index)}
+                style={{ padding: "8px 16px", borderRadius: 8, border: selectedPreset === index ? "2px solid #22c55e" : "1px solid #333", background: selectedPreset === index ? "rgba(34,197,94,0.1)" : "transparent", color: "inherit", cursor: "pointer", fontSize: 13 }}
+              >
+                {preset.label}
+                {preset.width !== 0 && (
+                  <span style={{ color: "#888", marginLeft: 6, fontSize: 11 }}>{preset.width}x{preset.height}</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: 12, color: "#888", display: "block", marginBottom: 4 }}>Width (px)</label>
+              <input
+                type="number"
+                value={width}
+                onChange={(e) => { setWidth(Number(e.target.value)); setSelectedPreset(5); }}
+                min={512}
+                max={2048}
+                step={64}
+                style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #333", background: "transparent", color: "inherit", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: 12, color: "#888", display: "block", marginBottom: 4 }}>Height (px)</label>
+              <input
+                type="number"
+                value={height}
+                onChange={(e) => { setHeight(Number(e.target.value)); setSelectedPreset(5); }}
+                min={512}
+                max={2048}
+                step={64}
+                style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #333", background: "transparent", color: "inherit", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={loading || !prompt.trim()}
+          style={{ padding: "14px", borderRadius: 8, border: "none", background: loading || !prompt.trim() ? "#333" : "linear-gradient(135deg, #22c55e, #16a34a)", color: loading || !prompt.trim() ? "#666" : "#fff", fontWeight: 700, fontSize: 16, cursor: loading || !prompt.trim() ? "not-allowed" : "pointer" }}
+        >
+          {loading ? "Generating... (this may take 10-20 seconds)" : `Generate Image — ${creditCost} credits`}
+        </button>
+
+        {error && (
+          <div style={{ padding: 16, borderRadius: 8, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444" }}>
+            {error}
+            {error.includes("credits") && (
+              <Link href="/credits" style={{ marginLeft: 8, textDecoration: "underline", color: "#22c55e" }}>Buy more credits</Link>
+            )}
+          </div>
+        )}
+
+        {image && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <img src={image} alt="Generated" style={{ width: "100%", borderRadius: 12, border: "1px solid #333" }} />
+            <a href={image} download="askevo-image.png" style={{ display: "inline-block", padding: "10px 24px", borderRadius: 8, background: "#22c55e", color: "#fff", textDecoration: "none", fontWeight: 600, textAlign: "center" }}>Download Image</a>
+          </div>
+        )}
+
+      </div>
+    </div>
   );
 }
