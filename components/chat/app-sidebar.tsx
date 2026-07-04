@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ImageIcon,
   PanelLeftIcon,
   PenSquareIcon,
   SparklesIcon,
@@ -121,78 +122,3 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     onClick={() => {
                       setOpenMobile(false);
                       router.push("/");
-                    }}
-                    tooltip="New Chat"
-                  >
-                    <PenSquareIcon className="size-4" />
-                    <span className="font-medium">New chat</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {user && (
-                  <SidebarMenuItem className="mt-1">
-                    <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] text-sidebar-foreground/50">
-                      <span>⚡</span>
-                      <span>{credits.toLocaleString()} credits</span>
-                    </div>
-                  </SidebarMenuItem>
-                )}
-                <SidebarMenuItem className="mt-0.5 mb-1">
-                  <SidebarMenuButton
-                    asChild
-                    className="h-9 rounded-lg border border-transparent bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 text-[13px] font-semibold text-amber-600 shadow-sm transition-all duration-150 hover:border-amber-500/30 hover:from-amber-500/25 hover:via-amber-400/20 hover:to-amber-500/25 hover:shadow-md dark:text-amber-400"
-                    tooltip="Buy Credits"
-                  >
-                    <Link
-                      href="/credits"
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <SparklesIcon className="size-4" />
-                      <span>Buy Credits</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {user && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      className="rounded-lg text-sidebar-foreground/40 transition-colors duration-150 hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => setShowDeleteAllDialog(true)}
-                      tooltip="Delete All Chats"
-                    >
-                      <TrashIcon className="size-4" />
-                      <span className="text-[13px]">Delete all</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarHistory user={user} />
-        </SidebarContent>
-        <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
-          {user && <SidebarUserNav user={user} />}
-        </SidebarFooter>
-        <SidebarRail />
-      </Sidebar>
-
-      <AlertDialog
-        onOpenChange={setShowDeleteAllDialog}
-        open={showDeleteAllDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete all chats?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete all
-              your chats and remove them from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleDeleteAll}>
-              Delete All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-}
