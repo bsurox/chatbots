@@ -3,12 +3,13 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -27,6 +28,39 @@ import type { Vote } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+
+const IMAGE_KEYWORDS = [
+  "generate an image",
+  "create an image",
+  "make an image",
+  "generate a picture",
+  "create a picture",
+  "make a picture",
+  "generate a photo",
+  "create a photo",
+  "image of",
+  "picture of",
+  "photo of",
+  "illustration of",
+];
+
+const VOICE_KEYWORDS = [
+  "read this out loud",
+  "say this",
+  "speak this",
+  "text to speech",
+  "convert to speech",
+  "read aloud",
+  "voice this",
+  "narrate",
+];
+
+function detectIntent(text: string): "image" | "voice" | null {
+  const lower = text.toLowerCase();
+  if (IMAGE_KEYWORDS.some((kw) => lower.includes(kw))) return "image";
+  if (VOICE_KEYWORDS.some((kw) => lower.includes(kw))) return "voice";
+  return null;
+}
 
 type ActiveChatContextValue = {
   chatId: string;
@@ -58,6 +92,7 @@ function extractChatId(pathname: string): string | null {
 
 export function ActiveChatProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { setDataStream } = useDataStream();
   const { mutate } = useSWRConfig();
 
@@ -100,7 +135,7 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
   const {
     messages,
     setMessages,
-    sendMessage,
+    sendMessage: originalSendMessage,
     status,
     stop,
     regenerate,
@@ -177,6 +212,31 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const sendMessage: UseChatHelpers<ChatMessage>["sendMessage"] = useCallback(
+    (message, options) => {
+      const text =
+        message?.parts
+          ?.filter((p) => p.type === "text")
+          .map((p) => (p as { type: "text"; text: string }).text)
+          .join(" ") ?? "";
+
+      const intent = detectIntent(text);
+
+      if (intent === "image") {
+        router.push(`/image?prompt=${encodeURIComponent(text)}`);
+        return Promise.resolve();
+      }
+
+      if (intent === "voice") {
+        router.push(`/voice?prompt=${encodeURIComponent(text)}`);
+        return Promise.resolve();
+      }
+
+      return originalSendMessage(message, options);
+    },
+    [originalSendMessage, router]
+  );
+
   const loadedChatIds = useRef(new Set<string>());
 
   if (isNewChat && !loadedChatIds.current.has(newChatIdRef.current)) {
@@ -226,12 +286,12 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
         "",
         `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/chat/${chatId}`
       );
-      sendMessage({
+      originalSendMessage({
         role: "user" as const,
         parts: [{ type: "text", text: query }],
       });
     }
-  }, [sendMessage, chatId]);
+  }, [originalSendMessage, chatId]);
 
   useAutoResume({
     autoResume: !isNewChat && !!chatData,
