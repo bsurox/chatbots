@@ -50,17 +50,18 @@ function PureChatHeader({
         style={{ textDecoration: "none" }}
       >
         <SparklesIcon
+          className={isLow ? "" : "text-amber-600 dark:text-amber-400"}
           style={{
-            color: isLow ? "#ef4444" : "#d97706",
             width: 16,
             height: 16,
+            color: isLow ? "#ef4444" : undefined,
           }}
         />
         <span
           style={{
             fontSize: 15,
             fontWeight: 600,
-            color: isLow ? "#ef4444" : (credits === 0 ? "#888" : "#d97706"),
+            color: isLow ? "#ef4444" : "#22c55e",
           }}
         >
           {credits.toLocaleString()} credits
@@ -69,16 +70,15 @@ function PureChatHeader({
 
       <Link
         href="/credits"
-        className="hidden md:ml-auto md:flex items-center gap-1.5"
+        className="hidden md:ml-auto md:flex items-center gap-1.5 text-amber-600 dark:text-amber-400"
         style={{
           padding: "6px 16px",
           borderRadius: 8,
-          background: "rgba(217,119,6,0.15)",
-          color: "#d97706",
+          background: "linear-gradient(to right, rgba(245,158,11,0.15), rgba(251,191,36,0.10), rgba(245,158,11,0.15))",
           fontSize: 13,
           fontWeight: 600,
           textDecoration: "none",
-          border: "1px solid rgba(217,119,6,0.3)",
+          border: "1px solid rgba(245,158,11,0.3)",
         }}
       >
         <SparklesIcon style={{ width: 13, height: 13 }} />
