@@ -7,6 +7,7 @@ import {
   PenSquareIcon,
   SparklesIcon,
   TrashIcon,
+  FileAudioIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -100,6 +101,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     <Link href="/voice" onClick={() => setOpenMobile(false)}>
                       <MicIcon className="size-4" />
                       <span className="font-medium">Voice Generator</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground" tooltip="Transcription">
+                    <Link href="/transcribe" onClick={() => setOpenMobile(false)}>
+                      <FileAudioIcon className="size-4" />
+                      <span className="font-medium">Transcription</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
