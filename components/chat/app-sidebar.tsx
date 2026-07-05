@@ -2,6 +2,7 @@
 
 import {
   ImageIcon,
+  MicIcon,
   PanelLeftIcon,
   PenSquareIcon,
   SparklesIcon,
@@ -91,6 +92,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     <Link href="/image" onClick={() => setOpenMobile(false)}>
                       <ImageIcon className="size-4" />
                       <span className="font-medium">Image Generator</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground" tooltip="Voice Generator">
+                    <Link href="/voice" onClick={() => setOpenMobile(false)}>
+                      <MicIcon className="size-4" />
+                      <span className="font-medium">Voice Generator</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
