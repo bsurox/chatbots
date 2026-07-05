@@ -11,6 +11,7 @@ type Voice = {
   gender: string;
   age: string;
   description: string;
+  previewUrl: string;
 };
 
 export default function VoicePage() {
@@ -22,6 +23,8 @@ export default function VoicePage() {
   const [audio, setAudio] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [playingPreview, setPlayingPreview] = useState<string | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const creditCost = Math.max(1, Math.ceil(text.length / 20));
@@ -51,6 +54,27 @@ export default function VoicePage() {
       v.gender.toLowerCase().includes(search.toLowerCase()) ||
       v.description.toLowerCase().includes(search.toLowerCase())
   );
+
+  function playPreview(voice: Voice, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!voice.previewUrl) return;
+
+    if (playingPreview === voice.id) {
+      previewAudioRef.current?.pause();
+      setPlayingPreview(null);
+      return;
+    }
+
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+    }
+
+    const audio = new Audio(voice.previewUrl);
+    previewAudioRef.current = audio;
+    audio.play();
+    setPlayingPreview(voice.id);
+    audio.onended = () => setPlayingPreview(null);
+  }
 
   async function handleGenerate() {
     if (!text.trim() || !selectedVoice) return;
@@ -87,10 +111,10 @@ export default function VoicePage() {
   const selectedVoiceDetails = voices.find((v) => v.id === selectedVoice);
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Voice Generator</h1>
-        <p style={{ color: "#888" }}>Ask Evo to bring your words to life. Powered by ElevenLabs.</p>
+        <p style={{ color: "#888" }}>Ask Evo to bring your words to life with realistic AI voices.</p>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -137,9 +161,10 @@ export default function VoicePage() {
                     color: "inherit",
                     cursor: "pointer",
                     textAlign: "left",
+                    position: "relative",
                   }}
                 >
-                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{voice.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2, paddingRight: 24 }}>{voice.name}</div>
                   {(voice.gender || voice.accent) && (
                     <div style={{ fontSize: 11, color: "#888" }}>
                       {[voice.gender, voice.accent, voice.age].filter(Boolean).join(" · ")}
@@ -147,6 +172,31 @@ export default function VoicePage() {
                   )}
                   {voice.description && (
                     <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>{voice.description}</div>
+                  )}
+                  {voice.previewUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => playPreview(voice, e)}
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        width: 22,
+                        height: 22,
+                        borderRadius: "50%",
+                        border: "1px solid #444",
+                        background: playingPreview === voice.id ? "#22c55e" : "transparent",
+                        color: playingPreview === voice.id ? "#000" : "#888",
+                        fontSize: 10,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {playingPreview === voice.id ? "■" : "▶"}
+                    </button>
                   )}
                 </button>
               ))}
@@ -190,6 +240,10 @@ export default function VoicePage() {
           </div>
         )}
 
+      </div>
+
+      <div style={{ marginTop: 48, textAlign: "center", fontSize: 11, color: "#444" }}>
+        Voice generation powered by ElevenLabs
       </div>
     </div>
   );
