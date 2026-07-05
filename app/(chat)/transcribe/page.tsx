@@ -199,3 +199,26 @@ export default function TranscribePage() {
             )}
           </div>
         )}
+
+        {transcript && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ padding: 20, borderRadius: 12, border: "1px solid #333", background: "rgba(34,197,94,0.05)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <p style={{ fontSize: 13, color: "#888" }}>Transcript:</p>
+                <button
+                  type="button"
+                  onClick={copyToClipboard}
+                  style={{ padding: "4px 12px", borderRadius: 6, border: "1px solid #333", background: "transparent", color: "#888", fontSize: 12, cursor: "pointer" }}
+                >
+                  Copy
+                </button>
+              </div>
+              <p style={{ fontSize: 14, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{transcript}</p>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
