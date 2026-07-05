@@ -3,13 +3,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import equal from "fast-deep-equal";
-import {
-  ArrowUpIcon,
-  BrainIcon,
-  EyeIcon,
-  LockIcon,
-  WrenchIcon,
-} from "lucide-react";
+import { ArrowUpIcon, SparklesIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -29,7 +23,6 @@ import {
   ModelSelector,
   ModelSelectorContent,
   ModelSelectorGroup,
-  ModelSelectorInput,
   ModelSelectorItem,
   ModelSelectorList,
   ModelSelectorLogo,
@@ -639,7 +632,6 @@ function PureModelSelectorCompact({
     chatModels.find((m: ChatModel) => m.id === selectedModelId) ??
     chatModels.find((m: ChatModel) => m.id === DEFAULT_CHAT_MODEL) ??
     chatModels[0];
-  const [provider] = selectedModel.id.split("/");
 
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
@@ -650,12 +642,7 @@ function PureModelSelectorCompact({
           title={selectedModel.description}
           variant="ghost"
         >
-          {provider && (
-            <ModelSelectorLogo
-              className="text-amber-500 dark:text-amber-400"
-              provider={provider}
-            />
-          )}
+          <SparklesIcon className="size-4 shrink-0 text-amber-500 dark:text-amber-400" />
           <div className="flex flex-col items-start leading-tight">
             <span className="text-[12px] font-semibold text-foreground">
               {selectedModel.name}
