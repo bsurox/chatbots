@@ -18,7 +18,7 @@ const PRESET_SIZES = [
 ];
 
 export default function ImagePage() {
-const [prompt, setPrompt] = useState(() => {
+  const [prompt, setPrompt] = useState(() => {
     if (typeof window !== "undefined") {
       return decodeURIComponent(new URLSearchParams(window.location.search).get("prompt") ?? "");
     }
@@ -75,10 +75,10 @@ const [prompt, setPrompt] = useState(() => {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Image Generator</h1>
-        <p style={{ color: "#888" }}>Ask Evo and generate stunning images using text descriptions. Powered by Stable Diffusion.</p>
+        <p style={{ color: "#888" }}>Ask Evo to generate stunning images of any size using text descriptions.</p>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -182,6 +182,10 @@ const [prompt, setPrompt] = useState(() => {
           </div>
         )}
 
+      </div>
+
+      <div style={{ marginTop: 48, textAlign: "center", fontSize: 11, color: "#444" }}>
+        Image generation powered by Stable Diffusion via Stability AI
       </div>
     </div>
   );
