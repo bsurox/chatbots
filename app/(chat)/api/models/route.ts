@@ -1,11 +1,11 @@
 import { getCapabilities, chatModels } from "@/lib/ai/models";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const headers = {
-    "Cache-Control": "public, max-age=86400, s-maxage=86400",
+    "Cache-Control": "no-store, max-age=0",
   };
-
   const capabilities = await getCapabilities();
-
   return Response.json({ capabilities, models: chatModels }, { headers });
 }
