@@ -466,7 +466,7 @@ function PureMultimodalInput({
           </div>
         )}
         <PromptInputTextarea
-          className="min-h-24 text-[15px] leading-relaxed px-4 pt-3.5 pb-1.5 text-foreground placeholder:text-muted-foreground/35"
+          className="min-h-24 text-[17px] leading-relaxed px-4 pt-3.5 pb-1.5 text-foreground placeholder:text-muted-foreground/35"
           data-testid="multimodal-input"
           onChange={handleInput}
           onKeyDown={(e) => {
@@ -637,17 +637,17 @@ function PureModelSelectorCompact({
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
         <Button
-          className="h-auto max-w-[220px] justify-start gap-1.5 rounded-lg px-2 py-1 transition-colors"
+          className="h-auto max-w-[240px] justify-start gap-2 rounded-lg px-2 py-1 transition-colors"
           data-testid="model-selector"
           title={selectedModel.description}
           variant="ghost"
         >
-          <SparklesIcon className="size-4 shrink-0 text-amber-500 dark:text-amber-400" />
+          <SparklesIcon className="size-5 shrink-0 text-amber-500 dark:text-amber-400" />
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-[12px] font-semibold text-foreground">
+            <span className="text-[15px] font-semibold text-foreground">
               {selectedModel.name}
             </span>
-            <span className="text-[10px]" style={{ color: "#22c55e" }}>
+            <span className="text-[12px]" style={{ color: "#22c55e" }}>
               1 credit per message
             </span>
           </div>
