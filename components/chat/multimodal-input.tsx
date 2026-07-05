@@ -526,6 +526,9 @@ function PureMultimodalInput({
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
             />
+            <span className="text-[11px] text-muted-foreground/50 whitespace-nowrap">
+              1 credit per message
+            </span>
           </PromptInputTools>
 
           {status === "submitted" ? (
@@ -657,6 +660,7 @@ function PureModelSelectorCompact({
         <Button
           className="h-7 max-w-[200px] justify-between gap-1.5 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
           data-testid="model-selector"
+          title={selectedModel.description}
           variant="ghost"
         >
           {provider && <ModelSelectorLogo provider={provider} />}
@@ -675,7 +679,7 @@ function PureModelSelectorCompact({
                 ]
               : chatModels;
 
-            const grouped: Record<
+            const grouped: Record
               string,
               { model: ChatModel; curated: boolean }[]
             > = {};
