@@ -124,10 +124,10 @@ export default function TranscribePage() {
   const hasAudio = audioBlob || uploadedFile;
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Transcription</h1>
-        <p style={{ color: "#888" }}>Record or upload audio and Evo will convert it to text instantly. Powered by OpenAI Whisper.</p>
+        <p style={{ color: "#888" }}>Ask Evo to convert any audio into text instantly.</p>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -218,6 +218,10 @@ export default function TranscribePage() {
           </div>
         )}
 
+      </div>
+
+      <div style={{ marginTop: 48, textAlign: "center", fontSize: 11, color: "#444" }}>
+        Transcription powered by Whisper via OpenAI
       </div>
     </div>
   );
