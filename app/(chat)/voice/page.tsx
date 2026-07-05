@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { ToolHeader } from "@/components/chat/tool-header";
 
 type Voice = {
   id: string;
@@ -111,7 +112,9 @@ export default function VoicePage() {
   const selectedVoiceDetails = voices.find((v) => v.id === selectedVoice);
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
+    <>
+      <ToolHeader />
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Voice Generator</h1>
         <p style={{ color: "#888" }}>Ask Evo to bring your words to life with realistic AI voices.</p>
@@ -245,6 +248,7 @@ export default function VoicePage() {
       <div style={{ marginTop: 48, textAlign: "center", fontSize: 11, color: "#444" }}>
         Voice generation powered by ElevenLabs
       </div>
-    </div>
+      </div>
+    </>
   );
 }
