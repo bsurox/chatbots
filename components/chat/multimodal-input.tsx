@@ -473,7 +473,7 @@ function PureMultimodalInput({
           </div>
         )}
         <PromptInputTextarea
-          className="min-h-24 text-[13px] leading-relaxed px-4 pt-3.5 pb-1.5 placeholder:text-muted-foreground/35"
+          className="min-h-24 text-[15px] leading-relaxed px-4 pt-3.5 pb-1.5 text-foreground placeholder:text-muted-foreground/35"
           data-testid="multimodal-input"
           onChange={handleInput}
           onKeyDown={(e) => {
@@ -526,9 +526,6 @@ function PureMultimodalInput({
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
             />
-            <span className="text-[11px] whitespace-nowrap" style={{ color: "#22c55e" }}>
-              1 credit per message
-            </span>
           </PromptInputTools>
 
           {status === "submitted" ? (
@@ -648,13 +645,25 @@ function PureModelSelectorCompact({
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
         <Button
-          className="h-7 max-w-[200px] justify-between gap-1.5 rounded-lg px-2 text-[12px] font-semibold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-400"
+          className="h-auto max-w-[220px] justify-start gap-1.5 rounded-lg px-2 py-1 transition-colors"
           data-testid="model-selector"
           title={selectedModel.description}
           variant="ghost"
         >
-          {provider && <ModelSelectorLogo provider={provider} />}
-          <ModelSelectorName>{selectedModel.name}</ModelSelectorName>
+          {provider && (
+            <ModelSelectorLogo
+              className="text-amber-500 dark:text-amber-400"
+              provider={provider}
+            />
+          )}
+          <div className="flex flex-col items-start leading-tight">
+            <span className="text-[12px] font-semibold text-foreground">
+              {selectedModel.name}
+            </span>
+            <span className="text-[10px]" style={{ color: "#22c55e" }}>
+              1 credit per message
+            </span>
+          </div>
         </Button>
       </ModelSelectorTrigger>
       <ModelSelectorContent>
