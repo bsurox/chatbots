@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ToolHeader } from "@/components/chat/tool-header";
 
 const QUALITY_OPTIONS = [
   { id: "core", name: "Standard", description: "Fast, great quality", credits: 8 },
@@ -75,7 +76,9 @@ export default function ImagePage() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
+    <>
+      <ToolHeader />
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Image Generator</h1>
         <p style={{ color: "#888" }}>Ask Evo to generate stunning images of any size using text descriptions.</p>
@@ -187,6 +190,7 @@ export default function ImagePage() {
       <div style={{ marginTop: 48, textAlign: "center", fontSize: 11, color: "#444" }}>
         Image generation powered by Stable Diffusion via Stability AI
       </div>
-    </div>
+      </div>
+    </>
   );
 }
