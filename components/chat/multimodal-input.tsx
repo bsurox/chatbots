@@ -526,7 +526,7 @@ function PureMultimodalInput({
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
             />
-            <span className="text-[11px] text-muted-foreground/50 whitespace-nowrap">
+            <span className="text-[11px] whitespace-nowrap" style={{ color: "#22c55e" }}>
               1 credit per message
             </span>
           </PromptInputTools>
@@ -648,7 +648,7 @@ function PureModelSelectorCompact({
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
         <Button
-          className="h-7 max-w-[200px] justify-between gap-1.5 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+          className="h-7 max-w-[200px] justify-between gap-1.5 rounded-lg px-2 text-[12px] font-semibold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-400"
           data-testid="model-selector"
           title={selectedModel.description}
           variant="ghost"
