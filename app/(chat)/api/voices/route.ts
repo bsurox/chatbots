@@ -20,7 +20,13 @@ export async function GET() {
 
   const data = await response.json();
 
-  const voices = data.voices.map((v: { voice_id: string; name: string; category: string; labels: Record<string, string> }) => ({
+  const voices = data.voices.map((v: {
+    voice_id: string;
+    name: string;
+    category: string;
+    labels: Record<string, string>;
+    preview_url: string;
+  }) => ({
     id: v.voice_id,
     name: v.name,
     category: v.category,
@@ -28,6 +34,7 @@ export async function GET() {
     gender: v.labels?.gender ?? "",
     age: v.labels?.age ?? "",
     description: v.labels?.description ?? "",
+    previewUrl: v.preview_url ?? "",
   }));
 
   return Response.json({ voices });
