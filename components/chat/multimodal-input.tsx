@@ -464,8 +464,9 @@ function PureMultimodalInput({
           </div>
         )}
         <PromptInputTextarea
-          className="min-h-24 text-[17px] leading-relaxed px-4 pt-3.5 pb-1.5 text-foreground placeholder:text-muted-foreground/35"
+          className="min-h-24 !text-[18px] leading-relaxed px-4 pt-3.5 pb-1.5 text-foreground placeholder:text-muted-foreground/35"
           data-testid="multimodal-input"
+          style={{ fontSize: "18px" }}
           onChange={handleInput}
           onKeyDown={(e) => {
             if (slashOpen) {
