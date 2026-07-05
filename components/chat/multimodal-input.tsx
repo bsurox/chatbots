@@ -25,8 +25,6 @@ import {
   ModelSelectorGroup,
   ModelSelectorItem,
   ModelSelectorList,
-  ModelSelectorLogo,
-  ModelSelectorName,
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
 import {
@@ -656,35 +654,39 @@ function PureModelSelectorCompact({
       <ModelSelectorContent>
         <ModelSelectorList>
           <ModelSelectorGroup heading="Available">
-            {chatModels.map((model: ChatModel) => {
-              const logoProvider = model.id.split("/")[0];
-              return (
-                <ModelSelectorItem
-                  className={cn(
-                    "flex w-full",
-                    model.id === selectedModel.id &&
-                      "border-b border-dashed border-foreground/50"
-                  )}
-                  key={model.id}
-                  onSelect={() => {
-                    onModelChange?.(model.id);
-                    setCookie("chat-model", model.id);
-                    setOpen(false);
-                    setTimeout(() => {
-                      document
-                        .querySelector<HTMLTextAreaElement>(
-                          "[data-testid='multimodal-input']"
-                        )
-                        ?.focus();
-                    }, 50);
-                  }}
-                  value={model.id}
-                >
-                  <ModelSelectorLogo provider={logoProvider} />
-                  <ModelSelectorName>{model.name}</ModelSelectorName>
-                </ModelSelectorItem>
-              );
-            })}
+            {chatModels.map((model: ChatModel) => (
+              <ModelSelectorItem
+                className={cn(
+                  "flex w-full items-center gap-2 py-2",
+                  model.id === selectedModel.id &&
+                    "border-b border-dashed border-foreground/50"
+                )}
+                key={model.id}
+                onSelect={() => {
+                  onModelChange?.(model.id);
+                  setCookie("chat-model", model.id);
+                  setOpen(false);
+                  setTimeout(() => {
+                    document
+                      .querySelector<HTMLTextAreaElement>(
+                        "[data-testid='multimodal-input']"
+                      )
+                      ?.focus();
+                  }, 50);
+                }}
+                value={model.id}
+              >
+                <SparklesIcon className="size-5 shrink-0 text-amber-500 dark:text-amber-400" />
+                <div className="flex flex-col items-start leading-tight">
+                  <span className="text-[15px] font-semibold text-foreground">
+                    {model.name}
+                  </span>
+                  <span className="text-[12px]" style={{ color: "#22c55e" }}>
+                    1 credit per message
+                  </span>
+                </div>
+              </ModelSelectorItem>
+            ))}
           </ModelSelectorGroup>
         </ModelSelectorList>
       </ModelSelectorContent>
