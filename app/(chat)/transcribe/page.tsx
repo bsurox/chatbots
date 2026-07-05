@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import { ToolHeader } from "@/components/chat/tool-header";
 
 export default function TranscribePage() {
   const [recording, setRecording] = useState(false);
@@ -124,7 +125,9 @@ export default function TranscribePage() {
   const hasAudio = audioBlob || uploadedFile;
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
+    <>
+      <ToolHeader />
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Transcription</h1>
         <p style={{ color: "#888" }}>Ask Evo to convert any audio into text instantly.</p>
@@ -223,6 +226,7 @@ export default function TranscribePage() {
       <div style={{ marginTop: 48, textAlign: "center", fontSize: 11, color: "#444" }}>
         Transcription powered by Whisper via OpenAI
       </div>
-    </div>
+      </div>
+    </>
   );
 }
