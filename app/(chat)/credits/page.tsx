@@ -2,18 +2,16 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
+import { ToolHeader } from "@/components/chat/tool-header";
 const BUNDLES = [
   { id: "starter", name: "Starter", price: "$5", credits: 220 },
   { id: "power", name: "Power", price: "$15", credits: 800 },
   { id: "pro", name: "Pro", price: "$40", credits: 2400 },
 ];
-
 export default function CreditsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
-
   useEffect(() => {
     if (status === "loading") return;
     if (!session?.user) {
@@ -25,7 +23,6 @@ export default function CreditsPage() {
       router.push("/register?redirectUrl=/credits");
     }
   }, [session, status, router]);
-
   if (status === "loading") {
     return (
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
@@ -33,12 +30,10 @@ export default function CreditsPage() {
       </div>
     );
   }
-
   const isGuest = /^guest-\d+$/.test(session?.user?.email ?? "");
   if (!session?.user || isGuest) {
     return null;
   }
-
   async function handleBuy(bundleId: string) {
     setLoading(bundleId);
     try {
@@ -55,9 +50,10 @@ export default function CreditsPage() {
       setLoading(null);
     }
   }
-
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+    <>
+      <ToolHeader />
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
         Buy Credits
       </h1>
@@ -110,6 +106,7 @@ export default function CreditsPage() {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
