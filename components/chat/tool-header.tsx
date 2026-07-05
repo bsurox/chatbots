@@ -1,28 +1,15 @@
 "use client";
-import { PanelLeftIcon, SparklesIcon } from "lucide-react";
+import { SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
-import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
 import { fetcher } from "@/lib/utils";
 
 export function ToolHeader() {
-  const { toggleSidebar, isMobile } = useSidebar();
   const { data: creditsData } = useSWR("/api/credits", fetcher, { refreshInterval: 30000 });
   const credits = creditsData?.credits ?? 0;
   const isLow = credits <= 20;
-
   return (
-    <header className="sticky top-0 flex h-14 items-center gap-2 bg-sidebar px-3">
-      <Button
-        className="md:hidden"
-        onClick={toggleSidebar}
-        size="icon-sm"
-        variant="ghost"
-      >
-        <PanelLeftIcon className="size-4" />
-      </Button>
-
+    <header className="sticky top-0 z-50 flex h-14 items-center gap-2 bg-sidebar px-3">
       <Link
         href="/credits"
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
@@ -36,10 +23,9 @@ export function ToolHeader() {
           {credits.toLocaleString()} credits
         </span>
       </Link>
-
       <Link
         href="/credits"
-        className="hidden md:ml-auto md:flex items-center gap-1.5 text-amber-600 dark:text-amber-400 transition-all duration-150"
+        className="ml-auto flex items-center gap-1.5 text-amber-600 dark:text-amber-400 transition-all duration-150"
         style={{
           padding: "6px 16px",
           borderRadius: 8,
