@@ -118,10 +118,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className={navButtonClass(isActive("/transcribe"))} tooltip="Transcription">
+                  <SidebarMenuButton asChild className={navButtonClass(isActive("/transcribe"))} tooltip="Speech to Text">
                     <Link href="/transcribe" onClick={() => setOpenMobile(false)}>
                       <FileAudioIcon className="size-4" />
-                      <span className="font-medium">Transcription</span>
+                      <span className="font-medium">Speech to Text</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
