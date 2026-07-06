@@ -1,19 +1,20 @@
 import Form from "next/form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+
+type AuthFormProps = {
+  action: string | ((formData: FormData) => void | Promise<void>);
+  children: React.ReactNode;
+  defaultEmail?: string;
+  showNameFields?: boolean;
+};
+
 export function AuthForm({
   action,
   children,
   defaultEmail = "",
   showNameFields = false,
-}: {
-  action: NonNullable
-    string | ((formData: FormData) => void | Promise<void>) | undefined
-  >;
-  children: React.ReactNode;
-  defaultEmail?: string;
-  showNameFields?: boolean;
-}) {
+}: AuthFormProps) {
   return (
     <Form action={action} className="flex flex-col gap-4">
       {showNameFields && (
