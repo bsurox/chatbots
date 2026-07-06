@@ -33,59 +33,66 @@ function buildGreeting(firstName: string | null): string {
 export const Greeting = () => {
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [show, setShow] = useState(false);
-  const [waitingForModal, setWaitingForModal] = useState(true);
   const [greetingText, setGreetingText] = useState(FALLBACK_TEXT);
+  const [ready, setReady] = useState(false);
 
   const { data: userData } = useSWR("/api/user/profile", fetcher);
 
-  // Decide whether we need to wait for the guest popup before animating
+  // Listen for the popup being dismissed
   useEffect(() => {
-    const email: string | null = userData?.email ?? null;
-    const isGuest = email ? GUEST_REGEX.test(email) : false;
-    const dismissed = sessionStorage.getItem(DISMISS_KEY);
-
-    // If the popup will show (guest, not yet dismissed), hold the animation
-    if (isGuest && !dismissed) {
-      setWaitingForModal(true);
-    } else {
-      setWaitingForModal(false);
-    }
-  }, [userData]);
-
-  // Listen for the popup being dismissed so we can start
-  useEffect(() => {
-    const handleDismissed = () => setWaitingForModal(false);
+    const handleDismissed = () => {
+      revealGreeting();
+    };
     window.addEventListener("evo-guest-welcome-dismissed", handleDismissed);
     return () =>
       window.removeEventListener(
         "evo-guest-welcome-dismissed",
         handleDismissed
       );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Once we're not waiting on the modal, reveal + maybe animate
+  // Once we know who the user is, decide whether to show now or wait
   useEffect(() => {
-    if (waitingForModal) {
+    if (ready) {
       return;
     }
+    // Wait until we actually have the profile response
+    if (userData === undefined) {
+      return;
+    }
+
+    const email: string | null = userData?.email ?? null;
+    const isGuest = email ? GUEST_REGEX.test(email) : false;
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+
+    // Set the greeting text now (even if hidden) so it's ready to reveal
+    const fullName: string | null = userData?.name ?? null;
+    const firstName = fullName ? fullName.trim().split(" ")[0] : null;
+    setGreetingText(buildGreeting(firstName));
+    if (firstName) {
+      sessionStorage.setItem("evo_returning_user", "true");
+    }
+
+    // If a guest popup is going to show and hasn't been dismissed, stay hidden
+    if (isGuest && !dismissed) {
+      return;
+    }
+
+    // Otherwise it's safe to reveal
+    revealGreeting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData, ready]);
+
+  function revealGreeting() {
+    setReady(true);
     const alreadyPlayed = sessionStorage.getItem(STORAGE_KEY);
     setShow(true);
     if (!alreadyPlayed) {
       setShouldAnimate(true);
       sessionStorage.setItem(STORAGE_KEY, "true");
     }
-  }, [waitingForModal]);
-
-  useEffect(() => {
-    if (userData) {
-      const fullName: string | null = userData.name ?? null;
-      const firstName = fullName ? fullName.trim().split(" ")[0] : null;
-      setGreetingText(buildGreeting(firstName));
-      if (firstName) {
-        sessionStorage.setItem("evo_returning_user", "true");
-      }
-    }
-  }, [userData]);
+  }
 
   if (!show) {
     return null;
