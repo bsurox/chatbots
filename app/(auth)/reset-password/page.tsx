@@ -2,14 +2,14 @@
 import Form from "next/form";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { Suspense, useActionState, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type ResetPasswordState, resetPassword } from "../reset-actions";
 
-export default function Page() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -34,7 +34,10 @@ export default function Page() {
       toast({ type: "error", description: "Something went wrong. Try again." });
     } else if (state.status === "success") {
       setIsSuccessful(true);
-      toast({ type: "success", description: "Password updated! Please sign in." });
+      toast({
+        type: "success",
+        description: "Password updated! Please sign in.",
+      });
       setTimeout(() => router.push("/login"), 1500);
     }
   }, [state.status, router]);
@@ -42,9 +45,7 @@ export default function Page() {
   if (!token) {
     return (
       <>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Invalid link
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Invalid link</h1>
         <p className="text-sm text-muted-foreground">
           This reset link is missing or broken. Please request a new one.
         </p>
@@ -94,5 +95,17 @@ export default function Page() {
         </SubmitButton>
       </Form>
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="text-sm text-muted-foreground">Loading...</div>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
