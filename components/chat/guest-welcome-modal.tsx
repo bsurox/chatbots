@@ -1,160 +1,177 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
 
-const GUEST_REGEX = /^guest-\d+$/;
+const FALLBACK_TEXT = "Hello, I'm Evo.";
+const STORAGE_KEY = "evo_greeting_played";
 const DISMISS_KEY = "evo_guest_welcome_dismissed";
+const BLOCK_KEY = "evo_greeting_blocked";
+const GUEST_REGEX = /^guest-\d+$/;
 
-export function GuestWelcomeModal() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
+function buildGreeting(firstName: string | null): string {
+  if (!firstName) {
+    return FALLBACK_TEXT;
+  }
 
+  const hour = new Date().getHours();
+  const alreadyVisited = sessionStorage.getItem("evo_returning_user");
+
+  if (alreadyVisited) {
+    return `Back at it, ${firstName}.`;
+  }
+
+  if (hour < 12) {
+    return `Good morning, ${firstName}.`;
+  }
+  if (hour < 18) {
+    return `Good afternoon, ${firstName}.`;
+  }
+  return `Good evening, ${firstName}.`;
+}
+
+// Read the block flag synchronously on first render so we never flash
+function isBlockedInitially(): boolean {
+  if (typeof window === "undefined") {
+    return true; // stay hidden during SSR to be safe
+  }
+  return sessionStorage.getItem(BLOCK_KEY) === "true";
+}
+
+export const Greeting = () => {
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [show, setShow] = useState(false);
+  const [greetingText, setGreetingText] = useState(FALLBACK_TEXT);
+  const [blocked, setBlocked] = useState(isBlockedInitially);
+  const [revealed, setRevealed] = useState(false);
+
+  const { data: userData } = useSWR("/api/user/profile", fetcher);
+
+  // Listen for the popup blocking / dismissing
   useEffect(() => {
-    if (status !== "authenticated") {
+    const handleBlock = () => setBlocked(true);
+    const handleDismissed = () => {
+      setBlocked(false);
+      reveal();
+    };
+    window.addEventListener("evo-greeting-block", handleBlock);
+    window.addEventListener("evo-guest-welcome-dismissed", handleDismissed);
+    return () => {
+      window.removeEventListener("evo-greeting-block", handleBlock);
+      window.removeEventListener(
+        "evo-guest-welcome-dismissed",
+        handleDismissed
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Prepare the greeting text + decide whether to reveal
+  useEffect(() => {
+    if (revealed || userData === undefined) {
       return;
     }
-    const email = session?.user?.email ?? "";
-    const isGuest = GUEST_REGEX.test(email);
-    const alreadyDismissed = sessionStorage.getItem(DISMISS_KEY);
 
-    if (isGuest && !alreadyDismissed) {
-      setOpen(true);
+    const fullName: string | null = userData?.name ?? null;
+    const firstName = fullName ? fullName.trim().split(" ")[0] : null;
+    setGreetingText(buildGreeting(firstName));
+    if (firstName) {
+      sessionStorage.setItem("evo_returning_user", "true");
     }
-  }, [session, status]);
 
-  const handleContinueAsGuest = () => {
-    sessionStorage.setItem(DISMISS_KEY, "true");
-    // Tell the greeting it's now allowed to animate
-    window.dispatchEvent(new Event("evo-guest-welcome-dismissed"));
-    setOpen(false);
-  };
+    const email: string | null = userData?.email ?? null;
+    const isGuest = email ? GUEST_REGEX.test(email) : false;
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+    const isBlocked = sessionStorage.getItem(BLOCK_KEY) === "true";
 
-  if (!open) {
+    // Guest who will see the popup (blocked, not dismissed) → stay hidden
+    if (isBlocked || (isGuest && !dismissed)) {
+      return;
+    }
+
+    reveal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData, revealed]);
+
+  function reveal() {
+    setRevealed(true);
+    const alreadyPlayed = sessionStorage.getItem(STORAGE_KEY);
+    setShow(true);
+    if (!alreadyPlayed) {
+      setShouldAnimate(true);
+      sessionStorage.setItem(STORAGE_KEY, "true");
+    }
+  }
+
+  if (blocked || !show) {
     return null;
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.6)",
-        backdropFilter: "blur(4px)",
-        padding: 20,
-      }}
-    >
+    <div className="flex flex-col items-center px-4" key="overview">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
       `}</style>
-      <div
+      <motion.div
+        initial={{ opacity: shouldAnimate ? 0 : 1 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
         style={{
-          width: "100%",
-          maxWidth: 400,
-          borderRadius: 16,
-          border: "1px solid rgba(255,255,255,0.1)",
-          background: "var(--background, #1a1a1a)",
-          padding: 32,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          fontFamily: "'Dancing Script', cursive",
+          fontSize: "clamp(2rem, 5vw, 3rem)",
+          fontWeight: 700,
+          color: "#4ade80",
+          textShadow: "0 0 12px rgba(74,222,128,0.4)",
+          minHeight: "3.5rem",
           textAlign: "center",
+          marginBottom: 24,
+          letterSpacing: "0.01em",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
         }}
       >
-        <div
-          style={{
-            fontFamily: "'Dancing Script', cursive",
-            fontSize: "2rem",
-            fontWeight: 700,
-            color: "#4ade80",
-            textShadow: "0 0 12px rgba(74,222,128,0.4)",
-            marginBottom: 8,
-          }}
-        >
-          Welcome to AskEvo
-        </div>
-
-        <p
-          style={{
-            fontSize: 14,
-            color: "var(--muted-foreground, #999)",
-            marginBottom: 28,
-            lineHeight: 1.5,
-          }}
-        >
-          Sign in or create an account to get started.
-        </p>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: 10,
-              border: "none",
-              background: "#fff",
-              color: "#000",
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: "pointer",
+        {shouldAnimate ? (
+          <motion.span
+            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            animate={{ clipPath: "inset(0 0% 0 0)" }}
+            transition={{
+              duration: 2.2,
+              ease: [0.25, 0.1, 0.25, 1],
+              delay: 0.2,
             }}
+            style={{ display: "inline-block" }}
           >
-            Log in
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/register")}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.2)",
-              background: "transparent",
-              color: "inherit",
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: "pointer",
-            }}
-          >
-            Sign up
-          </button>
-        </div>
-
-        <div style={{ marginTop: 24 }}>
-          <button
-            type="button"
-            onClick={handleContinueAsGuest}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "var(--muted-foreground, #999)",
-              fontSize: 13,
-              cursor: "pointer",
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-            }}
-          >
-            Continue as guest
-          </button>
-          <p
-            style={{
-              fontSize: 11,
-              color: "var(--muted-foreground, #777)",
-              marginTop: 8,
-              opacity: 0.7,
-            }}
-          >
-            AskEvo requires an account to use its service.
-          </p>
-        </div>
-      </div>
+            {greetingText}
+          </motion.span>
+        ) : (
+          greetingText
+        )}
+      </motion.div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
+        initial={{ opacity: 0, y: 10 }}
+        transition={{
+          delay: shouldAnimate ? 2.4 : 0,
+          duration: 0.5,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        What can I help with?
+      </motion.div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-3 text-center text-muted-foreground/80 text-sm"
+        initial={{ opacity: 0, y: 10 }}
+        transition={{
+          delay: shouldAnimate ? 2.6 : 0,
+          duration: 0.5,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        Ask a question, write code, or explore ideas.
+      </motion.div>
     </div>
   );
-}
+};
