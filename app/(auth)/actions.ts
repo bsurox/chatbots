@@ -1,20 +1,20 @@
 "use server";
-
 import { z } from "zod";
-
 import { createUser, getUser } from "@/lib/db/queries";
-
 import { signIn } from "./auth";
-
 const authFormSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
-
+const registerFormSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+});
 export type LoginActionState = {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
 };
-
 export const login = async (
   _: LoginActionState,
   formData: FormData
@@ -24,23 +24,19 @@ export const login = async (
       email: formData.get("email"),
       password: formData.get("password"),
     });
-
     await signIn("credentials", {
       email: validatedData.email,
       password: validatedData.password,
       redirect: false,
     });
-
     return { status: "success" };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
-
     return { status: "failed" };
   }
 };
-
 export type RegisterActionState = {
   status:
     | "idle"
@@ -50,35 +46,33 @@ export type RegisterActionState = {
     | "user_exists"
     | "invalid_data";
 };
-
 export const register = async (
   _: RegisterActionState,
   formData: FormData
 ): Promise<RegisterActionState> => {
   try {
-    const validatedData = authFormSchema.parse({
+    const validatedData = registerFormSchema.parse({
       email: formData.get("email"),
       password: formData.get("password"),
+      firstName: formData.get("firstName"),
+      lastName: formData.get("lastName"),
     });
-
     const [user] = await getUser(validatedData.email);
-
     if (user) {
       return { status: "user_exists" } as RegisterActionState;
     }
-    await createUser(validatedData.email, validatedData.password);
+    const fullName = `${validatedData.firstName} ${validatedData.lastName}`.trim();
+    await createUser(validatedData.email, validatedData.password, fullName);
     await signIn("credentials", {
       email: validatedData.email,
       password: validatedData.password,
       redirect: false,
     });
-
     return { status: "success" };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
-
     return { status: "failed" };
   }
 };
