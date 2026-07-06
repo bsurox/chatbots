@@ -31,18 +31,11 @@ function buildGreeting(firstName: string | null): string {
   return `Good evening, ${firstName}.`;
 }
 
-function isBlockedInitially(): boolean {
-  if (typeof window === "undefined") {
-    return true;
-  }
-  return sessionStorage.getItem(BLOCK_KEY) === "true";
-}
-
 export const Greeting = () => {
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [show, setShow] = useState(false);
   const [greetingText, setGreetingText] = useState(FALLBACK_TEXT);
-  const [blocked, setBlocked] = useState(isBlockedInitially);
+  const [blocked, setBlocked] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
   const { data: userData } = useSWR("/api/user/profile", fetcher);
@@ -79,10 +72,20 @@ export const Greeting = () => {
 
     const email: string | null = userData?.email ?? null;
     const isGuest = email ? GUEST_REGEX.test(email) : false;
-    const dismissed = sessionStorage.getItem(DISMISS_KEY);
-    const isBlocked = sessionStorage.getItem(BLOCK_KEY) === "true";
 
-    if (isBlocked || (isGuest && !dismissed)) {
+    // Real (non-guest) logged-in user: no popup applies to them.
+    // Clear any leftover block flag and reveal the greeting normally.
+    if (!isGuest) {
+      sessionStorage.removeItem(BLOCK_KEY);
+      setBlocked(false);
+      reveal();
+      return;
+    }
+
+    // Guest: only hold back if the popup hasn't been dismissed yet.
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+    if (!dismissed) {
+      setBlocked(true);
       return;
     }
 
