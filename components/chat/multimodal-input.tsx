@@ -641,7 +641,10 @@ function PureModelSelectorCompact({
           title={selectedModel.description}
           variant="ghost"
         >
-          <SparklesIcon className="size-5 shrink-0 text-amber-500 dark:text-amber-400" />
+          <SparklesIcon
+            className="size-5 shrink-0"
+            style={{ color: "#f59e0b" }}
+          />
           <div className="flex flex-col items-start leading-tight">
             <span className="text-[15px] font-semibold text-foreground">
               {selectedModel.name}
@@ -677,7 +680,10 @@ function PureModelSelectorCompact({
                 }}
                 value={model.id}
               >
-                <SparklesIcon className="size-5 shrink-0 text-amber-500 dark:text-amber-400" />
+                <SparklesIcon
+                  className="size-5 shrink-0"
+                  style={{ color: "#f59e0b" }}
+                />
                 <div className="flex flex-col items-start leading-tight">
                   <span className="text-[15px] font-semibold text-foreground">
                     {model.name}
