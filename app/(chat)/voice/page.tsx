@@ -29,6 +29,7 @@ export default function VoicePage() {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const creditCost = Math.max(1, Math.ceil(text.length / 20));
+  const creditLabel = creditCost === 1 ? "credit" : "credits";
 
   useEffect(() => {
     async function fetchVoices() {
@@ -133,7 +134,7 @@ export default function VoicePage() {
           />
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
             <span style={{ fontSize: 12, color: "#888" }}>{text.length} characters</span>
-            <span style={{ fontSize: 12, color: "#22c55e" }}>{creditCost} credits</span>
+            <span style={{ fontSize: 12, color: "#22c55e" }}>{creditCost} {creditLabel}</span>
           </div>
         </div>
 
@@ -221,7 +222,7 @@ export default function VoicePage() {
           disabled={loading || !text.trim() || !selectedVoice}
           style={{ padding: "14px", borderRadius: 8, border: "none", background: loading || !text.trim() || !selectedVoice ? "#333" : "linear-gradient(135deg, #22c55e, #16a34a)", color: loading || !text.trim() || !selectedVoice ? "#666" : "#fff", fontWeight: 700, fontSize: 16, cursor: loading || !text.trim() || !selectedVoice ? "not-allowed" : "pointer" }}
         >
-          {loading ? "Generating audio..." : `Generate Voice — ${creditCost} credits`}
+          {loading ? "Generating audio..." : `Generate Voice — ${creditCost} ${creditLabel}`}
         </button>
 
         {error && (
