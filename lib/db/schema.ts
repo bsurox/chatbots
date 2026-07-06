@@ -143,3 +143,16 @@ export const userCredits = pgTable('UserCredits', {
   credits: integer('credits').notNull().default(0),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 });
+
+export const passwordResetToken = pgTable("PasswordResetToken", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  token: varchar("token", { length: 128 }).notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  used: boolean("used").notNull().default(false),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type PasswordResetToken = InferSelectModel<typeof passwordResetToken>;
