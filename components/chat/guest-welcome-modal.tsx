@@ -17,10 +17,19 @@ export function GuestWelcomeModal() {
     if (status !== "authenticated") {
       return;
     }
+
     const email = session?.user?.email ?? "";
     const isGuest = GUEST_REGEX.test(email);
-    const alreadyDismissed = sessionStorage.getItem(DISMISS_KEY);
 
+    // If this is a real (non-guest) logged-in user, never show the popup.
+    // Also clean up any leftover flags and make sure it's closed.
+    if (!isGuest) {
+      sessionStorage.removeItem(BLOCK_KEY);
+      setOpen(false);
+      return;
+    }
+
+    const alreadyDismissed = sessionStorage.getItem(DISMISS_KEY);
     if (isGuest && !alreadyDismissed) {
       sessionStorage.setItem(BLOCK_KEY, "true");
       window.dispatchEvent(new Event("evo-greeting-block"));
