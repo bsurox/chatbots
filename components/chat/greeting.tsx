@@ -1,14 +1,40 @@
 "use client";
-
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
 
-const HELLO_TEXT = "Hello, I'm Evo.";
+const FALLBACK_TEXT = "Hello, I'm Evo.";
 const STORAGE_KEY = "evo_greeting_played";
+
+function buildGreeting(firstName: string | null): string {
+  if (!firstName) {
+    return FALLBACK_TEXT;
+  }
+
+  const hour = new Date().getHours();
+  const alreadyVisited = sessionStorage.getItem("evo_returning_user");
+
+  // Returning within the same session gets the casual line sometimes
+  if (alreadyVisited) {
+    return `Back at it, ${firstName}.`;
+  }
+
+  if (hour < 12) {
+    return `Good morning, ${firstName}.`;
+  }
+  if (hour < 18) {
+    return `Good afternoon, ${firstName}.`;
+  }
+  return `Good evening, ${firstName}.`;
+}
 
 export const Greeting = () => {
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [show, setShow] = useState(false);
+  const [greetingText, setGreetingText] = useState(FALLBACK_TEXT);
+
+  const { data: userData } = useSWR("/api/user/profile", fetcher);
 
   useEffect(() => {
     const alreadyPlayed = sessionStorage.getItem(STORAGE_KEY);
@@ -19,14 +45,26 @@ export const Greeting = () => {
     }
   }, []);
 
-  if (!show) return null;
+  useEffect(() => {
+    if (userData) {
+      const fullName: string | null = userData.name ?? null;
+      const firstName = fullName ? fullName.trim().split(" ")[0] : null;
+      setGreetingText(buildGreeting(firstName));
+      if (firstName) {
+        sessionStorage.setItem("evo_returning_user", "true");
+      }
+    }
+  }, [userData]);
+
+  if (!show) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center px-4" key="overview">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
       `}</style>
-
       <motion.div
         initial={{ opacity: shouldAnimate ? 0 : 1 }}
         animate={{ opacity: 1 }}
@@ -56,13 +94,12 @@ export const Greeting = () => {
             }}
             style={{ display: "inline-block" }}
           >
-            {HELLO_TEXT}
+            {greetingText}
           </motion.span>
         ) : (
-          HELLO_TEXT
+          greetingText
         )}
       </motion.div>
-
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
