@@ -37,7 +37,7 @@ export default function CreditsPage() {
   }, [session, status, router]);
   if (status === "loading") {
     return (
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 20px" }}>
         <p style={{ color: "#888" }}>Loading...</p>
       </div>
     );
@@ -65,8 +65,8 @@ export default function CreditsPage() {
   return (
     <>
       <ToolHeader />
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 20px" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 20px" }}>
+      <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, color: "#22c55e" }}>
         Buy Credits
       </h1>
       <p style={{ color: "#888", marginBottom: 32 }}>
@@ -75,7 +75,7 @@ export default function CreditsPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gridTemplateColumns: "repeat(3, 1fr)",
           gap: 16,
         }}
       >
