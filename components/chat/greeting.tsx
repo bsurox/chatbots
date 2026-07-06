@@ -42,7 +42,6 @@ export const Greeting = () => {
   const { data: session, status } = useSession();
   const { data: userData } = useSWR("/api/user/profile", fetcher);
 
-  // Listen for the popup dismiss (guest path)
   useEffect(() => {
     const handleBlock = () => setBlocked(true);
     const handleDismissed = () => {
@@ -61,7 +60,6 @@ export const Greeting = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep the greeting text in sync with the name whenever it arrives
   useEffect(() => {
     const fullName: string | null = userData?.name ?? null;
     const firstName = fullName ? fullName.trim().split(" ")[0] : null;
@@ -71,7 +69,6 @@ export const Greeting = () => {
     }
   }, [userData]);
 
-  // Decide whether to reveal, based on session (reliable)
   useEffect(() => {
     if (revealed || status === "loading") {
       return;
@@ -129,3 +126,52 @@ export const Greeting = () => {
           minHeight: "3.5rem",
           textAlign: "center",
           marginBottom: 24,
+          letterSpacing: "0.01em",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {shouldAnimate ? (
+          <motion.span
+            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            animate={{ clipPath: "inset(0 0% 0 0)" }}
+            transition={{
+              duration: 2.2,
+              ease: [0.25, 0.1, 0.25, 1],
+              delay: 0.2,
+            }}
+            style={{ display: "inline-block" }}
+          >
+            {greetingText}
+          </motion.span>
+        ) : (
+          greetingText
+        )}
+      </motion.div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
+        initial={{ opacity: 0, y: 10 }}
+        transition={{
+          delay: shouldAnimate ? 2.4 : 0,
+          duration: 0.5,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        What can I help with?
+      </motion.div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-3 text-center text-muted-foreground/80 text-sm"
+        initial={{ opacity: 0, y: 10 }}
+        transition={{
+          delay: shouldAnimate ? 2.6 : 0,
+          duration: 0.5,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        Ask a question, write code, or explore ideas.
+      </motion.div>
+    </div>
+  );
+};
