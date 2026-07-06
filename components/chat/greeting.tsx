@@ -6,6 +6,8 @@ import { fetcher } from "@/lib/utils";
 
 const FALLBACK_TEXT = "Hello, I'm Evo.";
 const STORAGE_KEY = "evo_greeting_played";
+const DISMISS_KEY = "evo_guest_welcome_dismissed";
+const GUEST_REGEX = /^guest-\d+$/;
 
 function buildGreeting(firstName: string | null): string {
   if (!firstName) {
@@ -15,7 +17,6 @@ function buildGreeting(firstName: string | null): string {
   const hour = new Date().getHours();
   const alreadyVisited = sessionStorage.getItem("evo_returning_user");
 
-  // Returning within the same session gets the casual line sometimes
   if (alreadyVisited) {
     return `Back at it, ${firstName}.`;
   }
@@ -32,18 +33,48 @@ function buildGreeting(firstName: string | null): string {
 export const Greeting = () => {
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [show, setShow] = useState(false);
+  const [waitingForModal, setWaitingForModal] = useState(true);
   const [greetingText, setGreetingText] = useState(FALLBACK_TEXT);
 
   const { data: userData } = useSWR("/api/user/profile", fetcher);
 
+  // Decide whether we need to wait for the guest popup before animating
   useEffect(() => {
+    const email: string | null = userData?.email ?? null;
+    const isGuest = email ? GUEST_REGEX.test(email) : false;
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+
+    // If the popup will show (guest, not yet dismissed), hold the animation
+    if (isGuest && !dismissed) {
+      setWaitingForModal(true);
+    } else {
+      setWaitingForModal(false);
+    }
+  }, [userData]);
+
+  // Listen for the popup being dismissed so we can start
+  useEffect(() => {
+    const handleDismissed = () => setWaitingForModal(false);
+    window.addEventListener("evo-guest-welcome-dismissed", handleDismissed);
+    return () =>
+      window.removeEventListener(
+        "evo-guest-welcome-dismissed",
+        handleDismissed
+      );
+  }, []);
+
+  // Once we're not waiting on the modal, reveal + maybe animate
+  useEffect(() => {
+    if (waitingForModal) {
+      return;
+    }
     const alreadyPlayed = sessionStorage.getItem(STORAGE_KEY);
     setShow(true);
     if (!alreadyPlayed) {
       setShouldAnimate(true);
       sessionStorage.setItem(STORAGE_KEY, "true");
     }
-  }, []);
+  }, [waitingForModal]);
 
   useEffect(() => {
     if (userData) {
