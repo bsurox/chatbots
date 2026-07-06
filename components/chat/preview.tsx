@@ -9,25 +9,12 @@ export function Preview() {
     router.push(url);
   };
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-tl-2xl bg-background">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
-      `}</style>
+    <div
+      className="flex h-full flex-col overflow-hidden rounded-tl-2xl bg-background"
+      style={{ filter: "blur(6px)", opacity: 0.5, pointerEvents: "none" }}
+    >
       <div className="flex flex-1 flex-col items-center justify-center gap-8 px-8">
         <div className="text-center">
-          <div
-            style={{
-              fontFamily: "'Dancing Script', cursive",
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              fontWeight: 700,
-              color: "#4ade80",
-              textShadow: "0 0 12px rgba(74,222,128,0.4)",
-              marginBottom: 20,
-              letterSpacing: "0.01em",
-            }}
-          >
-            Hello, I'm Evo.
-          </div>
           <h2 className="text-xl font-semibold tracking-tight">
             What can I help with?
           </h2>
