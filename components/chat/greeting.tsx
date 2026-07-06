@@ -7,6 +7,7 @@ import { fetcher } from "@/lib/utils";
 const FALLBACK_TEXT = "Hello, I'm Evo.";
 const STORAGE_KEY = "evo_greeting_played";
 const DISMISS_KEY = "evo_guest_welcome_dismissed";
+const BLOCK_KEY = "evo_greeting_blocked";
 const GUEST_REGEX = /^guest-\d+$/;
 
 function buildGreeting(firstName: string | null): string {
@@ -30,43 +31,45 @@ function buildGreeting(firstName: string | null): string {
   return `Good evening, ${firstName}.`;
 }
 
+function isBlockedInitially(): boolean {
+  if (typeof window === "undefined") {
+    return true;
+  }
+  return sessionStorage.getItem(BLOCK_KEY) === "true";
+}
+
 export const Greeting = () => {
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [show, setShow] = useState(false);
   const [greetingText, setGreetingText] = useState(FALLBACK_TEXT);
-  const [ready, setReady] = useState(false);
+  const [blocked, setBlocked] = useState(isBlockedInitially);
+  const [revealed, setRevealed] = useState(false);
 
   const { data: userData } = useSWR("/api/user/profile", fetcher);
 
-  // Listen for the popup being dismissed
   useEffect(() => {
+    const handleBlock = () => setBlocked(true);
     const handleDismissed = () => {
-      revealGreeting();
+      setBlocked(false);
+      reveal();
     };
+    window.addEventListener("evo-greeting-block", handleBlock);
     window.addEventListener("evo-guest-welcome-dismissed", handleDismissed);
-    return () =>
+    return () => {
+      window.removeEventListener("evo-greeting-block", handleBlock);
       window.removeEventListener(
         "evo-guest-welcome-dismissed",
         handleDismissed
       );
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Once we know who the user is, decide whether to show now or wait
   useEffect(() => {
-    if (ready) {
-      return;
-    }
-    // Wait until we actually have the profile response
-    if (userData === undefined) {
+    if (revealed || userData === undefined) {
       return;
     }
 
-    const email: string | null = userData?.email ?? null;
-    const isGuest = email ? GUEST_REGEX.test(email) : false;
-    const dismissed = sessionStorage.getItem(DISMISS_KEY);
-
-    // Set the greeting text now (even if hidden) so it's ready to reveal
     const fullName: string | null = userData?.name ?? null;
     const firstName = fullName ? fullName.trim().split(" ")[0] : null;
     setGreetingText(buildGreeting(firstName));
@@ -74,18 +77,21 @@ export const Greeting = () => {
       sessionStorage.setItem("evo_returning_user", "true");
     }
 
-    // If a guest popup is going to show and hasn't been dismissed, stay hidden
-    if (isGuest && !dismissed) {
+    const email: string | null = userData?.email ?? null;
+    const isGuest = email ? GUEST_REGEX.test(email) : false;
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+    const isBlocked = sessionStorage.getItem(BLOCK_KEY) === "true";
+
+    if (isBlocked || (isGuest && !dismissed)) {
       return;
     }
 
-    // Otherwise it's safe to reveal
-    revealGreeting();
+    reveal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData, ready]);
+  }, [userData, revealed]);
 
-  function revealGreeting() {
-    setReady(true);
+  function reveal() {
+    setRevealed(true);
     const alreadyPlayed = sessionStorage.getItem(STORAGE_KEY);
     setShow(true);
     if (!alreadyPlayed) {
@@ -94,7 +100,7 @@ export const Greeting = () => {
     }
   }
 
-  if (!show) {
+  if (blocked || !show) {
     return null;
   }
 
