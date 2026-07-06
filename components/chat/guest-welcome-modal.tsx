@@ -21,20 +21,25 @@ export function GuestWelcomeModal() {
     const email = session?.user?.email ?? "";
     const isGuest = GUEST_REGEX.test(email);
 
-    // If this is a real (non-guest) logged-in user, never show the popup.
-    // Also clean up any leftover flags and make sure it's closed.
+    // Real logged-in user: never show popup, clear any leftover block flag.
     if (!isGuest) {
       sessionStorage.removeItem(BLOCK_KEY);
       setOpen(false);
       return;
     }
 
+    // Guest who already dismissed: make sure nothing is left blocking.
     const alreadyDismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (isGuest && !alreadyDismissed) {
-      sessionStorage.setItem(BLOCK_KEY, "true");
-      window.dispatchEvent(new Event("evo-greeting-block"));
-      setOpen(true);
+    if (alreadyDismissed) {
+      sessionStorage.removeItem(BLOCK_KEY);
+      setOpen(false);
+      return;
     }
+
+    // Fresh guest: block the greeting and show the popup.
+    sessionStorage.setItem(BLOCK_KEY, "true");
+    window.dispatchEvent(new Event("evo-greeting-block"));
+    setOpen(true);
   }, [session, status]);
 
   const handleContinueAsGuest = () => {
