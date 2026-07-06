@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ import { fetcher } from "@/lib/utils";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { setOpenMobile, toggleSidebar } = useSidebar();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
@@ -46,6 +47,18 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/history`, { method: "DELETE" });
     toast.success("All chats deleted");
   };
+
+  const isActive = (path: string) => pathname === path;
+
+  const navButtonClass = (active: boolean) =>
+    active
+      ? "h-8 rounded-lg border border-sidebar-border bg-sidebar-accent text-[13px] text-sidebar-foreground transition-colors duration-150"
+      : "h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
+
+  const creditsButtonClass = (active: boolean) =>
+    active
+      ? "h-9 rounded-lg border border-amber-500/50 bg-gradient-to-r from-amber-500/30 via-amber-400/25 to-amber-500/30 text-[13px] font-semibold text-amber-600 shadow-md transition-all duration-150 dark:text-amber-400"
+      : "h-9 rounded-lg border border-transparent bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 text-[13px] font-semibold text-amber-600 shadow-sm transition-all duration-150 hover:border-amber-500/30 hover:from-amber-500/25 hover:via-amber-400/20 hover:to-amber-500/25 hover:shadow-md dark:text-amber-400";
 
   return (
     <>
@@ -80,7 +93,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    className={navButtonClass(isActive("/"))}
                     onClick={() => { setOpenMobile(false); router.push("/"); }}
                     tooltip="New Chat"
                   >
@@ -89,7 +102,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground" tooltip="Image Generator">
+                  <SidebarMenuButton asChild className={navButtonClass(isActive("/image"))} tooltip="Image Generator">
                     <Link href="/image" onClick={() => setOpenMobile(false)}>
                       <ImageIcon className="size-4" />
                       <span className="font-medium">Image Generator</span>
@@ -97,7 +110,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground" tooltip="Voice Generator">
+                  <SidebarMenuButton asChild className={navButtonClass(isActive("/voice"))} tooltip="Voice Generator">
                     <Link href="/voice" onClick={() => setOpenMobile(false)}>
                       <MicIcon className="size-4" />
                       <span className="font-medium">Voice Generator</span>
@@ -105,7 +118,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground" tooltip="Transcription">
+                  <SidebarMenuButton asChild className={navButtonClass(isActive("/transcribe"))} tooltip="Transcription">
                     <Link href="/transcribe" onClick={() => setOpenMobile(false)}>
                       <FileAudioIcon className="size-4" />
                       <span className="font-medium">Transcription</span>
@@ -113,7 +126,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem className="mt-0.5 mb-1">
-                  <SidebarMenuButton asChild className="h-9 rounded-lg border border-transparent bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 text-[13px] font-semibold text-amber-600 shadow-sm transition-all duration-150 hover:border-amber-500/30 hover:from-amber-500/25 hover:via-amber-400/20 hover:to-amber-500/25 hover:shadow-md dark:text-amber-400" tooltip="Buy Credits">
+                  <SidebarMenuButton asChild className={creditsButtonClass(isActive("/credits"))} tooltip="Buy Credits">
                     <Link href="/credits" onClick={() => setOpenMobile(false)}>
                       <SparklesIcon className="size-4" />
                       <span>Buy Credits</span>
