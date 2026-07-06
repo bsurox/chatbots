@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
@@ -38,8 +39,10 @@ export const Greeting = () => {
   const [blocked, setBlocked] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
+  const { data: session, status } = useSession();
   const { data: userData } = useSWR("/api/user/profile", fetcher);
 
+  // Listen for the popup dismiss (guest "continue as guest" path)
   useEffect(() => {
     const handleBlock = () => setBlocked(true);
     const handleDismissed = () => {
@@ -58,11 +61,20 @@ export const Greeting = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Main decision, driven by the session (reliable) with profile for the name
   useEffect(() => {
-    if (revealed || userData === undefined) {
+    if (revealed) {
+      return;
+    }
+    // Wait until the session is settled
+    if (status === "loading") {
       return;
     }
 
+    const email: string | null = session?.user?.email ?? null;
+    const isGuest = email ? GUEST_REGEX.test(email) : false;
+
+    // Name comes from the profile API (may arrive slightly later — that's fine)
     const fullName: string | null = userData?.name ?? null;
     const firstName = fullName ? fullName.trim().split(" ")[0] : null;
     setGreetingText(buildGreeting(firstName));
@@ -70,11 +82,7 @@ export const Greeting = () => {
       sessionStorage.setItem("evo_returning_user", "true");
     }
 
-    const email: string | null = userData?.email ?? null;
-    const isGuest = email ? GUEST_REGEX.test(email) : false;
-
-    // Real (non-guest) logged-in user: no popup applies to them.
-    // Clear any leftover block flag and reveal the greeting normally.
+    // Real logged-in user (or no session at all): always reveal, clear block.
     if (!isGuest) {
       sessionStorage.removeItem(BLOCK_KEY);
       setBlocked(false);
@@ -91,7 +99,7 @@ export const Greeting = () => {
 
     reveal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData, revealed]);
+  }, [session, status, userData, revealed]);
 
   function reveal() {
     setRevealed(true);
