@@ -37,9 +37,7 @@ export default function VideoPage() {
   const [tierId, setTierId] = useState<Tier["id"]>("standard");
   const [length, setLength] = useState<5 | 10>(5);
   const [credits, setCredits] = useState<number | null>(null);
-  const [phase, setPhase] = useState
-    "idle" | "starting" | "generating" | "done" | "error"
-  >("idle");
+  const [phase, setPhase] = useState<"idle" | "starting" | "generating" | "done" | "error">("idle");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -173,10 +171,10 @@ export default function VideoPage() {
 
   let stage = statusLabel;
   if (!stage) {
-    if (elapsed < 6) stage = "Queued — reserving a spot…";
-    else if (elapsed < 20) stage = "Warming up the model…";
-    else if (elapsed < 75) stage = "Rendering frames…";
-    else stage = "Finalizing your video…";
+    if (elapsed < 6) stage = "Queued - reserving a spot...";
+    else if (elapsed < 20) stage = "Warming up the model...";
+    else if (elapsed < 75) stage = "Rendering frames...";
+    else stage = "Finalizing your video...";
   }
 
   async function handleGenerate() {
@@ -306,7 +304,7 @@ export default function VideoPage() {
         <p style={{ color: "#888", marginBottom: 28, fontSize: 14 }}>
           Balance:{" "}
           <span style={{ color: "#22c55e", fontWeight: 600 }}>
-            {credits === null ? "…" : credits.toLocaleString()} credits
+            {credits === null ? "..." : credits.toLocaleString()} credits
           </span>
         </p>
 
@@ -357,7 +355,7 @@ export default function VideoPage() {
               8 seconds
             </div>
             <p style={{ color: "#777", fontSize: 13, marginTop: 8, marginBottom: 0 }}>
-              Cinematic renders a single 8-second clip with sound — this is the
+              Cinematic renders a single 8-second clip with sound - this is the
               max length for this tier.
             </p>
           </div>
@@ -459,17 +457,17 @@ export default function VideoPage() {
           }}
         >
           {phase === "starting"
-            ? "Starting…"
+            ? "Starting..."
             : phase === "generating"
-            ? "Generating…"
-            : `Generate Video · ${cost.toLocaleString()} credits`}
+            ? "Generating..."
+            : `Generate Video - ${cost.toLocaleString()} credits`}
         </button>
 
         {notEnough && !busy && (
           <p style={{ marginTop: 12, fontSize: 14, color: "#f87171" }}>
             Not enough credits for this option.{" "}
             <a href="/credits" style={{ color: "#22c55e", fontWeight: 600 }}>
-              Buy more →
+              Buy more
             </a>
           </p>
         )}
@@ -484,9 +482,9 @@ export default function VideoPage() {
               <span />
             </div>
             <p className="video-loader-hint">
-              Most videos finish in about 1–3 minutes — Cinematic and 10-second
+              Most videos finish in about 1-3 minutes - Cinematic and 10-second
               clips can take a little longer. You can keep this tab open; if you
-              refresh, it’ll pick right back up.
+              refresh, it will pick right back up.
             </p>
           </div>
         )}
@@ -530,7 +528,7 @@ export default function VideoPage() {
                 fontSize: 14,
               }}
             >
-              Download video →
+              Download video
             </a>
           </div>
         )}
