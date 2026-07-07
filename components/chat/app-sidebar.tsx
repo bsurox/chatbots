@@ -8,6 +8,7 @@ import {
   SparklesIcon,
   TrashIcon,
   FileAudioIcon,
+  VideoIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -106,6 +107,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     <Link href="/image" onClick={() => setOpenMobile(false)}>
                       <ImageIcon className="size-4" />
                       <span className="font-medium">Image Generator</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className={navButtonClass(isActive("/video"))} tooltip="Video Generator">
+                    <Link href="/video" onClick={() => setOpenMobile(false)}>
+                      <VideoIcon className="size-4" />
+                      <span className="font-medium">Video Generator</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
