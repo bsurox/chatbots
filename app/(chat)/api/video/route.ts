@@ -5,14 +5,13 @@ import { createVideoJob } from "@/lib/db/video-jobs";
 
 type TierId = "fast" | "standard" | "premium" | "cinematic";
 
-const VIDEO_CONFIG: Record
-  TierId,
-  {
-    modelId: string;
-    credits: Record<number, number>;
-    buildInput: (prompt: string, seconds: number) => Record<string, unknown>;
-  }
-> = {
+type TierConfig = {
+  modelId: string;
+  credits: Record<number, number>;
+  buildInput: (prompt: string, seconds: number) => Record<string, unknown>;
+};
+
+const VIDEO_CONFIG: Record<TierId, TierConfig> = {
   fast: {
     modelId: "fal-ai/kling-video/v1/standard/text-to-video",
     credits: { 5: 75, 10: 150 },
