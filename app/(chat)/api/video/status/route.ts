@@ -79,7 +79,7 @@ export async function GET(request: Request) {
         const credits = await getUserCredits(session.user.id);
         return Response.json({ status: "completed", videoUrl, credits });
       }
-      // Completed but produced no video → treat as failure + refund once.
+      // Completed but produced no video -> treat as failure + refund once.
       const claimed = await claimVideoJobRefund(requestId);
       if (claimed) {
         await addCredits(claimed.userId, claimed.creditCost);
@@ -93,13 +93,13 @@ export async function GET(request: Request) {
     }
 
     if (falStatus === "IN_QUEUE") {
-      return Response.json({ status: "processing", statusLabel: "Queued…" });
+      return Response.json({ status: "processing", statusLabel: "Queued..." });
     }
     if (falStatus === "IN_PROGRESS") {
-      return Response.json({ status: "processing", statusLabel: "Rendering…" });
+      return Response.json({ status: "processing", statusLabel: "Rendering..." });
     }
 
-    // Any explicit error/failure status from fal → refund once.
+    // Any explicit error/failure status from fal -> refund once.
     if (falStatus === "ERROR" || falStatus === "FAILED") {
       const claimed = await claimVideoJobRefund(requestId);
       if (claimed) {
