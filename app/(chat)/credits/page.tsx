@@ -105,7 +105,7 @@ export default function CreditsPage() {
         }
       `}</style>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, color: "#22c55e" }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, color: "#fff" }}>
           Buy Credits
         </h1>
         <p style={{ color: "#888", marginBottom: 32 }}>
@@ -151,7 +151,7 @@ export default function CreditsPage() {
               <p style={{ fontSize: 32, fontWeight: 700, marginBottom: 4 }}>
                 {bundle.price}
               </p>
-              <p style={{ color: "#888", marginBottom: 16 }}>
+              <p style={{ marginBottom: 16 }}>
                 {bundle.originalCredits ? (
                   <>
                     <span style={{ textDecoration: "line-through", color: "#666", marginRight: 6 }}>
@@ -162,7 +162,9 @@ export default function CreditsPage() {
                     </span>
                   </>
                 ) : (
-                  `${bundle.credits.toLocaleString()} credits`
+                  <span style={{ color: "#22c55e", fontWeight: 600 }}>
+                    {bundle.credits.toLocaleString()} credits
+                  </span>
                 )}
               </p>
               <button
