@@ -5,17 +5,20 @@ import { useRouter } from "next/navigation";
 import { ToolHeader } from "@/components/chat/tool-header";
 
 type Tier = {
-  id: "fast" | "standard" | "premium";
+  id: "fast" | "standard" | "premium" | "cinematic";
   name: string;
   desc: string;
-  credits5: number;
-  credits10: number;
+  credits5?: number;
+  credits10?: number;
+  fixedSeconds?: number;
+  credits8?: number;
 };
 
 const TIERS: Tier[] = [
   { id: "fast", name: "Fast", desc: "Quick drafts & ideas", credits5: 75, credits10: 150 },
   { id: "standard", name: "Standard", desc: "Balanced quality & speed", credits5: 110, credits10: 220 },
-  { id: "premium", name: "Premium", desc: "Highest quality — Veo 3", credits5: 250, credits10: 500 },
+  { id: "premium", name: "Premium", desc: "Top quality, up to 10s", credits5: 250, credits10: 500 },
+  { id: "cinematic", name: "Cinematic", desc: "Highest quality + sound (Veo 3)", fixedSeconds: 8, credits8: 375 },
 ];
 
 const JOB_KEY = "askevo_video_job";
@@ -97,9 +100,7 @@ export default function VideoPage() {
           loadCredits();
           return;
         }
-        // optional human-readable status from the backend queue
         if (data.statusLabel) setStatusLabel(data.statusLabel);
-        // still processing → check again shortly
         pollRef.current = setTimeout(() => poll(requestId), 4000);
       } catch {
         pollRef.current = setTimeout(() => poll(requestId), 5000);
@@ -159,12 +160,17 @@ export default function VideoPage() {
   }
 
   const tier = TIERS.find((t) => t.id === tierId)!;
-  const cost = length === 5 ? tier.credits5 : tier.credits10;
+  const isFixed = !!tier.fixedSeconds;
+  const effectiveSeconds = isFixed ? (tier.fixedSeconds as number) : length;
+  const cost = isFixed
+    ? (tier.credits8 as number)
+    : length === 5
+    ? (tier.credits5 as number)
+    : (tier.credits10 as number);
   const notEnough = credits !== null && cost > credits;
   const busy = phase === "starting" || phase === "generating";
   const canGenerate = prompt.trim().length > 0 && !busy && !notEnough;
 
-  // stage label: use backend status if present, else derive from elapsed time
   let stage = statusLabel;
   if (!stage) {
     if (elapsed < 6) stage = "Queued — reserving a spot…";
@@ -186,7 +192,11 @@ export default function VideoPage() {
       const res = await fetch("/api/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim(), tier: tierId, length }),
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          tier: tierId,
+          length: effectiveSeconds,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.requestId) {
@@ -215,10 +225,13 @@ export default function VideoPage() {
       <style>{`
         .video-tiers {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           gap: 12px;
         }
-        @media (max-width: 767px) {
+        @media (max-width: 900px) {
+          .video-tiers { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 520px) {
           .video-tiers { grid-template-columns: 1fr; }
         }
         @keyframes ae-spin { to { transform: rotate(360deg); } }
@@ -327,33 +340,56 @@ export default function VideoPage() {
         <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
           Length
         </label>
-        <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-          {[5, 10].map((sec) => {
-            const active = length === sec;
-            return (
-              <button
-                key={sec}
-                type="button"
-                onClick={() => setLength(sec as 5 | 10)}
-                disabled={busy}
-                style={{
-                  flex: 1,
-                  padding: "10px 0",
-                  borderRadius: 8,
-                  fontWeight: 600,
-                  fontSize: 14,
-                  cursor: busy ? "not-allowed" : "pointer",
-                  background: active ? "rgba(34,197,94,0.12)" : "transparent",
-                  color: active ? "#22c55e" : "#aaa",
-                  border: active ? "2px solid #22c55e" : "1px solid #333",
-                  opacity: busy ? 0.6 : 1,
-                }}
-              >
-                {sec} seconds
-              </button>
-            );
-          })}
-        </div>
+        {isFixed ? (
+          <div style={{ marginBottom: 24 }}>
+            <div
+              style={{
+                display: "inline-block",
+                padding: "10px 18px",
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 14,
+                background: "rgba(34,197,94,0.12)",
+                color: "#22c55e",
+                border: "2px solid #22c55e",
+              }}
+            >
+              8 seconds
+            </div>
+            <p style={{ color: "#777", fontSize: 13, marginTop: 8, marginBottom: 0 }}>
+              Cinematic renders a single 8-second clip with sound — this is the
+              max length for this tier.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
+            {[5, 10].map((sec) => {
+              const active = length === sec;
+              return (
+                <button
+                  key={sec}
+                  type="button"
+                  onClick={() => setLength(sec as 5 | 10)}
+                  disabled={busy}
+                  style={{
+                    flex: 1,
+                    padding: "10px 0",
+                    borderRadius: 8,
+                    fontWeight: 600,
+                    fontSize: 14,
+                    cursor: busy ? "not-allowed" : "pointer",
+                    background: active ? "rgba(34,197,94,0.12)" : "transparent",
+                    color: active ? "#22c55e" : "#aaa",
+                    border: active ? "2px solid #22c55e" : "1px solid #333",
+                    opacity: busy ? 0.6 : 1,
+                  }}
+                >
+                  {sec} seconds
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Tiers */}
         <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
@@ -362,7 +398,12 @@ export default function VideoPage() {
         <div className="video-tiers" style={{ marginBottom: 28 }}>
           {TIERS.map((t) => {
             const active = t.id === tierId;
-            const tCost = length === 5 ? t.credits5 : t.credits10;
+            const tFixed = !!t.fixedSeconds;
+            const tCost = tFixed
+              ? (t.credits8 as number)
+              : length === 5
+              ? (t.credits5 as number)
+              : (t.credits10 as number);
             return (
               <button
                 key={t.id}
@@ -377,17 +418,24 @@ export default function VideoPage() {
                   background: active ? "rgba(34,197,94,0.08)" : "#111",
                   border: active ? "2px solid #22c55e" : "1px solid #333",
                   opacity: busy ? 0.6 : 1,
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
                 <div style={{ fontSize: 16, fontWeight: 600, color: "#fff", marginBottom: 4 }}>
                   {t.name}
                 </div>
-                <div style={{ fontSize: 13, color: "#888", marginBottom: 10 }}>
+                <div style={{ fontSize: 13, color: "#888", marginBottom: 10, flex: 1 }}>
                   {t.desc}
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#22c55e" }}>
                   {tCost.toLocaleString()} credits
                 </div>
+                {tFixed && (
+                  <div style={{ fontSize: 11, color: "#777", marginTop: 4 }}>
+                    8-second max
+                  </div>
+                )}
               </button>
             );
           })}
@@ -436,7 +484,7 @@ export default function VideoPage() {
               <span />
             </div>
             <p className="video-loader-hint">
-              Most videos finish in about 1–3 minutes — Premium and 10-second
+              Most videos finish in about 1–3 minutes — Cinematic and 10-second
               clips can take a little longer. You can keep this tab open; if you
               refresh, it’ll pick right back up.
             </p>
