@@ -29,6 +29,15 @@ function formatElapsed(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+function triggerDownload(url: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "askevo-video.mp4";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 export default function VideoPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -355,184 +364,4 @@ export default function VideoPage() {
               8 seconds
             </div>
             <p style={{ color: "#777", fontSize: 13, marginTop: 8, marginBottom: 0 }}>
-              Cinematic renders a single 8-second clip with sound - this is the
-              max length for this tier.
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-            {[5, 10].map((sec) => {
-              const active = length === sec;
-              return (
-                <button
-                  key={sec}
-                  type="button"
-                  onClick={() => setLength(sec as 5 | 10)}
-                  disabled={busy}
-                  style={{
-                    flex: 1,
-                    padding: "10px 0",
-                    borderRadius: 8,
-                    fontWeight: 600,
-                    fontSize: 14,
-                    cursor: busy ? "not-allowed" : "pointer",
-                    background: active ? "rgba(34,197,94,0.12)" : "transparent",
-                    color: active ? "#22c55e" : "#aaa",
-                    border: active ? "2px solid #22c55e" : "1px solid #333",
-                    opacity: busy ? 0.6 : 1,
-                  }}
-                >
-                  {sec} seconds
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Tiers */}
-        <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-          Quality
-        </label>
-        <div className="video-tiers" style={{ marginBottom: 28 }}>
-          {TIERS.map((t) => {
-            const active = t.id === tierId;
-            const tFixed = !!t.fixedSeconds;
-            const tCost = tFixed
-              ? (t.credits8 as number)
-              : length === 5
-              ? (t.credits5 as number)
-              : (t.credits10 as number);
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTierId(t.id)}
-                disabled={busy}
-                style={{
-                  textAlign: "left",
-                  padding: 16,
-                  borderRadius: 12,
-                  cursor: busy ? "not-allowed" : "pointer",
-                  background: active ? "rgba(34,197,94,0.08)" : "#111",
-                  border: active ? "2px solid #22c55e" : "1px solid #333",
-                  opacity: busy ? 0.6 : 1,
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <div style={{ fontSize: 16, fontWeight: 600, color: "#fff", marginBottom: 4 }}>
-                  {t.name}
-                </div>
-                <div style={{ fontSize: 13, color: "#888", marginBottom: 10, flex: 1 }}>
-                  {t.desc}
-                </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#22c55e" }}>
-                  {tCost.toLocaleString()} credits
-                </div>
-                {tFixed && (
-                  <div style={{ fontSize: 11, color: "#777", marginTop: 4 }}>
-                    8-second max
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Generate */}
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={!canGenerate}
-          style={{
-            width: "100%",
-            padding: "14px 0",
-            borderRadius: 10,
-            fontWeight: 700,
-            fontSize: 15,
-            border: "none",
-            cursor: canGenerate ? "pointer" : "not-allowed",
-            background: canGenerate ? "#22c55e" : "#1c1c1c",
-            color: canGenerate ? "#000" : "#555",
-          }}
-        >
-          {phase === "starting"
-            ? "Starting..."
-            : phase === "generating"
-            ? "Generating..."
-            : `Generate Video - ${cost.toLocaleString()} credits`}
-        </button>
-
-        {notEnough && !busy && (
-          <p style={{ marginTop: 12, fontSize: 14, color: "#f87171" }}>
-            Not enough credits for this option.{" "}
-            <a href="/credits" style={{ color: "#22c55e", fontWeight: 600 }}>
-              Buy more
-            </a>
-          </p>
-        )}
-
-        {/* Loading sequence */}
-        {busy && (
-          <div className="video-loader">
-            <div className="video-loader-ring" />
-            <div className="video-loader-time">{formatElapsed(elapsed)}</div>
-            <div className="video-loader-stage">{stage}</div>
-            <div className="video-loader-bar">
-              <span />
-            </div>
-            <p className="video-loader-hint">
-              Most videos finish in about 1-3 minutes - Cinematic and 10-second
-              clips can take a little longer. You can keep this tab open; if you
-              refresh, it will pick right back up.
-            </p>
-          </div>
-        )}
-
-        {/* Error */}
-        {phase === "error" && errorMsg && (
-          <div
-            style={{
-              marginTop: 24,
-              padding: 16,
-              borderRadius: 12,
-              border: "1px solid #7f1d1d",
-              background: "rgba(127,29,29,0.15)",
-              color: "#f87171",
-              fontSize: 14,
-            }}
-          >
-            {errorMsg}
-          </div>
-        )}
-
-        {/* Result */}
-        {phase === "done" && videoUrl && (
-          <div style={{ marginTop: 24 }}>
-            <p style={{ color: "#22c55e", fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
-              Done in {formatElapsed(elapsed)}
-            </p>
-            <video
-              controls
-              src={videoUrl}
-              style={{ width: "100%", borderRadius: 12, border: "1px solid #333" }}
-            />
-            
-              href={videoUrl}
-              download
-              style={{
-                display: "inline-block",
-                marginTop: 12,
-                color: "#22c55e",
-                fontWeight: 600,
-                fontSize: 14,
-              }}
-            >
-              Download video
-            </a>
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
+              Cinematic renders a single 8-second
