@@ -163,9 +163,9 @@ export default function VideoPage() {
 
   let stage = statusLabel;
   if (!stage) {
-    if (elapsed < 6) stage = "Queued - reserving a spot...";
-    else if (elapsed < 20) stage = "Warming up the model...";
-    else if (elapsed < 75) stage = "Rendering frames...";
+    if (elapsed < 8) stage = "Queued - reserving a spot...";
+    else if (elapsed < 40) stage = "Warming up the model...";
+    else if (elapsed < 240) stage = "Rendering frames...";
     else stage = "Finalizing your video...";
   }
 
@@ -291,7 +291,7 @@ export default function VideoPage() {
             <div className="vg-time">{fmt(elapsed)}</div>
             <div className="vg-stage">{stage}</div>
             <div className="vg-bar"><span /></div>
-            <p className="vg-hint">Most videos finish in about 1-3 minutes - Cinematic and 10-second clips can take a little longer. You can keep this tab open; if you refresh, it will pick right back up.</p>
+            <p className="vg-hint">This usually takes 2-6 minutes, and can run a little longer at peak times. You can keep this tab open; if you refresh, it will pick right back up.</p>
           </div>
         )}
 
