@@ -19,17 +19,17 @@ const VIDEO_CONFIG: Record<TierId, TierConfig> = {
   },
   standard: {
     modelId: "fal-ai/kling-video/v2.6/pro/text-to-video",
-    credits: { 5: 110, 10: 220 },
+    credits: { 5: 120, 10: 240 },
     buildInput: (prompt, seconds) => ({ prompt, duration: String(seconds), aspect_ratio: "16:9", generate_audio: false }),
   },
   premium: {
     modelId: "fal-ai/kling-video/v2.6/pro/text-to-video",
-    credits: { 5: 250, 10: 500 },
+    credits: { 5: 200, 10: 400 },
     buildInput: (prompt, seconds) => ({ prompt, duration: String(seconds), aspect_ratio: "16:9", generate_audio: true }),
   },
   cinematic: {
     modelId: "fal-ai/veo3",
-    credits: { 8: 375 },
+    credits: { 8: 500 },
     buildInput: (prompt, seconds) => ({ prompt, duration: `${seconds}s`, aspect_ratio: "16:9", resolution: "720p", generate_audio: true }),
   },
 };
