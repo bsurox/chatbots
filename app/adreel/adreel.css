@@ -1,0 +1,27 @@
+.ar-page { min-height: 100vh; background: #0a0a0a; color: #fff; font-family: inherit; }
+.ar-wrap { max-width: 960px; margin: 0 auto; padding: 60px 20px; }
+.ar-badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #22d3ee; border: 1px solid rgba(34,211,238,0.4); border-radius: 999px; padding: 5px 12px; margin-bottom: 20px; }
+.ar-h1 { font-size: 44px; font-weight: 800; line-height: 1.1; margin: 0 0 16px; }
+.ar-grad { background: linear-gradient(90deg, #22d3ee, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ar-sub { font-size: 18px; color: #a3a3a3; line-height: 1.6; margin: 0 0 32px; max-width: 640px; }
+.ar-form { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.ar-input { flex: 1; min-width: 220px; background: #141414; border: 1px solid #333; border-radius: 10px; color: #fff; padding: 14px 16px; font-size: 15px; }
+.ar-select { background: #141414; border: 1px solid #333; border-radius: 10px; color: #a3a3a3; padding: 14px 12px; font-size: 14px; }
+.ar-btn { background: #22d3ee; color: #000; font-weight: 800; font-size: 15px; border: none; border-radius: 10px; padding: 14px 22px; cursor: pointer; }
+.ar-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.ar-note { font-size: 13px; color: #737373; margin: 0 0 60px; }
+.ar-ok { font-size: 16px; font-weight: 700; color: #22c55e; margin: 0 0 60px; }
+.ar-err { font-size: 14px; color: #f87171; margin: 8px 0 0; }
+.ar-h2 { font-size: 26px; font-weight: 800; margin: 0 0 20px; }
+.ar-vids { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 60px; }
+.ar-vid { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 14px; border: 1px solid #262626; background: #141414; }
+.ar-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 60px; }
+.ar-step { background: #111; border: 1px solid #262626; border-radius: 14px; padding: 20px; }
+.ar-step-n { font-size: 13px; font-weight: 800; color: #22d3ee; margin-bottom: 8px; }
+.ar-step-t { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.ar-step-d { font-size: 14px; color: #a3a3a3; line-height: 1.5; }
+.ar-price { background: #111; border: 1px solid #262626; border-radius: 16px; padding: 28px; text-align: center; margin-bottom: 60px; }
+.ar-price-n { font-size: 40px; font-weight: 800; }
+.ar-price-s { font-size: 14px; color: #a3a3a3; margin-top: 6px; }
+.ar-foot { font-size: 13px; color: #525252; text-align: center; padding-bottom: 30px; }
+@media (max-width: 720px) { .ar-h1 { font-size: 32px; } .ar-vids, .ar-steps { grid-template-columns: 1fr; } }
