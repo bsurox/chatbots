@@ -1,0 +1,117 @@
+"use client";
+import "./adreel.css";
+import { useState } from "react";
+
+export default function AdReelPage() {
+  const [email, setEmail] = useState("");
+  const [business, setBusiness] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [errMsg, setErrMsg] = useState("");
+
+  async function submit() {
+    if (state === "sending") return;
+    setErrMsg("");
+    setState("sending");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, business, source: "adreel-landing" }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrMsg(data.error || "Something went wrong.");
+        setState("error");
+        return;
+      }
+      setState("done");
+    } catch {
+      setErrMsg("Something went wrong. Please try again.");
+      setState("error");
+    }
+  }
+
+  return (
+    <div className="ar-page">
+      <div className="ar-wrap">
+        <div className="ar-badge">Early Access</div>
+        <h1 className="ar-h1">
+          AI video ads for your business. <span className="ar-grad">In minutes, not weeks.</span>
+        </h1>
+        <p className="ar-sub">
+          AdReel turns a one-line description of your product into a scroll-stopping
+          short video ad for TikTok, Reels, and Shorts. No videographer, no editing,
+          no experience needed.
+        </p>
+
+        {state === "done" ? (
+          <p className="ar-ok">You are on the list! We will email you when early access opens.</p>
+        ) : (
+          <div style={{ marginBottom: 60 }}>
+            <div className="ar-form">
+              <input
+                className="ar-input"
+                type="email"
+                placeholder="you@business.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={state === "sending"}
+              />
+              <select
+                className="ar-select"
+                value={business}
+                onChange={(e) => setBusiness(e.target.value)}
+                disabled={state === "sending"}
+              >
+                <option value="">What do you sell?</option>
+                <option value="ecommerce">Online store / e-commerce</option>
+                <option value="restaurant">Restaurant / food</option>
+                <option value="realestate">Real estate</option>
+                <option value="services">Local services</option>
+                <option value="other">Something else</option>
+              </select>
+              <button className="ar-btn" type="button" onClick={submit} disabled={state === "sending"}>
+                {state === "sending" ? "Joining..." : "Join the waitlist"}
+              </button>
+            </div>
+            <p className="ar-note">Early access pricing: $19/mo, locked in for waitlist members. No card required today.</p>
+            {state === "error" && <p className="ar-err">{errMsg}</p>}
+          </div>
+        )}
+
+        <h2 className="ar-h2">Made with AdReel</h2>
+        <div className="ar-vids">
+          <video className="ar-vid" src="/adreel/demo1.mp4" autoPlay muted loop playsInline />
+          <video className="ar-vid" src="/adreel/demo2.mp4" autoPlay muted loop playsInline />
+          <video className="ar-vid" src="/adreel/demo3.mp4" autoPlay muted loop playsInline />
+        </div>
+
+        <h2 className="ar-h2">How it works</h2>
+        <div className="ar-steps">
+          <div className="ar-step">
+            <div className="ar-step-n">STEP 1</div>
+            <div className="ar-step-t">Describe your product</div>
+            <div className="ar-step-d">One sentence about what you sell. That is all AdReel needs.</div>
+          </div>
+          <div className="ar-step">
+            <div className="ar-step-n">STEP 2</div>
+            <div className="ar-step-t">AI builds your ad</div>
+            <div className="ar-step-d">A short, high-energy video ad designed for TikTok, Reels, and Shorts.</div>
+          </div>
+          <div className="ar-step">
+            <div className="ar-step-n">STEP 3</div>
+            <div className="ar-step-t">Post it and grow</div>
+            <div className="ar-step-d">Download in vertical format, ready to publish. New ad whenever you want one.</div>
+          </div>
+        </div>
+
+        <div className="ar-price">
+          <div className="ar-price-n">$19/mo</div>
+          <div className="ar-price-s">Early access price for waitlist members. Cancel anytime.</div>
+        </div>
+
+        <div className="ar-foot">AdReel is powered by AskEvo. Questions? hello@askevo.ai</div>
+      </div>
+    </div>
+  );
+}
