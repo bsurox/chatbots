@@ -1,12 +1,31 @@
 "use client";
 import "./adreel.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const DEMOS = ["/adreel/demo1.mp4", "/adreel/demo2.mp4", "/adreel/demo3.mp4"];
 
 export default function AdReelPage() {
   const [email, setEmail] = useState("");
   const [business, setBusiness] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
+
+  const [playing, setPlaying] = useState(0);
+  const [lightbox, setLightbox] = useState<number | null>(null);
+  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+
+  useEffect(() => {
+    videoRefs.current.forEach((v, i) => {
+      if (!v) return;
+      if (i === playing && lightbox === null) {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+      } else {
+        v.pause();
+        v.currentTime = 0;
+      }
+    });
+  }, [playing, lightbox]);
 
   async function submit() {
     if (state === "sending") return;
@@ -81,9 +100,31 @@ export default function AdReelPage() {
 
         <h2 className="ar-h2">Made with AdReel</h2>
         <div className="ar-vids">
-          <video className="ar-vid" src="/adreel/demo1.mp4" autoPlay muted loop playsInline />
-          <video className="ar-vid" src="/adreel/demo2.mp4" autoPlay muted loop playsInline />
-          <video className="ar-vid" src="/adreel/demo3.mp4" autoPlay muted loop playsInline />
+          {DEMOS.map((src, i) => (
+            <div
+              key={src}
+              className={i === playing ? "ar-vidbox on" : "ar-vidbox"}
+              onClick={() => setLightbox(i)}
+            >
+              <video
+                ref={(el) => {
+                  videoRefs.current[i] = el;
+                }}
+                className="ar-vid"
+                src={src}
+                muted
+                playsInline
+                preload="auto"
+                onEnded={() => {
+                  if (i === playing) setPlaying((p) => (p + 1) % DEMOS.length);
+                }}
+              />
+              <div style={{ position: "absolute", bottom: 10, right: 10, width: 32, height: 32, background: "rgba(0,0,0,0.65)", borderRadius: 8 }}>
+                <div style={{ position: "absolute", top: 8, left: 8, width: 8, height: 8, borderTop: "2px solid #fff", borderLeft: "2px solid #fff" }} />
+                <div style={{ position: "absolute", bottom: 8, right: 8, width: 8, height: 8, borderBottom: "2px solid #fff", borderRight: "2px solid #fff" }} />
+              </div>
+            </div>
+          ))}
         </div>
 
         <h2 className="ar-h2">How it works</h2>
@@ -112,6 +153,20 @@ export default function AdReelPage() {
 
         <div className="ar-foot">AdReel is powered by AskEvo. Questions? hello@askevo.ai</div>
       </div>
+
+      {lightbox !== null && (
+        <div className="ar-lb" onClick={() => setLightbox(null)}>
+          <video
+            className="ar-lbvid"
+            src={DEMOS[lightbox]}
+            autoPlay
+            controls
+            playsInline
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="ar-lbclose">Click outside the video to close</div>
+        </div>
+      )}
     </div>
   );
 }
