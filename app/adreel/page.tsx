@@ -151,7 +151,7 @@ export default function AdReelPage() {
           <div className="ar-price-s">Early access price for waitlist members. Cancel anytime.</div>
         </div>
 
-        <div className="ar-foot">AdReel is powered by AskEvo. Questions? hello@askevo.ai</div>
+        <div className="ar-foot">AdReel is powered by AskEvo LLC. Questions or need help? Contact support@askevo.ai</div>
       </div>
 
       {lightbox !== null && (
