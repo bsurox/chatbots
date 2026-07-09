@@ -3,7 +3,7 @@
 .ar-badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #22d3ee; border: 1px solid rgba(34,211,238,0.4); border-radius: 999px; padding: 5px 12px; margin-bottom: 20px; }
 .ar-h1 { font-size: 44px; font-weight: 800; line-height: 1.1; margin: 0 0 16px; }
 .ar-grad { background: linear-gradient(90deg, #22d3ee, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.ar-sub { font-size: 18px; color: #a3a3a3; line-height: 1.6; margin: 0 0 32px; max-width: 640px; }
+.ar-sub { font-size: 18px; color: #f5f5f5; line-height: 1.6; margin: 0 0 32px; max-width: 640px; }
 .ar-form { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .ar-input { flex: 1; min-width: 220px; background: #141414; border: 1px solid #333; border-radius: 10px; color: #fff; padding: 14px 16px; font-size: 15px; }
 .ar-select { background: #141414; border: 1px solid #333; border-radius: 10px; color: #a3a3a3; padding: 14px 12px; font-size: 14px; }
