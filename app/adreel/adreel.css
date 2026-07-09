@@ -9,7 +9,7 @@
 .ar-select { background: #141414; border: 1px solid #333; border-radius: 10px; color: #a3a3a3; padding: 14px 12px; font-size: 14px; }
 .ar-btn { background: #22d3ee; color: #000; font-weight: 800; font-size: 15px; border: none; border-radius: 10px; padding: 14px 22px; cursor: pointer; }
 .ar-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.ar-note { font-size: 13px; color: #737373; margin: 0 0 60px; }
+.ar-note { font-size: 13px; color: #22d3ee; margin: 0 0 60px; }
 .ar-ok { font-size: 16px; font-weight: 700; color: #22c55e; margin: 0 0 60px; }
 .ar-err { font-size: 14px; color: #f87171; margin: 8px 0 0; }
 .ar-h2 { font-size: 26px; font-weight: 800; margin: 0 0 20px; }
