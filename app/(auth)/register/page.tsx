@@ -7,10 +7,12 @@ import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
 import { type RegisterActionState, register } from "../actions";
+
 export default function Page() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [state, formAction] = useActionState<RegisterActionState, FormData>(
     register,
     { status: "idle" }
@@ -35,6 +37,13 @@ export default function Page() {
     }
   }, [state.status]);
   const handleSubmit = (formData: FormData) => {
+    if (!agreed) {
+      toast({
+        type: "error",
+        description: "Please agree to the Terms of Service to continue.",
+      });
+      return;
+    }
     setEmail(formData.get("email") as string);
     formAction(formData);
   };
@@ -43,6 +52,35 @@ export default function Page() {
       <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
       <p className="text-sm text-muted-foreground">Get started for free</p>
       <AuthForm action={handleSubmit} defaultEmail={email} showNameFields>
+        <label className="flex items-start gap-2 text-[13px] text-muted-foreground">
+          <input
+            checked={agreed}
+            className="mt-0.5 size-4 accent-green-500"
+            onChange={(e) => setAgreed(e.target.checked)}
+            required
+            type="checkbox"
+          />
+          <span>
+            I agree to the{" "}
+            <Link
+              className="text-foreground underline-offset-4 hover:underline"
+              href="/terms"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              className="text-foreground underline-offset-4 hover:underline"
+              href="/privacy"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Privacy Policy
+            </Link>
+          </span>
+        </label>
         <SubmitButton isSuccessful={isSuccessful}>Sign up</SubmitButton>
         <p className="text-center text-[13px] text-muted-foreground">
           {"Have an account? "}
@@ -57,3 +95,8 @@ export default function Page() {
     </>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE (register page) - if you can see these lines
+// after pasting, the whole file made it. Safe to commit.
+// -----------------------------------------------------------
