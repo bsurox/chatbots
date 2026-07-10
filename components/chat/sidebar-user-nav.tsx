@@ -155,3 +155,11 @@ export function SidebarUserNav({ user }: { user: User }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </>
+  );
+}
+
+// -----------------------------------------------------------
+// END OF FILE (sidebar-user-nav) - if you can see these lines
+// after pasting, the whole file made it. Safe to commit.
+// -----------------------------------------------------------
