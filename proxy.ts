@@ -25,6 +25,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/privacy")) {
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith("/terms")) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
@@ -59,3 +67,8 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };
+
+// -----------------------------------------------------------
+// END OF FILE (proxy) - if you can see these lines after
+// pasting, the whole file made it. Safe to commit.
+// -----------------------------------------------------------
