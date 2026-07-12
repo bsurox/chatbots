@@ -1,16 +1,20 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useState } from "react";
+import { Suspense, useActionState, useEffect, useState } from "react";
 import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
 import { type RegisterActionState, register } from "../actions";
 
-export default function Page() {
+function RegisterContent() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const promo = searchParams.get("promo");
+  const promoEmail = searchParams.get("email") || "";
+  const isAdreelPromo = promo === "adreel";
+  const [email, setEmail] = useState(promoEmail);
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [state, formAction] = useActionState<RegisterActionState, FormData>(
@@ -33,7 +37,11 @@ export default function Page() {
       toast({ type: "success", description: "Account created!" });
       setIsSuccessful(true);
       updateSession();
-      router.refresh();
+      if (isAdreelPromo) {
+        router.push("/video");
+      } else {
+        router.refresh();
+      }
     }
   }, [state.status]);
   const handleSubmit = (formData: FormData) => {
@@ -49,6 +57,17 @@ export default function Page() {
   };
   return (
     <>
+      {isAdreelPromo ? (
+        <div className="rounded-lg border border-green-500/40 bg-green-500/10 p-3 text-sm">
+          <p className="font-semibold text-green-600 dark:text-green-400">
+            Your 250 free video credits are waiting
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            Create your account with the same email you just entered and
+            your credits are applied instantly.
+          </p>
+        </div>
+      ) : null}
       <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
       <p className="text-sm text-muted-foreground">Get started for free</p>
       <AuthForm action={handleSubmit} defaultEmail={email} showNameFields>
@@ -96,7 +115,16 @@ export default function Page() {
   );
 }
 
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterContent />
+    </Suspense>
+  );
+}
+
 // -----------------------------------------------------------
-// END OF FILE (register page) - if you can see these lines
-// after pasting, the whole file made it. Safe to commit.
+// END OF FILE - app/(auth)/register/page.tsx (v2 - promo)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
 // -----------------------------------------------------------
