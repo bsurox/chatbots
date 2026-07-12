@@ -1,6 +1,6 @@
 import "server-only";
-import { and, eq, gt } from "drizzle-orm";
-import { boolean, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { and, count, eq, gt } from "drizzle-orm";
+import { boolean, integer, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { db } from "./queries";
 
 export const waitlistSignups = pgTable("waitlist_signups", {
@@ -10,6 +10,7 @@ export const waitlistSignups = pgTable("waitlist_signups", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   promoCredits: integer("promo_credits").notNull().default(0),
   promoClaimed: boolean("promo_claimed").notNull().default(false),
+  ip: varchar("ip", { length: 64 }),
 });
 
 export async function addToWaitlist(params: {
@@ -17,6 +18,7 @@ export async function addToWaitlist(params: {
   business?: string | null;
   source?: string | null;
   promoCredits?: number;
+  ip?: string | null;
 }) {
   await db
     .insert(waitlistSignups)
@@ -25,8 +27,27 @@ export async function addToWaitlist(params: {
       business: params.business ?? null,
       source: params.source ?? null,
       promoCredits: params.promoCredits ?? 0,
+      ip: params.ip ?? null,
     })
     .onConflictDoNothing();
+}
+
+// Counts how many signups from this IP received promo credits in the
+// last N hours. Used to cap free-credit grants per IP. Withheld
+// (zero-credit) signups do not count toward the cap.
+export async function countRecentPromoSignups(ip: string, hours: number): Promise<number> {
+  const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
+  const rows = await db
+    .select({ value: count() })
+    .from(waitlistSignups)
+    .where(
+      and(
+        eq(waitlistSignups.ip, ip),
+        gt(waitlistSignups.promoCredits, 0),
+        gt(waitlistSignups.createdAt, cutoff)
+      )
+    );
+  return rows[0] ? rows[0].value : 0;
 }
 
 // Atomically claims promo credits for an email. Flips promo_claimed
@@ -52,6 +73,6 @@ export async function claimPromoCredits(email: string): Promise<number> {
 }
 
 // ============================================================
-// END OF FILE - lib/db/waitlist.ts
+// END OF FILE - lib/db/waitlist.ts (v2 - IP tracking)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
