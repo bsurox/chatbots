@@ -1,14 +1,18 @@
 "use client";
 import "./adreel.css";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const DEMOS = ["/adreel/demo1.mp4", "/adreel/demo2.mp4", "/adreel/demo3.mp4"];
 
 export default function AdReelPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [business, setBusiness] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
+  const [claimUrl, setClaimUrl] = useState("");
 
   const [playing, setPlaying] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -31,11 +35,12 @@ export default function AdReelPage() {
     if (state === "sending") return;
     setErrMsg("");
     setState("sending");
+    const cleanEmail = email.toLowerCase().trim();
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, business, source: "adreel-landing" }),
+        body: JSON.stringify({ email: cleanEmail, business, source: "adreel-landing" }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -43,7 +48,12 @@ export default function AdReelPage() {
         setState("error");
         return;
       }
+      const url = "/register?promo=adreel&email=" + encodeURIComponent(cleanEmail);
+      setClaimUrl(url);
       setState("done");
+      setTimeout(() => {
+        router.push(url);
+      }, 2000);
     } catch {
       setErrMsg("Something went wrong. Please try again.");
       setState("error");
@@ -55,16 +65,22 @@ export default function AdReelPage() {
       <div className="ar-wrap">
         <div className="ar-badge">Early Access</div>
         <h1 className="ar-h1">
-          AI video ads for your business. <span className="ar-grad">In minutes, not weeks.</span>
+          Your first AI video ad is free. <span className="ar-grad">Start creating in under a minute.</span>
         </h1>
         <p className="ar-sub">
-          AdReel turns a one-line description of your product into a scroll-stopping
-          short video ad for TikTok, Reels, and Shorts. No videographer, no editing,
-          no experience needed.
+          Sign up free and get 250 video credits instantly - enough to create one
+          premium AI video ad with sound for your business. Built for TikTok,
+          Reels, and Shorts. No videographer, no editing, no card required.
         </p>
 
         {state === "done" ? (
-          <p className="ar-ok">You are on the list! We will email you when early access opens.</p>
+          <div style={{ marginBottom: 60 }}>
+            <p className="ar-ok">You are in! Your 250 free credits are attached to your email.</p>
+            <p className="ar-note">Taking you to create your account and claim them...</p>
+            <button className="ar-btn" type="button" onClick={() => router.push(claimUrl)}>
+              Continue now
+            </button>
+          </div>
         ) : (
           <div style={{ marginBottom: 60 }}>
             <div className="ar-form">
@@ -90,10 +106,10 @@ export default function AdReelPage() {
                 <option value="other">Something else</option>
               </select>
               <button className="ar-btn" type="button" onClick={submit} disabled={state === "sending"}>
-                {state === "sending" ? "Joining..." : "Join the waitlist"}
+                {state === "sending" ? "Working..." : "Get my free video ad"}
               </button>
             </div>
-            <p className="ar-note">Early access pricing: $19/mo, locked in for waitlist members. No card required today.</p>
+            <p className="ar-note">Free signup = 250 credits instantly, enough for one premium video ad with audio. Early access pricing locked at $19/mo for members. No card required.</p>
             {state === "error" && <p className="ar-err">{errMsg}</p>}
           </div>
         )}
@@ -131,27 +147,48 @@ export default function AdReelPage() {
         <div className="ar-steps">
           <div className="ar-step">
             <div className="ar-step-n">STEP 1</div>
-            <div className="ar-step-t">Describe your product</div>
-            <div className="ar-step-d">One sentence about what you sell. That is all AdReel needs.</div>
+            <div className="ar-step-t">Sign up free</div>
+            <div className="ar-step-d">Enter your email and create your account. 250 video credits are applied instantly.</div>
           </div>
           <div className="ar-step">
             <div className="ar-step-n">STEP 2</div>
-            <div className="ar-step-t">AI builds your ad</div>
-            <div className="ar-step-d">A short, high-energy video ad designed for TikTok, Reels, and Shorts.</div>
+            <div className="ar-step-t">Describe your product</div>
+            <div className="ar-step-d">Tell the AI what you sell in a sentence or two. It builds a short, high-energy video ad with sound.</div>
           </div>
           <div className="ar-step">
             <div className="ar-step-n">STEP 3</div>
-            <div className="ar-step-t">Post it and grow</div>
-            <div className="ar-step-d">Download in vertical format, ready to publish. New ad whenever you want one.</div>
+            <div className="ar-step-t">Download and post</div>
+            <div className="ar-step-d">Grab your video and publish to TikTok, Reels, or Shorts. Buy more credits only if you want more ads.</div>
           </div>
         </div>
 
         <div className="ar-price">
           <div className="ar-price-n">$19/mo</div>
-          <div className="ar-price-s">Early access price for waitlist members. Cancel anytime.</div>
+          <div className="ar-price-s">Early access price for members when subscriptions launch. Your first video is free. Cancel anytime.</div>
         </div>
 
-        <div className="ar-foot">AdReel is powered by AskEvo LLC. Questions or need help? Contact support@askevo.ai</div>
+        <div className="ar-foot">
+          AdReel is powered by AskEvo LLC. Questions or need help? Contact support@askevo.ai
+          <div style={{ marginTop: 10 }}>
+            <Link
+              href="/privacy"
+              rel="noopener noreferrer"
+              style={{ color: "#a3a3a3", textDecoration: "underline" }}
+              target="_blank"
+            >
+              Privacy Policy
+            </Link>
+            <span style={{ margin: "0 10px", color: "#525252" }}>|</span>
+            <Link
+              href="/terms"
+              rel="noopener noreferrer"
+              style={{ color: "#a3a3a3", textDecoration: "underline" }}
+              target="_blank"
+            >
+              Terms of Service
+            </Link>
+          </div>
+        </div>
       </div>
 
       {lightbox !== null && (
@@ -170,3 +207,9 @@ export default function AdReelPage() {
     </div>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - app/adreel/page.tsx (v2 - free video offer)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
