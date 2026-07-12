@@ -1,20 +1,26 @@
 "use server";
 import { z } from "zod";
+import { addCredits } from "@/lib/db/credits";
 import { createUser, getUser } from "@/lib/db/queries";
+import { claimPromoCredits } from "@/lib/db/waitlist";
 import { signIn } from "./auth";
+
 const authFormSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
+
 const registerFormSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
 });
+
 export type LoginActionState = {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
 };
+
 export const login = async (
   _: LoginActionState,
   formData: FormData
@@ -37,6 +43,7 @@ export const login = async (
     return { status: "failed" };
   }
 };
+
 export type RegisterActionState = {
   status:
     | "idle"
@@ -46,6 +53,7 @@ export type RegisterActionState = {
     | "user_exists"
     | "invalid_data";
 };
+
 export const register = async (
   _: RegisterActionState,
   formData: FormData
@@ -63,6 +71,23 @@ export const register = async (
     }
     const fullName = `${validatedData.firstName} ${validatedData.lastName}`.trim();
     await createUser(validatedData.email, validatedData.password, fullName);
+
+    // Grant any promo credits attached to this email (e.g. AdReel
+    // free video offer). claimPromoCredits flips the claimed flag
+    // exactly once, so this can never double-grant. Wrapped so a
+    // promo failure can never block account creation.
+    try {
+      const [newUser] = await getUser(validatedData.email);
+      if (newUser) {
+        const promo = await claimPromoCredits(validatedData.email);
+        if (promo > 0) {
+          await addCredits(newUser.id, promo);
+        }
+      }
+    } catch (promoError) {
+      console.error("Promo claim error:", promoError);
+    }
+
     await signIn("credentials", {
       email: validatedData.email,
       password: validatedData.password,
@@ -76,3 +101,8 @@ export const register = async (
     return { status: "failed" };
   }
 };
+
+// ============================================================
+// END OF FILE - app/(auth)/actions.ts (v2 - promo claim)
+// If you can see this comment, the paste was not truncated.
+// ============================================================
