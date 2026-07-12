@@ -3,7 +3,7 @@ import { addToWaitlist, countRecentPromoSignups } from "@/lib/db/waitlist";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ADREEL_SOURCE = "adreel-landing";
-const ADREEL_PROMO_CREDITS = 200;
+const ADREEL_PROMO_CREDITS = 250;
 const MAX_PROMO_PER_IP_PER_DAY = 2;
 
 const DISPOSABLE_DOMAINS = new Set([
@@ -133,6 +133,6 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/waitlist/route.ts (v2 - hardened)
+// END OF FILE - app/(chat)/api/waitlist/route.ts (v3 - 250 credits)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
