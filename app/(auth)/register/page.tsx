@@ -38,7 +38,7 @@ function RegisterContent() {
       setIsSuccessful(true);
       updateSession();
       if (isAdreelPromo) {
-        router.push("/video");
+        window.location.href = "/video?tier=premium&duration=5";
       } else {
         router.refresh();
       }
@@ -124,7 +124,7 @@ export default function Page() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/register/page.tsx (v2 - promo)
+// END OF FILE - app/(auth)/register/page.tsx (v3 - hard nav)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
