@@ -1,0 +1,307 @@
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility -webkit-overflow-scrolling-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+@utility touch-pan-y {
+  touch-action: pan-y;
+}
+
+@utility overscroll-behavior-contain {
+  overscroll-behavior: contain;
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --foreground-rgb: 255, 255, 255;
+      --background-start-rgb: 0, 0, 0;
+      --background-end-rgb: 0, 0, 0;
+    }
+  }
+}
+
+.skeleton {
+  * {
+    pointer-events: none !important;
+  }
+
+  *[class^="text-"] {
+    color: transparent;
+    @apply rounded-md bg-foreground/20 select-none animate-pulse;
+  }
+
+  .skeleton-bg {
+    @apply bg-foreground/10;
+  }
+
+  .skeleton-div {
+    @apply bg-foreground/20 animate-pulse;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes dot-pulse {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes thinking-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.62 0.11 168 / 0%);
+  }
+  50% {
+    box-shadow: 0 0 0 3px oklch(0.62 0.11 168 / 8%);
+  }
+}
+
+@keyframes subtle-lift {
+  from {
+    transform: translateY(0);
+    box-shadow: var(--shadow-card);
+  }
+  to {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-float);
+  }
+}
+
+@utility fade-up {
+  animation: fade-up 0.25s var(--ease-spring) both;
+}
+
+@utility fade-in {
+  animation: fade-in 0.2s ease both;
+}
+
+@utility shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.04),
+    transparent
+  );
+  background-size: 200% 100%;
+}
+
+@utility dot-pulse {
+  animation: dot-pulse 1.4s ease-in-out infinite;
+}
+
+@utility message-fade-in {
+  animation: message-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility thinking-dot {
+  animation: thinking-dot 1.4s ease-in-out infinite;
+}
+
+@utility composer-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.ProseMirror {
+  outline: none;
+}
+
+.cm-editor {
+  @apply bg-transparent! outline-hidden! text-[13px]! leading-[1.6]!;
+  font-family:
+    "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", ui-monospace,
+    monospace !important;
+}
+
+.cm-gutters {
+  @apply bg-transparent! border-r-0! outline-hidden!;
+}
+
+.cm-gutter.cm-lineNumbers {
+  @apply min-w-[3rem] text-muted-foreground/40 text-[11px]!;
+}
+
+.cm-scroller {
+  @apply overflow-auto!;
+}
+
+.ͼo.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
+.ͼo.cm-selectionBackground,
+.ͼo.cm-content::selection {
+  background: oklch(0.62 0.11 168 / 0.15) !important;
+}
+
+.dark
+  .ͼo.cm-focused
+  > .cm-scroller
+  > .cm-selectionLayer
+  .cm-selectionBackground,
+.dark .ͼo.cm-selectionBackground,
+.dark .ͼo.cm-content::selection {
+  background: oklch(0.62 0.11 168 / 0.2) !important;
+}
+
+.cm-activeLine {
+  @apply bg-muted/50! rounded-sm!;
+}
+
+.cm-activeLineGutter {
+  @apply bg-transparent!;
+}
+
+.cm-activeLineGutter .cm-gutterElement {
+  color: var(--foreground) !important;
+  opacity: 0.7;
+}
+
+.cm-gutter.cm-lineNumbers .cm-gutterElement {
+  padding-right: 12px !important;
+}
+
+.cm-foldGutter {
+  @apply min-w-3;
+}
+
+.cm-cursor {
+  border-left-color: oklch(0.62 0.11 168) !important;
+  border-left-width: 2px !important;
+}
+
+.cm-matchingBracket {
+  background: oklch(0.62 0.11 168 / 0.12) !important;
+  outline: 1px solid oklch(0.62 0.11 168 / 0.3);
+  border-radius: 2px;
+}
+
+.suggestion-highlight {
+  @apply cursor-pointer rounded-sm bg-blue-200 transition-colors hover:bg-blue-300 dark:bg-blue-500/40 dark:text-blue-50 dark:hover:bg-blue-400/50;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0 0 0 / 0.12) transparent;
+  }
+
+  .dark * {
+    scrollbar-color: oklch(1 0 0 / 0.1) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: oklch(0 0 0 / 0.12);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: oklch(0 0 0 / 0.25);
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background: oklch(1 0 0 / 0.1);
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: oklch(1 0 0 / 0.2);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+[data-testid="artifact"] {
+  isolation: isolate;
+}
+
+/* ============================================================ */
+/* END OF FILE - app/effects.css (v1 - split from globals)      */
+/* If you can see this comment, the paste was not truncated.    */
+/* ============================================================ */
