@@ -291,7 +291,7 @@ export default function VideoPage() {
           <div style={{ marginTop: 24 }}>
             <p className="vg-done">Done in {fmt(elapsed)}</p>
             <video className="vg-video" controls src={videoUrl} />
-            <div style={{ mt: 12 } && { marginTop: 12 }}>
+            <div style={{ marginTop: 12 }}>
               <button type="button" className="vg-link" onClick={() => download(videoUrl)}>Download video</button>
             </div>
           </div>
@@ -301,5 +301,5 @@ export default function VideoPage() {
   );
 }
 
-// END OF FILE - app/(chat)/video/page.tsx (v3 - flag fallback)
+// END OF FILE - app/(chat)/video/page.tsx (v3.1 - build fix)
 // If you can see this line after pasting, the whole file made it.
