@@ -12,7 +12,6 @@ export default function AdReelPage() {
   const [business, setBusiness] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
-  const [claimUrl, setClaimUrl] = useState("");
 
   const [playing, setPlaying] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -49,7 +48,6 @@ export default function AdReelPage() {
         return;
       }
       const url = "/register?promo=adreel&email=" + encodeURIComponent(cleanEmail);
-      setClaimUrl(url);
       setState("done");
       router.push(url);
     } catch {
@@ -74,10 +72,7 @@ export default function AdReelPage() {
         {state === "done" ? (
           <div style={{ marginBottom: 60 }}>
             <p className="ar-ok">You are in! Your 250 free credits are attached to your email.</p>
-            <p className="ar-note">Taking you to create your account and claim them...</p>
-            <button className="ar-btn" type="button" onClick={() => router.push(claimUrl)}>
-              Continue
-            </button>
+            <p className="ar-note">You will now be redirected to AskEvo for video generation...</p>
           </div>
         ) : (
           <div style={{ marginBottom: 60 }}>
@@ -202,7 +197,7 @@ export default function AdReelPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/adreel/page.tsx (v5 - instant redirect)
+// END OF FILE - app/adreel/page.tsx (v6 - no continue button)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
