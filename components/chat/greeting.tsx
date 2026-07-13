@@ -1,11 +1,12 @@
 "use client";
 import { motion } from "framer-motion";
-import { FileAudioIcon, GemIcon, ImageIcon, MicIcon, VideoIcon } from "lucide-react";
+import { FileAudioIcon, ImageIcon, MicIcon, VideoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
+import { GemIcon } from "./gem-icon";
 
 const FALLBACK_TEXT = "Hello, I'm Evo.";
 const STORAGE_KEY = "evo_greeting_played";
@@ -206,7 +207,7 @@ export const Greeting = () => {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/greeting.tsx (v2 - rebrand)
+// END OF FILE - components/chat/greeting.tsx (v3 - custom gem)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
