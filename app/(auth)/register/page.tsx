@@ -38,6 +38,11 @@ function RegisterContent() {
       setIsSuccessful(true);
       updateSession();
       if (isAdreelPromo) {
+        try {
+          localStorage.setItem("askevo_preselect", JSON.stringify({ tier: "premium", duration: 5 }));
+        } catch {
+          // ignore
+        }
         window.location.href = "/video?tier=premium&duration=5";
       } else {
         router.refresh();
@@ -124,7 +129,7 @@ export default function Page() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/register/page.tsx (v3 - hard nav)
+// END OF FILE - app/(auth)/register/page.tsx (v4 - preselect flag)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
