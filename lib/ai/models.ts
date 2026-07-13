@@ -18,7 +18,7 @@ export type ChatModel = {
   gatewayOrder?: string[];
   reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high";
 };
-// Only AskEvo Pro is active. Others kept commented out for later.
+// Only Evo 1 is active. Others kept commented out for later.
 export const chatModels: ChatModel[] = [
   // {
   //   id: "claude-haiku-4-5",
@@ -28,7 +28,7 @@ export const chatModels: ChatModel[] = [
   // },
   {
     id: "claude-sonnet-4-5",
-    name: "AskEvo Pro",
+    name: "Evo 1",
     provider: "anthropic",
     description: "Our latest and fastest model available",
   },
@@ -63,3 +63,8 @@ chatModels.reduce(
   },
   {} as Record<string, ChatModel[]>
 );
+
+// ============================================================
+// END OF FILE - lib/ai/models.ts (v2 - Evo 1)
+// If you can see this comment, the paste was not truncated.
+// ============================================================
