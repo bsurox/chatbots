@@ -6,15 +6,14 @@ import {
   MicIcon,
   PanelLeftIcon,
   PenSquareIcon,
-  GemIcon,
   FileAudioIcon,
   VideoIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import useSWR from "swr";
+import { GemIcon } from "./gem-icon";
 import { SidebarHistory } from "@/components/chat/sidebar-history";
 import { SidebarUserNav } from "@/components/chat/sidebar-user-nav";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
@@ -54,7 +53,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             <div className="group/logo relative flex items-center justify-center">
               <SidebarMenuButton asChild className="size-8 !px-0 items-center justify-center group-data-[collapsible=icon]:group-hover/logo:opacity-0" tooltip="AskEvo">
                 <Link href="/" onClick={() => setOpenMobile(false)}>
-                  <Image src="/logo.png" alt="AskEvo" width={28} height={28} className="rounded-full" />
+                  <div className="flex size-7 items-center justify-center rounded-lg border border-primary bg-background text-[11px] font-semibold text-primary">AE</div>
                 </Link>
               </SidebarMenuButton>
               <Tooltip>
@@ -81,49 +80,49 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <SidebarMenuButton
                   className={navButtonClass(isActive("/"))}
                   onClick={() => { setOpenMobile(false); router.push("/"); }}
-                  tooltip="New Chat"
+                  tooltip="New chat"
                 >
                   <PenSquareIcon className="size-4 text-primary" />
                   <span className="font-medium">New chat</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={navButtonClass(isActive("/image"))} tooltip="Image Generator">
+                <SidebarMenuButton asChild className={navButtonClass(isActive("/image"))} tooltip="Image">
                   <Link href="/image" onClick={() => setOpenMobile(false)}>
                     <ImageIcon className="size-4" />
-                    <span className="font-medium">Image Generator</span>
+                    <span className="font-medium">Image</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={navButtonClass(isActive("/video"))} tooltip="Video Generator">
+                <SidebarMenuButton asChild className={navButtonClass(isActive("/video"))} tooltip="Video">
                   <Link href="/video" onClick={() => setOpenMobile(false)}>
                     <VideoIcon className="size-4" />
-                    <span className="font-medium">Video Generator</span>
+                    <span className="font-medium">Video</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={navButtonClass(isActive("/voice"))} tooltip="Voice Generator">
+                <SidebarMenuButton asChild className={navButtonClass(isActive("/voice"))} tooltip="Voice">
                   <Link href="/voice" onClick={() => setOpenMobile(false)}>
                     <MicIcon className="size-4" />
-                    <span className="font-medium">Voice Generator</span>
+                    <span className="font-medium">Voice</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={navButtonClass(isActive("/transcribe"))} tooltip="Speech to Text">
+                <SidebarMenuButton asChild className={navButtonClass(isActive("/transcribe"))} tooltip="Speech to text">
                   <Link href="/transcribe" onClick={() => setOpenMobile(false)}>
                     <FileAudioIcon className="size-4" />
-                    <span className="font-medium">Speech to Text</span>
+                    <span className="font-medium">Speech to text</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem className="mt-0.5 mb-1">
-                <SidebarMenuButton asChild className={creditsButtonClass(isActive("/credits"))} tooltip="Buy Credits">
+                <SidebarMenuButton asChild className={creditsButtonClass(isActive("/credits"))} tooltip="Buy credits">
                   <Link href="/credits" onClick={() => setOpenMobile(false)}>
                     <GemIcon className="size-4 text-amber-400" />
-                    <span className="text-amber-400">Buy Credits</span>
+                    <span className="text-amber-400">Buy credits</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -163,7 +162,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/app-sidebar.tsx (v4 - gold text)
+// END OF FILE - components/chat/app-sidebar.tsx (v5 - mockup match)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
