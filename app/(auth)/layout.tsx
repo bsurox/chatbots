@@ -1,5 +1,6 @@
-import { ArrowLeftIcon, GemIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
+import { GemIcon } from "@/components/chat/gem-icon";
 import { Preview } from "@/components/chat/preview";
 export default function AuthLayout({
   children,
@@ -38,7 +39,7 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v2 - gem)
+// END OF FILE - app/(auth)/layout.tsx (v3 - custom gem)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
