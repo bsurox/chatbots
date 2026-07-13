@@ -3,12 +3,10 @@ import Form from "next/form";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useActionState, useEffect, useState } from "react";
+import { PasswordField } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { type ResetPasswordState, resetPassword } from "../reset-actions";
-
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,7 +16,6 @@ function ResetPasswordForm() {
     resetPassword,
     { status: "idle" }
   );
-
   useEffect(() => {
     if (state.status === "invalid_data") {
       toast({
@@ -41,7 +38,18 @@ function ResetPasswordForm() {
       setTimeout(() => router.push("/login"), 1500);
     }
   }, [state.status, router]);
-
+  const handleSubmit = (formData: FormData) => {
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    if (password !== confirmPassword) {
+      toast({
+        type: "error",
+        description: "Passwords do not match. Please try again.",
+      });
+      return;
+    }
+    formAction(formData);
+  };
   if (!token) {
     return (
       <>
@@ -60,7 +68,6 @@ function ResetPasswordForm() {
       </>
     );
   }
-
   return (
     <>
       <h1 className="text-2xl font-semibold tracking-tight">
@@ -69,27 +76,21 @@ function ResetPasswordForm() {
       <p className="text-sm text-muted-foreground">
         Choose a new password for your account.
       </p>
-
-      <Form action={formAction} className="mt-4 flex flex-col gap-4">
+      <Form action={handleSubmit} className="mt-4 flex flex-col gap-4">
         <input name="token" type="hidden" value={token} />
-        <div className="flex flex-col gap-2">
-          <Label
-            className="font-normal text-muted-foreground"
-            htmlFor="password"
-          >
-            New password
-          </Label>
-          <Input
-            autoComplete="new-password"
-            autoFocus
-            className="h-10 rounded-lg border-border/50 bg-muted/50 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
-            id="password"
-            name="password"
-            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-            required
-            type="password"
-          />
-        </div>
+        <PasswordField
+          autoComplete="new-password"
+          autoFocus
+          id="password"
+          label="New password"
+          name="password"
+        />
+        <PasswordField
+          autoComplete="new-password"
+          id="confirmPassword"
+          label="Confirm new password"
+          name="confirmPassword"
+        />
         <SubmitButton isSuccessful={isSuccessful}>
           Update password
         </SubmitButton>
@@ -97,7 +98,6 @@ function ResetPasswordForm() {
     </>
   );
 }
-
 export default function Page() {
   return (
     <Suspense
@@ -109,3 +109,9 @@ export default function Page() {
     </Suspense>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - app/(auth)/reset-password/page.tsx (v2)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
