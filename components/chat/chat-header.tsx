@@ -1,10 +1,11 @@
 "use client";
-import { GemIcon, PanelLeftIcon } from "lucide-react";
+import { PanelLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
+import { GemIcon } from "./gem-icon";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
 import { fetcher } from "@/lib/utils";
 function PureChatHeader({
@@ -40,24 +41,13 @@ function PureChatHeader({
         />
       )}
       <Link
+        className={isLow ? "ml-auto flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 font-semibold text-[12px]" : "ml-auto flex items-center gap-1.5 rounded-full border border-green-500/40 bg-green-500/10 px-3 py-1 font-semibold text-[12px] transition-colors hover:border-green-500/60"}
         href="/credits"
-        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
-        style={{ textDecoration: "none" }}
       >
-        <GemIcon
-          className={isLow ? "" : "text-amber-600 dark:text-amber-400"}
-          style={{ width: 16, height: 16, color: isLow ? "#ef4444" : undefined }}
-        />
-        <span style={{ fontSize: 15, fontWeight: 600, color: isLow ? "#ef4444" : "#22c55e" }}>
+        <GemIcon className="size-3.5 text-amber-400" />
+        <span className={isLow ? "text-red-400" : "text-green-500"}>
           {credits.toLocaleString()} credits
         </span>
-      </Link>
-      <Link
-        className="hidden items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/15 px-4 py-1.5 font-semibold text-[13px] text-amber-400 transition-all duration-150 hover:border-amber-500/60 hover:bg-amber-500/25 md:ml-auto md:flex"
-        href="/credits"
-      >
-        <GemIcon className="size-3.5" />
-        Buy Credits
       </Link>
     </header>
   );
@@ -71,7 +61,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/chat-header.tsx (v2 - rebrand)
+// END OF FILE - components/chat/chat-header.tsx (v3 - credits pill)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
