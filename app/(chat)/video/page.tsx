@@ -4,40 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { ToolHeader } from "@/components/chat/tool-header";
-
-type Tier = {
-  id: "fast" | "standard" | "premium" | "cinematic";
-  name: string;
-  desc: string;
-  credits5?: number;
-  credits10?: number;
-  fixedSeconds?: number;
-  credits8?: number;
-};
-
-const TIERS: Tier[] = [
-  { id: "fast", name: "Fast", desc: "Quick drafts & ideas", credits5: 75, credits10: 150 },
-  { id: "standard", name: "Standard", desc: "Balanced quality & speed", credits5: 110, credits10: 220 },
-  { id: "premium", name: "Premium", desc: "Top quality, up to 10s", credits5: 250, credits10: 500 },
-  { id: "cinematic", name: "Cinematic", desc: "Highest quality + sound (Veo 3)", fixedSeconds: 8, credits8: 375 },
-];
-
-const JOB_KEY = "askevo_video_job";
-
-function fmt(sec: number): string {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-function download(url: string) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "askevo-video.mp4";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
+import { download, fmt, JOB_KEY, TIERS, type Tier } from "./video-config";
 
 export default function VideoPage() {
   const { data: session, status } = useSession();
@@ -67,6 +34,16 @@ export default function VideoPage() {
       router.push("/register?redirectUrl=/video");
     }
   }, [session, status, router]);
+
+  // AdReel promo lands here as /video?tier=premium&duration=5.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const t = p.get("tier");
+    if (t === "fast" || t === "standard" || t === "premium" || t === "cinematic") setTierId(t);
+    const d = p.get("duration");
+    if (d === "5") setLength(5);
+    if (d === "10") setLength(10);
+  }, []);
 
   const loadCredits = useCallback(async () => {
     try {
@@ -310,3 +287,6 @@ export default function VideoPage() {
     </>
   );
 }
+
+// END OF FILE - app/(chat)/video/page.tsx (v2 - preselect + split)
+// If you can see this line after pasting, the whole file made it.
