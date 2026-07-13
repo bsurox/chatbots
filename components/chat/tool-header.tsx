@@ -1,7 +1,7 @@
 "use client";
-import { GemIcon } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
+import { GemIcon } from "./gem-icon";
 import { fetcher } from "@/lib/utils";
 export function ToolHeader() {
   const { data: creditsData } = useSWR("/api/credits", fetcher, { refreshInterval: 30000 });
@@ -10,31 +10,20 @@ export function ToolHeader() {
   return (
     <header className="sticky top-0 z-50 flex h-14 items-center gap-2 bg-sidebar px-3">
       <Link
+        className={isLow ? "ml-auto flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 font-semibold text-[12px]" : "ml-auto flex items-center gap-1.5 rounded-full border border-green-500/40 bg-green-500/10 px-3 py-1 font-semibold text-[12px] transition-colors hover:border-green-500/60"}
         href="/credits"
-        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
-        style={{ textDecoration: "none" }}
       >
-        <GemIcon
-          className={isLow ? "" : "text-amber-600 dark:text-amber-400"}
-          style={{ width: 16, height: 16, color: isLow ? "#ef4444" : undefined }}
-        />
-        <span style={{ fontSize: 15, fontWeight: 600, color: isLow ? "#ef4444" : "#22c55e" }}>
+        <GemIcon className="size-3.5 text-amber-400" />
+        <span className={isLow ? "text-red-400" : "text-green-500"}>
           {credits.toLocaleString()} credits
         </span>
-      </Link>
-      <Link
-        className="ml-auto flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/15 px-4 py-1.5 font-semibold text-[13px] text-amber-400 transition-all duration-150 hover:border-amber-500/60 hover:bg-amber-500/25"
-        href="/credits"
-      >
-        <GemIcon className="size-3.5" />
-        Buy Credits
       </Link>
     </header>
   );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/tool-header.tsx (v2 - gems)
+// END OF FILE - components/chat/tool-header.tsx (v3 - credits pill)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
