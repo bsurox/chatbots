@@ -1,9 +1,8 @@
 "use client";
-import { SparklesIcon } from "lucide-react";
+import { GemIcon } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
-
 export function ToolHeader() {
   const { data: creditsData } = useSWR("/api/credits", fetcher, { refreshInterval: 30000 });
   const credits = creditsData?.credits ?? 0;
@@ -15,7 +14,7 @@ export function ToolHeader() {
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
         style={{ textDecoration: "none" }}
       >
-        <SparklesIcon
+        <GemIcon
           className={isLow ? "" : "text-amber-600 dark:text-amber-400"}
           style={{ width: 16, height: 16, color: isLow ? "#ef4444" : undefined }}
         />
@@ -24,29 +23,18 @@ export function ToolHeader() {
         </span>
       </Link>
       <Link
+        className="ml-auto flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/15 px-4 py-1.5 font-semibold text-[13px] text-amber-400 transition-all duration-150 hover:border-amber-500/60 hover:bg-amber-500/25"
         href="/credits"
-        className="ml-auto flex items-center gap-1.5 text-amber-600 dark:text-amber-400 transition-all duration-150"
-        style={{
-          padding: "6px 16px",
-          borderRadius: 8,
-          background: "linear-gradient(to right, rgba(245,158,11,0.15), rgba(251,191,36,0.10), rgba(245,158,11,0.15))",
-          fontSize: 13,
-          fontWeight: 600,
-          textDecoration: "none",
-          border: "1px solid rgba(245,158,11,0.3)",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "linear-gradient(to right, rgba(245,158,11,0.25), rgba(251,191,36,0.20), rgba(245,158,11,0.25))";
-          e.currentTarget.style.borderColor = "rgba(245,158,11,0.5)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "linear-gradient(to right, rgba(245,158,11,0.15), rgba(251,191,36,0.10), rgba(245,158,11,0.15))";
-          e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)";
-        }}
       >
-        <SparklesIcon style={{ width: 13, height: 13 }} />
+        <GemIcon className="size-3.5" />
         Buy Credits
       </Link>
     </header>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - components/chat/tool-header.tsx (v2 - gems)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
