@@ -13,13 +13,15 @@ type AuthFormProps = {
   showConfirmPassword?: boolean;
 };
 
-function PasswordField({
+export function PasswordField({
   autoComplete,
+  autoFocus,
   id,
   label,
   name,
 }: {
   autoComplete?: string;
+  autoFocus?: boolean;
   id: string;
   label: string;
   name: string;
@@ -33,6 +35,7 @@ function PasswordField({
       <div className="relative">
         <Input
           autoComplete={autoComplete}
+          autoFocus={autoFocus}
           className="h-10 rounded-lg border-border/50 bg-muted/50 pr-10 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
           id={id}
           name={name}
@@ -133,7 +136,7 @@ export function AuthForm({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/auth-form.tsx (v2 - eye toggle)
+// END OF FILE - components/chat/auth-form.tsx (v3 - exported field)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
