@@ -122,8 +122,8 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <SidebarMenuItem className="mt-0.5 mb-1">
                 <SidebarMenuButton asChild className={creditsButtonClass(isActive("/credits"))} tooltip="Buy Credits">
                   <Link href="/credits" onClick={() => setOpenMobile(false)}>
-                    <GemIcon className="size-4" />
-                    <span>Buy Credits</span>
+                    <GemIcon className="size-4 text-amber-400" />
+                    <span className="text-amber-400">Buy Credits</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -163,7 +163,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/app-sidebar.tsx (v3 - threshold 20)
+// END OF FILE - components/chat/app-sidebar.tsx (v4 - gold text)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
