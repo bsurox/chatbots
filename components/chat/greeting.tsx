@@ -117,9 +117,6 @@ export const Greeting = () => {
 
   return (
     <div className="flex flex-col items-center px-4" key="overview">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
-      `}</style>
       <motion.div
         animate={{ opacity: 1 }}
         className="mb-4 flex size-11 items-center justify-center rounded-2xl border border-primary/50 bg-primary/10"
@@ -133,81 +130,11 @@ export const Greeting = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
         style={{
-          fontFamily: "'Dancing Script', cursive",
-          fontSize: "clamp(2rem, 5vw, 3rem)",
-          fontWeight: 700,
+          fontSize: "clamp(1.6rem, 4vw, 2.1rem)",
+          fontWeight: 600,
           color: "#4ade80",
-          textShadow: "0 0 12px rgba(74,222,128,0.4)",
-          minHeight: "3.5rem",
+          minHeight: "3rem",
           textAlign: "center",
-          marginBottom: 24,
-          letterSpacing: "0.01em",
+          marginBottom: 20,
+          letterSpacing: "-0.02em",
           overflow: "hidden",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {shouldAnimate ? (
-          <motion.span
-            initial={{ clipPath: "inset(0 100% 0 0)" }}
-            animate={{ clipPath: "inset(0 0% 0 0)" }}
-            transition={{
-              duration: 2.2,
-              ease: [0.25, 0.1, 0.25, 1],
-              delay: 0.2,
-            }}
-            style={{ display: "inline-block" }}
-          >
-            {greetingText}
-          </motion.span>
-        ) : (
-          greetingText
-        )}
-      </motion.div>
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center text-muted-foreground/80 text-sm"
-        initial={{ opacity: 0, y: 10 }}
-        transition={{
-          delay: shouldAnimate ? 2.4 : 0,
-          duration: 0.5,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-      >
-        What are we creating today?
-      </motion.div>
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        className="mt-6 flex max-w-md flex-wrap items-center justify-center gap-2"
-        initial={{ opacity: 0, y: 10 }}
-        transition={{
-          delay: shouldAnimate ? 2.7 : 0,
-          duration: 0.5,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-      >
-        <button className={CHIP_CLASS} onClick={() => router.push("/image")} type="button">
-          <ImageIcon className="size-3.5 text-primary" />
-          Create an image
-        </button>
-        <button className={CHIP_CLASS} onClick={() => router.push("/video")} type="button">
-          <VideoIcon className="size-3.5 text-primary" />
-          Generate a video ad
-        </button>
-        <button className={CHIP_CLASS} onClick={() => router.push("/voice")} type="button">
-          <MicIcon className="size-3.5 text-primary" />
-          Clone a voice
-        </button>
-        <button className={CHIP_CLASS} onClick={() => router.push("/transcribe")} type="button">
-          <FileAudioIcon className="size-3.5 text-primary" />
-          Transcribe audio
-        </button>
-      </motion.div>
-    </div>
-  );
-};
-
-// -----------------------------------------------------------
-// END OF FILE - components/chat/greeting.tsx (v3 - custom gem)
-// If you can see these lines after pasting, the whole file
-// made it. Safe to commit.
-// -----------------------------------------------------------
