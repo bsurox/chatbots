@@ -1,8 +1,6 @@
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, GemIcon } from "lucide-react";
 import Link from "next/link";
-import { SparklesIcon } from "@/components/chat/icons";
 import { Preview } from "@/components/chat/preview";
-
 export default function AuthLayout({
   children,
 }: {
@@ -24,7 +22,7 @@ export default function AuthLayout({
               className="mb-2 flex size-9 items-center justify-center rounded-lg bg-muted/60 ring-1 ring-border/50"
               style={{ color: "#f59e0b" }}
             >
-              <SparklesIcon size={14} />
+              <GemIcon className="size-3.5" />
             </div>
             {children}
           </div>
@@ -38,3 +36,9 @@ export default function AuthLayout({
     </div>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - app/(auth)/layout.tsx (v2 - gem)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
