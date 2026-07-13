@@ -10,12 +10,18 @@ const authFormSchema = z.object({
   password: z.string().min(6),
 });
 
-const registerFormSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-});
+const registerFormSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(6),
+    confirmPassword: z.string().min(6),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export type LoginActionState = {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
@@ -62,6 +68,7 @@ export const register = async (
     const validatedData = registerFormSchema.parse({
       email: formData.get("email"),
       password: formData.get("password"),
+      confirmPassword: formData.get("confirmPassword"),
       firstName: formData.get("firstName"),
       lastName: formData.get("lastName"),
     });
@@ -103,6 +110,6 @@ export const register = async (
 };
 
 // ============================================================
-// END OF FILE - app/(auth)/actions.ts (v2 - promo claim)
+// END OF FILE - app/(auth)/actions.ts (v3 - confirm backstop)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
