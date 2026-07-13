@@ -32,7 +32,16 @@ export function download(url: string) {
   document.body.removeChild(a);
 }
 
+export type AspectRatio = "16:9" | "9:16";
+
+export const ASPECT_RATIOS: { id: AspectRatio; label: string; hint: string }[] = [
+  { id: "16:9", label: "Widescreen", hint: "YouTube, websites" },
+  { id: "9:16", label: "Vertical", hint: "Reels, TikTok, Stories" },
+];
+
+export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
+
 // ============================================================
-// END OF FILE - app/(chat)/video/video-config.ts (v1)
+// END OF FILE - app/(chat)/video/video-config.ts (v2 - ratios)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
