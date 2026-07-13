@@ -35,12 +35,25 @@ export default function VideoPage() {
     }
   }, [session, status, router]);
 
-  // AdReel promo lands here as /video?tier=premium&duration=5.
+  // AdReel promo preselect: URL params, with a one-shot localStorage
+  // fallback set at registration (survives redirects that strip params).
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
-    const t = p.get("tier");
+    let t = p.get("tier");
+    let d = p.get("duration");
+    try {
+      if (!t) {
+        const saved = JSON.parse(localStorage.getItem("askevo_preselect") || "null");
+        if (saved) {
+          t = saved.tier;
+          d = String(saved.duration);
+        }
+      }
+      localStorage.removeItem("askevo_preselect");
+    } catch {
+      // ignore
+    }
     if (t === "fast" || t === "standard" || t === "premium" || t === "cinematic") setTierId(t);
-    const d = p.get("duration");
     if (d === "5") setLength(5);
     if (d === "10") setLength(10);
   }, []);
@@ -278,7 +291,7 @@ export default function VideoPage() {
           <div style={{ marginTop: 24 }}>
             <p className="vg-done">Done in {fmt(elapsed)}</p>
             <video className="vg-video" controls src={videoUrl} />
-            <div style={{ marginTop: 12 }}>
+            <div style={{ mt: 12 } && { marginTop: 12 }}>
               <button type="button" className="vg-link" onClick={() => download(videoUrl)}>Download video</button>
             </div>
           </div>
@@ -288,5 +301,5 @@ export default function VideoPage() {
   );
 }
 
-// END OF FILE - app/(chat)/video/page.tsx (v2 - preselect + split)
+// END OF FILE - app/(chat)/video/page.tsx (v3 - flag fallback)
 // If you can see this line after pasting, the whole file made it.
