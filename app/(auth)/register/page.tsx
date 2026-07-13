@@ -57,6 +57,15 @@ function RegisterContent() {
       });
       return;
     }
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    if (password !== confirmPassword) {
+      toast({
+        type: "error",
+        description: "Passwords do not match. Please try again.",
+      });
+      return;
+    }
     setEmail(formData.get("email") as string);
     formAction(formData);
   };
@@ -75,7 +84,7 @@ function RegisterContent() {
       ) : null}
       <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
       <p className="text-sm text-muted-foreground">Get started for free</p>
-      <AuthForm action={handleSubmit} defaultEmail={email} showNameFields>
+      <AuthForm action={handleSubmit} defaultEmail={email} showConfirmPassword showNameFields>
         <label className="flex items-start gap-2 text-[13px] text-muted-foreground">
           <input
             checked={agreed}
@@ -129,7 +138,7 @@ export default function Page() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/register/page.tsx (v4 - preselect flag)
+// END OF FILE - app/(auth)/register/page.tsx (v5 - confirm password)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
