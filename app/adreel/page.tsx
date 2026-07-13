@@ -65,7 +65,7 @@ export default function AdReelPage() {
       <div className="ar-wrap">
         <div className="ar-badge">Early Access</div>
         <h1 className="ar-h1">
-          Your first AI video ad is free. <span className="ar-grad">Start creating in under a minute.</span>
+          First AI video ad is free. <span className="ar-grad">Start creating in under a minute.</span>
         </h1>
         <p className="ar-sub">
           Sign up free and get 250 video credits instantly - enough to create one
@@ -109,7 +109,7 @@ export default function AdReelPage() {
                 {state === "sending" ? "Working..." : "Get my free video ad"}
               </button>
             </div>
-            <p className="ar-note">Free signup = 250 credits instantly, enough for one premium video ad with audio. Early access pricing locked at $19/mo for members. No card required.</p>
+            <p className="ar-note">Free signup = 250 credits instantly, enough for one premium video ad with audio. No card required.</p>
             {state === "error" && <p className="ar-err">{errMsg}</p>}
           </div>
         )}
@@ -158,13 +158,8 @@ export default function AdReelPage() {
           <div className="ar-step">
             <div className="ar-step-n">STEP 3</div>
             <div className="ar-step-t">Download and post</div>
-            <div className="ar-step-d">Grab your video and publish to TikTok, Reels, or Shorts. Buy more credits only if you want more ads.</div>
+            <div className="ar-step-d">Grab your video and publish to TikTok, Reels, or Shorts. Ready to post the same day.</div>
           </div>
-        </div>
-
-        <div className="ar-price">
-          <div className="ar-price-n">$19/mo</div>
-          <div className="ar-price-s">Early access price for members when subscriptions launch. Your first video is free. Cancel anytime.</div>
         </div>
 
         <div className="ar-foot">
@@ -209,7 +204,7 @@ export default function AdReelPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/adreel/page.tsx (v2 - free video offer)
+// END OF FILE - app/adreel/page.tsx (v3 - no pricing)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
