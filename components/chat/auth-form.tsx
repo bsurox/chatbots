@@ -1,4 +1,7 @@
+"use client";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Form from "next/form";
+import { useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
@@ -7,13 +10,56 @@ type AuthFormProps = {
   children: React.ReactNode;
   defaultEmail?: string;
   showNameFields?: boolean;
+  showConfirmPassword?: boolean;
 };
+
+function PasswordField({
+  autoComplete,
+  id,
+  label,
+  name,
+}: {
+  autoComplete?: string;
+  id: string;
+  label: string;
+  name: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="flex flex-col gap-2">
+      <Label className="font-normal text-muted-foreground" htmlFor={id}>
+        {label}
+      </Label>
+      <div className="relative">
+        <Input
+          autoComplete={autoComplete}
+          className="h-10 rounded-lg border-border/50 bg-muted/50 pr-10 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
+          id={id}
+          name={name}
+          placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+          required
+          type={show ? "text" : "password"}
+        />
+        <button
+          aria-label={show ? "Hide password" : "Show password"}
+          className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground/60 transition-colors hover:text-foreground"
+          onClick={() => setShow((s) => !s)}
+          tabIndex={-1}
+          type="button"
+        >
+          {show ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function AuthForm({
   action,
   children,
   defaultEmail = "",
   showNameFields = false,
+  showConfirmPassword = false,
 }: AuthFormProps) {
   return (
     <Form action={action} className="flex flex-col gap-4">
@@ -72,20 +118,22 @@ export function AuthForm({
           type="email"
         />
       </div>
-      <div className="flex flex-col gap-2">
-        <Label className="font-normal text-muted-foreground" htmlFor="password">
-          Password
-        </Label>
-        <Input
-          className="h-10 rounded-lg border-border/50 bg-muted/50 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
-          id="password"
-          name="password"
-          placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-          required
-          type="password"
+      <PasswordField id="password" label="Password" name="password" />
+      {showConfirmPassword && (
+        <PasswordField
+          autoComplete="new-password"
+          id="confirmPassword"
+          label="Confirm password"
+          name="confirmPassword"
         />
-      </div>
+      )}
       {children}
     </Form>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - components/chat/auth-form.tsx (v2 - eye toggle)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
