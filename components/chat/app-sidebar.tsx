@@ -144,7 +144,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         {user && (
           <div className="mx-2 flex items-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-3 py-2 group-data-[collapsible=icon]:hidden">
             <GemIcon className="size-4 text-amber-400" />
-            <span className={creditsData && credits < 25 ? "text-[13px] font-semibold text-red-400" : "text-[13px] font-semibold text-green-500"}>
+            <span className={creditsData && credits <= 20 ? "text-[13px] font-semibold text-red-400" : "text-[13px] font-semibold text-green-500"}>
               {creditsData ? credits.toLocaleString() : "..."}
             </span>
             <span className="text-xs text-sidebar-foreground/60">credits</span>
@@ -163,7 +163,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/app-sidebar.tsx (v2 - rebrand)
+// END OF FILE - components/chat/app-sidebar.tsx (v3 - threshold 20)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
