@@ -14,16 +14,14 @@ export function GemIcon(props: SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <path d="M7 4h10l4 6-9 10-9-10z" />
-      <path d="M3 10h18" />
-      <path d="M7 4l2.5 6" />
-      <path d="M17 4l-2.5 6" />
+      <path d="M6 5h12l3 5l-8.5 9.5a.7 .7 0 0 1 -1 0l-8.5 -9.5l3 -5" />
+      <path d="M10 12l-2 -2.2l.6 -1" />
     </svg>
   );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/gem-icon.tsx (v2 - wider cut)
+// END OF FILE - components/chat/gem-icon.tsx (v3 - exact match)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
