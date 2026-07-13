@@ -301,7 +301,13 @@
   isolation: isolate;
 }
 
+/* Rebrand: send button uses Evo mint without editing the
+   composer component file (targets its stable test id). */
+[data-testid="send-button"]:not(:disabled) {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
 /* ============================================================ */
-/* END OF FILE - app/effects.css (v1 - split from globals)      */
-/* If you can see this comment, the paste was not truncated.    */
+/* END OF FILE - app/effects.css (v2 - mint send button)        */
 /* ============================================================ */
