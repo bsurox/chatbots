@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   AlertDialog,
@@ -107,7 +108,7 @@ export function ChatShell() {
               votes={votes}
             />
 
-            <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
+            <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl flex-col gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
               {!isReadonly && (
                 <MultimodalInput
                   attachments={attachments}
@@ -145,6 +146,16 @@ export function ChatShell() {
                   stop={stop}
                 />
               )}
+              <p className="pb-0.5 text-center text-[11px] text-muted-foreground/60">
+                Evo can make mistakes. Verify important info.{" "}
+                <Link className="underline-offset-2 hover:underline" href="/privacy" target="_blank">
+                  Privacy Policy
+                </Link>
+                {" | "}
+                <Link className="underline-offset-2 hover:underline" href="/terms" target="_blank">
+                  Terms
+                </Link>
+              </p>
             </div>
           </div>
         </div>
@@ -203,3 +214,9 @@ export function ChatShell() {
     </>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - components/chat/shell.tsx (v2 - fine print)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
