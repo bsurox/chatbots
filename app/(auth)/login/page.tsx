@@ -61,6 +61,21 @@ export default function Page() {
           </Link>
         </p>
       </AuthForm>
+      <p className="pt-2 text-center text-[11px] text-muted-foreground/60">
+        <Link className="underline-offset-2 hover:underline" href="/privacy" target="_blank">
+          Privacy Policy
+        </Link>
+        <span className="px-1.5">|</span>
+        <Link className="underline-offset-2 hover:underline" href="/terms" target="_blank">
+          Terms of Service
+        </Link>
+      </p>
     </>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - app/(auth)/login/page.tsx (v2 - legal links)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
