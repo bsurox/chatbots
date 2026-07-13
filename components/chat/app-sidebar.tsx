@@ -6,7 +6,7 @@ import {
   MicIcon,
   PanelLeftIcon,
   PenSquareIcon,
-  SparklesIcon,
+  GemIcon,
   FileAudioIcon,
   VideoIcon,
 } from "lucide-react";
@@ -38,13 +38,13 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   const navButtonClass = (active: boolean) =>
     active
-      ? "h-8 rounded-lg border border-sidebar-border bg-sidebar-accent text-[13px] text-sidebar-foreground transition-colors duration-150"
-      : "h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
+      ? "h-8 rounded-lg bg-sidebar-accent text-[13px] text-sidebar-foreground transition-colors duration-150"
+      : "h-8 rounded-lg text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
 
   const creditsButtonClass = (active: boolean) =>
     active
-      ? "h-9 rounded-lg border border-amber-500/50 bg-gradient-to-r from-amber-500/30 via-amber-400/25 to-amber-500/30 text-[13px] font-semibold text-amber-600 shadow-md transition-all duration-150 dark:text-amber-400"
-      : "h-9 rounded-lg border border-transparent bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 text-[13px] font-semibold text-amber-600 shadow-sm transition-all duration-150 hover:border-amber-500/30 hover:from-amber-500/25 hover:via-amber-400/20 hover:to-amber-500/25 hover:shadow-md dark:text-amber-400";
+      ? "h-9 rounded-lg border border-amber-500/70 bg-amber-500/25 text-[13px] font-semibold text-amber-400 transition-all duration-150"
+      : "h-9 rounded-lg border border-amber-500/40 bg-amber-500/15 text-[13px] font-semibold text-amber-400 transition-all duration-150 hover:border-amber-500/60 hover:bg-amber-500/25";
 
   return (
     <Sidebar collapsible="icon">
@@ -66,6 +66,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <TooltipContent className="hidden md:block" side="right">Open sidebar</TooltipContent>
               </Tooltip>
             </div>
+            <span className="ml-2 flex-1 text-sm font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">AskEvo</span>
             <div className="group-data-[collapsible=icon]:hidden">
               <SidebarTrigger className="text-sidebar-foreground/60 transition-colors duration-150 hover:text-sidebar-foreground" />
             </div>
@@ -82,7 +83,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   onClick={() => { setOpenMobile(false); router.push("/"); }}
                   tooltip="New Chat"
                 >
-                  <PenSquareIcon className="size-4" />
+                  <PenSquareIcon className="size-4 text-primary" />
                   <span className="font-medium">New chat</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -121,7 +122,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <SidebarMenuItem className="mt-0.5 mb-1">
                 <SidebarMenuButton asChild className={creditsButtonClass(isActive("/credits"))} tooltip="Buy Credits">
                   <Link href="/credits" onClick={() => setOpenMobile(false)}>
-                    <SparklesIcon className="size-4" />
+                    <GemIcon className="size-4" />
                     <span>Buy Credits</span>
                   </Link>
                 </SidebarMenuButton>
@@ -139,10 +140,30 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarGroup>
         <SidebarHistory user={user} />
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
+      <SidebarFooter className="border-t border-sidebar-border pt-2 pb-2">
+        {user && (
+          <div className="mx-2 flex items-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-3 py-2 group-data-[collapsible=icon]:hidden">
+            <GemIcon className="size-4 text-amber-400" />
+            <span className={creditsData && credits < 25 ? "text-[13px] font-semibold text-red-400" : "text-[13px] font-semibold text-green-500"}>
+              {creditsData ? credits.toLocaleString() : "..."}
+            </span>
+            <span className="text-xs text-sidebar-foreground/60">credits</span>
+          </div>
+        )}
         {user && <SidebarUserNav user={user} />}
+        <div className="px-3 pb-1 text-[11px] text-sidebar-foreground/50 group-data-[collapsible=icon]:hidden">
+          <Link className="hover:text-sidebar-foreground/80 hover:underline" href="/privacy" target="_blank">Privacy Policy</Link>
+          <span className="px-1.5">|</span>
+          <Link className="hover:text-sidebar-foreground/80 hover:underline" href="/terms" target="_blank">Terms</Link>
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - components/chat/app-sidebar.tsx (v2 - rebrand)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
