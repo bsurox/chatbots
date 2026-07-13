@@ -51,6 +51,7 @@ export default function AdReelPage() {
       const url = "/register?promo=adreel&email=" + encodeURIComponent(cleanEmail);
       setClaimUrl(url);
       setState("done");
+      router.push(url);
     } catch {
       setErrMsg("Something went wrong. Please try again.");
       setState("error");
@@ -73,7 +74,7 @@ export default function AdReelPage() {
         {state === "done" ? (
           <div style={{ marginBottom: 60 }}>
             <p className="ar-ok">You are in! Your 250 free credits are attached to your email.</p>
-            <p className="ar-note">Click continue to create your account and claim them.</p>
+            <p className="ar-note">Taking you to create your account and claim them...</p>
             <button className="ar-btn" type="button" onClick={() => router.push(claimUrl)}>
               Continue
             </button>
@@ -201,7 +202,7 @@ export default function AdReelPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/adreel/page.tsx (v4 - manual continue)
+// END OF FILE - app/adreel/page.tsx (v5 - instant redirect)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
