@@ -85,7 +85,7 @@ export function ChatShell() {
             selectedVisibilityType={visibilityType}
           />
 
-          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background md:rounded-tl-[12px] md:border-t md:border-l md:border-border/40">
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background md:border-l md:border-border/40">
             <Messages
               addToolApprovalResponse={addToolApprovalResponse}
               chatId={chatId}
@@ -216,7 +216,7 @@ export function ChatShell() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/shell.tsx (v2 - fine print)
+// END OF FILE - components/chat/shell.tsx (v3 - black canvas)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
