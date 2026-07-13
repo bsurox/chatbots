@@ -3,7 +3,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import equal from "fast-deep-equal";
-import { ArrowUpIcon, SparklesIcon } from "lucide-react";
+import { ArrowUpIcon, GemIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -641,7 +641,7 @@ function PureModelSelectorCompact({
           title={selectedModel.description}
           variant="ghost"
         >
-          <SparklesIcon
+          <GemIcon
             className="size-5 shrink-0"
             style={{ color: "#f59e0b" }}
           />
@@ -680,7 +680,7 @@ function PureModelSelectorCompact({
                 }}
                 value={model.id}
               >
-                <SparklesIcon
+                <GemIcon
                   className="size-5 shrink-0"
                   style={{ color: "#f59e0b" }}
                 />
@@ -726,3 +726,9 @@ function PureStopButton({
 }
 
 const StopButton = memo(PureStopButton);
+
+// -----------------------------------------------------------
+// END OF FILE - components/chat/multimodal-input.tsx (v2 - gems)
+// Delivered via file upload, not paste. If you can see these
+// lines on GitHub after committing, the upload was complete.
+// -----------------------------------------------------------
