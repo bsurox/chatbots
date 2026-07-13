@@ -5,8 +5,8 @@ import {
   LifeBuoyIcon,
   MicIcon,
   PanelLeftIcon,
-  PenSquareIcon,
-  FileAudioIcon,
+  PlusIcon,
+  EarIcon,
   VideoIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -37,13 +37,13 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   const navButtonClass = (active: boolean) =>
     active
-      ? "h-8 rounded-lg bg-sidebar-accent text-[13px] text-sidebar-foreground transition-colors duration-150"
-      : "h-8 rounded-lg text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
+      ? "h-8 rounded-md bg-sidebar-accent text-[13px] text-sidebar-foreground transition-colors duration-150"
+      : "h-8 rounded-md text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
 
   const creditsButtonClass = (active: boolean) =>
     active
-      ? "h-9 rounded-lg border border-amber-500/70 bg-amber-500/25 text-[13px] font-semibold text-amber-400 transition-all duration-150"
-      : "h-9 rounded-lg border border-amber-500/40 bg-amber-500/15 text-[13px] font-semibold text-amber-400 transition-all duration-150 hover:border-amber-500/60 hover:bg-amber-500/25";
+      ? "h-9 rounded-md border border-amber-500/70 bg-amber-500/25 text-[13px] font-semibold text-amber-400 transition-all duration-150"
+      : "h-9 rounded-md border border-amber-500/40 bg-amber-500/15 text-[13px] font-semibold text-amber-400 transition-all duration-150 hover:border-amber-500/60 hover:bg-amber-500/25";
 
   return (
     <Sidebar collapsible="icon">
@@ -53,7 +53,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             <div className="group/logo relative flex items-center justify-center">
               <SidebarMenuButton asChild className="size-8 !px-0 items-center justify-center group-data-[collapsible=icon]:group-hover/logo:opacity-0" tooltip="AskEvo">
                 <Link href="/" onClick={() => setOpenMobile(false)}>
-                  <div className="flex size-7 items-center justify-center rounded-lg border border-primary bg-background text-[11px] font-semibold text-primary">AE</div>
+                  <div className="flex size-7 items-center justify-center border border-primary bg-background text-[11px] font-semibold text-primary" style={{ borderRadius: 8 }}>AE</div>
                 </Link>
               </SidebarMenuButton>
               <Tooltip>
@@ -82,7 +82,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   onClick={() => { setOpenMobile(false); router.push("/"); }}
                   tooltip="New chat"
                 >
-                  <PenSquareIcon className="size-4 text-primary" />
+                  <PlusIcon className="size-4 text-primary" />
                   <span className="font-medium">New chat</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -113,7 +113,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className={navButtonClass(isActive("/transcribe"))} tooltip="Speech to text">
                   <Link href="/transcribe" onClick={() => setOpenMobile(false)}>
-                    <FileAudioIcon className="size-4" />
+                    <EarIcon className="size-4" />
                     <span className="font-medium">Speech to text</span>
                   </Link>
                 </SidebarMenuButton>
@@ -139,7 +139,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarGroup>
         <SidebarHistory user={user} />
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border pt-2 pb-2">
+      <SidebarFooter className="pt-2 pb-2">
         {user && (
           <div className="mx-2 flex items-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-3 py-2 group-data-[collapsible=icon]:hidden">
             <GemIcon className="size-4 text-amber-400" />
@@ -162,7 +162,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/app-sidebar.tsx (v5 - mockup match)
+// END OF FILE - components/chat/app-sidebar.tsx (v6 - icon polish)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
