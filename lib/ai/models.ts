@@ -43,7 +43,7 @@ export async function getCapabilities(): Promise<Record<string, ModelCapabilitie
   return Object.fromEntries(
     chatModels.map((model) => [
       model.id,
-      { tools: true, vision: false, reasoning: false },
+      { tools: true, vision: true, reasoning: false },
     ])
   );
 }
@@ -65,6 +65,6 @@ chatModels.reduce(
 );
 
 // ============================================================
-// END OF FILE - lib/ai/models.ts (v2 - Evo 1)
+// END OF FILE - lib/ai/models.ts (v3 - vision on)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
