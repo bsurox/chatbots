@@ -25,7 +25,7 @@ function PureChatHeader({
     return null;
   }
   return (
-    <header className="sticky top-0 flex h-14 items-center gap-2 bg-sidebar px-3">
+    <header className="sticky top-0 flex h-14 items-center gap-2 bg-background px-3">
       <Button
         className="md:hidden"
         onClick={toggleSidebar}
@@ -61,7 +61,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/chat-header.tsx (v3 - credits pill)
+// END OF FILE - components/chat/chat-header.tsx (v4 - black canvas)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
