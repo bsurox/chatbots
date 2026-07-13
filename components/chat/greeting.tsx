@@ -1,5 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
+import { FileAudioIcon, GemIcon, ImageIcon, MicIcon, VideoIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
@@ -10,6 +12,9 @@ const STORAGE_KEY = "evo_greeting_played";
 const DISMISS_KEY = "evo_guest_welcome_dismissed";
 const BLOCK_KEY = "evo_greeting_blocked";
 const GUEST_REGEX = /^guest-\d+$/;
+
+const CHIP_CLASS =
+  "flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-[13px] text-foreground/80 transition-colors duration-150 hover:border-primary/50 hover:text-foreground";
 
 function buildGreeting(firstName: string | null): string {
   if (!firstName) {
@@ -39,6 +44,7 @@ export const Greeting = () => {
   const [blocked, setBlocked] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
+  const router = useRouter();
   const { data: session, status } = useSession();
   const { data: userData } = useSWR("/api/user/profile", fetcher);
 
@@ -114,6 +120,14 @@ export const Greeting = () => {
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
       `}</style>
       <motion.div
+        animate={{ opacity: 1 }}
+        className="mb-4 flex size-11 items-center justify-center rounded-2xl border border-primary/50 bg-primary/10"
+        initial={{ opacity: shouldAnimate ? 0 : 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <GemIcon className="size-5 text-amber-400" />
+      </motion.div>
+      <motion.div
         initial={{ opacity: shouldAnimate ? 0 : 1 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
@@ -150,7 +164,7 @@ export const Greeting = () => {
       </motion.div>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
+        className="text-center text-muted-foreground/80 text-sm"
         initial={{ opacity: 0, y: 10 }}
         transition={{
           delay: shouldAnimate ? 2.4 : 0,
@@ -158,20 +172,41 @@ export const Greeting = () => {
           ease: [0.22, 1, 0.36, 1],
         }}
       >
-        What can I help with?
+        What are we creating today?
       </motion.div>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="mt-3 text-center text-muted-foreground/80 text-sm"
+        className="mt-6 flex max-w-md flex-wrap items-center justify-center gap-2"
         initial={{ opacity: 0, y: 10 }}
         transition={{
-          delay: shouldAnimate ? 2.6 : 0,
+          delay: shouldAnimate ? 2.7 : 0,
           duration: 0.5,
           ease: [0.22, 1, 0.36, 1],
         }}
       >
-        Ask a question, write code, or explore ideas.
+        <button className={CHIP_CLASS} onClick={() => router.push("/image")} type="button">
+          <ImageIcon className="size-3.5 text-primary" />
+          Create an image
+        </button>
+        <button className={CHIP_CLASS} onClick={() => router.push("/video")} type="button">
+          <VideoIcon className="size-3.5 text-primary" />
+          Generate a video ad
+        </button>
+        <button className={CHIP_CLASS} onClick={() => router.push("/voice")} type="button">
+          <MicIcon className="size-3.5 text-primary" />
+          Clone a voice
+        </button>
+        <button className={CHIP_CLASS} onClick={() => router.push("/transcribe")} type="button">
+          <FileAudioIcon className="size-3.5 text-primary" />
+          Transcribe audio
+        </button>
       </motion.div>
     </div>
   );
 };
+
+// -----------------------------------------------------------
+// END OF FILE - components/chat/greeting.tsx (v2 - rebrand)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
