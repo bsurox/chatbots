@@ -23,9 +23,19 @@ function buildGreeting(firstName: string | null): string {
   }
 
   const hour = new Date().getHours();
-  const alreadyVisited = sessionStorage.getItem("evo_returning_user");
+  let isRecentReturn = false;
+  try {
+    const key = "evo_last_visit_" + firstName.toLowerCase();
+    const last = localStorage.getItem(key);
+    if (last && Date.now() - Number(last) < 12 * 60 * 60 * 1000) {
+      isRecentReturn = true;
+    }
+    localStorage.setItem(key, String(Date.now()));
+  } catch {
+    // ignore storage errors
+  }
 
-  if (alreadyVisited) {
+  if (isRecentReturn) {
     return `Back at it, ${firstName}.`;
   }
 
@@ -71,9 +81,6 @@ export const Greeting = () => {
     const fullName: string | null = userData?.name ?? null;
     const firstName = fullName ? fullName.trim().split(" ")[0] : null;
     setGreetingText(buildGreeting(firstName));
-    if (firstName) {
-      sessionStorage.setItem("evo_returning_user", "true");
-    }
   }, [userData]);
 
   useEffect(() => {
@@ -202,7 +209,7 @@ export const Greeting = () => {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/greeting.tsx (v4 - crisp font)
+// END OF FILE - components/chat/greeting.tsx (v5 - smarter returns)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
