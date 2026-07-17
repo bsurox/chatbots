@@ -23,13 +23,24 @@ export function fmt(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function download(url: string) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "askevo-video.mp4";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+export async function download(url: string) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("fetch failed");
+    }
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = "askevo-video.mp4";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    window.open(url, "_blank");
+  }
 }
 
 export type AspectRatio = "16:9" | "9:16";
@@ -42,6 +53,6 @@ export const ASPECT_RATIOS: { id: AspectRatio; label: string; hint: string }[] =
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 
 // ============================================================
-// END OF FILE - app/(chat)/video/video-config.ts (v2 - ratios)
+// END OF FILE - app/(chat)/video/video-config.ts (v3 - true download)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
