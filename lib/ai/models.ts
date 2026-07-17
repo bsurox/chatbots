@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL = "claude-sonnet-4-5";
+export const DEFAULT_CHAT_MODEL = "claude-haiku-4-5";
 export const titleModel = {
   id: "claude-haiku-4-5",
   name: "Claude Haiku",
@@ -18,26 +18,26 @@ export type ChatModel = {
   gatewayOrder?: string[];
   reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high";
 };
-// Only Evo 1 is active. Others kept commented out for later.
+// Evo 1 = fastest and cheapest (default). Evo 2 = smarter. Evo 3 = most powerful, 3 credits.
 export const chatModels: ChatModel[] = [
-  // {
-  //   id: "claude-haiku-4-5",
-  //   name: "Claude Haiku",
-  //   provider: "anthropic",
-  //   description: "Fast and efficient — great for quick tasks",
-  // },
   {
-    id: "claude-sonnet-4-5",
+    id: "claude-haiku-4-5",
     name: "Evo 1",
     provider: "anthropic",
-    description: "Our latest and fastest model available",
+    description: "Fast and snappy - great for everyday questions",
   },
-  // {
-  //   id: "claude-opus-4-5",
-  //   name: "Claude Opus",
-  //   provider: "anthropic",
-  //   description: "Most powerful — best for complex tasks",
-  // },
+  {
+    id: "claude-sonnet-4-5",
+    name: "Evo 2",
+    provider: "anthropic",
+    description: "Smarter and more thorough - great for detailed work",
+  },
+  {
+    id: "claude-opus-4-5",
+    name: "Evo 3",
+    provider: "anthropic",
+    description: "Our most powerful - deep reasoning for complex tasks",
+  },
 ];
 export async function getCapabilities(): Promise<Record<string, ModelCapabilities>> {
   return Object.fromEntries(
@@ -65,6 +65,6 @@ chatModels.reduce(
 );
 
 // ============================================================
-// END OF FILE - lib/ai/models.ts (v3 - vision on)
+// END OF FILE - lib/ai/models.ts (v5 - Evo 1/2/3)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
