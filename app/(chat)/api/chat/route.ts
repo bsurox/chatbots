@@ -14,8 +14,10 @@ import { auth, type UserType } from "@/app/(auth)/auth";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import {
   allowedModelIds,
+  CHAT_MESSAGE_COST,
   chatModels,
   DEFAULT_CHAT_MODEL,
+  FREE_ELIGIBLE_MODELS,
   getCapabilities,
 } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
@@ -81,8 +83,15 @@ export async function POST(request: Request) {
       return new ChatbotError("unauthorized:chat").toResponse();
     }
 
-    if (session.user.type === "guest") {
-      const hasCredits = await deductCredits(session.user.id, 1);
+    const chatModel = allowedModelIds.has(selectedChatModel)
+      ? selectedChatModel
+      : DEFAULT_CHAT_MODEL;
+
+    const messageCost = CHAT_MESSAGE_COST[chatModel] ?? 1;
+    const freeEligible = FREE_ELIGIBLE_MODELS.has(chatModel);
+
+    if (session.user.type === "guest" || !freeEligible) {
+      const hasCredits = await deductCredits(session.user.id, messageCost);
       if (!hasCredits) {
         return new ChatbotError("payment_required:credits").toResponse();
       }
@@ -92,10 +101,6 @@ export async function POST(request: Request) {
         return new ChatbotError("payment_required:credits").toResponse();
       }
     }
-
-    const chatModel = allowedModelIds.has(selectedChatModel)
-      ? selectedChatModel
-      : DEFAULT_CHAT_MODEL;
 
     await checkIpRateLimit(ipAddress(request));
 
@@ -385,6 +390,6 @@ export async function DELETE(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/chat/route.ts (v2 - free tier)
+// END OF FILE - app/(chat)/api/chat/route.ts (v3 - model pricing)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
