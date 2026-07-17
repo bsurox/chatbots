@@ -2,6 +2,7 @@
 
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
+import { ArrowDownIcon } from "lucide-react";
 import { memo } from "react";
 import { useDataStream } from "@/components/chat/data-stream-provider";
 import { useMessages } from "@/hooks/use-messages";
@@ -9,7 +10,6 @@ import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Conversation, ConversationContent } from "../ai-elements/conversation";
-import { ArrowDownIcon } from "../ai-elements/icons";
 import { Greeting } from "./greeting";
 import { PreviewMessage, ThinkingMessage } from "./message";
 
@@ -104,7 +104,7 @@ function PureMessages({
       {!isAtBottom && (
         <button
           aria-label="Scroll to bottom"
-          className="-translate-x-1/2 absolute bottom-4 left-1/2 z-10 rounded-full border border-border/50 bg-background/80 p-2 text-muted-foreground shadow-[var(--shadow-card)] backdrop-blur transition-colors hover:text-foreground"
+          className={cn("-translate-x-1/2 absolute bottom-4 left-1/2 z-10 rounded-full border border-border/50 bg-background/80 p-2 text-muted-foreground shadow-[var(--shadow-card)] backdrop-blur transition-colors hover:text-foreground")}
           onClick={() => scrollToBottom("smooth")}
           type="button"
         >
@@ -138,7 +138,7 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/messages.tsx (v2 - model prop)
+// END OF FILE - components/chat/messages.tsx (v2.1 - import fix)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
