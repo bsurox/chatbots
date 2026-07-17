@@ -22,16 +22,26 @@ export function GemIcon(props: SVGProps<SVGSVGElement>) {
 
 export function gemColorForModel(modelId: string | undefined): string {
   if (modelId === "claude-haiku-4-5") {
-    return "text-orange-400";
+    return "text-[#cd8c52]";
   }
   if (modelId === "claude-sonnet-4-5") {
-    return "text-slate-300";
+    return "text-slate-400";
   }
   return "text-amber-400";
 }
 
+export function gemHexForModel(modelId: string | undefined): string {
+  if (modelId === "claude-haiku-4-5") {
+    return "#cd8c52";
+  }
+  if (modelId === "claude-sonnet-4-5") {
+    return "#94a3b8";
+  }
+  return "#fbbf24";
+}
+
 // -----------------------------------------------------------
-// END OF FILE - components/chat/gem-icon.tsx (v4 - model colors)
+// END OF FILE - components/chat/gem-icon.tsx (v5 - true metals)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
