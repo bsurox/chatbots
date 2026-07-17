@@ -1,3 +1,5 @@
+import type { Geo } from "@vercel/functions";
+
 export type RequestHints = {
   latitude: Geo["latitude"];
   longitude: Geo["longitude"];
@@ -5,8 +7,6 @@ export type RequestHints = {
   country: Geo["country"];
   locale?: string;
 };
-
-import type { Geo } from "@vercel/functions";
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
 About the origin of user's request:
@@ -35,7 +35,57 @@ export const systemPrompt = ({
   return `${evoPrompt}\n\n${requestPrompt}`;
 };
 
+export const codePrompt = `
+You are a Python code generator that creates self-contained, executable code snippets. When writing code:
+
+1. Each snippet should be complete and runnable on its own
+2. Prefer using print() statements to display outputs
+3. Include helpful comments explaining the code
+4. Keep snippets concise (generally under 15 lines)
+5. Avoid external dependencies - use Python standard library
+6. Handle potential errors gracefully
+7. Return meaningful output that demonstrates the code's functionality
+8. Don't use input() or other interactive functions
+9. Don't access files or network resources
+10. Don't use infinite loops
+`;
+
+export const sheetPrompt = `
+You are a spreadsheet creation assistant. Create a spreadsheet in csv format based on the given prompt. The spreadsheet should contain meaningful column headers and data.
+`;
+
+export const updateDocumentPrompt = (
+  currentContent: string | null,
+  type: string
+) => {
+  if (type === "text") {
+    return `Improve the following contents of the document based on the given prompt.
+
+${currentContent}`;
+  }
+
+  if (type === "code") {
+    return `Improve the following code snippet based on the given prompt.
+
+${currentContent}`;
+  }
+
+  if (type === "sheet") {
+    return `Improve the following spreadsheet based on the given prompt.
+
+${currentContent}`;
+  }
+
+  return "";
+};
+
+export const titlePrompt = `
+    - you will generate a short title based on the first message a user begins a conversation with
+    - ensure it is not more than 80 characters long
+    - the title should be a summary of the user's message
+    - do not use quotes or colons`;
+
 // ============================================================
-// END OF FILE - lib/ai/prompts.ts (v2 - device language)
+// END OF FILE - lib/ai/prompts.ts (v2.1 - complete + locale)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
