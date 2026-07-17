@@ -20,8 +20,18 @@ export function GemIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function gemColorForModel(modelId: string | undefined): string {
+  if (modelId === "claude-haiku-4-5") {
+    return "text-orange-400";
+  }
+  if (modelId === "claude-sonnet-4-5") {
+    return "text-slate-300";
+  }
+  return "text-amber-400";
+}
+
 // -----------------------------------------------------------
-// END OF FILE - components/chat/gem-icon.tsx (v3 - exact match)
+// END OF FILE - components/chat/gem-icon.tsx (v4 - model colors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
