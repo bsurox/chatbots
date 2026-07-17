@@ -37,7 +37,7 @@ import {
   updateChatTitleById,
   updateMessage,
 } from "@/lib/db/queries";
-import { deductCredits } from "@/lib/db/credits";
+import { deductCredits, spendChatMessage } from "@/lib/db/credits";
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
 import { checkIpRateLimit } from "@/lib/ratelimit";
@@ -81,10 +81,16 @@ export async function POST(request: Request) {
       return new ChatbotError("unauthorized:chat").toResponse();
     }
 
-    const hasCredits = await deductCredits(session.user.id, 1);
-
-    if (!hasCredits) {
-      return new ChatbotError("payment_required:credits").toResponse();
+    if (session.user.type === "guest") {
+      const hasCredits = await deductCredits(session.user.id, 1);
+      if (!hasCredits) {
+        return new ChatbotError("payment_required:credits").toResponse();
+      }
+    } else {
+      const spend = await spendChatMessage(session.user.id);
+      if (spend.source === "blocked") {
+        return new ChatbotError("payment_required:credits").toResponse();
+      }
     }
 
     const chatModel = allowedModelIds.has(selectedChatModel)
@@ -363,7 +369,7 @@ export async function DELETE(request: Request) {
 
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return new ChatbotError("unauthorized:chat").toResponse();
   }
 
@@ -377,3 +383,8 @@ export async function DELETE(request: Request) {
 
   return Response.json(deletedChat, { status: 200 });
 }
+
+// ============================================================
+// END OF FILE - app/(chat)/api/chat/route.ts (v2 - free tier)
+// If you can see this comment, the paste was not truncated.
+// ============================================================
