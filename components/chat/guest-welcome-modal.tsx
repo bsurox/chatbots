@@ -4,49 +4,35 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-const GUEST_REGEX = /^guest-\d+$/;
 const DISMISS_KEY = "evo_guest_welcome_dismissed";
-const BLOCK_KEY = "evo_greeting_blocked";
+const GUEST_REGEX = /^guest-\d+$/;
 
 export function GuestWelcomeModal() {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (status !== "authenticated") {
+    if (status === "loading") {
       return;
     }
-
-    const email = session?.user?.email ?? "";
-    const isGuest = GUEST_REGEX.test(email);
-
-    // Real logged-in user: never show popup, clear any leftover block flag.
+    const email: string | null = session?.user?.email ?? null;
+    const isGuest = email ? GUEST_REGEX.test(email) : false;
     if (!isGuest) {
-      sessionStorage.removeItem(BLOCK_KEY);
-      setOpen(false);
       return;
     }
-
-    // Guest who already dismissed: make sure nothing is left blocking.
-    const alreadyDismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (alreadyDismissed) {
-      sessionStorage.removeItem(BLOCK_KEY);
-      setOpen(false);
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+    if (dismissed) {
       return;
     }
-
-    // Fresh guest: block the greeting and show the popup.
-    sessionStorage.setItem(BLOCK_KEY, "true");
     window.dispatchEvent(new Event("evo-greeting-block"));
     setOpen(true);
   }, [session, status]);
 
-  const handleContinueAsGuest = () => {
+  const dismiss = () => {
     sessionStorage.setItem(DISMISS_KEY, "true");
-    sessionStorage.removeItem(BLOCK_KEY);
-    window.dispatchEvent(new Event("evo-guest-welcome-dismissed"));
     setOpen(false);
+    window.dispatchEvent(new Event("evo-guest-welcome-dismissed"));
   };
 
   if (!open) {
@@ -54,124 +40,55 @@ export function GuestWelcomeModal() {
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.6)",
-        backdropFilter: "blur(4px)",
-        padding: 20,
-      }}
-    >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
-      `}</style>
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 400,
-          borderRadius: 16,
-          border: "1px solid rgba(255,255,255,0.1)",
-          background: "var(--background, #1a1a1a)",
-          padding: 32,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-          textAlign: "center",
-        }}
-      >
-        <div
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-xl">
+        <h1
           style={{
-            fontFamily: "'Dancing Script', cursive",
-            fontSize: "2rem",
-            fontWeight: 700,
+            fontSize: "1.5rem",
+            fontWeight: 600,
             color: "#4ade80",
-            textShadow: "0 0 12px rgba(74,222,128,0.4)",
+            letterSpacing: "-0.02em",
             marginBottom: 8,
           }}
         >
           Welcome to AskEvo
-        </div>
-
-        <p
-          style={{
-            fontSize: 14,
-            color: "var(--muted-foreground, #999)",
-            marginBottom: 28,
-            lineHeight: 1.5,
-          }}
-        >
+        </h1>
+        <p className="mb-6 text-muted-foreground text-sm">
           Sign in or create an account to get started.
         </p>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="flex flex-col gap-3">
           <button
-            type="button"
+            className="rounded-lg bg-foreground px-5 py-2.5 font-semibold text-background text-sm transition-opacity hover:opacity-85"
             onClick={() => router.push("/login")}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: 10,
-              border: "none",
-              background: "#fff",
-              color: "#000",
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: "pointer",
-            }}
+            type="button"
           >
             Log in
           </button>
-
           <button
-            type="button"
+            className="rounded-lg border border-border px-5 py-2.5 font-semibold text-foreground text-sm transition-colors hover:bg-muted"
             onClick={() => router.push("/register")}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.2)",
-              background: "transparent",
-              color: "inherit",
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: "pointer",
-            }}
+            type="button"
           >
             Sign up
           </button>
         </div>
-
-        <div style={{ marginTop: 24 }}>
-          <button
-            type="button"
-            onClick={handleContinueAsGuest}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "var(--muted-foreground, #999)",
-              fontSize: 13,
-              cursor: "pointer",
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-            }}
-          >
-            Continue as guest
-          </button>
-          <p
-            style={{
-              fontSize: 11,
-              color: "var(--muted-foreground, #777)",
-              marginTop: 8,
-              opacity: 0.7,
-            }}
-          >
-            AskEvo requires an account to use its service.
-          </p>
-        </div>
+        <button
+          className="mt-5 text-[13px] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+          onClick={dismiss}
+          type="button"
+        >
+          Continue as guest
+        </button>
+        <p className="mt-2 text-[11px] text-muted-foreground/60">
+          AskEvo requires an account to use its service.
+        </p>
       </div>
     </div>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - components/chat/guest-welcome-modal.tsx (v2)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
