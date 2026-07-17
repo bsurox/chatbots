@@ -39,7 +39,7 @@ function PureChatHeader({
     return null;
   }
   return (
-    <header className="sticky top-0 flex h-14 items-center gap-2 bg-background px-3">
+    <header className="sticky top-0 flex min-h-14 items-center gap-2 bg-background px-3 py-2">
       <Button
         className="md:hidden"
         onClick={toggleSidebar}
@@ -65,7 +65,7 @@ function PureChatHeader({
           </span>
         </Link>
         {freeRemaining > 0 && (
-          <span className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 font-medium text-[11px] text-primary">
+          <span className="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 font-medium text-[12px] text-blue-400">
             {freeRemaining} free {freeRemaining === 1 ? "message" : "messages"} today
           </span>
         )}
@@ -99,7 +99,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/chat-header.tsx (v5 - free badge)
+// END OF FILE - components/chat/chat-header.tsx (v6 - badge polish)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
