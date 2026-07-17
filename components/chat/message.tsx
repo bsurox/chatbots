@@ -15,7 +15,7 @@ import {
 import { useDataStream } from "./data-stream-provider";
 import { DocumentToolResult } from "./document";
 import { DocumentPreview } from "./document-preview";
-import { GemIcon } from "./gem-icon";
+import { GemIcon, gemColorForModel } from "./gem-icon";
 import { MessageActions } from "./message-actions";
 import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
@@ -31,6 +31,7 @@ const PurePreviewMessage = ({
   regenerate: _regenerate,
   isReadonly,
   requiresScrollPadding: _requiresScrollPadding,
+  selectedModelId,
   onEdit,
 }: {
   addToolApprovalResponse: UseChatHelpers<ChatMessage>["addToolApprovalResponse"];
@@ -42,6 +43,7 @@ const PurePreviewMessage = ({
   regenerate: UseChatHelpers<ChatMessage>["regenerate"];
   isReadonly: boolean;
   requiresScrollPadding: boolean;
+  selectedModelId?: string;
   onEdit?: (message: ChatMessage) => void;
 }) => {
   const attachmentsFromMessage = message.parts.filter(
@@ -345,8 +347,8 @@ const PurePreviewMessage = ({
       >
         {isAssistant && (
           <div className="flex h-[calc(13px*1.65)] shrink-0 items-center">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-muted/60 text-amber-600 ring-1 ring-border/50 dark:text-amber-400">
-              <GemIcon className="size-3.5" />
+            <div className="flex size-7 items-center justify-center rounded-lg bg-muted/60 ring-1 ring-border/50">
+              <GemIcon className={cn("size-3.5", gemColorForModel(selectedModelId))} />
             </div>
           </div>
         )}
@@ -362,7 +364,7 @@ const PurePreviewMessage = ({
 
 export const PreviewMessage = PurePreviewMessage;
 
-export const ThinkingMessage = () => {
+export const ThinkingMessage = ({ selectedModelId }: { selectedModelId?: string }) => {
   return (
     <div
       className="group/message w-full"
@@ -371,8 +373,8 @@ export const ThinkingMessage = () => {
     >
       <div className="flex items-start gap-3">
         <div className="flex h-[calc(13px*1.65)] shrink-0 items-center">
-          <div className="flex size-7 items-center justify-center rounded-lg bg-muted/60 text-amber-600 ring-1 ring-border/50 dark:text-amber-400">
-            <GemIcon className="size-3.5" />
+          <div className="flex size-7 items-center justify-center rounded-lg bg-muted/60 ring-1 ring-border/50">
+            <GemIcon className={cn("size-3.5", gemColorForModel(selectedModelId))} />
           </div>
         </div>
 
@@ -388,6 +390,8 @@ export const ThinkingMessage = () => {
 
 // -----------------------------------------------------------
 // END OF FILE - components/chat/message.tsx (v2 - gem avatar)
+// -----------------------------------------------------------
+// END OF FILE - components/chat/message.tsx (v3 - model colors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
