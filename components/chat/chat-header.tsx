@@ -68,8 +68,14 @@ function PureChatHeader({
         )}
       </div>
       {showPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4"
+          onClick={dismissPopup}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button aria-label="Close" className="absolute top-3 right-3 text-muted-foreground transition-colors hover:text-foreground" onClick={dismissPopup} type="button">
               <XIcon className="size-4" />
             </button>
@@ -96,7 +102,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/chat-header.tsx (v7 - always visible)
+// END OF FILE - components/chat/chat-header.tsx (v8 - tap to close)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
