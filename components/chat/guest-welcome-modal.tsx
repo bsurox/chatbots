@@ -19,6 +19,10 @@ export function GuestWelcomeModal() {
     const email: string | null = session?.user?.email ?? null;
     const isGuest = email ? GUEST_REGEX.test(email) : false;
     if (!isGuest) {
+      if (open) {
+        setOpen(false);
+        window.dispatchEvent(new Event("evo-guest-welcome-dismissed"));
+      }
       return;
     }
     const dismissed = sessionStorage.getItem(DISMISS_KEY);
@@ -27,7 +31,7 @@ export function GuestWelcomeModal() {
     }
     window.dispatchEvent(new Event("evo-greeting-block"));
     setOpen(true);
-  }, [session, status]);
+  }, [session, status, open]);
 
   const dismiss = () => {
     sessionStorage.setItem(DISMISS_KEY, "true");
@@ -88,7 +92,7 @@ export function GuestWelcomeModal() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/guest-welcome-modal.tsx (v2)
+// END OF FILE - components/chat/guest-welcome-modal.tsx (v3 - closes on login)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
