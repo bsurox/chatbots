@@ -17,7 +17,7 @@ function PureChatHeader({
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
 }) {
-  const { state, toggleSidebar, isMobile } = useSidebar();
+  const { toggleSidebar } = useSidebar();
   const { data: creditsData } = useSWR("/api/credits", fetcher, { refreshInterval: 30000 });
   const credits = creditsData?.credits ?? 0;
   const freeRemaining = creditsData?.freeRemaining ?? 0;
@@ -35,9 +35,6 @@ function PureChatHeader({
     setShowPopup(false);
     sessionStorage.setItem("evo_free_popup_shown", "true");
   };
-  if (state === "collapsed" && !isMobile) {
-    return null;
-  }
   return (
     <header className="sticky top-0 flex min-h-14 items-center gap-2 bg-background px-3 py-2">
       <Button
@@ -99,7 +96,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/chat-header.tsx (v6 - badge polish)
+// END OF FILE - components/chat/chat-header.tsx (v7 - always visible)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
