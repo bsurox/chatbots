@@ -18,13 +18,13 @@ export type ChatModel = {
   gatewayOrder?: string[];
   reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high";
 };
-// Evo 1 = fastest and cheapest (default). Evo 2 = smarter. Evo 3 = most powerful, 3 credits.
+// Evo 1 = fastest and cheapest (default). Evo 2 = smarter. Evo 3 = premium, 3 credits, never free.
 export const chatModels: ChatModel[] = [
   {
     id: "claude-haiku-4-5",
     name: "Evo 1",
     provider: "anthropic",
-    description: "Fast and snappy - great for everyday questions",
+    description: "Fastest model, great for everyday questions and problems",
   },
   {
     id: "claude-sonnet-4-5",
@@ -36,9 +36,15 @@ export const chatModels: ChatModel[] = [
     id: "claude-opus-4-5",
     name: "Evo 3",
     provider: "anthropic",
-    description: "Our most powerful - deep reasoning for complex tasks",
+    description: "Our premium model - for long conversations and your toughest problems",
   },
 ];
+export const CHAT_MESSAGE_COST: Record<string, number> = {
+  "claude-haiku-4-5": 1,
+  "claude-sonnet-4-5": 1,
+  "claude-opus-4-5": 3,
+};
+export const FREE_ELIGIBLE_MODELS = new Set(["claude-haiku-4-5", "claude-sonnet-4-5"]);
 export async function getCapabilities(): Promise<Record<string, ModelCapabilities>> {
   return Object.fromEntries(
     chatModels.map((model) => [
@@ -65,6 +71,6 @@ chatModels.reduce(
 );
 
 // ============================================================
-// END OF FILE - lib/ai/models.ts (v5 - Evo 1/2/3)
+// END OF FILE - lib/ai/models.ts (v7 - descriptions)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
