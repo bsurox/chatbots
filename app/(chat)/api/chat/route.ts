@@ -176,11 +176,15 @@ export async function POST(request: Request) {
 
     const { longitude, latitude, city, country } = geolocation(request);
 
+    const acceptLanguage = request.headers.get("accept-language");
+    const locale = acceptLanguage ? acceptLanguage.split(",")[0].trim() : undefined;
+
     const requestHints: RequestHints = {
       longitude,
       latitude,
       city,
       country,
+      locale,
     };
 
     if (message?.role === "user") {
@@ -390,6 +394,6 @@ export async function DELETE(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/chat/route.ts (v3 - model pricing)
+// END OF FILE - app/(chat)/api/chat/route.ts (v4 - device language)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
