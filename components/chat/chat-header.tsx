@@ -1,7 +1,7 @@
 "use client";
-import { PanelLeftIcon } from "lucide-react";
+import { PanelLeftIcon, XIcon } from "lucide-react";
 import Link from "next/link";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -20,7 +20,21 @@ function PureChatHeader({
   const { state, toggleSidebar, isMobile } = useSidebar();
   const { data: creditsData } = useSWR("/api/credits", fetcher, { refreshInterval: 30000 });
   const credits = creditsData?.credits ?? 0;
+  const freeRemaining = creditsData?.freeRemaining ?? 0;
   const isLow = credits <= 20;
+  const [showPopup, setShowPopup] = useState(false);
+  useEffect(() => {
+    if (!creditsData) {
+      return;
+    }
+    if (creditsData.freeRemaining === 0 && creditsData.credits < 1 && !sessionStorage.getItem("evo_free_popup_shown")) {
+      setShowPopup(true);
+    }
+  }, [creditsData]);
+  const dismissPopup = () => {
+    setShowPopup(false);
+    sessionStorage.setItem("evo_free_popup_shown", "true");
+  };
   if (state === "collapsed" && !isMobile) {
     return null;
   }
@@ -40,15 +54,39 @@ function PureChatHeader({
           selectedVisibilityType={selectedVisibilityType}
         />
       )}
-      <Link
-        className={isLow ? "ml-auto flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 font-semibold text-[12px]" : "ml-auto flex items-center gap-1.5 rounded-full border border-green-500/40 bg-green-500/10 px-3 py-1 font-semibold text-[12px] transition-colors hover:border-green-500/60"}
-        href="/credits"
-      >
-        <GemIcon className="size-3.5 text-amber-400" />
-        <span className={isLow ? "text-red-400" : "text-green-500"}>
-          {credits.toLocaleString()} credits
-        </span>
-      </Link>
+      <div className="ml-auto flex flex-col items-end gap-1">
+        <Link
+          className={isLow ? "flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 font-semibold text-[13px]" : "flex items-center gap-1.5 rounded-full border border-green-500/40 bg-green-500/10 px-3.5 py-1.5 font-semibold text-[13px] transition-colors hover:border-green-500/60"}
+          href="/credits"
+        >
+          <GemIcon className="size-4 text-amber-400" />
+          <span className={isLow ? "text-red-400" : "text-green-500"}>
+            {credits.toLocaleString()} credits
+          </span>
+        </Link>
+        {freeRemaining > 0 && (
+          <span className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 font-medium text-[11px] text-primary">
+            {freeRemaining} free {freeRemaining === 1 ? "message" : "messages"} today
+          </span>
+        )}
+      </div>
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-xl">
+            <button aria-label="Close" className="absolute top-3 right-3 text-muted-foreground transition-colors hover:text-foreground" onClick={dismissPopup} type="button">
+              <XIcon className="size-4" />
+            </button>
+            <GemIcon className="mx-auto mb-3 size-8 text-amber-400" />
+            <h2 className="mb-2 font-semibold text-foreground text-lg">Out of free messages</h2>
+            <p className="mb-4 text-muted-foreground text-sm">
+              You have used all your free messages for the day. Come back tomorrow or purchase credits to continue.
+            </p>
+            <Link className="inline-block rounded-lg bg-primary px-5 py-2 font-semibold text-primary-foreground text-sm transition-opacity hover:opacity-85" href="/credits" onClick={dismissPopup}>
+              Buy Credits
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -61,7 +99,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/chat-header.tsx (v4 - black canvas)
+// END OF FILE - components/chat/chat-header.tsx (v5 - free badge)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
