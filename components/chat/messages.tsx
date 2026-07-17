@@ -48,7 +48,6 @@ function PureMessages({
     scrollToBottom,
     hasSentMessage,
   } = useMessages({
-    chatId,
     status,
   });
 
@@ -138,7 +137,7 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/messages.tsx (v2.1 - import fix)
+// END OF FILE - components/chat/messages.tsx (v2.2 - hook fix)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
