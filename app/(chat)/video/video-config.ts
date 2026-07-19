@@ -11,8 +11,17 @@ export type Tier = {
 export const TIERS: Tier[] = [
   { id: "fast", name: "Fast", desc: "Quick drafts & ideas", credits5: 75, credits10: 150 },
   { id: "standard", name: "Standard", desc: "Balanced quality & speed", credits5: 110, credits10: 220 },
-  { id: "premium", name: "Premium", desc: "Top quality, up to 10s", credits5: 250, credits10: 500 },
-  { id: "cinematic", name: "Cinematic", desc: "Highest quality + sound (Veo 3.1)", fixedSeconds: 8, credits8: 375 },
+  { id: "premium", name: "Premium", desc: "Top quality, up to 10s, video only", credits5: 250, credits10: 500 },
+  { id: "cinematic", name: "Cinematic", desc: "Highest quality, sound optional (Veo 3.1)", fixedSeconds: 8, credits8: 375 },
+];
+
+// Single source of truth for the Cinematic duration/audio grid.
+// The route holds the same numbers; keep them in sync when prices change.
+export type CinematicSeconds = 4 | 6 | 8;
+export const CINEMATIC_PRICING: { seconds: CinematicSeconds; audio: number; silent: number }[] = [
+  { seconds: 4, audio: 190, silent: 140 },
+  { seconds: 6, audio: 285, silent: 210 },
+  { seconds: 8, audio: 375, silent: 275 },
 ];
 
 export const JOB_KEY = "askevo_video_job";
@@ -53,6 +62,6 @@ export const ASPECT_RATIOS: { id: AspectRatio; label: string; hint: string }[] =
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 
 // ============================================================
-// END OF FILE - app/(chat)/video/video-config.ts (v4 - veo 3.1 label)
+// END OF FILE - app/(chat)/video/video-config.ts (v5 - cinematic grid)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
