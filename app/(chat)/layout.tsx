@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import Script from "next/script";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
+import { AnnouncementBanner } from "@/components/chat/announcement-banner";
 import { AppSidebar } from "@/components/chat/app-sidebar";
 import { DataStreamProvider } from "@/components/chat/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -38,8 +39,14 @@ async function SidebarShell({ children }: { children: React.ReactNode }) {
               "!bg-card !text-foreground !border-border/50 !shadow-[var(--shadow-float)]",
           }}
         />
+        <AnnouncementBanner />
         {children}
       </SidebarInset>
     </SidebarProvider>
   );
 }
+
+// ============================================================
+// END OF FILE - app/(chat)/layout.tsx (v2 - announcement banner)
+// If you can see this comment, the paste was not truncated.
+// ============================================================
