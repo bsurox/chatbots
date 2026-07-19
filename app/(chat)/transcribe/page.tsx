@@ -11,6 +11,7 @@ export default function TranscribePage() {
   const [duration, setDuration] = useState(0);
   const [loading, setLoading] = useState(false);
   const [transcript, setTranscript] = useState<string | null>(null);
+  const [charged, setCharged] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
@@ -19,7 +20,7 @@ export default function TranscribePage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
 
-  const creditCost = Math.max(5, Math.ceil(duration) * 5);
+  const creditCost = Math.max(3, Math.ceil(duration / 60) * 3);
 
   async function startRecording() {
     try {
@@ -45,6 +46,7 @@ export default function TranscribePage() {
       setAudioBlob(null);
       setAudioUrl(null);
       setTranscript(null);
+      setCharged(null);
       setDuration(0);
 
       timerRef.current = setInterval(() => {
@@ -66,25 +68,46 @@ export default function TranscribePage() {
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const url = URL.createObjectURL(file);
     setUploadedFile(file);
-    setAudioUrl(URL.createObjectURL(file));
+    setAudioUrl(url);
     setAudioBlob(null);
     setTranscript(null);
+    setCharged(null);
     setDuration(0);
+    // Read the real length of the uploaded file so the cost preview is honest.
+    const probe = new Audio();
+    probe.preload = "metadata";
+    probe.onloadedmetadata = () => {
+      if (Number.isFinite(probe.duration) && probe.duration > 0) {
+        setDuration(Math.ceil(probe.duration));
+      }
+    };
+    probe.src = url;
   }
 
   async function handleTranscribe() {
     const source = audioBlob ?? uploadedFile;
     if (!source) return;
 
+    if (source.size > 25 * 1024 * 1024) {
+      setError("That file is over the 25MB limit for transcription. Please use a smaller file.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setTranscript(null);
+    setCharged(null);
 
     try {
       const formData = new FormData();
-      formData.append("audio", source, "audio.webm");
-      formData.append("duration", String(Math.max(1, Math.ceil(duration))));
+      if (audioBlob) {
+        formData.append("audio", audioBlob, "audio.webm");
+      } else {
+        formData.append("audio", source);
+      }
+      formData.append("duration", String(Math.ceil(duration)));
 
       const res = await fetch("/api/transcribe", {
         method: "POST",
@@ -103,6 +126,9 @@ export default function TranscribePage() {
       }
 
       setTranscript(data.text);
+      if (typeof data.creditsCharged === "number") {
+        setCharged(data.creditsCharged);
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -207,7 +233,7 @@ export default function TranscribePage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ padding: 20, borderRadius: 12, border: "1px solid #333", background: "rgba(34,197,94,0.05)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <p style={{ fontSize: 13, color: "#888" }}>Transcript:</p>
+                <p style={{ fontSize: 13, color: "#888" }}>{charged !== null ? `Transcript (${charged} credits):` : "Transcript:"}</p>
                 <button
                   type="button"
                   onClick={copyToClipboard}
@@ -229,7 +255,7 @@ export default function TranscribePage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(chat)/transcribe/page.tsx (v2 - no model note)
+// END OF FILE - app/(chat)/transcribe/page.tsx (v3 - per-minute billing)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
