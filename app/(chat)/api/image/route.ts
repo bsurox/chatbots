@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     // Exact-fit: center-crop and resize the generated image to the
     // requested pixels. If the resize step itself fails, return the raw
     // generated image rather than losing a paid generation.
-    let output = generated;
+    let output: Buffer = generated;
     try {
       output = await sharp(generated)
         .resize(width, height, { fit: "cover", position: "centre" })
@@ -137,6 +137,6 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/image/route.ts (v2 - real sizes + refunds)
+// END OF FILE - app/(chat)/api/image/route.ts (v2.1 - type fix)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
