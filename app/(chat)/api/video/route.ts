@@ -26,7 +26,7 @@ const VIDEO_CONFIG: Record<TierId, TierConfig> = {
     buildInput: (prompt, seconds, ratio) => ({ prompt, duration: String(seconds), aspect_ratio: ratio, generate_audio: true }),
   },
   cinematic: {
-    modelId: "fal-ai/veo3",
+    modelId: "fal-ai/veo3.1",
     credits: { 8: 375 },
     buildInput: (prompt, seconds, ratio) => ({ prompt, duration: `${seconds}s`, aspect_ratio: ratio, resolution: "720p", generate_audio: true }),
   },
@@ -87,11 +87,11 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("Video start error:", err);
     await addCredits(session.user.id, creditCost);
-    return Response.json({ error: "Something went wrong starting the video." }, { status: 500 });
+    return Response.json({ error: "Something went wrong starting the video." }, { status: 502 });
   }
 }
 
 // ============================================================
-// END OF FILE - video generation route.ts (v2 - ratios + price fix)
+// END OF FILE - video generation route.ts (v3 - veo 3.1)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
