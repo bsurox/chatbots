@@ -32,81 +32,77 @@ export default function VoicePage() {
   const creditLabel = creditCost === 1 ? "credit" : "credits";
 
   useEffect(() => {
-    let cancelled = false;
-    async function loadVoices() {
+    async function fetchVoices() {
       try {
-        const res = await fetch("/api/voice/voices");
-        if (!res.ok) {
-          throw new Error("failed");
-        }
+        const res = await fetch("/api/voices");
         const data = await res.json();
-        if (!cancelled) {
-          setVoices(data.voices ?? []);
-          if (data.voices?.length > 0) {
-            setSelectedVoice(data.voices[0].id);
-          }
+        if (data.voices) {
+          setVoices(data.voices);
+          setSelectedVoice(data.voices[0]?.id ?? "");
         }
       } catch {
-        if (!cancelled) {
-          setError("Could not load voices. Please refresh the page.");
-        }
+        setError("Failed to load voices.");
       } finally {
-        if (!cancelled) {
-          setLoadingVoices(false);
-        }
+        setLoadingVoices(false);
       }
     }
-    loadVoices();
-    return () => {
-      cancelled = true;
-    };
+    fetchVoices();
   }, []);
 
-  const filteredVoices = voices.filter((v) => {
-    const q = search.toLowerCase();
-    return (
-      v.name.toLowerCase().includes(q) ||
-      v.accent.toLowerCase().includes(q) ||
-      v.gender.toLowerCase().includes(q) ||
-      v.category.toLowerCase().includes(q)
-    );
-  });
+  const filteredVoices = voices.filter(
+    (v) =>
+      v.name.toLowerCase().includes(search.toLowerCase()) ||
+      v.accent.toLowerCase().includes(search.toLowerCase()) ||
+      v.gender.toLowerCase().includes(search.toLowerCase()) ||
+      v.description.toLowerCase().includes(search.toLowerCase())
+  );
 
-  function playPreview(voice: Voice) {
-    if (previewAudioRef.current) {
-      previewAudioRef.current.pause();
-      previewAudioRef.current = null;
-    }
+  function playPreview(voice: Voice, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!voice.previewUrl) return;
+
     if (playingPreview === voice.id) {
+      previewAudioRef.current?.pause();
       setPlayingPreview(null);
       return;
     }
-    const el = new Audio(voice.previewUrl);
-    previewAudioRef.current = el;
+
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+    }
+
+    const audio = new Audio(voice.previewUrl);
+    previewAudioRef.current = audio;
+    audio.play();
     setPlayingPreview(voice.id);
-    el.play().catch(() => setPlayingPreview(null));
-    el.onended = () => setPlayingPreview(null);
+    audio.onended = () => setPlayingPreview(null);
   }
 
   async function handleGenerate() {
-    if (!text.trim() || !selectedVoice || loading) {
-      return;
-    }
+    if (!text.trim() || !selectedVoice) return;
     setLoading(true);
     setError(null);
     setAudio(null);
+
     try {
       const res = await fetch("/api/voice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.trim(), voiceId: selectedVoice }),
+        body: JSON.stringify({ text, voiceId: selectedVoice }),
       });
+
       const data = await res.json();
+
       if (!res.ok) {
-        setError(data.error || "Could not generate audio.");
+        if (res.status === 402) {
+          setError("Not enough credits. Please buy more to continue.");
+        } else {
+          setError(data.error || "Something went wrong. Please try again.");
+        }
         return;
       }
-      setAudio(data.audioUrl);
+
+      setAudio(data.audio);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -114,121 +110,149 @@ export default function VoicePage() {
     }
   }
 
+  const selectedVoiceDetails = voices.find((v) => v.id === selectedVoice);
+
   return (
     <>
       <ToolHeader />
-      <div className="vc-wrap" style={{ maxWidth: 720, margin: "0 auto", padding: "32px 16px" }}>
-        <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 4 }}>Voice Generator</h1>
-        <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginBottom: 24 }}>
-          Type your text, pick a voice, and Evo speaks it.
-        </p>
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Voice Generator</h1>
+        <p style={{ color: "#888" }}>Ask Evo to bring your words to life with realistic AI voices.</p>
+      </div>
 
-        <label htmlFor="vc-text" style={{ display: "block", fontSize: 13, color: "var(--muted-foreground)", marginBottom: 6 }}>
-          Text
-        </label>
-        <textarea
-          id="vc-text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          disabled={loading}
-          rows={4}
-          placeholder="Type what you want Evo to say..."
-          style={{ width: "100%", borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", padding: 12, fontSize: 15, marginBottom: 16 }}
-        />
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
-        <label htmlFor="vc-search" style={{ display: "block", fontSize: 13, color: "var(--muted-foreground)", marginBottom: 6 }}>
-          Voices
-        </label>
-        <input
-          id="vc-search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search voices by name, accent, or style..."
-          style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)", padding: "8px 12px", fontSize: 14, marginBottom: 12 }}
-        />
-
-        {loadingVoices ? (
-          <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Loading voices...</p>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10, maxHeight: 320, overflowY: "auto", marginBottom: 20 }}>
-            {filteredVoices.map((voice) => (
-              <div
-                key={voice.id}
-                style={{
-                  borderRadius: 12,
-                  border: voice.id === selectedVoice ? "1px solid var(--primary)" : "1px solid var(--border)",
-                  background: voice.id === selectedVoice ? "color-mix(in oklab, var(--primary) 10%, transparent)" : "var(--card)",
-                  padding: 12,
-                  cursor: "pointer",
-                }}
-                onClick={() => setSelectedVoice(voice.id)}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontWeight: 600, fontSize: 14 }}>{voice.name}</span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playPreview(voice);
-                    }}
-                    style={{ fontSize: 12, color: "var(--primary)", background: "none", border: "none", cursor: "pointer" }}
-                  >
-                    {playingPreview === voice.id ? "Stop" : "Preview"}
-                  </button>
-                </div>
-                <p style={{ fontSize: 12, color: "var(--muted-foreground)" }}>
-                  {voice.gender} - {voice.accent} - {voice.age}
-                </p>
-              </div>
-            ))}
+        <div>
+          <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Your text</label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Type or paste the text you want converted to speech..."
+            rows={5}
+            style={{ width: "100%", padding: "12px", borderRadius: 8, border: "1px solid #333", background: "transparent", color: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
+          />
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+            <span style={{ fontSize: 12, color: "#888" }}>{text.length} characters</span>
+            <span style={{ fontSize: 12, color: "#22c55e" }}>{creditCost} {creditLabel}</span>
           </div>
-        )}
+        </div>
+
+        <div>
+          <label style={{ display: "block", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Select a voice</label>
+          <input
+            type="text"
+            placeholder="Search voices by name, gender, accent..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #333", background: "transparent", color: "inherit", fontSize: 13, marginBottom: 12, boxSizing: "border-box" }}
+          />
+
+          {loadingVoices ? (
+            <div style={{ color: "#888", fontSize: 14 }}>Loading voices...</div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10, maxHeight: 300, overflowY: "auto", paddingRight: 4 }}>
+              {filteredVoices.map((voice) => (
+                <button
+                  key={voice.id}
+                  type="button"
+                  onClick={() => setSelectedVoice(voice.id)}
+                  style={{
+                    padding: "12px",
+                    borderRadius: 8,
+                    border: selectedVoice === voice.id ? "2px solid #22c55e" : "1px solid #333",
+                    background: selectedVoice === voice.id ? "rgba(34,197,94,0.1)" : "transparent",
+                    color: "inherit",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    position: "relative",
+                  }}
+                >
+                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2, paddingRight: 24 }}>{voice.name}</div>
+                  {(voice.gender || voice.accent) && (
+                    <div style={{ fontSize: 11, color: "#888" }}>
+                      {[voice.gender, voice.accent, voice.age].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
+                  {voice.description && (
+                    <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>{voice.description}</div>
+                  )}
+                  {voice.previewUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => playPreview(voice, e)}
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        width: 22,
+                        height: 22,
+                        borderRadius: "50%",
+                        border: "1px solid #444",
+                        background: playingPreview === voice.id ? "#22c55e" : "transparent",
+                        color: playingPreview === voice.id ? "#000" : "#888",
+                        fontSize: 10,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {playingPreview === voice.id ? "■" : "▶"}
+                    </button>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {selectedVoiceDetails && (
+            <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 8, background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.2)", fontSize: 13, color: "#888" }}>
+              Selected: <span style={{ color: "#22c55e", fontWeight: 600 }}>{selectedVoiceDetails.name}</span>
+              {selectedVoiceDetails.gender && ` · ${selectedVoiceDetails.gender}`}
+              {selectedVoiceDetails.accent && ` · ${selectedVoiceDetails.accent}`}
+            </div>
+          )}
+        </div>
 
         <button
           type="button"
           onClick={handleGenerate}
           disabled={loading || !text.trim() || !selectedVoice}
-          style={{
-            width: "100%",
-            borderRadius: 12,
-            background: "var(--primary)",
-            color: "var(--primary-foreground)",
-            padding: "12px 16px",
-            fontSize: 15,
-            fontWeight: 600,
-            border: "none",
-            cursor: loading || !text.trim() ? "not-allowed" : "pointer",
-            opacity: loading || !text.trim() ? 0.6 : 1,
-          }}
+          style={{ padding: "14px", borderRadius: 8, border: "none", background: loading || !text.trim() || !selectedVoice ? "#333" : "linear-gradient(135deg, #22c55e, #16a34a)", color: loading || !text.trim() || !selectedVoice ? "#666" : "#fff", fontWeight: 700, fontSize: 16, cursor: loading || !text.trim() || !selectedVoice ? "not-allowed" : "pointer" }}
         >
-          {loading ? "Generating..." : `Generate Voice - ${creditCost} ${creditLabel}`}
+          {loading ? "Generating audio..." : `Generate Voice — ${creditCost} ${creditLabel}`}
         </button>
 
         {error && (
-          <p style={{ marginTop: 12, fontSize: 14, color: "#f87171" }}>{error}</p>
+          <div style={{ padding: 16, borderRadius: 8, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444" }}>
+            {error}
+            {error.includes("credits") && (
+              <Link href="/credits" style={{ marginLeft: 8, textDecoration: "underline", color: "#22c55e" }}>Buy more credits</Link>
+            )}
+          </div>
         )}
 
         {audio && (
-          <div style={{ marginTop: 24 }}>
-            <audio controls ref={audioRef} src={audio} style={{ width: "100%" }} />
-            <div style={{ marginTop: 8 }}>
-              <Link
-                href={audio}
-                target="_blank"
-                style={{ fontSize: 13, color: "var(--primary)", textDecoration: "underline" }}
-              >
-                Open audio in new tab
-              </Link>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ padding: 16, borderRadius: 12, border: "1px solid #333", background: "rgba(34,197,94,0.05)" }}>
+              <p style={{ fontSize: 13, color: "#888", marginBottom: 12 }}>Your generated audio:</p>
+              <audio ref={audioRef} controls src={audio} style={{ width: "100%" }} />
             </div>
+            <a href={audio} download="askevo-voice.mp3" style={{ display: "inline-block", padding: "10px 24px", borderRadius: 8, background: "#22c55e", color: "#fff", textDecoration: "none", fontWeight: 600, textAlign: "center" }}>Download Audio</a>
           </div>
         )}
+
+      </div>
+
       </div>
     </>
   );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(chat)/voice/page.tsx (v2 - no model note)
+// END OF FILE - app/(chat)/voice/page.tsx (v2.1 - true original)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
