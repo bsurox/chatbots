@@ -28,8 +28,8 @@ const VIDEO_CONFIG: Record<TierId, TierConfig> = {
   },
   cinematic: {
     modelId: "fal-ai/veo3.1",
-    credits: { 8: 375 },
-    creditsNoAudio: { 8: 275 },
+    credits: { 4: 190, 6: 285, 8: 375 },
+    creditsNoAudio: { 4: 140, 6: 210, 8: 275 },
     buildInput: (prompt, seconds, ratio, audio) => ({ prompt, duration: `${seconds}s`, aspect_ratio: ratio, resolution: "720p", generate_audio: audio }),
   },
 };
@@ -95,6 +95,6 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - video generation route.ts (v4 - audio toggle)
+// END OF FILE - video generation route.ts (v5 - cinematic durations)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
