@@ -87,7 +87,7 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("Video start error:", err);
     await addCredits(session.user.id, creditCost);
-    return Response.json({ error: "Something went wrong starting the video." }, { status: 502 });
+    return Response.json({ error: "Something went wrong starting the video.", }, { status: 500 });
   }
 }
 
