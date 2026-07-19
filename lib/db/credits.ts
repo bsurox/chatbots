@@ -74,8 +74,9 @@ async function readCreditRow(userId: string): Promise<RawCreditRow> {
 // Spends one chat message: free allowance first, then paid credits.
 // The 24h free window runs from the most recent free message sent.
 // Both spends are single conditional statements, so concurrent messages
-// serialize correctly instead of double-counting.
-export async function spendChatMessage(userId: string): Promise<ChatSpendResult> {
+// serialize correctly instead of double-counting. paidCost is the price
+// charged when the free allowance is exhausted (thread-length band cost).
+export async function spendChatMessage(userId: string, paidCost = 1): Promise<ChatSpendResult> {
   await ensureCreditRow(userId);
   const freeRes = await db.execute(sql`UPDATE "UserCredits" SET free_messages_used = CASE WHEN free_last_used IS NULL OR free_last_used <= NOW() - INTERVAL '24 hours' THEN 1 ELSE free_messages_used + 1 END, free_last_used = NOW(), "updatedAt" = NOW() WHERE "userId" = ${userId} AND (free_last_used IS NULL OR free_last_used <= NOW() - INTERVAL '24 hours' OR free_messages_used < ${FREE_DAILY_MESSAGES}) RETURNING free_messages_used, "credits"`);
   const freeRows = normalizeRows(freeRes);
@@ -83,7 +84,7 @@ export async function spendChatMessage(userId: string): Promise<ChatSpendResult>
     const used = Number(freeRows[0].free_messages_used);
     return { source: "free", freeRemaining: Math.max(0, FREE_DAILY_MESSAGES - used), credits: Number(freeRows[0].credits) };
   }
-  const paidRes = await db.execute(sql`UPDATE "UserCredits" SET "credits" = "credits" - 1, "updatedAt" = NOW() WHERE "userId" = ${userId} AND "credits" >= 1 RETURNING "credits"`);
+  const paidRes = await db.execute(sql`UPDATE "UserCredits" SET "credits" = "credits" - ${paidCost}, "updatedAt" = NOW() WHERE "userId" = ${userId} AND "credits" >= ${paidCost} RETURNING "credits"`);
   const paidRows = normalizeRows(paidRes);
   if (paidRows.length > 0) {
     return { source: "credit", freeRemaining: 0, credits: Number(paidRows[0].credits) };
@@ -103,6 +104,6 @@ export async function getFreeStatus(userId: string): Promise<FreeStatus> {
 }
 
 // ============================================================
-// END OF FILE - lib/db/credits.ts (v3 - atomic spends)
+// END OF FILE - lib/db/credits.ts (v3.1 - band-aware paid fallback)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
