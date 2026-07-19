@@ -12,7 +12,7 @@ export const TIERS: Tier[] = [
   { id: "fast", name: "Fast", desc: "Quick drafts & ideas", credits5: 75, credits10: 150 },
   { id: "standard", name: "Standard", desc: "Balanced quality & speed", credits5: 110, credits10: 220 },
   { id: "premium", name: "Premium", desc: "Top quality, up to 10s", credits5: 250, credits10: 500 },
-  { id: "cinematic", name: "Cinematic", desc: "Highest quality + sound (Veo 3)", fixedSeconds: 8, credits8: 375 },
+  { id: "cinematic", name: "Cinematic", desc: "Highest quality + sound (Veo 3.1)", fixedSeconds: 8, credits8: 375 },
 ];
 
 export const JOB_KEY = "askevo_video_job";
@@ -53,6 +53,6 @@ export const ASPECT_RATIOS: { id: AspectRatio; label: string; hint: string }[] =
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 
 // ============================================================
-// END OF FILE - app/(chat)/video/video-config.ts (v3 - true download)
+// END OF FILE - app/(chat)/video/video-config.ts (v4 - veo 3.1 label)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
