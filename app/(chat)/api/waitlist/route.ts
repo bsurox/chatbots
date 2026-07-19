@@ -6,6 +6,10 @@ const ADREEL_SOURCE = "adreel-landing";
 const ADREEL_PROMO_CREDITS = 250;
 const MAX_PROMO_PER_IP_PER_DAY = 2;
 
+// AdReel promo kill switch. The promo run is over: no new credit grants.
+// To bring the promo back later, change this to true and commit.
+const ADREEL_PROMO_ACTIVE = false;
+
 const DISPOSABLE_DOMAINS = new Set([
   "mailinator.com",
   "guerrillamail.com",
@@ -98,7 +102,9 @@ export async function POST(request: Request) {
     let reason = "not an AdReel signup";
     if (cleanSource === ADREEL_SOURCE) {
       const domain = cleanEmail.split("@")[1] || "";
-      if (process.env.ADREEL_PROMO_DISABLED === "true") {
+      if (!ADREEL_PROMO_ACTIVE) {
+        reason = "promo run ended";
+      } else if (process.env.ADREEL_PROMO_DISABLED === "true") {
         reason = "promo disabled by kill switch";
       } else if (DISPOSABLE_DOMAINS.has(domain)) {
         reason = "disposable email domain";
@@ -121,7 +127,7 @@ export async function POST(request: Request) {
       ip,
     });
 
-    if (cleanSource === ADREEL_SOURCE) {
+    if (cleanSource === ADREEL_SOURCE && ADREEL_PROMO_ACTIVE) {
       await notifySupport(cleanEmail, cleanBusiness, promoCredits, reason, ip);
     }
 
@@ -133,6 +139,6 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/waitlist/route.ts (v3 - 250 credits)
+// END OF FILE - app/(chat)/api/waitlist/route.ts (v4 - promo off)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
