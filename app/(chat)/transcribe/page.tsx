@@ -223,10 +223,13 @@ export default function TranscribePage() {
 
       </div>
 
-      <div style={{ marginTop: 48, textAlign: "center", fontSize: 11, color: "#444" }}>
-        Transcription powered by Whisper via OpenAI
-      </div>
       </div>
     </>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - app/(chat)/transcribe/page.tsx (v2 - no model note)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
