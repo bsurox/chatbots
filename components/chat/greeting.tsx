@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { FileAudioIcon, ImageIcon, MicIcon, VideoIcon } from "lucide-react";
+import { EarIcon, ImageIcon, MicIcon, VideoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -197,10 +197,10 @@ export const Greeting = () => {
         </button>
         <button className={CHIP_CLASS} onClick={() => router.push("/voice")} type="button">
           <MicIcon className="size-3.5 text-primary" />
-          Clone a voice
+          Generate a voice
         </button>
         <button className={CHIP_CLASS} onClick={() => router.push("/transcribe")} type="button">
-          <FileAudioIcon className="size-3.5 text-primary" />
+          <EarIcon className="size-3.5 text-primary" />
           Transcribe audio
         </button>
       </motion.div>
@@ -209,7 +209,7 @@ export const Greeting = () => {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/greeting.tsx (v5 - smarter returns)
+// END OF FILE - components/chat/greeting.tsx (v6 - matching icons)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
