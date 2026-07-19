@@ -45,6 +45,12 @@ export default function ImagePage() {
 
   async function handleGenerate() {
     if (!prompt.trim()) return;
+    // Clamp custom sizes to the range the generator supports and sync the
+    // fields so the request and the result always agree with the inputs.
+    const w = Math.min(2048, Math.max(512, Math.round(Number(width) || 1024)));
+    const h = Math.min(2048, Math.max(512, Math.round(Number(height) || 1024)));
+    setWidth(w);
+    setHeight(h);
     setLoading(true);
     setError(null);
     setImage(null);
@@ -53,7 +59,7 @@ export default function ImagePage() {
       const res = await fetch("/api/image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, width, height, quality }),
+        body: JSON.stringify({ prompt, width: w, height: h, quality }),
       });
 
       const data = await res.json();
@@ -81,7 +87,7 @@ export default function ImagePage() {
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "40px 20px", paddingBottom: 60 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Image Generator</h1>
-        <p style={{ color: "#888" }}>Ask Evo to generate stunning images of any size using text descriptions.</p>
+        <p style={{ color: "#888" }}>Ask Evo to generate stunning images at any size from 512 to 2048 pixels.</p>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -193,7 +199,7 @@ export default function ImagePage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(chat)/image/page.tsx (v2.1 - true original)
+// END OF FILE - app/(chat)/image/page.tsx (v3 - real sizes)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
