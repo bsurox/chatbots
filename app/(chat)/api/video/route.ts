@@ -7,7 +7,8 @@ type AspectRatio = "16:9" | "9:16";
 type TierConfig = {
   modelId: string;
   credits: Record<number, number>;
-  buildInput: (prompt: string, seconds: number, ratio: AspectRatio) => Record<string, unknown>;
+  creditsNoAudio?: Record<number, number>;
+  buildInput: (prompt: string, seconds: number, ratio: AspectRatio, audio: boolean) => Record<string, unknown>;
 };
 const VIDEO_CONFIG: Record<TierId, TierConfig> = {
   fast: {
@@ -23,12 +24,13 @@ const VIDEO_CONFIG: Record<TierId, TierConfig> = {
   premium: {
     modelId: "fal-ai/kling-video/v2.6/pro/text-to-video",
     credits: { 5: 250, 10: 500 },
-    buildInput: (prompt, seconds, ratio) => ({ prompt, duration: String(seconds), aspect_ratio: ratio, generate_audio: true }),
+    buildInput: (prompt, seconds, ratio) => ({ prompt, duration: String(seconds), aspect_ratio: ratio, generate_audio: false }),
   },
   cinematic: {
     modelId: "fal-ai/veo3.1",
     credits: { 8: 375 },
-    buildInput: (prompt, seconds, ratio) => ({ prompt, duration: `${seconds}s`, aspect_ratio: ratio, resolution: "720p", generate_audio: true }),
+    creditsNoAudio: { 8: 275 },
+    buildInput: (prompt, seconds, ratio, audio) => ({ prompt, duration: `${seconds}s`, aspect_ratio: ratio, resolution: "720p", generate_audio: audio }),
   },
 };
 export async function POST(request: Request) {
@@ -36,8 +38,9 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { prompt, tier, length, aspectRatio } = await request.json();
+  const { prompt, tier, length, aspectRatio, audio } = await request.json();
   const ratio: AspectRatio = aspectRatio === "9:16" ? "9:16" : "16:9";
+  const wantsAudio = audio !== false;
   if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
     return Response.json({ error: "Missing prompt" }, { status: 400 });
   }
@@ -46,7 +49,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid tier" }, { status: 400 });
   }
   const seconds = Number(length);
-  const creditCost = config.credits[seconds];
+  const creditCost = wantsAudio ? config.credits[seconds] : (config.creditsNoAudio?.[seconds] ?? config.credits[seconds]);
   if (!creditCost) {
     return Response.json({ error: "Invalid length for this tier" }, { status: 400 });
   }
@@ -61,7 +64,7 @@ export async function POST(request: Request) {
         Authorization: `Key ${process.env.FAL_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(config.buildInput(prompt.trim(), seconds, ratio)),
+      body: JSON.stringify(config.buildInput(prompt.trim(), seconds, ratio, wantsAudio)),
     });
     if (!submitRes.ok) {
       const errText = await submitRes.text();
@@ -87,11 +90,11 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("Video start error:", err);
     await addCredits(session.user.id, creditCost);
-    return Response.json({ error: "Something went wrong starting the video.", }, { status: 500 });
+    return Response.json({ error: "Something went wrong starting the video." }, { status: 500 });
   }
 }
 
 // ============================================================
-// END OF FILE - video generation route.ts (v3 - veo 3.1)
+// END OF FILE - video generation route.ts (v4 - audio toggle)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
