@@ -2,6 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
 
+// AdReel kill switch. The promo run is over, so /adreel returns a 404.
+// To bring the page back later, change this to true and commit.
+const ADREEL_ENABLED = false;
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -18,6 +22,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (pathname.startsWith("/adreel")) {
+    if (!ADREEL_ENABLED) {
+      return NextResponse.rewrite(new URL("/adreel-disabled", request.url));
+    }
     return NextResponse.next();
   }
 
@@ -69,6 +76,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE (proxy) - if you can see these lines after
-// pasting, the whole file made it. Safe to commit.
+// END OF FILE - proxy.ts (v2 - adreel kill switch)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
 // -----------------------------------------------------------
