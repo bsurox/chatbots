@@ -80,6 +80,10 @@ export default function VoicePage() {
 
   async function handleGenerate() {
     if (!text.trim() || !selectedVoice) return;
+    if (text.length > 5000) {
+      setError("Text is too long. The limit is 5,000 characters.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setAudio(null);
@@ -130,10 +134,11 @@ export default function VoicePage() {
             onChange={(e) => setText(e.target.value)}
             placeholder="Type or paste the text you want converted to speech..."
             rows={5}
+            maxLength={5000}
             style={{ width: "100%", padding: "12px", borderRadius: 8, border: "1px solid #333", background: "transparent", color: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
           />
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-            <span style={{ fontSize: 12, color: "#888" }}>{text.length} characters</span>
+            <span style={{ fontSize: 12, color: text.length >= 4500 ? "#f59e0b" : "#888" }}>{text.length.toLocaleString()} / 5,000 characters</span>
             <span style={{ fontSize: 12, color: "#22c55e" }}>{creditCost} {creditLabel}</span>
           </div>
         </div>
@@ -252,7 +257,7 @@ export default function VoicePage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(chat)/voice/page.tsx (v2.1 - true original)
+// END OF FILE - app/(chat)/voice/page.tsx (v3 - char limit)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
