@@ -61,10 +61,6 @@ export const ASPECT_RATIOS: { id: AspectRatio; label: string; hint: string }[] =
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 
 // ============================================================
-// END OF FILE - app/updates... no — app/(chat)/video/video-config.ts (v6 - premium retired)
+// END OF FILE - app/(chat)/video/video-config.ts (v6.1 - clean marker)
 // If you can see this comment, the paste was not truncated.
-// ============================================================
-// END OF FILE - app/(chat)/video/video-config.ts (v6 - premium retired)
-// If you can see this comment, the paste was not truncated.
-// ============================================================
 // ============================================================
