@@ -11,7 +11,7 @@ export default function VideoPage() {
   const router = useRouter();
 
   const [prompt, setPrompt] = useState("");
-  const [tierId, setTierId] = useState<Tier["id"]>("standard");
+  const [tierId, setTierId] = useState<Tier["id"]>("premium");
   const [length, setLength] = useState<5 | 10>(5);
   const [cineSeconds, setCineSeconds] = useState<CinematicSeconds>(8);
   const [cineAudio, setCineAudio] = useState(true);
@@ -57,7 +57,8 @@ export default function VideoPage() {
     } catch {
       // ignore
     }
-    if (t === "fast" || t === "standard" || t === "premium" || t === "cinematic") setTierId(t);
+    if (t === "standard") t = "premium";
+    if (t === "fast" || t === "premium" || t === "cinematic") setTierId(t);
     if (d === "5") setLength(5);
     if (d === "10") setLength(10);
   }, []);
@@ -143,7 +144,7 @@ export default function VideoPage() {
     return null;
   }
 
-  const tier = TIERS.find((t) => t.id === tierId)!;
+  const tier = TIERS.find((t) => t.id === tierId) ?? TIERS[0];
   const isCinematic = tierId === "cinematic";
   const cineRow = CINEMATIC_PRICING.find((r) => r.seconds === cineSeconds) ?? CINEMATIC_PRICING[CINEMATIC_PRICING.length - 1];
   const effectiveSeconds = isCinematic ? cineRow.seconds : length;
@@ -365,5 +366,5 @@ export default function VideoPage() {
   );
 }
 
-// END OF FILE - app/(chat)/video/page.tsx (v6 - format guard)
+// END OF FILE - app/(chat)/video/page.tsx (v7 - premium default, standard alias mapped)
 // If you can see this line after pasting, the whole file made it.
