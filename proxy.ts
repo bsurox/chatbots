@@ -40,6 +40,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/updates")) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
@@ -76,7 +80,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v2 - adreel kill switch)
+// END OF FILE - proxy.ts (v3 - public updates page)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
