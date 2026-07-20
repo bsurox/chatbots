@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { AnnouncementBanner } from "@/components/chat/announcement-banner";
+import { AudioStopper } from "@/components/chat/audio-stopper";
 import { AppSidebar } from "@/components/chat/app-sidebar";
 import { DataStreamProvider } from "@/components/chat/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -40,6 +41,7 @@ async function SidebarShell({ children }: { children: React.ReactNode }) {
           }}
         />
         <AnnouncementBanner />
+        <AudioStopper />
         {children}
       </SidebarInset>
     </SidebarProvider>
@@ -47,6 +49,6 @@ async function SidebarShell({ children }: { children: React.ReactNode }) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/layout.tsx (v2 - announcement banner)
+// END OF FILE - app/(chat)/layout.tsx (v3 - audio stopper)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
