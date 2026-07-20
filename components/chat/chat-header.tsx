@@ -36,7 +36,7 @@ function PureChatHeader({
     sessionStorage.setItem("evo_free_popup_shown", "true");
   };
   return (
-    <header className="sticky top-0 flex min-h-14 items-center gap-2 bg-background px-3 py-2">
+    <header className="sticky top-0 flex min-h-14 items-center gap-2 bg-transparent px-3 py-2">
       <Button
         className="md:hidden"
         onClick={toggleSidebar}
@@ -102,7 +102,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
 });
 
 // -----------------------------------------------------------
-// END OF FILE - components/chat/chat-header.tsx (v8 - tap to close)
+// END OF FILE - components/chat/chat-header.tsx (v9 - transparent, no band)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
