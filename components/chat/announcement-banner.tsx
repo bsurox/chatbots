@@ -2,16 +2,12 @@
 
 import { XIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GemIcon } from "./gem-icon";
 
 const DISMISS_KEY = "evo_banner_veo31_dismissed";
-// Pages that never show the announcement.
-const HIDDEN_PREFIXES = ["/credits", "/support"];
 
 export function AnnouncementBanner() {
-  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   // Start hidden and reveal after mount so dismissed users never see a flash.
@@ -26,9 +22,6 @@ export function AnnouncementBanner() {
   }, []);
 
   if (!visible) {
-    return null;
-  }
-  if (HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
     return null;
   }
 
@@ -49,7 +42,7 @@ export function AnnouncementBanner() {
         live for Cinematic tier videos.{" "}
         <Link
           className="font-semibold text-primary underline underline-offset-2 transition-opacity hover:opacity-80"
-          href="/video"
+          href="/video?tier=cinematic"
         >
           Try it
         </Link>
@@ -67,6 +60,6 @@ export function AnnouncementBanner() {
 }
 
 // ============================================================
-// END OF FILE - components/chat/announcement-banner.tsx (v1.2 - shorter copy)
+// END OF FILE - components/chat/announcement-banner.tsx (v2 - all pages + deep link)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
