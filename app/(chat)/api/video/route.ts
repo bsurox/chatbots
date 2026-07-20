@@ -10,22 +10,24 @@ type TierConfig = {
   creditsNoAudio?: Record<number, number>;
   buildInput: (prompt: string, seconds: number, ratio: AspectRatio, audio: boolean) => Record<string, unknown>;
 };
+// The tier formerly labeled Standard. Renamed to Premium on 2026-07-20
+// when the old 250/500 tier was retired (it had become an identical
+// product at a higher price once its audio was removed).
+const KLING_SILENT: TierConfig = {
+  modelId: "fal-ai/kling-video/v2.6/pro/text-to-video",
+  credits: { 5: 110, 10: 220 },
+  buildInput: (prompt, seconds, ratio) => ({ prompt, duration: String(seconds), aspect_ratio: ratio, generate_audio: false }),
+};
 const VIDEO_CONFIG: Record<TierId, TierConfig> = {
   fast: {
     modelId: "fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
     credits: { 5: 75, 10: 150 },
     buildInput: (prompt, seconds, ratio) => ({ prompt, duration: String(seconds), aspect_ratio: ratio }),
   },
-  standard: {
-    modelId: "fal-ai/kling-video/v2.6/pro/text-to-video",
-    credits: { 5: 110, 10: 220 },
-    buildInput: (prompt, seconds, ratio) => ({ prompt, duration: String(seconds), aspect_ratio: ratio, generate_audio: false }),
-  },
-  premium: {
-    modelId: "fal-ai/kling-video/v2.6/pro/text-to-video",
-    credits: { 5: 250, 10: 500 },
-    buildInput: (prompt, seconds, ratio) => ({ prompt, duration: String(seconds), aspect_ratio: ratio, generate_audio: false }),
-  },
+  premium: KLING_SILENT,
+  // Permanent alias: clients loaded before the rename may still send
+  // "standard". Same product, same pricing - never breaks, never overcharges.
+  standard: KLING_SILENT,
   cinematic: {
     modelId: "fal-ai/veo3.1",
     credits: { 4: 190, 6: 285, 8: 375 },
@@ -95,6 +97,6 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - video generation route.ts (v5 - cinematic durations)
+// END OF FILE - video generation route.ts (v6 - premium retired)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
