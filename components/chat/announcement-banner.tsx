@@ -35,9 +35,9 @@ export function AnnouncementBanner() {
   }
 
   return (
-    <div className="relative z-40 flex items-center justify-center gap-2.5 border-primary/30 border-b bg-primary/10 px-10 py-2.5 text-center">
+    <div className="relative z-40 flex items-center justify-center gap-2 border-primary/30 border-b bg-primary/10 px-8 py-2.5 text-center sm:px-10">
       <GemIcon className="size-4 shrink-0 text-primary" />
-      <p className="text-[13px] text-foreground sm:text-sm">
+      <p className="text-[12px] text-foreground sm:text-sm">
         <span className="font-semibold text-primary">NEW:</span> Veo 3.1 now
         live for Cinematic tier videos.{" "}
         <Link
@@ -60,6 +60,6 @@ export function AnnouncementBanner() {
 }
 
 // ============================================================
-// END OF FILE - components/chat/announcement-banner.tsx (v2 - all pages + deep link)
+// END OF FILE - components/chat/announcement-banner.tsx (v2.1 - mobile fit)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
