@@ -31,7 +31,7 @@ async function SidebarShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen={!isCollapsed}>
       <AppSidebar user={session?.user} />
-      <SidebarInset>
+      <SidebarInset className="bg-background">
         <Toaster
           position="top-center"
           theme="system"
@@ -49,6 +49,6 @@ async function SidebarShell({ children }: { children: React.ReactNode }) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/layout.tsx (v3 - audio stopper)
+// END OF FILE - app/(chat)/layout.tsx (v4 - one canvas shade)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
