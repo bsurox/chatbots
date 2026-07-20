@@ -10,8 +10,7 @@ export type Tier = {
 
 export const TIERS: Tier[] = [
   { id: "fast", name: "Fast", desc: "Quick drafts & ideas", credits5: 75, credits10: 150 },
-  { id: "standard", name: "Standard", desc: "Balanced quality & speed", credits5: 110, credits10: 220 },
-  { id: "premium", name: "Premium", desc: "Top quality, up to 10s, video only", credits5: 250, credits10: 500 },
+  { id: "premium", name: "Premium", desc: "Top quality, up to 10s, video only", credits5: 110, credits10: 220 },
   { id: "cinematic", name: "Cinematic", desc: "Highest quality, sound optional (Veo 3.1)", fixedSeconds: 8, credits8: 375 },
 ];
 
@@ -62,6 +61,6 @@ export const ASPECT_RATIOS: { id: AspectRatio; label: string; hint: string }[] =
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 
 // ============================================================
-// END OF FILE - app/(chat)/video/video-config.ts (v5 - cinematic grid)
+// END OF FILE - app/updates... no — app/(chat)/video/video-config.ts (v6 - premium retired)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
