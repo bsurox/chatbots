@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ToolHeader } from "@/components/chat/tool-header";
 
@@ -19,8 +19,23 @@ export default function TranscribePage() {
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const creditCost = Math.max(3, Math.ceil(duration / 60) * 3);
+
+  // Stop everything when leaving the page: the audio preview keeps playing
+  // across navigation otherwise, and a live recording would keep the mic on.
+  useEffect(() => {
+    return () => {
+      previewAudioRef.current?.pause();
+      if (timerRef.current) clearInterval(timerRef.current);
+      const recorder = mediaRecorderRef.current;
+      if (recorder && recorder.state !== "inactive") {
+        recorder.stream.getTracks().forEach((t) => t.stop());
+        recorder.stop();
+      }
+    };
+  }, []);
 
   async function startRecording() {
     try {
@@ -205,7 +220,7 @@ export default function TranscribePage() {
         {audioUrl && (
           <div style={{ padding: 16, borderRadius: 12, border: "1px solid #333", background: "rgba(34,197,94,0.05)" }}>
             <p style={{ fontSize: 13, color: "#888", marginBottom: 8 }}>Preview:</p>
-            <audio controls src={audioUrl} style={{ width: "100%" }} />
+            <audio ref={previewAudioRef} controls src={audioUrl} style={{ width: "100%" }} />
           </div>
         )}
 
@@ -255,7 +270,7 @@ export default function TranscribePage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(chat)/transcribe/page.tsx (v3 - per-minute billing)
+// END OF FILE - app/(chat)/transcribe/page.tsx (v3.1 - audio + mic cleanup)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
