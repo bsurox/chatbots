@@ -14,6 +14,20 @@ export type PatchNote = {
 
 export const PATCH_NOTES: PatchNote[] = [
   {
+    slug: "downtime-july-19",
+    date: "July 19, 2026",
+    sortKey: "2026-07-19.2",
+    title: "Unexpected Website Downtime - Resolved",
+    tagline: "A short outage today, what happened, and how to reach us if you were affected.",
+    body: `As part of background maintenance conducted today, July 19th, AskEvo experienced unexpected sitewide downtime - visitors to the askevo.ai domain saw a 404 error for roughly 20 minutes, beginning around 6:48 PM Mountain Time.
+
+We quickly reverted the changes to restore full website function, and the intended maintenance was completed successfully afterward.
+
+If you were affected by the outage, please reach out through our support page at askevo.ai/support, or email us directly at support@askevo.ai. When you contact us, include as much detail as you can about the issue you experienced, along with your name and account email address. We will verify the information and respond within 1-3 days - and if this downtime caused a problem for you, we will make it right.
+
+Thank you for using AskEvo. For any other questions, contact our support team. To stay up to speed on updates and important information, follow our official patch notes - launched today - right here at askevo.ai/updates.`,
+  },
+  {
     slug: "cinematic-update",
     date: "July 19, 2026",
     sortKey: "2026-07-19",
@@ -45,6 +59,6 @@ More soon. Go make something. 💎`,
 ];
 
 // ============================================================
-// END OF FILE - app/updates/updates-data.ts (v1)
+// END OF FILE - app/updates/updates-data.ts (v2 - downtime notice)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
