@@ -49,6 +49,15 @@ export default function VoicePage() {
     fetchVoices();
   }, []);
 
+  // Stop any playing audio when leaving the page - detached players are
+  // allowed to keep playing across navigation otherwise.
+  useEffect(() => {
+    return () => {
+      previewAudioRef.current?.pause();
+      audioRef.current?.pause();
+    };
+  }, []);
+
   const filteredVoices = voices.filter(
     (v) =>
       v.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -257,7 +266,7 @@ export default function VoicePage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(chat)/voice/page.tsx (v3 - char limit)
+// END OF FILE - app/(chat)/voice/page.tsx (v3.1 - audio cleanup)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
