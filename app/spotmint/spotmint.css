@@ -73,8 +73,8 @@
 .sp-mbtn.primary { background: var(--primary); color: #000; border: none; }
 
 .sp-gemlogo { color: var(--primary); width: 19px; height: 19px; margin-left: 6px; }
-.sp-foot { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; }
-.sp-acct { width: 34px; height: 34px; border-radius: 999px; border: 1px solid #333; background: #111; color: #888; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.sp-foot { position: relative; display: flex; align-items: center; justify-content: center; min-height: 34px; margin-top: 14px; }
+.sp-acct { position: absolute; left: 0; width: 34px; height: 34px; border-radius: 999px; border: 1px solid #333; background: #111; color: #888; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .sp-buy { display: block; width: fit-content; margin: 0; font-size: 12px; font-weight: 700; color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); border-radius: 999px; padding: 6px 14px; }
 
 /* Roomy mode: Fast/Premium have no sound row, so everything grows to
@@ -88,10 +88,11 @@
 .sp-roomy .sp-tiers { gap: 10px; margin-bottom: 16px; }
 .sp-roomy .sp-tier { padding: 15px 16px; }
 .sp-roomy .sp-formats { gap: 10px; margin-bottom: 16px; }
-.sp-roomy .sp-fmt { padding: 14px 10px; }
 .sp-roomy .sp-gen { padding: 15px 0; }
+.sp-roomy .sp-fmt { padding: 14px 10px; }
 
 /* ============================================================ */
-/* END OF FILE - app/spotmint/spotmint.css (v6 - account row)    */
+/* END OF FILE - app/spotmint/spotmint.css (v7 - left account,   */
+/* centered badge)                                               */
 /* If you can see this comment, the paste was not truncated.     */
 /* ============================================================ */
