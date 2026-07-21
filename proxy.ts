@@ -13,6 +13,26 @@ export async function proxy(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
+  // Spotmint app fence (v4). The wrapped app appends "SpotmintApp" to
+  // its User-Agent. App traffic may only reach the Spotmint surface,
+  // the auth doors, the legal pages, the API plumbing, and static
+  // files - anything else bounces home to /spotmint. This is what
+  // keeps the rest of the site unreachable from inside the app.
+  const userAgent = request.headers.get("user-agent") ?? "";
+  if (userAgent.includes("SpotmintApp")) {
+    const appAllowed =
+      pathname.startsWith("/spotmint") ||
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname.startsWith("/api/") ||
+      pathname.startsWith("/privacy") ||
+      pathname.startsWith("/terms") ||
+      pathname.includes(".");
+    if (!appAllowed) {
+      return NextResponse.redirect(new URL("/spotmint", request.url));
+    }
+  }
+
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -80,7 +100,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v3 - public updates page)
+// END OF FILE - proxy.ts (v4 - spotmint app fence)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
