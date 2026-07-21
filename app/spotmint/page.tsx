@@ -3,6 +3,7 @@ import "./spotmint.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { GemIcon } from "@/components/chat/gem-icon";
 import { BRAND } from "./brand";
 import { CINEMATIC_PRICING, TIERS, fmt, type AspectRatio, type CinematicSeconds, type Tier } from "../(chat)/video/video-config";
 
@@ -254,9 +255,9 @@ export default function SpotmintPage() {
   }
 
   return (
-    <div className="sp-wrap">
+    <div className={isCinematic ? "sp-wrap" : "sp-wrap sp-roomy"}>
       <div className="sp-top">
-        <div className="sp-brand">Spot<span>mint</span></div>
+        <div className="sp-brand">Spot<span>mint</span><GemIcon className="sp-gemlogo" /></div>
         <div className="sp-credits">{credits === null ? "..." : credits.toLocaleString()} credits</div>
       </div>
       <p className="sp-tag">{BRAND.tagline}</p>
@@ -388,7 +389,7 @@ export default function SpotmintPage() {
             <p className="sp-mt">Not enough credits</p>
             <p className="sp-mm">
               This option costs {cost.toLocaleString()} credits and your balance is {(credits ?? 0).toLocaleString()}.
-              {isApp ? <> Credits can be purchased at <em>askevo.ai</em>.</> : <> Top up and your new balance shows here right away.</>}
+              {isApp ? <> Credits can be purchased at <em>{BRAND.storeDomain}</em>.</> : <> Top up and your new balance shows here right away.</>}
             </p>
             <div className="sp-mrow">
               <button type="button" className="sp-mbtn" onClick={() => setShowCreditsModal(false)}>Close</button>
@@ -400,12 +401,14 @@ export default function SpotmintPage() {
         </div>
       )}
 
+      <p className="sp-buy">Buy credits at {BRAND.storeDomain}</p>
+
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v2 - credits refresh + modal)
+// END OF FILE - app/spotmint/page.tsx (v3 - gem, roomy, buy badge)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
