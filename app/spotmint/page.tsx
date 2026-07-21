@@ -33,10 +33,12 @@ export default function SpotmintPage() {
   const [elapsed, setElapsed] = useState(0);
   const [statusLabel, setStatusLabel] = useState<string | null>(null);
   const [isApp, setIsApp] = useState(false);
+  const [showCreditsModal, setShowCreditsModal] = useState(false);
   const [shareLabel, setShareLabel] = useState("Share");
 
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resumedRef = useRef(false);
+  const lastUserRef = useRef<string | null>(null);
 
   // Inside the wrapped app, Capacitor injects window.Capacitor.
   // When present we hide every credit-purchase link so the app
@@ -98,10 +100,30 @@ export default function SpotmintPage() {
     [loadCredits]
   );
 
+  // Credits: re-fetch whenever the signed-in identity changes (the app
+  // logs in mid-session while this page instance survives navigation),
+  // and whenever the app returns to the foreground - which is also what
+  // updates the balance after buying on the web and coming back.
+  useEffect(() => {
+    const email = session?.user?.email ?? null;
+    if (!email || /^guest-\d+$/.test(email)) return;
+    if (lastUserRef.current !== email) {
+      lastUserRef.current = email;
+      loadCredits();
+    }
+  }, [session, loadCredits]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && lastUserRef.current) loadCredits();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [loadCredits]);
+
   useEffect(() => {
     if (!session?.user || resumedRef.current) return;
     resumedRef.current = true;
-    loadCredits();
     const saved = localStorage.getItem(BRAND.jobKey);
     if (saved) {
       try {
@@ -115,7 +137,7 @@ export default function SpotmintPage() {
         localStorage.removeItem(BRAND.jobKey);
       }
     }
-  }, [session, loadCredits, poll]);
+  }, [session, poll]);
 
   useEffect(() => {
     if ((phase === "generating" || phase === "starting") && startedAt) {
@@ -150,7 +172,7 @@ export default function SpotmintPage() {
     : (tier.credits10 as number);
   const notEnough = credits !== null && cost > credits;
   const busy = phase === "starting" || phase === "generating";
-  const canGenerate = prompt.trim().length > 0 && !busy && !notEnough;
+  const canGenerate = prompt.trim().length > 0 && !busy;
 
   let stage = statusLabel;
   if (!stage) {
@@ -162,6 +184,10 @@ export default function SpotmintPage() {
 
   async function handleGenerate() {
     if (!canGenerate) return;
+    if (notEnough) {
+      setShowCreditsModal(true);
+      return;
+    }
     setErrorMsg(null);
     setVideoUrl(null);
     setStatusLabel(null);
@@ -241,7 +267,7 @@ export default function SpotmintPage() {
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder={BRAND.promptPlaceholder}
-        rows={3}
+        rows={2}
         disabled={busy}
       />
 
@@ -333,18 +359,6 @@ export default function SpotmintPage() {
         {phase === "starting" ? "Starting..." : phase === "generating" ? "Creating your ad..." : `Create my ad - ${cost.toLocaleString()} credits`}
       </button>
 
-      {notEnough && !busy && (
-        <p style={{ marginTop: 12, fontSize: 14, color: "#f87171" }}>
-          Not enough credits for this option.
-          {!isApp && (
-            <>
-              {" "}
-              <button type="button" className="sp-link" onClick={() => router.push("/credits")}>Buy more</button>
-            </>
-          )}
-        </p>
-      )}
-
       {busy && (
         <div className="sp-loader">
           <div className="sp-ring" />
@@ -368,12 +382,30 @@ export default function SpotmintPage() {
         </div>
       )}
 
+      {showCreditsModal && (
+        <div className="sp-mask" onClick={() => setShowCreditsModal(false)}>
+          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="sp-mt">Not enough credits</p>
+            <p className="sp-mm">
+              This option costs {cost.toLocaleString()} credits and your balance is {(credits ?? 0).toLocaleString()}.
+              {isApp ? <> Credits can be purchased at <em>askevo.ai</em>.</> : <> Top up and your new balance shows here right away.</>}
+            </p>
+            <div className="sp-mrow">
+              <button type="button" className="sp-mbtn" onClick={() => setShowCreditsModal(false)}>Close</button>
+              {!isApp && (
+                <button type="button" className="sp-mbtn primary" onClick={() => router.push("/credits")}>Buy credits</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v1)
+// END OF FILE - app/spotmint/page.tsx (v2 - credits refresh + modal)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
