@@ -2,12 +2,12 @@
    site: dark canvas, emerald primary, amber credits. Mobile-first -
    this page's home is a phone screen inside the app wrapper. */
 
-.sp-wrap { max-width: 560px; margin: 0 auto; padding: 14px 16px 24px; }
-.sp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.sp-wrap { max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px); }
+.sp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .sp-brand { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
 .sp-brand span { color: #22c55e; }
 .sp-credits { font-size: 13px; font-weight: 700; color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
-.sp-tag { color: #888; font-size: 13px; margin: 0 0 12px; }
+.sp-tag { color: #888; font-size: 13px; margin: 0 0 16px; }
 
 .sp-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #fff; }
 .sp-ta { width: 100%; resize: vertical; background: #111; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
@@ -73,6 +73,6 @@
 .sp-mbtn.primary { background: #22c55e; color: #000; border: none; }
 
 /* ============================================================ */
-/* END OF FILE - app/spotmint/spotmint.css (v2 - fit + modal)    */
+/* END OF FILE - app/spotmint/spotmint.css (v3 - safe area)      */
 /* If you can see this comment, the paste was not truncated.     */
 /* ============================================================ */
