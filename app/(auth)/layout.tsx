@@ -1,21 +1,28 @@
+"use client";
 import { ArrowLeftIcon } from "lucide-react";
-import { headers } from "next/headers";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { GemIcon } from "@/components/chat/gem-icon";
 import { Preview } from "@/components/chat/preview";
-export default async function AuthLayout({
+export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Spotmint face (v4): when this door is reached from a Spotmint
+  // Spotmint face (v5): when this door is reached from a Spotmint
   // surface - the spotmint.store host or the wrapped app's signature -
   // the auth screens wear Spotmint branding with AskEvo LLC in fine
-  // print. askevo.ai itself keeps the original look untouched.
-  const h = await headers();
-  const host = h.get("host") ?? "";
-  const ua = h.get("user-agent") ?? "";
-  const isSpotmint = host.includes("spotmint.store") || ua.includes("SpotmintApp");
+  // print. Detection happens client-side after mount: server-side
+  // header access here breaks prerendering on this Next version.
+  const [isSpotmint, setIsSpotmint] = useState(false);
+  useEffect(() => {
+    if (
+      window.location.hostname.includes("spotmint.store") ||
+      navigator.userAgent.includes("SpotmintApp")
+    ) {
+      setIsSpotmint(true);
+    }
+  }, []);
   return (
     <div className="flex h-dvh w-screen bg-sidebar">
       <div className={isSpotmint ? "flex w-full flex-col bg-background p-8 md:p-16" : "flex w-full flex-col bg-background p-8 xl:w-[600px] xl:shrink-0 xl:rounded-r-2xl xl:border-r xl:border-border/40 md:p-16"}>
@@ -61,7 +68,7 @@ export default async function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v4 - spotmint face)
+// END OF FILE - app/(auth)/layout.tsx (v5 - spotmint face, client-side)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
