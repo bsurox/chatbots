@@ -33,17 +33,16 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Spotmint store island (v5). spotmint.store is a second front door
-  // into this same app, but it only opens onto the credits flow: its
-  // homepage sends visitors straight to /credits, and the rest of the
-  // site does not exist on that host - same idea as the app fence.
+  // Spotmint store island (v6). spotmint.store serves only the
+  // Spotmint-dressed store page and its doors - the AskEvo credits
+  // page (sidebar, banner and all) no longer exists on this host, so
+  // there is nothing AskEvo-branded to escape into.
   const hostname = request.nextUrl.hostname;
   if (hostname === "spotmint.store" || hostname.endsWith(".spotmint.store")) {
     if (pathname === "/") {
-      return NextResponse.redirect(new URL("/credits", request.url));
+      return NextResponse.redirect(new URL("/spotmint/credits", request.url));
     }
     const storeAllowed =
-      pathname.startsWith("/credits") ||
       pathname === "/login" ||
       pathname === "/register" ||
       pathname.startsWith("/api/") ||
@@ -52,7 +51,7 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/spotmint") ||
       pathname.includes(".");
     if (!storeAllowed) {
-      return NextResponse.redirect(new URL("/credits", request.url));
+      return NextResponse.redirect(new URL("/spotmint/credits", request.url));
     }
   }
 
@@ -123,7 +122,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v5 - spotmint.store island)
+// END OF FILE - proxy.ts (v6 - store island, spotmint-dressed)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
