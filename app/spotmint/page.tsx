@@ -1,7 +1,7 @@
 "use client";
 import "./spotmint.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { GemIcon } from "@/components/chat/gem-icon";
 import { BRAND } from "./brand";
@@ -35,6 +35,7 @@ export default function SpotmintPage() {
   const [statusLabel, setStatusLabel] = useState<string | null>(null);
   const [isApp, setIsApp] = useState(false);
   const [showCreditsModal, setShowCreditsModal] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
   const [shareLabel, setShareLabel] = useState("Share");
 
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -383,6 +384,19 @@ export default function SpotmintPage() {
         </div>
       )}
 
+      {showAccount && (
+        <div className="sp-mask" onClick={() => setShowAccount(false)}>
+          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="sp-mt">Account</p>
+            <p className="sp-mm">Signed in as <em>{session?.user?.email}</em></p>
+            <div className="sp-mrow">
+              <button type="button" className="sp-mbtn" onClick={() => setShowAccount(false)}>Close</button>
+              <button type="button" className="sp-mbtn" onClick={() => signOut({ redirectTo: "/spotmint" })}>Log out</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCreditsModal && (
         <div className="sp-mask" onClick={() => setShowCreditsModal(false)}>
           <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
@@ -401,7 +415,15 @@ export default function SpotmintPage() {
         </div>
       )}
 
-      <p className="sp-buy">Buy credits at <span style={{ color: "var(--primary)" }}>{BRAND.storeDomain}</span></p>
+      <div className="sp-foot">
+        <button type="button" className="sp-acct" onClick={() => setShowAccount(true)} aria-label="Account">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
+          </svg>
+        </button>
+        <p className="sp-buy">Buy credits at {BRAND.storeDomain}</p>
+      </div>
 
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
@@ -409,6 +431,6 @@ export default function SpotmintPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v3.1 - two-tone buy badge)
+// END OF FILE - app/spotmint/page.tsx (v4 - account button, gold badge)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
