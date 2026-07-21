@@ -33,6 +33,29 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Spotmint store island (v5). spotmint.store is a second front door
+  // into this same app, but it only opens onto the credits flow: its
+  // homepage sends visitors straight to /credits, and the rest of the
+  // site does not exist on that host - same idea as the app fence.
+  const hostname = request.nextUrl.hostname;
+  if (hostname === "spotmint.store" || hostname.endsWith(".spotmint.store")) {
+    if (pathname === "/") {
+      return NextResponse.redirect(new URL("/credits", request.url));
+    }
+    const storeAllowed =
+      pathname.startsWith("/credits") ||
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname.startsWith("/api/") ||
+      pathname.startsWith("/privacy") ||
+      pathname.startsWith("/terms") ||
+      pathname.startsWith("/spotmint") ||
+      pathname.includes(".");
+    if (!storeAllowed) {
+      return NextResponse.redirect(new URL("/credits", request.url));
+    }
+  }
+
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -100,7 +123,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v4 - spotmint app fence)
+// END OF FILE - proxy.ts (v5 - spotmint.store island)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
