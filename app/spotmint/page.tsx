@@ -401,7 +401,7 @@ export default function SpotmintPage() {
         </div>
       )}
 
-      <p className="sp-buy">Buy credits at {BRAND.storeDomain}</p>
+      <p className="sp-buy">Buy credits at <span style={{ color: "var(--primary)" }}>{BRAND.storeDomain}</span></p>
 
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
@@ -409,6 +409,6 @@ export default function SpotmintPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v3 - gem, roomy, buy badge)
+// END OF FILE - app/spotmint/page.tsx (v3.1 - two-tone buy badge)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
