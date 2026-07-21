@@ -4,53 +4,53 @@
 
 .sp-wrap { max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px); }
 .sp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-.sp-brand { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
-.sp-brand span { color: #22c55e; }
+.sp-brand { display: flex; align-items: center; gap: 6px; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+.sp-brand span { color: var(--primary); }
 .sp-credits { font-size: 13px; font-weight: 700; color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
 .sp-tag { color: #888; font-size: 13px; margin: 0 0 16px; }
 
 .sp-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #fff; }
-.sp-ta { width: 100%; resize: vertical; background: #111; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
+.sp-ta { width: 100%; height: 68px; resize: none; background: #111; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
 .sp-ta:disabled { opacity: 0.6; }
 
 .sp-seg { display: flex; gap: 8px; margin-bottom: 12px; }
 .sp-wrap button { -webkit-tap-highlight-color: transparent; }
 .sp-seg button { flex: 1; padding: 9px 0; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #aaa; border: 1px solid #333; }
-.sp-seg button.on { background: rgba(34,197,94,0.12); color: #22c55e; border: 2px solid #22c55e; }
+.sp-seg button.on { background: color-mix(in oklab, var(--primary) 14%, transparent); color: var(--primary); border: 2px solid var(--primary); }
 .sp-seg button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .sp-tiers { display: grid; grid-template-columns: 1fr; gap: 7px; margin-bottom: 12px; }
 .sp-tier { text-align: left; padding: 10px 14px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.sp-tier.on { background: rgba(34,197,94,0.08); border: 2px solid #22c55e; }
+.sp-tier.on { background: color-mix(in oklab, var(--primary) 9%, transparent); border: 2px solid var(--primary); }
 .sp-tier:disabled { opacity: 0.6; cursor: not-allowed; }
 .sp-tn { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 2px; }
 .sp-td { font-size: 12px; color: #888; margin: 0; }
-.sp-tc { font-size: 14px; font-weight: 700; color: #22c55e; white-space: nowrap; }
+.sp-tc { font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap; }
 
 .sp-formats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
 .sp-fmt { text-align: center; padding: 10px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; }
-.sp-fmt.on { background: rgba(34,197,94,0.08); border: 2px solid #22c55e; }
+.sp-fmt.on { background: color-mix(in oklab, var(--primary) 9%, transparent); border: 2px solid var(--primary); }
 .sp-fmt:disabled { opacity: 0.6; cursor: not-allowed; }
 .sp-fn { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 2px; }
 .sp-fd { font-size: 12px; color: #888; margin: 0; }
 
-.sp-gen { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: #22c55e; color: #000; }
+.sp-gen { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: var(--primary); color: #000; }
 .sp-gen:disabled { cursor: not-allowed; background: #1c1c1c; color: #555; }
-.sp-link { background: none; border: none; padding: 0; font: inherit; color: #22c55e; font-weight: 600; cursor: pointer; }
+.sp-link { background: none; border: none; padding: 0; font: inherit; color: var(--primary); font-weight: 600; cursor: pointer; }
 
 @keyframes sp-spin { to { transform: rotate(360deg); } }
 @keyframes sp-indeterminate { 0% { left: -40%; } 100% { left: 100%; } }
 @keyframes sp-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .sp-loader { margin-top: 22px; padding: 28px 20px; border-radius: 14px; border: 1px solid #2a2a2a; background: linear-gradient(180deg, #121212, #0d0d0d); text-align: center; animation: sp-fade 0.3s ease; }
-.sp-ring { width: 46px; height: 46px; border-radius: 50%; border: 3px solid #222; border-top-color: #22c55e; animation: sp-spin 0.9s linear infinite; margin: 0 auto 16px; }
+.sp-ring { width: 46px; height: 46px; border-radius: 50%; border: 3px solid #222; border-top-color: var(--primary); animation: sp-spin 0.9s linear infinite; margin: 0 auto 16px; }
 .sp-time { font-size: 30px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: 1px; line-height: 1; margin-bottom: 6px; }
-.sp-stage { font-size: 14px; color: #22c55e; font-weight: 600; margin-bottom: 16px; }
+.sp-stage { font-size: 14px; color: var(--primary); font-weight: 600; margin-bottom: 16px; }
 .sp-bar { position: relative; height: 6px; border-radius: 999px; background: #1a1a1a; overflow: hidden; margin-bottom: 14px; }
-.sp-bar span { position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 999px; background: linear-gradient(90deg, transparent, #22c55e, transparent); animation: sp-indeterminate 1.4s ease-in-out infinite; }
+.sp-bar span { position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: sp-indeterminate 1.4s ease-in-out infinite; }
 .sp-hint { font-size: 13px; color: #777; line-height: 1.5; margin: 0; }
 
 .sp-err { margin-top: 22px; padding: 14px 16px; border-radius: 12px; border: 1px solid #7f1d1d; background: rgba(127,29,29,0.15); color: #f87171; font-size: 14px; }
-.sp-done { color: #22c55e; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.sp-done { color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 10px; }
 .sp-video { width: 100%; border-radius: 12px; border: 1px solid #333; background: #000; }
 .sp-actions { display: flex; gap: 10px; margin-top: 12px; }
 .sp-act { flex: 1; padding: 12px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: #111; color: #fff; border: 1px solid #333; }
@@ -67,12 +67,30 @@
 .sp-modal { background: #141414; border: 1px solid #333; border-radius: 16px; padding: 20px; max-width: 340px; width: 100%; }
 .sp-mt { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px; }
 .sp-mm { font-size: 13px; color: #aaa; line-height: 1.6; margin: 0 0 16px; }
-.sp-mm em { color: #22c55e; font-style: normal; font-weight: 600; }
+.sp-mm em { color: var(--primary); font-style: normal; font-weight: 600; }
 .sp-mrow { display: flex; gap: 10px; }
 .sp-mbtn { flex: 1; padding: 11px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: #111; color: #fff; border: 1px solid #333; }
-.sp-mbtn.primary { background: #22c55e; color: #000; border: none; }
+.sp-mbtn.primary { background: var(--primary); color: #000; border: none; }
+
+.sp-gemlogo { color: var(--primary); width: 19px; height: 19px; }
+.sp-buy { display: block; width: fit-content; margin: 14px auto 0; font-size: 12px; font-weight: 700; color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); border-radius: 999px; padding: 6px 14px; }
+
+/* Roomy mode: Fast/Premium have no sound row, so everything grows to
+   fill the screen; Cinematic stays compact and adds the sound row, so
+   the two states land at about the same height and swapping tiers
+   feels like only the sound option appears. */
+.sp-roomy .sp-tag { margin-bottom: 20px; }
+.sp-roomy .sp-ta { height: 96px; margin-bottom: 16px; }
+.sp-roomy .sp-seg { margin-bottom: 16px; }
+.sp-roomy .sp-seg button { padding: 12px 0; }
+.sp-roomy .sp-tiers { gap: 10px; margin-bottom: 16px; }
+.sp-roomy .sp-tier { padding: 15px 16px; }
+.sp-roomy .sp-formats { gap: 10px; margin-bottom: 16px; }
+.sp-roomy .sp-fmt { padding: 14px 10px; }
+.sp-roomy .sp-gen { padding: 15px 0; }
 
 /* ============================================================ */
-/* END OF FILE - app/spotmint/spotmint.css (v3 - safe area)      */
+/* END OF FILE - app/spotmint/spotmint.css (v4 - gem green,      */
+/* roomy mode, buy badge)                                        */
 /* If you can see this comment, the paste was not truncated.     */
 /* ============================================================ */
