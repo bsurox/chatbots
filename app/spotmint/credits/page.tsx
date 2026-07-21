@@ -1,7 +1,7 @@
 "use client";
 import "../spotmint.css";
 import { useCallback, useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BRAND } from "../brand";
 
@@ -25,6 +25,7 @@ export default function SpotmintStorePage() {
   const [credits, setCredits] = useState<number | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [justPaid, setJustPaid] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
 
   const loadCredits = useCallback(async () => {
     try {
@@ -131,12 +132,34 @@ export default function SpotmintStorePage() {
       </div>
       <p className="sp-hint">Checkout is handled securely by Stripe. Credits land on your account within seconds of payment.</p>
 
+      <div className="sp-foot">
+        <button type="button" className="sp-acct" onClick={() => setShowAccount(true)} aria-label="Account">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
+          </svg>
+        </button>
+      </div>
+
+      {showAccount && (
+        <div className="sp-mask" onClick={() => setShowAccount(false)}>
+          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="sp-mt">Account</p>
+            <p className="sp-mm">Signed in as <em>{session?.user?.email}</em></p>
+            <div className="sp-mrow">
+              <button type="button" className="sp-mbtn" onClick={() => setShowAccount(false)}>Close</button>
+              <button type="button" className="sp-mbtn" onClick={() => signOut({ redirectTo: "/spotmint/credits" })}>Log out</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/credits/page.tsx (v1)
+// END OF FILE - app/spotmint/credits/page.tsx (v2 - account button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
