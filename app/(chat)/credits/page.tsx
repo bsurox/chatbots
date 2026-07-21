@@ -17,8 +17,8 @@ const BUNDLES: Bundle[] = [
   { id: "starter", name: "Starter", price: "$5", credits: 220 },
   { id: "power", name: "Power", price: "$15", credits: 800 },
   { id: "pro", name: "Pro", price: "$40", credits: 2400 },
-  { id: "premium", name: "Premium Pack", price: "$75", credits: 5000, badge: "Best value for video" },
-  { id: "ultra", name: "Ultra Pack", price: "$150", credits: 11750, originalCredits: 11000 },
+  { id: "premium", name: "Premium", price: "$75", credits: 5000, badge: "Best value for video" },
+  { id: "ultra", name: "Ultra", price: "$150", credits: 11750, originalCredits: 11000 },
 ];
 
 export default function CreditsPage() {
@@ -192,3 +192,9 @@ export default function CreditsPage() {
     </>
   );
 }
+
+// -----------------------------------------------------------
+// END OF FILE - app/(chat)/credits/page.tsx (v2 - pack-less names)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
