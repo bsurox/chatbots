@@ -37,7 +37,7 @@ export default function AuthLayout({
           <div className="flex flex-col gap-2">
             {isSpotmint ? (
               <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
-                Spot<span style={{ color: "#22c55e" }}>mint</span>
+                Spot<span style={{ color: "var(--primary)" }}>mint</span>
               </div>
             ) : (
               <div
@@ -68,7 +68,7 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v5 - spotmint face, client-side)
+// END OF FILE - app/(auth)/layout.tsx (v6 - gem green wordmark)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
