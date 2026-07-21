@@ -14,6 +14,32 @@ export type PatchNote = {
 
 export const PATCH_NOTES: PatchNote[] = [
   {
+    slug: "july-20-tune-up",
+    date: "July 20, 2026",
+    sortKey: "2026-07-20",
+    title: "A Smoother AskEvo + Something New Is Coming",
+    tagline: "A simpler video lineup, cleaner names, a brief video outage explained - and our next project gets a codename.",
+    body: `📱 ANNOUNCED — Our next project has a codename
+- AskEvo is officially building its next product: a dedicated mobile app, coming to the iOS App Store and Google Play.
+- Codename: ADREEL.
+- That is all we are saying for now. More soon. 👀
+
+🎬 CHANGED — A simpler video lineup
+- Video generation is now three tiers: Fast, Premium, and Cinematic.
+- Fast for quick drafts, Premium for top-quality video, Cinematic for the highest quality with optional sound — still the audio king of the lineup.
+- Nothing you need to do: old links and bookmarks keep working.
+
+⚠️ RESOLVED — Brief video page outage
+- Earlier today, while the new lineup rolled out, the video page failed to load for signed-in users for a short window. The rest of the site was unaffected, and the issue is fully resolved.
+- If this outage caused a problem for you, please reach out through our support page at askevo.ai/support, or email support@askevo.ai with as much detail as you can, plus your name and account email. We will verify and respond within 1-3 days — and we will make it right.
+
+🧼 POLISH — Cleaner names, tighter screws
+- Credit packs got cleaner names: Premium and Ultra drop the "Pack" — now matching the rest of the lineup everywhere, including checkout.
+- Dozens of small under-the-hood reliability and polish improvements across the site.
+
+More soon. Go make something. 💎`,
+  },
+  {
     slug: "downtime-july-19",
     date: "July 19, 2026",
     sortKey: "2026-07-19.2",
@@ -59,6 +85,6 @@ More soon. Go make something. 💎`,
 ];
 
 // ============================================================
-// END OF FILE - app/updates/updates-data.ts (v2 - downtime notice)
+// END OF FILE - app/updates/updates-data.ts (v3 - july 20 tune-up)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
