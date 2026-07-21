@@ -2,38 +2,39 @@
    site: dark canvas, emerald primary, amber credits. Mobile-first -
    this page's home is a phone screen inside the app wrapper. */
 
-.sp-wrap { max-width: 560px; margin: 0 auto; padding: 28px 18px 48px; }
-.sp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.sp-brand { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+.sp-wrap { max-width: 560px; margin: 0 auto; padding: 14px 16px 24px; }
+.sp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.sp-brand { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
 .sp-brand span { color: #22c55e; }
 .sp-credits { font-size: 13px; font-weight: 700; color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
-.sp-tag { color: #888; font-size: 14px; margin: 0 0 26px; }
+.sp-tag { color: #888; font-size: 13px; margin: 0 0 12px; }
 
-.sp-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #fff; }
-.sp-ta { width: 100%; resize: vertical; background: #111; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; margin-bottom: 22px; box-sizing: border-box; }
+.sp-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #fff; }
+.sp-ta { width: 100%; resize: vertical; background: #111; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
 .sp-ta:disabled { opacity: 0.6; }
 
-.sp-seg { display: flex; gap: 10px; margin-bottom: 22px; }
-.sp-seg button { flex: 1; padding: 11px 0; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #aaa; border: 1px solid #333; }
+.sp-seg { display: flex; gap: 8px; margin-bottom: 12px; }
+.sp-wrap button { -webkit-tap-highlight-color: transparent; }
+.sp-seg button { flex: 1; padding: 9px 0; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #aaa; border: 1px solid #333; }
 .sp-seg button.on { background: rgba(34,197,94,0.12); color: #22c55e; border: 2px solid #22c55e; }
 .sp-seg button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.sp-tiers { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 22px; }
-.sp-tier { text-align: left; padding: 14px 16px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sp-tiers { display: grid; grid-template-columns: 1fr; gap: 7px; margin-bottom: 12px; }
+.sp-tier { text-align: left; padding: 10px 14px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .sp-tier.on { background: rgba(34,197,94,0.08); border: 2px solid #22c55e; }
 .sp-tier:disabled { opacity: 0.6; cursor: not-allowed; }
 .sp-tn { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 2px; }
 .sp-td { font-size: 12px; color: #888; margin: 0; }
 .sp-tc { font-size: 14px; font-weight: 700; color: #22c55e; white-space: nowrap; }
 
-.sp-formats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
-.sp-fmt { text-align: center; padding: 14px 10px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; }
+.sp-formats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.sp-fmt { text-align: center; padding: 10px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; }
 .sp-fmt.on { background: rgba(34,197,94,0.08); border: 2px solid #22c55e; }
 .sp-fmt:disabled { opacity: 0.6; cursor: not-allowed; }
 .sp-fn { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 2px; }
 .sp-fd { font-size: 12px; color: #888; margin: 0; }
 
-.sp-gen { width: 100%; padding: 15px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: #22c55e; color: #000; }
+.sp-gen { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: #22c55e; color: #000; }
 .sp-gen:disabled { cursor: not-allowed; background: #1c1c1c; color: #555; }
 .sp-link { background: none; border: none; padding: 0; font: inherit; color: #22c55e; font-weight: 600; cursor: pointer; }
 
@@ -54,7 +55,7 @@
 .sp-actions { display: flex; gap: 10px; margin-top: 12px; }
 .sp-act { flex: 1; padding: 12px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: #111; color: #fff; border: 1px solid #333; }
 
-.sp-note { color: #666; font-size: 12px; text-align: center; margin-top: 34px; line-height: 1.6; }
+.sp-note { color: #666; font-size: 11px; text-align: center; margin-top: 18px; line-height: 1.5; }
 
 @media (min-width: 640px) {
   .sp-wrap { max-width: 640px; padding-top: 40px; }
@@ -62,7 +63,16 @@
   .sp-tier { flex-direction: column; align-items: flex-start; }
 }
 
+.sp-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 50; animation: sp-fade 0.15s ease; }
+.sp-modal { background: #141414; border: 1px solid #333; border-radius: 16px; padding: 20px; max-width: 340px; width: 100%; }
+.sp-mt { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px; }
+.sp-mm { font-size: 13px; color: #aaa; line-height: 1.6; margin: 0 0 16px; }
+.sp-mm em { color: #22c55e; font-style: normal; font-weight: 600; }
+.sp-mrow { display: flex; gap: 10px; }
+.sp-mbtn { flex: 1; padding: 11px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: #111; color: #fff; border: 1px solid #333; }
+.sp-mbtn.primary { background: #22c55e; color: #000; border: none; }
+
 /* ============================================================ */
-/* END OF FILE - app/spotmint/spotmint.css (v1)                  */
+/* END OF FILE - app/spotmint/spotmint.css (v2 - fit + modal)    */
 /* If you can see this comment, the paste was not truncated.     */
 /* ============================================================ */
