@@ -116,7 +116,7 @@ export default function SpotmintStorePage() {
           <button
             key={b.id}
             type="button"
-            className="sp-tier"
+            className="sp-tier sp-pack"
             onClick={() => handleBuy(b.id)}
             disabled={loading !== null}
           >
@@ -130,7 +130,7 @@ export default function SpotmintStorePage() {
           </button>
         ))}
       </div>
-      <p className="sp-hint">Checkout is handled securely by Stripe. Credits land on your account within seconds of payment.</p>
+      <p className="sp-secure">Checkout is handled securely by Stripe. Credits land on your account within seconds of payment.</p>
 
       <div className="sp-foot">
         <button type="button" className="sp-acct" onClick={() => setShowAccount(true)} aria-label="Account">
@@ -160,6 +160,6 @@ export default function SpotmintStorePage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/credits/page.tsx (v2 - account button)
+// END OF FILE - app/spotmint/credits/page.tsx (v3 - mint packs, secure panel)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
