@@ -2,8 +2,44 @@ import "server-only";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// v2: a light rate limit so nobody can script-flood the support
+// inbox or burn the Resend quota. Five messages per visitor per 15
+// minutes, tracked in this server's memory. Honest limits of the
+// approach: memory resets on each deploy and heavy traffic spreads
+// across servers, so this stops casual abuse rather than a
+// determined attacker - the bulletproof version needs a shared
+// store and is not worth it unless real abuse shows up.
+const WINDOW_MS = 15 * 60 * 1000;
+const MAX_PER_WINDOW = 5;
+const hits = new Map<string, number[]>();
+
+function isLimited(key: string): boolean {
+  const now = Date.now();
+  if (hits.size > 500) {
+    for (const [k, times] of hits) {
+      if (times.every((t) => now - t >= WINDOW_MS)) hits.delete(k);
+    }
+  }
+  const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
+  if (recent.length >= MAX_PER_WINDOW) {
+    hits.set(key, recent);
+    return true;
+  }
+  recent.push(now);
+  hits.set(key, recent);
+  return false;
+}
+
 export async function POST(request: Request) {
   try {
+    const ip = (request.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+    if (isLimited(ip)) {
+      return Response.json(
+        { error: "Too many messages - please wait a few minutes and try again." },
+        { status: 429 }
+      );
+    }
+
     const { name, email, comment } = await request.json();
 
     if (!name || typeof name !== "string" || !name.trim() || name.length > 100) {
@@ -46,3 +82,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "Something went wrong." }, { status: 500 });
   }
 }
+
+// -----------------------------------------------------------
+// END OF FILE - app/(chat)/api/support/route.ts (v2 - rate
+// limit)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
