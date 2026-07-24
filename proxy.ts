@@ -20,6 +20,14 @@ export async function proxy(request: NextRequest) {
   // keeps the rest of the site unreachable from inside the app.
   const userAgent = request.headers.get("user-agent") ?? "";
   if (userAgent.includes("SpotmintApp")) {
+    // v7: the one /spotmint path the app must NEVER see is the Stripe
+    // store page - purchase machinery inside the app would break the
+    // zero-commission doctrine. App traffic aiming there lands on the
+    // wallet, the in-app credits surface. Web and store-host traffic
+    // is untouched.
+    if (pathname.startsWith("/spotmint/credits")) {
+      return NextResponse.redirect(new URL("/spotmint/wallet", request.url));
+    }
     const appAllowed =
       pathname.startsWith("/spotmint") ||
       pathname === "/login" ||
@@ -122,7 +130,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v6 - store island, spotmint-dressed)
+// END OF FILE - proxy.ts (v7 - store page blocked in-app)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
