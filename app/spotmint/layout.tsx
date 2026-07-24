@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import "./spotmint.css";
 import { BRAND } from "./brand";
+import { SpotmintTabs } from "./tabs";
 
-// Server-side wrapper for the Spotmint surface. Its job is metadata:
-// the browser tab, share cards, and the wrapped app say Spotmint,
-// not AskEvo. Styling and logic live in page.tsx; this is a passthrough.
+// Server-side wrapper for the Spotmint surface. v3 is no longer a
+// passthrough: it mounts the shell - the four-tab bottom bar renders
+// here once for every /spotmint/* page (app, web, and the store
+// host alike), and .sp-shell pads the pages so content clears the
+// fixed bar. Metadata duties unchanged: the browser tab, share
+// cards, and the wrapped app say Spotmint, not AskEvo.
 
 export const metadata: Metadata = {
   title: BRAND.name,
@@ -22,10 +27,15 @@ export const viewport: Viewport = {
 };
 
 export default function SpotmintLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return (
+    <div className="sp-shell">
+      {children}
+      <SpotmintTabs />
+    </div>
+  );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/layout.tsx (v2 - safe area + zoom lock)
+// END OF FILE - app/spotmint/layout.tsx (v3 - shell activation)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
