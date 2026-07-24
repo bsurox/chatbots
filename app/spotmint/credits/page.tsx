@@ -26,6 +26,11 @@ export default function SpotmintStorePage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [justPaid, setJustPaid] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [isIos, setIsIos] = useState(false);
+
+  useEffect(() => {
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) setIsIos(true);
+  }, []);
 
   const loadCredits = useCallback(async () => {
     try {
@@ -57,9 +62,20 @@ export default function SpotmintStorePage() {
       setJustPaid(true);
       const t1 = setTimeout(loadCredits, 2000);
       const t2 = setTimeout(loadCredits, 6000);
+      // v4: hop back into the app automatically. iOS shows its own
+      // "Open in Spotmint?" confirm for scheme launches from Safari -
+      // that single tap is the closest to auto the platform allows.
+      // If it is blocked or dismissed, the button below the payment
+      // note is the fallback.
+      const t3 = setTimeout(() => {
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+          window.location.href = "spotmint://open";
+        }
+      }, 1400);
       return () => {
         clearTimeout(t1);
         clearTimeout(t2);
+        clearTimeout(t3);
       };
     }
   }, [loadCredits]);
@@ -107,7 +123,14 @@ export default function SpotmintStorePage() {
       <p className="sp-tag">Credits power every ad you create</p>
 
       {justPaid && (
-        <p className="sp-done">Payment received - your credits are being added to your balance.</p>
+        <div style={{ marginBottom: 18 }}>
+          <p className="sp-done">Payment received - your credits are being added to your balance.</p>
+          {isIos && (
+            <button type="button" className="sp-gen" onClick={() => { window.location.href = "spotmint://open"; }}>
+              Open the Spotmint app
+            </button>
+          )}
+        </div>
       )}
 
       <label className="sp-label">Choose a pack</label>
@@ -160,6 +183,6 @@ export default function SpotmintStorePage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/credits/page.tsx (v3 - mint packs, secure panel)
+// END OF FILE - app/spotmint/credits/page.tsx (v4 - auto return to app)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
