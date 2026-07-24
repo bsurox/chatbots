@@ -1,7 +1,7 @@
 "use client";
 import "./spotmint.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { GemIcon } from "@/components/chat/gem-icon";
 import { BRAND } from "./brand";
@@ -35,8 +35,8 @@ export default function SpotmintPage() {
   const [statusLabel, setStatusLabel] = useState<string | null>(null);
   const [isApp, setIsApp] = useState(false);
   const [showCreditsModal, setShowCreditsModal] = useState(false);
-  const [showAccount, setShowAccount] = useState(false);
   const [shareLabel, setShareLabel] = useState("Share");
+  const [saveLabel, setSaveLabel] = useState("Save");
 
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resumedRef = useRef(false);
@@ -222,23 +222,50 @@ export default function SpotmintPage() {
   }
 
   async function saveVideo(url: string) {
+    if (saveLabel !== "Save") return;
+    setSaveLabel("Preparing...");
     try {
       const res = await fetch(url);
       if (!res.ok) {
         throw new Error("fetch failed");
       }
       const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objectUrl;
-      a.download = "spotmint-ad.mp4";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      window.open(url, "_blank");
+      const file = new File([blob], "spotmint-ad.mp4", { type: blob.type || "video/mp4" });
+      if (isApp) {
+        // WKWebView has no download manager, so browser-style downloads
+        // are silent no-ops inside the app. The native share sheet with
+        // the actual file is the real path: it offers Save Video (to
+        // Photos) and Save to Files - exactly the two options we want.
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file] });
+          setSaveLabel("Saved");
+        } else {
+          throw new Error("file share unavailable");
+        }
+      } else {
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = "spotmint-ad.mp4";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(objectUrl);
+        setSaveLabel("Saved");
+      }
+    } catch (err) {
+      if ((err as { name?: string })?.name === "AbortError") {
+        setSaveLabel("Save");
+        return;
+      }
+      if (!isApp) {
+        window.open(url, "_blank");
+        setSaveLabel("Save");
+        return;
+      }
+      setSaveLabel("Save failed");
     }
+    setTimeout(() => setSaveLabel("Save"), 2200);
   }
 
   async function shareVideo(url: string) {
@@ -367,7 +394,7 @@ export default function SpotmintPage() {
           <div className="sp-time">{fmt(elapsed)}</div>
           <div className="sp-stage">{stage}</div>
           <div className="sp-bar"><span /></div>
-          <p className="sp-hint">Ads usually take 2-6 minutes. Keep this open or come back - your ad picks up right where it left off.</p>
+          <p className="sp-hint">Ads usually take 2-6 minutes. You can close this and come back - your ad keeps rendering and will be waiting here.</p>
         </div>
       )}
 
@@ -378,21 +405,8 @@ export default function SpotmintPage() {
           <p className="sp-done">Done in {fmt(elapsed)}</p>
           <video className="sp-video" controls playsInline src={videoUrl} />
           <div className="sp-actions">
-            <button type="button" className="sp-act" onClick={() => saveVideo(videoUrl)}>Save</button>
+            <button type="button" className="sp-act" onClick={() => saveVideo(videoUrl)}>{saveLabel}</button>
             <button type="button" className="sp-act" onClick={() => shareVideo(videoUrl)}>{shareLabel}</button>
-          </div>
-        </div>
-      )}
-
-      {showAccount && (
-        <div className="sp-mask" onClick={() => setShowAccount(false)}>
-          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
-            <p className="sp-mt">Account</p>
-            <p className="sp-mm">Signed in as <em>{session?.user?.email}</em></p>
-            <div className="sp-mrow">
-              <button type="button" className="sp-mbtn" onClick={() => setShowAccount(false)}>Close</button>
-              <button type="button" className="sp-mbtn" onClick={() => signOut({ redirectTo: "/spotmint" })}>Log out</button>
-            </div>
           </div>
         </div>
       )}
@@ -415,22 +429,12 @@ export default function SpotmintPage() {
         </div>
       )}
 
-      <div className="sp-foot">
-        <button type="button" className="sp-acct" onClick={() => setShowAccount(true)} aria-label="Account">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
-          </svg>
-        </button>
-        <p className="sp-buy">Buy credits at {BRAND.storeDomain}</p>
-      </div>
-
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v4 - account button, gold badge)
+// END OF FILE - app/spotmint/page.tsx (v6 - shell cleanup)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
