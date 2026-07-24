@@ -14,6 +14,7 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
+  const buyerEmail = session.user.email ?? "";
   const { bundle } = await request.json();
   const selected = PRICE_MAP[bundle];
   if (!selected) {
@@ -44,6 +45,15 @@ export async function POST(request: Request) {
       },
     ],
     mode: "payment",
+    // v3: purchases started on spotmint.store carry a SPOTMINT
+    // statement suffix, so card statements read ASKEVO* SPOTMINT
+    // instead of bare AskEvo. Requires the shortened statement
+    // descriptor to be set in the Stripe dashboard first. The
+    // buyer's account email is locked into checkout so receipts
+    // and the charge always tie to the signed-in account (guest
+    // ids are not real emails, hence the guard).
+    payment_intent_data: isSpotmintStore ? { statement_descriptor_suffix: "SPOTMINT" } : undefined,
+    customer_email: buyerEmail.includes("@") ? buyerEmail : undefined,
     success_url: successUrl,
     cancel_url: cancelUrl,
     metadata: {
@@ -55,8 +65,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(chat)/api/checkout/route.ts (v2 - origin
-// returns + pack-less names)
+// END OF FILE - app/(chat)/api/checkout/route.ts (v3 - spotmint
+// statement suffix + receipt email)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
