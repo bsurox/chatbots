@@ -53,7 +53,7 @@
 .sp-done { color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 10px; }
 .sp-video { width: 100%; border-radius: 12px; border: 1px solid #333; background: #000; }
 .sp-actions { display: flex; gap: 10px; margin-top: 12px; }
-.sp-act { flex: 1; padding: 12px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: #111; color: #fff; border: 1px solid #333; }
+.sp-act { flex: 1; padding: 12px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: color-mix(in oklab, var(--primary) 12%, transparent); color: var(--primary); border: 2px solid var(--primary); }
 
 .sp-note { color: #666; font-size: 11px; text-align: center; margin-top: 18px; line-height: 1.5; }
 
@@ -91,8 +91,17 @@
 .sp-roomy .sp-gen { padding: 15px 0; }
 .sp-roomy .sp-fmt { padding: 14px 10px; }
 
+/* Store (spotmint.store): every pack card is mint-highlighted - on
+   the store there is no selected-vs-unselected state to protect, the
+   packs ARE the product. .sp-secure is the Stripe reassurance line
+   in real green (#22c55e - same green as the AskEvo credits page),
+   deliberately not the brand mint. Both classes are dormant until
+   credits page v3 adopts them. */
+.sp-pack { background: color-mix(in oklab, var(--primary) 9%, transparent); border: 2px solid var(--primary); }
+.sp-secure { font-size: 13px; font-weight: 600; color: #22c55e; line-height: 1.5; text-align: center; border: 1px solid rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); border-radius: 10px; padding: 10px 14px; margin: 14px 0 0; }
+
 /* ============================================================ */
-/* END OF FILE - app/spotmint/spotmint.css (v7 - left account,   */
-/* centered badge)                                               */
+/* END OF FILE - app/spotmint/spotmint.css (v8 - mint actions,   */
+/* store pack + secure styles)                                   */
 /* If you can see this comment, the paste was not truncated.     */
 /* ============================================================ */
