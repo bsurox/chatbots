@@ -100,17 +100,19 @@
 .sp-pack { background: color-mix(in oklab, var(--primary) 9%, transparent); border: 2px solid var(--primary); }
 .sp-secure { font-size: 13px; font-weight: 600; color: #22c55e; line-height: 1.5; text-align: center; border: 1px solid rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); border-radius: 10px; padding: 10px 14px; margin: 14px 0 0; }
 
-/* Shell tab bar (dormant until app/spotmint/layout.tsx v3 mounts
-   SpotmintTabs and wraps pages in .sp-shell). Fixed to the bottom
-   with home-indicator clearance; Create wears the raised mint
-   circle - the crown of the bar. z-index stays under the modals. */
+/* Shell tab bar. Fixed to the bottom with home-indicator
+   clearance; Create wears the mint circle, sitting flush in the
+   bar (the raised version read as broken), always green but
+   dimmed on every page except Create itself. z-index stays
+   under the modals. */
 .sp-shell { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 .sp-tabs { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; align-items: flex-end; background: rgba(10,10,10,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top: 1px solid #222; padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); z-index: 40; }
 .sp-tab { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 64px; color: #777; font-size: 10px; font-weight: 600; text-decoration: none; -webkit-tap-highlight-color: transparent; }
 .sp-tab.on { color: var(--primary); }
-.sp-create-btn { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 999px; background: var(--primary); color: #000; margin-top: -20px; box-shadow: 0 4px 16px color-mix(in oklab, var(--primary) 45%, transparent); }
+.sp-create-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: var(--primary); color: #000; box-shadow: 0 2px 12px color-mix(in oklab, var(--primary) 40%, transparent); }
+.sp-tab:not(.on) .sp-create-btn { opacity: 0.55; box-shadow: none; }
 
 /* ============================================================ */
-/* END OF FILE - app/spotmint/spotmint.css (v9 - shell tab bar)  */
+/* END OF FILE - app/spotmint/spotmint.css (v10 - flush create)  */
 /* If you can see this comment, the paste was not truncated.     */
 /* ============================================================ */
