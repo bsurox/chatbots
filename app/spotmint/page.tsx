@@ -429,12 +429,19 @@ export default function SpotmintPage() {
         </div>
       )}
 
-      <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
+      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 18 }}>
+        <button type="button" className="sp-link" style={{ fontSize: 12 }} onClick={() => router.push("/spotmint/terms")}>Terms</button>
+        <span style={{ color: "#666", fontSize: 12 }}>-</span>
+        <button type="button" className="sp-link" style={{ fontSize: 12 }} onClick={() => router.push("/spotmint/privacy")}>Privacy</button>
+        <span style={{ color: "#666", fontSize: 12 }}>-</span>
+        <button type="button" className="sp-link" style={{ fontSize: 12 }} onClick={() => router.push("/spotmint/support")}>Contact us</button>
+      </div>
+      <p className="sp-note" style={{ marginTop: 8 }}>{BRAND.poweredBy}</p>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v6 - shell cleanup)
+// END OF FILE - app/spotmint/page.tsx (v7 - legal footer)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
