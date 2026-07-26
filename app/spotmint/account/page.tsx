@@ -1,3 +1,4 @@
+// FILE: app/spotmint/account/page.tsx
 "use client";
 import "../spotmint.css";
 import { useEffect } from "react";
@@ -54,12 +55,18 @@ export default function SpotmintAccountPage() {
         </button>
       </div>
 
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
+        <button type="button" className="sp-link" style={{ fontSize: 12, color: "#888" }} onClick={() => router.push("/spotmint/delete-account")}>
+          Delete account
+        </button>
+      </div>
+
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/account/page.tsx (v1 - account tab)
+// END OF FILE - app/spotmint/account/page.tsx (v2 - delete link)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
