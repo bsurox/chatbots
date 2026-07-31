@@ -1,3 +1,4 @@
+// FILE: app/spotmint/library/page.tsx
 "use client";
 import "../spotmint.css";
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ export default function SpotmintLibraryPage() {
   const [isApp, setIsApp] = useState(false);
   const [saveLabels, setSaveLabels] = useState<Record<string, string>>({});
   const [shareLabels, setShareLabels] = useState<Record<string, string>>({});
+  const [reportLabels, setReportLabels] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if ((window as { Capacitor?: unknown }).Capacitor) {
@@ -63,6 +65,9 @@ export default function SpotmintLibraryPage() {
   }
   function setShareLabel(id: string, value: string) {
     setShareLabels((prev) => ({ ...prev, [id]: value }));
+  }
+  function setReportLabel(id: string, value: string) {
+    setReportLabels((prev) => ({ ...prev, [id]: value }));
   }
 
   async function saveVideo(id: string, url: string) {
@@ -122,6 +127,36 @@ export default function SpotmintLibraryPage() {
     }
   }
 
+  // Content report (guideline 1.2): same mechanism as the result
+  // screen - one tap sends the job's request ID and video URL down
+  // the support pipe with a CONTENT REPORT prefix.
+  async function reportVideo(id: string, url: string) {
+    if ((reportLabels[id] ?? "Report") !== "Report") return;
+    setReportLabel(id, "Sending...");
+    try {
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: session?.user?.name || "Spotmint user",
+          email: session?.user?.email || "",
+          comment:
+            "CONTENT REPORT - Spotmint\n" +
+            "A user flagged this generated video as objectionable.\n" +
+            "Request ID: " + id + "\n" +
+            "Video URL: " + url,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("report failed");
+      }
+      setReportLabel(id, "Reported");
+    } catch {
+      setReportLabel(id, "Try again");
+      setTimeout(() => setReportLabel(id, "Report"), 2600);
+    }
+  }
+
   if (status === "loading") {
     return <div className="sp-wrap"><p style={{ color: "#888" }}>Loading...</p></div>;
   }
@@ -166,6 +201,14 @@ export default function SpotmintLibraryPage() {
                 {shareLabels[v.requestId] ?? "Share"}
               </button>
             </div>
+            <button
+              type="button"
+              className="sp-link"
+              style={{ display: "block", margin: "8px auto 0", fontSize: 12, color: "#888", fontWeight: 500 }}
+              onClick={() => reportVideo(v.requestId, v.videoUrl)}
+            >
+              {reportLabels[v.requestId] ?? "Report"}
+            </button>
           </div>
         ))}
 
@@ -175,6 +218,6 @@ export default function SpotmintLibraryPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/library/page.tsx (v1 - library tab)
+// END OF FILE - app/spotmint/library/page.tsx (v2 - report links)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
