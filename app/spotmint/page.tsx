@@ -1,69 +1,37 @@
-// FILE: app/spotmint/page.tsx
+// FILE: app/spotmint/credits/page.tsx
 "use client";
-import "./spotmint.css";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useSession } from "next-auth/react";
+import "../spotmint.css";
+import { useCallback, useEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { GemIcon } from "@/components/chat/gem-icon";
-import { BRAND } from "./brand";
-import { CINEMATIC_PRICING, TIERS, fmt, type AspectRatio, type CinematicSeconds, type Tier } from "../(chat)/video/video-config";
+import { BRAND } from "../brand";
 
-// Spotmint: the focused ad maker. Same engine, same prices, same
-// credits as /video - this surface just speaks to business owners
-// making ads. Vertical starts selected because ads live on Reels.
+// The Spotmint store: Spotmint-dressed credits page served on
+// spotmint.store. Display data below mirrors the server's PRICE_MAP
+// in app/(chat)/api/checkout/route.ts - keep them in sync. The
+// server's table is what actually charges, so a mismatch here can
+// only mislabel, never misbill.
 
-const FORMATS: { id: AspectRatio; label: string; hint: string }[] = [
-  { id: "9:16", label: "Vertical", hint: "Reels, TikTok, Stories" },
-  { id: "16:9", label: "Widescreen", hint: "YouTube, websites" },
+const BUNDLES: { id: string; name: string; price: string; credits: number; badge?: string }[] = [
+  { id: "starter", name: "Starter", price: "$5", credits: 220 },
+  { id: "power", name: "Power", price: "$15", credits: 800 },
+  { id: "pro", name: "Pro", price: "$40", credits: 2400 },
+  { id: "premium", name: "Premium", price: "$75", credits: 5000, badge: "Best value for video" },
+  { id: "ultra", name: "Ultra", price: "$150", credits: 11750 },
 ];
 
-export default function SpotmintPage() {
+export default function SpotmintStorePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  const [prompt, setPrompt] = useState("");
-  const [tierId, setTierId] = useState<Tier["id"]>("premium");
-  const [length, setLength] = useState<5 | 10>(5);
-  const [cineSeconds, setCineSeconds] = useState<CinematicSeconds>(8);
-  const [cineAudio, setCineAudio] = useState(true);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("9:16");
   const [credits, setCredits] = useState<number | null>(null);
-  const [phase, setPhase] = useState<"idle" | "starting" | "generating" | "done" | "error">("idle");
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [startedAt, setStartedAt] = useState<number | null>(null);
-  const [elapsed, setElapsed] = useState(0);
-  const [statusLabel, setStatusLabel] = useState<string | null>(null);
-  const [isApp, setIsApp] = useState(false);
-  const [showCreditsModal, setShowCreditsModal] = useState(false);
-  const [shareLabel, setShareLabel] = useState("Share");
-  const [saveLabel, setSaveLabel] = useState("Save");
-  const [reportLabel, setReportLabel] = useState("Report this ad");
-  const [lastRequestId, setLastRequestId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [justPaid, setJustPaid] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+  const [isIos, setIsIos] = useState(false);
 
-  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const resumedRef = useRef(false);
-  const lastUserRef = useRef<string | null>(null);
-
-  // Inside the wrapped app, Capacitor injects window.Capacitor.
-  // When present we hide every credit-purchase link so the app
-  // stays commission-free on both stores.
   useEffect(() => {
-    if ((window as { Capacitor?: unknown }).Capacitor) {
-      setIsApp(true);
-    }
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) setIsIos(true);
   }, []);
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session?.user) {
-      router.push("/register?redirectUrl=/spotmint");
-      return;
-    }
-    if (/^guest-\d+$/.test(session.user.email ?? "")) {
-      router.push("/register?redirectUrl=/spotmint");
-    }
-  }, [session, status, router]);
 
   const loadCredits = useCallback(async () => {
     try {
@@ -75,90 +43,70 @@ export default function SpotmintPage() {
     }
   }, []);
 
-  const poll = useCallback(
-    async (requestId: string) => {
-      try {
-        const res = await fetch(`/api/video/status?requestId=${encodeURIComponent(requestId)}`);
-        const data = await res.json();
-        if (data.status === "completed" && data.videoUrl) {
-          setVideoUrl(data.videoUrl);
-          setPhase("done");
-          setStatusLabel(null);
-          if (typeof data.credits === "number") setCredits(data.credits);
-          localStorage.removeItem(BRAND.jobKey);
-          return;
-        }
-        if (data.status === "failed") {
-          setErrorMsg(data.error || "Generation failed. Your credits were refunded.");
-          setPhase("error");
-          setStatusLabel(null);
-          localStorage.removeItem(BRAND.jobKey);
-          loadCredits();
-          return;
-        }
-        if (data.statusLabel) setStatusLabel(data.statusLabel);
-        pollRef.current = setTimeout(() => poll(requestId), 4000);
-      } catch {
-        pollRef.current = setTimeout(() => poll(requestId), 5000);
-      }
-    },
-    [loadCredits]
-  );
-
-  // Credits: re-fetch whenever the signed-in identity changes (the app
-  // logs in mid-session while this page instance survives navigation),
-  // and whenever the app returns to the foreground - which is also what
-  // updates the balance after buying on the web and coming back.
   useEffect(() => {
-    const email = session?.user?.email ?? null;
-    if (!email || /^guest-\d+$/.test(email)) return;
-    if (lastUserRef.current !== email) {
-      lastUserRef.current = email;
-      loadCredits();
+    if (status === "loading") return;
+    if (!session?.user) {
+      router.push("/login?redirectUrl=/spotmint/credits");
+      return;
     }
-  }, [session, loadCredits]);
+    if (/^guest-\d+$/.test(session.user.email ?? "")) {
+      router.push("/login?redirectUrl=/spotmint/credits");
+      return;
+    }
+    loadCredits();
+  }, [session, status, router, loadCredits]);
+
+  useEffect(() => {
+    // Back from a completed Stripe checkout: show the note and give the
+    // webhook a moment to land the credits, refreshing a couple times.
+    if (window.location.search.includes("success=1")) {
+      setJustPaid(true);
+      const t1 = setTimeout(loadCredits, 2000);
+      const t2 = setTimeout(loadCredits, 6000);
+      // v4: hop back into the app automatically. iOS shows its own
+      // "Open in Spotmint?" confirm for scheme launches from Safari -
+      // that single tap is the closest to auto the platform allows.
+      // If it is blocked or dismissed, the button below the payment
+      // note is the fallback.
+      const t3 = setTimeout(() => {
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+          window.location.href = "spotmint://open";
+        }
+      }, 1400);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
+    }
+  }, [loadCredits]);
 
   useEffect(() => {
     const onVisible = () => {
-      if (document.visibilityState === "visible" && lastUserRef.current) loadCredits();
+      if (document.visibilityState === "visible") loadCredits();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [loadCredits]);
 
-  useEffect(() => {
-    if (!session?.user || resumedRef.current) return;
-    resumedRef.current = true;
-    const saved = localStorage.getItem(BRAND.jobKey);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.requestId) {
-          setLastRequestId(parsed.requestId);
-          setStartedAt(parsed.startedAt || Date.now());
-          setPhase("generating");
-          poll(parsed.requestId);
-        }
-      } catch {
-        localStorage.removeItem(BRAND.jobKey);
+  async function handleBuy(bundleId: string) {
+    setLoading(bundleId);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bundle: bundleId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
       }
+      setLoading(null);
+    } catch {
+      setLoading(null);
     }
-  }, [session, poll]);
-
-  useEffect(() => {
-    if ((phase === "generating" || phase === "starting") && startedAt) {
-      const tick = () => setElapsed(Math.floor((Date.now() - startedAt) / 1000));
-      tick();
-      const id = setInterval(tick, 1000);
-      return () => clearInterval(id);
-    }
-  }, [phase, startedAt]);
-
-  useEffect(() => {
-    return () => {
-      if (pollRef.current) clearTimeout(pollRef.current);
-    };
-  }, []);
+  }
 
   if (status === "loading") {
     return <div className="sp-wrap"><p style={{ color: "#888" }}>Loading...</p></div>;
@@ -167,329 +115,75 @@ export default function SpotmintPage() {
     return null;
   }
 
-  const tier = TIERS.find((t) => t.id === tierId) ?? TIERS[0];
-  const isCinematic = tierId === "cinematic";
-  const cineRow = CINEMATIC_PRICING.find((r) => r.seconds === cineSeconds) ?? CINEMATIC_PRICING[CINEMATIC_PRICING.length - 1];
-  const effectiveSeconds = isCinematic ? cineRow.seconds : length;
-  const cost = isCinematic
-    ? (cineAudio ? cineRow.audio : cineRow.silent)
-    : length === 5
-    ? (tier.credits5 as number)
-    : (tier.credits10 as number);
-  const notEnough = credits !== null && cost > credits;
-  const busy = phase === "starting" || phase === "generating";
-  const canGenerate = prompt.trim().length > 0 && !busy;
-
-  let stage = statusLabel;
-  if (!stage) {
-    if (elapsed < 8) stage = "Queued - reserving a spot...";
-    else if (elapsed < 40) stage = "Warming up the model...";
-    else if (elapsed < 240) stage = "Rendering your ad...";
-    else stage = "Finalizing your ad...";
-  }
-
-  async function handleGenerate() {
-    if (!canGenerate) return;
-    if (notEnough) {
-      setShowCreditsModal(true);
-      return;
-    }
-    setErrorMsg(null);
-    setVideoUrl(null);
-    setStatusLabel(null);
-    setReportLabel("Report this ad");
-    setLastRequestId(null);
-    const started = Date.now();
-    setStartedAt(started);
-    setElapsed(0);
-    setPhase("starting");
-    try {
-      const res = await fetch("/api/video", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim(), tier: tierId, length: effectiveSeconds, aspectRatio, audio: isCinematic ? cineAudio : undefined }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.requestId) {
-        setErrorMsg(data.error || "Could not start your ad.");
-        setPhase("error");
-        loadCredits();
-        return;
-      }
-      if (typeof data.credits === "number") setCredits(data.credits);
-      setLastRequestId(data.requestId);
-      localStorage.setItem(BRAND.jobKey, JSON.stringify({ requestId: data.requestId, startedAt: started }));
-      setPhase("generating");
-      poll(data.requestId);
-    } catch {
-      setErrorMsg("Something went wrong. Please try again.");
-      setPhase("error");
-      loadCredits();
-    }
-  }
-
-  async function saveVideo(url: string) {
-    if (saveLabel !== "Save") return;
-    setSaveLabel("Preparing...");
-    try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error("fetch failed");
-      }
-      const blob = await res.blob();
-      const file = new File([blob], "spotmint-ad.mp4", { type: blob.type || "video/mp4" });
-      if (isApp) {
-        // WKWebView has no download manager, so browser-style downloads
-        // are silent no-ops inside the app. The native share sheet with
-        // the actual file is the real path: it offers Save Video (to
-        // Photos) and Save to Files - exactly the two options we want.
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file] });
-          setSaveLabel("Saved");
-        } else {
-          throw new Error("file share unavailable");
-        }
-      } else {
-        const objectUrl = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = objectUrl;
-        a.download = "spotmint-ad.mp4";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(objectUrl);
-        setSaveLabel("Saved");
-      }
-    } catch (err) {
-      if ((err as { name?: string })?.name === "AbortError") {
-        setSaveLabel("Save");
-        return;
-      }
-      if (!isApp) {
-        window.open(url, "_blank");
-        setSaveLabel("Save");
-        return;
-      }
-      setSaveLabel("Save failed");
-    }
-    setTimeout(() => setSaveLabel("Save"), 2200);
-  }
-
-  async function shareVideo(url: string) {
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: BRAND.name, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      setShareLabel("Link copied");
-      setTimeout(() => setShareLabel("Share"), 2000);
-    } catch {
-      // user cancelled the share sheet - nothing to do
-    }
-  }
-
-  // Content report: App Store guideline 1.2 wants users of AI
-  // generators to have a way to flag objectionable output. One tap
-  // sends the job's request ID and video URL down the existing
-  // support pipe with a CONTENT REPORT prefix - support@askevo.ai
-  // can then pull the job, remove the content, and act on the
-  // account per the terms. No new backend.
-  async function reportVideo(url: string) {
-    if (reportLabel !== "Report this ad") return;
-    setReportLabel("Sending report...");
-    try {
-      const res = await fetch("/api/support", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: session?.user?.name || "Spotmint user",
-          email: session?.user?.email || "",
-          comment:
-            "CONTENT REPORT - Spotmint\n" +
-            "A user flagged this generated video as objectionable.\n" +
-            "Request ID: " + (lastRequestId ?? "unknown") + "\n" +
-            "Video URL: " + url,
-        }),
-      });
-      if (!res.ok) {
-        throw new Error("report failed");
-      }
-      setReportLabel("Reported - thank you");
-    } catch {
-      setReportLabel("Could not send - try again");
-      setTimeout(() => setReportLabel("Report this ad"), 2600);
-    }
-  }
-
   return (
-    <div className={isCinematic ? "sp-wrap" : "sp-wrap sp-roomy"}>
+    <div className="sp-wrap">
       <div className="sp-top">
-        <div className="sp-brand">Spot<span>mint</span><GemIcon className="sp-gemlogo" /></div>
+        <div className="sp-brand">Spot<span>mint</span></div>
         <div className="sp-credits">{credits === null ? "..." : credits.toLocaleString()} credits</div>
       </div>
-      <p className="sp-tag">{BRAND.tagline}</p>
+      <p className="sp-tag">Credits power every ad you create</p>
 
-      <label className="sp-label">Describe your ad</label>
-      <textarea
-        className="sp-ta"
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder={BRAND.promptPlaceholder}
-        rows={2}
-        disabled={busy}
-      />
-
-      <label className="sp-label">Length</label>
-      {isCinematic ? (
-        <div style={{ marginBottom: 22 }}>
-          <div className="sp-seg">
-            {CINEMATIC_PRICING.map((row) => (
-              <button
-                key={row.seconds}
-                type="button"
-                className={cineSeconds === row.seconds ? "on" : undefined}
-                onClick={() => setCineSeconds(row.seconds)}
-                disabled={busy}
-              >
-                {row.seconds}s
-              </button>
-            ))}
-          </div>
-          <label className="sp-label">Sound</label>
-          <div className="sp-seg">
-            <button type="button" className={cineAudio ? "on" : undefined} onClick={() => setCineAudio(true)} disabled={busy}>
-              Sound on - {cineRow.audio.toLocaleString()}
+      {justPaid && (
+        <div style={{ marginBottom: 18 }}>
+          <p className="sp-done">Payment received - your credits are being added to your balance.</p>
+          {isIos && (
+            <button type="button" className="sp-gen" onClick={() => { window.location.href = "spotmint://open"; }}>
+              Open the Spotmint app
             </button>
-            <button type="button" className={!cineAudio ? "on" : undefined} onClick={() => setCineAudio(false)} disabled={busy}>
-              Sound off - {cineRow.silent.toLocaleString()}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="sp-seg">
-          {[5, 10].map((sec) => (
-            <button
-              key={sec}
-              type="button"
-              className={length === sec ? "on" : undefined}
-              onClick={() => setLength(sec as 5 | 10)}
-              disabled={busy}
-            >
-              {sec} seconds
-            </button>
-          ))}
+          )}
         </div>
       )}
 
-      <label className="sp-label">Quality</label>
+      <label className="sp-label">Choose a pack</label>
       <div className="sp-tiers">
-        {TIERS.map((t) => {
-          const tCost = t.id === "cinematic"
-            ? (cineAudio ? cineRow.audio : cineRow.silent)
-            : length === 5
-            ? (t.credits5 as number)
-            : (t.credits10 as number);
-          return (
-            <button
-              key={t.id}
-              type="button"
-              className={t.id === tierId ? "sp-tier on" : "sp-tier"}
-              onClick={() => setTierId(t.id)}
-              disabled={busy}
-            >
-              <div>
-                <div className="sp-tn">{t.name}</div>
-                <p className="sp-td">{t.desc}</p>
-              </div>
-              <div className="sp-tc">{tCost.toLocaleString()} cr</div>
-            </button>
-          );
-        })}
-      </div>
-
-      <label className="sp-label">Format</label>
-      <div className="sp-formats">
-        {FORMATS.map((f) => (
+        {BUNDLES.map((b) => (
           <button
-            key={f.id}
+            key={b.id}
             type="button"
-            className={f.id === aspectRatio ? "sp-fmt on" : "sp-fmt"}
-            onClick={() => setAspectRatio(f.id)}
-            disabled={busy}
+            className="sp-tier sp-pack"
+            onClick={() => handleBuy(b.id)}
+            disabled={loading !== null}
           >
-            <div className="sp-fn">{f.label}</div>
-            <p className="sp-fd">{f.hint}</p>
+            <div>
+              <div className="sp-tn">{b.name}</div>
+              <p className="sp-td">
+                {b.credits.toLocaleString()} credits{b.badge ? ` - ${b.badge}` : ""}
+              </p>
+            </div>
+            <div className="sp-tc">{loading === b.id ? "..." : b.price}</div>
           </button>
         ))}
       </div>
+      <p className="sp-secure">Checkout is handled securely by Stripe. Credits land on your account within seconds of payment.</p>
 
-      <button type="button" className="sp-gen" onClick={handleGenerate} disabled={!canGenerate}>
-        {phase === "starting" ? "Starting..." : phase === "generating" ? "Creating your ad..." : `Create my ad - ${cost.toLocaleString()} credits`}
-      </button>
+      <div className="sp-foot">
+        <button type="button" className="sp-acct" onClick={() => setShowAccount(true)} aria-label="Account">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
+          </svg>
+        </button>
+      </div>
 
-      {busy && (
-        <div className="sp-loader">
-          <div className="sp-ring" />
-          <div className="sp-time">{fmt(elapsed)}</div>
-          <div className="sp-stage">{stage}</div>
-          <div className="sp-bar"><span /></div>
-          <p className="sp-hint">Ads usually take 2-6 minutes. You can close this and come back - your ad keeps rendering and will be waiting here.</p>
-        </div>
-      )}
-
-      {phase === "error" && errorMsg && <div className="sp-err">{errorMsg}</div>}
-
-      {phase === "done" && videoUrl && (
-        <div style={{ marginTop: 22 }}>
-          <p className="sp-done">Done in {fmt(elapsed)}</p>
-          <video className="sp-video" controls playsInline src={videoUrl} />
-          <div className="sp-actions">
-            <button type="button" className="sp-act" onClick={() => saveVideo(videoUrl)}>{saveLabel}</button>
-            <button type="button" className="sp-act" onClick={() => shareVideo(videoUrl)}>{shareLabel}</button>
-          </div>
-          <button
-            type="button"
-            className="sp-link"
-            style={{ display: "block", margin: "12px auto 0", fontSize: 12, color: "#888", fontWeight: 500 }}
-            onClick={() => reportVideo(videoUrl)}
-          >
-            {reportLabel}
-          </button>
-        </div>
-      )}
-
-      {showCreditsModal && (
-        <div className="sp-mask" onClick={() => setShowCreditsModal(false)}>
+      {showAccount && (
+        <div className="sp-mask" onClick={() => setShowAccount(false)}>
           <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
-            <p className="sp-mt">Not enough credits</p>
-            <p className="sp-mm">
-              This option costs {cost.toLocaleString()} credits and your balance is {(credits ?? 0).toLocaleString()}.
-              {isApp ? <> Credits can be purchased at <em>{BRAND.storeDomain}</em>.</> : <> Top up and your new balance shows here right away.</>}
-            </p>
+            <p className="sp-mt">Account</p>
+            <p className="sp-mm">Signed in as <em>{session?.user?.email}</em></p>
             <div className="sp-mrow">
-              <button type="button" className="sp-mbtn" onClick={() => setShowCreditsModal(false)}>Close</button>
-              {!isApp && (
-                <button type="button" className="sp-mbtn primary" onClick={() => router.push("/credits")}>Buy credits</button>
-              )}
+              <button type="button" className="sp-mbtn" onClick={() => setShowAccount(false)}>Close</button>
+              <button type="button" className="sp-mbtn" onClick={() => signOut({ redirectTo: "/spotmint/credits" })}>Log out</button>
             </div>
           </div>
         </div>
       )}
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 18 }}>
-        <button type="button" className="sp-link" style={{ fontSize: 12 }} onClick={() => router.push("/spotmint/terms")}>Terms</button>
-        <span style={{ color: "#666", fontSize: 12 }}>-</span>
-        <button type="button" className="sp-link" style={{ fontSize: 12 }} onClick={() => router.push("/spotmint/privacy")}>Privacy</button>
-        <span style={{ color: "#666", fontSize: 12 }}>-</span>
-        <button type="button" className="sp-link" style={{ fontSize: 12 }} onClick={() => router.push("/spotmint/support")}>Contact us</button>
-      </div>
-      <p className="sp-note" style={{ marginTop: 8 }}>{BRAND.poweredBy}</p>
+      <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v8 - content report link)
+// END OF FILE - app/spotmint/credits/page.tsx (v5 - store defaults to login)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
