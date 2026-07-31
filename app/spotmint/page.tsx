@@ -1,3 +1,4 @@
+// FILE: app/spotmint/page.tsx
 "use client";
 import "./spotmint.css";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -37,6 +38,8 @@ export default function SpotmintPage() {
   const [showCreditsModal, setShowCreditsModal] = useState(false);
   const [shareLabel, setShareLabel] = useState("Share");
   const [saveLabel, setSaveLabel] = useState("Save");
+  const [reportLabel, setReportLabel] = useState("Report this ad");
+  const [lastRequestId, setLastRequestId] = useState<string | null>(null);
 
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resumedRef = useRef(false);
@@ -131,6 +134,7 @@ export default function SpotmintPage() {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.requestId) {
+          setLastRequestId(parsed.requestId);
           setStartedAt(parsed.startedAt || Date.now());
           setPhase("generating");
           poll(parsed.requestId);
@@ -193,6 +197,8 @@ export default function SpotmintPage() {
     setErrorMsg(null);
     setVideoUrl(null);
     setStatusLabel(null);
+    setReportLabel("Report this ad");
+    setLastRequestId(null);
     const started = Date.now();
     setStartedAt(started);
     setElapsed(0);
@@ -211,6 +217,7 @@ export default function SpotmintPage() {
         return;
       }
       if (typeof data.credits === "number") setCredits(data.credits);
+      setLastRequestId(data.requestId);
       localStorage.setItem(BRAND.jobKey, JSON.stringify({ requestId: data.requestId, startedAt: started }));
       setPhase("generating");
       poll(data.requestId);
@@ -279,6 +286,39 @@ export default function SpotmintPage() {
       setTimeout(() => setShareLabel("Share"), 2000);
     } catch {
       // user cancelled the share sheet - nothing to do
+    }
+  }
+
+  // Content report: App Store guideline 1.2 wants users of AI
+  // generators to have a way to flag objectionable output. One tap
+  // sends the job's request ID and video URL down the existing
+  // support pipe with a CONTENT REPORT prefix - support@askevo.ai
+  // can then pull the job, remove the content, and act on the
+  // account per the terms. No new backend.
+  async function reportVideo(url: string) {
+    if (reportLabel !== "Report this ad") return;
+    setReportLabel("Sending report...");
+    try {
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: session?.user?.name || "Spotmint user",
+          email: session?.user?.email || "",
+          comment:
+            "CONTENT REPORT - Spotmint\n" +
+            "A user flagged this generated video as objectionable.\n" +
+            "Request ID: " + (lastRequestId ?? "unknown") + "\n" +
+            "Video URL: " + url,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("report failed");
+      }
+      setReportLabel("Reported - thank you");
+    } catch {
+      setReportLabel("Could not send - try again");
+      setTimeout(() => setReportLabel("Report this ad"), 2600);
     }
   }
 
@@ -408,6 +448,14 @@ export default function SpotmintPage() {
             <button type="button" className="sp-act" onClick={() => saveVideo(videoUrl)}>{saveLabel}</button>
             <button type="button" className="sp-act" onClick={() => shareVideo(videoUrl)}>{shareLabel}</button>
           </div>
+          <button
+            type="button"
+            className="sp-link"
+            style={{ display: "block", margin: "12px auto 0", fontSize: 12, color: "#888", fontWeight: 500 }}
+            onClick={() => reportVideo(videoUrl)}
+          >
+            {reportLabel}
+          </button>
         </div>
       )}
 
@@ -442,6 +490,6 @@ export default function SpotmintPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v7 - legal footer)
+// END OF FILE - app/spotmint/page.tsx (v8 - content report link)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
