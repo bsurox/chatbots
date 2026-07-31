@@ -1,3 +1,4 @@
+// FILE: app/spotmint/credits/page.tsx
 "use client";
 import "../spotmint.css";
 import { useCallback, useEffect, useState } from "react";
@@ -45,11 +46,11 @@ export default function SpotmintStorePage() {
   useEffect(() => {
     if (status === "loading") return;
     if (!session?.user) {
-      router.push("/register?redirectUrl=/spotmint/credits");
+      router.push("/login?redirectUrl=/spotmint/credits");
       return;
     }
     if (/^guest-\d+$/.test(session.user.email ?? "")) {
-      router.push("/register?redirectUrl=/spotmint/credits");
+      router.push("/login?redirectUrl=/spotmint/credits");
       return;
     }
     loadCredits();
@@ -183,6 +184,6 @@ export default function SpotmintStorePage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/credits/page.tsx (v4 - auto return to app)
+// END OF FILE - app/spotmint/credits/page.tsx (v5 - store defaults to login)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
