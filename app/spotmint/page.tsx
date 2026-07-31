@@ -1,189 +1,178 @@
-// FILE: app/spotmint/credits/page.tsx
-"use client";
-import "../spotmint.css";
-import { useCallback, useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { BRAND } from "../brand";
-
-// The Spotmint store: Spotmint-dressed credits page served on
-// spotmint.store. Display data below mirrors the server's PRICE_MAP
-// in app/(chat)/api/checkout/route.ts - keep them in sync. The
-// server's table is what actually charges, so a mismatch here can
-// only mislabel, never misbill.
-
-const BUNDLES: { id: string; name: string; price: string; credits: number; badge?: string }[] = [
-  { id: "starter", name: "Starter", price: "$5", credits: 220 },
-  { id: "power", name: "Power", price: "$15", credits: 800 },
-  { id: "pro", name: "Pro", price: "$40", credits: 2400 },
-  { id: "premium", name: "Premium", price: "$75", credits: 5000, badge: "Best value for video" },
-  { id: "ultra", name: "Ultra", price: "$150", credits: 11750 },
-];
-
-export default function SpotmintStorePage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [credits, setCredits] = useState<number | null>(null);
-  const [loading, setLoading] = useState<string | null>(null);
-  const [justPaid, setJustPaid] = useState(false);
-  const [showAccount, setShowAccount] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-
-  useEffect(() => {
-    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) setIsIos(true);
-  }, []);
-
-  const loadCredits = useCallback(async () => {
-    try {
-      const res = await fetch("/api/credits");
-      const data = await res.json();
-      if (typeof data.credits === "number") setCredits(data.credits);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session?.user) {
-      router.push("/login?redirectUrl=/spotmint/credits");
-      return;
-    }
-    if (/^guest-\d+$/.test(session.user.email ?? "")) {
-      router.push("/login?redirectUrl=/spotmint/credits");
-      return;
-    }
-    loadCredits();
-  }, [session, status, router, loadCredits]);
-
-  useEffect(() => {
-    // Back from a completed Stripe checkout: show the note and give the
-    // webhook a moment to land the credits, refreshing a couple times.
-    if (window.location.search.includes("success=1")) {
-      setJustPaid(true);
-      const t1 = setTimeout(loadCredits, 2000);
-      const t2 = setTimeout(loadCredits, 6000);
-      // v4: hop back into the app automatically. iOS shows its own
-      // "Open in Spotmint?" confirm for scheme launches from Safari -
-      // that single tap is the closest to auto the platform allows.
-      // If it is blocked or dismissed, the button below the payment
-      // note is the fallback.
-      const t3 = setTimeout(() => {
-        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-          window.location.href = "spotmint://open";
-        }
-      }, 1400);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-      };
-    }
-  }, [loadCredits]);
-
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === "visible") loadCredits();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [loadCredits]);
-
-  async function handleBuy(bundleId: string) {
-    setLoading(bundleId);
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bundle: bundleId }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      setLoading(null);
-    } catch {
-      setLoading(null);
-    }
-  }
-
-  if (status === "loading") {
-    return <div className="sp-wrap"><p style={{ color: "#888" }}>Loading...</p></div>;
-  }
-  if (!session?.user || /^guest-\d+$/.test(session?.user?.email ?? "")) {
-    return null;
-  }
-
-  return (
-    <div className="sp-wrap">
-      <div className="sp-top">
-        <div className="sp-brand">Spot<span>mint</span></div>
-        <div className="sp-credits">{credits === null ? "..." : credits.toLocaleString()} credits</div>
-      </div>
-      <p className="sp-tag">Credits power every ad you create</p>
-
-      {justPaid && (
-        <div style={{ marginBottom: 18 }}>
-          <p className="sp-done">Payment received - your credits are being added to your balance.</p>
-          {isIos && (
-            <button type="button" className="sp-gen" onClick={() => { window.location.href = "spotmint://open"; }}>
-              Open the Spotmint app
-            </button>
-          )}
-        </div>
-      )}
-
-      <label className="sp-label">Choose a pack</label>
-      <div className="sp-tiers">
-        {BUNDLES.map((b) => (
-          <button
-            key={b.id}
-            type="button"
-            className="sp-tier sp-pack"
-            onClick={() => handleBuy(b.id)}
-            disabled={loading !== null}
-          >
-            <div>
-              <div className="sp-tn">{b.name}</div>
-              <p className="sp-td">
-                {b.credits.toLocaleString()} credits{b.badge ? ` - ${b.badge}` : ""}
-              </p>
-            </div>
-            <div className="sp-tc">{loading === b.id ? "..." : b.price}</div>
-          </button>
-        ))}
-      </div>
-      <p className="sp-secure">Checkout is handled securely by Stripe. Credits land on your account within seconds of payment.</p>
-
-      <div className="sp-foot">
-        <button type="button" className="sp-acct" onClick={() => setShowAccount(true)} aria-label="Account">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
-          </svg>
-        </button>
-      </div>
-
-      {showAccount && (
-        <div className="sp-mask" onClick={() => setShowAccount(false)}>
-          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
-            <p className="sp-mt">Account</p>
-            <p className="sp-mm">Signed in as <em>{session?.user?.email}</em></p>
-            <div className="sp-mrow">
-              <button type="button" className="sp-mbtn" onClick={() => setShowAccount(false)}>Close</button>
-              <button type="button" className="sp-mbtn" onClick={() => signOut({ redirectTo: "/spotmint/credits" })}>Log out</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
-    </div>
-  );
-}
-
-// ============================================================
-// END OF FILE - app/spotmint/credits/page.tsx (v5 - store defaults to login)
-// If you can see this comment, the paste was not truncated.
-// ============================================================
+22:59:12.324 Running build in Cleveland, USA (East) – cle1
+22:59:12.325 Build machine configuration: 4 cores, 8 GB
+22:59:12.420 Cloning github.com/bsurox/chatbots (Branch: main, Commit: 7807db0)
+22:59:13.367 Cloning completed: 947.000ms
+22:59:13.467 Restored build cache from previous deployment (3GwYTPncXoswBd2n9ePz8abbAF5U)
+22:59:13.642 Running "vercel build"
+22:59:13.654 Vercel CLI 58.4.0
+22:59:13.672 Detected OpenTelemetry dependency: @vercel/otel@1.12.0, which meets the minimum version requirement of 1.11.0
+22:59:13.845 Running "install" command: `npx pnpm@10.32.1 install --no-frozen-lockfile`...
+22:59:17.284 npm warn exec The following package was not found and will be installed: pnpm@10.32.1
+22:59:19.142 Progress: resolved 0, reused 0, downloaded 1, added 0
+22:59:20.213 Progress: resolved 61, reused 0, downloaded 61, added 0
+22:59:21.214 Progress: resolved 86, reused 0, downloaded 86, added 0
+22:59:22.214 Progress: resolved 122, reused 0, downloaded 113, added 0
+22:59:23.218 Progress: resolved 247, reused 0, downloaded 232, added 0
+22:59:24.221 Progress: resolved 341, reused 0, downloaded 326, added 0
+22:59:25.232 Progress: resolved 466, reused 0, downloaded 393, added 0
+22:59:26.242 Progress: resolved 665, reused 0, downloaded 538, added 0
+22:59:27.038  WARN  2 deprecated subdependencies found: @esbuild-kit/core-utils@3.3.2, @esbuild-kit/esm-loader@2.6.5
+22:59:27.069 Already up to date
+22:59:27.124 Progress: resolved 838, reused 0, downloaded 711, added 0, done
+22:59:27.533  WARN  Issues with peer dependencies found
+22:59:27.534 .
+22:59:27.534 ├─┬ @vercel/otel 1.14.2
+22:59:27.534 │ └── ✕ unmet peer @opentelemetry/api-logs@">=0.46.0 <0.200.0": found 0.200.0
+22:59:27.534 ├─┬ next-auth 5.0.0-beta.25
+22:59:27.534 │ └── ✕ unmet peer next@"^14.0.0-0 || ^15.0.0-0": found 16.2.0
+22:59:27.534 └─┬ next-themes 0.3.0
+22:59:27.534   ├── ✕ unmet peer react@"^16.8 || ^17 || ^18": found 19.0.1
+22:59:27.535   └── ✕ unmet peer react-dom@"^16.8 || ^17 || ^18": found 19.0.1
+22:59:27.535 
+22:59:27.541 Done in 9.1s using pnpm v10.32.1
+22:59:27.635 Detected Next.js version: 16.2.0
+22:59:27.687 Detected `pnpm-lock.yaml` version 9 generated by pnpm@10.x with package.json#packageManager pnpm@10.32.1
+22:59:27.687 Running "pnpm run build"
+22:59:29.336 
+22:59:29.336 > chatbot@3.1.0 build /vercel/path0
+22:59:29.337 > tsx lib/db/migrate && next build
+22:59:29.337 
+22:59:29.700 Running migrations...
+22:59:29.904 {
+22:59:29.904   severity_local: 'NOTICE',
+22:59:29.904   severity: 'NOTICE',
+22:59:29.904   code: '42P06',
+22:59:29.904   message: 'schema "drizzle" already exists, skipping',
+22:59:29.904   file: 'schemacmds.c',
+22:59:29.904   line: '132',
+22:59:29.904   routine: 'CreateSchemaCommand'
+22:59:29.904 }
+22:59:29.925 {
+22:59:29.925   severity_local: 'NOTICE',
+22:59:29.925   severity: 'NOTICE',
+22:59:29.925   code: '42P07',
+22:59:29.925   message: 'relation "__drizzle_migrations" already exists, skipping',
+22:59:29.925   file: 'parse_utilcmd.c',
+22:59:29.925   line: '207',
+22:59:29.925   routine: 'transformCreateStmt'
+22:59:29.925 }
+22:59:29.990 Migrations completed in 289 ms
+22:59:30.631   Applying modifyConfig from Vercel
+22:59:30.655 ▲ Next.js 16.2.0 (Turbopack)
+22:59:30.656 - Cache Components enabled
+22:59:30.656 - Experiments (use with caution):
+22:59:30.656   ✓ appNewScrollHandler
+22:59:30.656   ✓ cachedNavigations
+22:59:30.656   ✓ inlineCss
+22:59:30.656   ✓ prefetchInlining
+22:59:30.656 
+22:59:30.687   Creating an optimized production build ...
+23:00:04.840 
+23:00:04.841 > Build error occurred
+23:00:04.845 Error: Turbopack build failed with 4 errors:
+23:00:04.845 ./app/spotmint/page.tsx:8:1
+23:00:04.845 Module not found: Can't resolve '../brand'
+23:00:04.845    6 | import { signOut, useSession } from "next-auth/react";
+23:00:04.845    7 | import { useRouter } from "next/navigation";
+23:00:04.845 >  8 | import { BRAND } from "../brand";
+23:00:04.845      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23:00:04.845    9 |
+23:00:04.845   10 | // The Spotmint store: Spotmint-dressed credits page served on
+23:00:04.845   11 | // spotmint.store. Display data below mirrors the server's PRICE_MAP
+23:00:04.846 
+23:00:04.846 
+23:00:04.846 
+23:00:04.846 Import traces:
+23:00:04.846   Client Component Browser:
+23:00:04.846     ./app/spotmint/page.tsx [Client Component Browser]
+23:00:04.846     ./app/spotmint/page.tsx [Server Component]
+23:00:04.846 
+23:00:04.846   Client Component SSR:
+23:00:04.846     ./app/spotmint/page.tsx [Client Component SSR]
+23:00:04.846     ./app/spotmint/page.tsx [Server Component]
+23:00:04.846 
+23:00:04.846 https://nextjs.org/docs/messages/module-not-found
+23:00:04.846 
+23:00:04.846 
+23:00:04.846 ./app/spotmint/page.tsx:7:1
+23:00:04.846 Module not found: Can't resolve '../brand'
+23:00:04.846    5 | import { signOut, useSession } from "next-auth/react";
+23:00:04.846    6 | import { useRouter } from "next/navigation";
+23:00:04.846 >  7 | import { BRAND } from "../brand";
+23:00:04.846      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23:00:04.846    8 |
+23:00:04.847    9 | // The Spotmint store: Spotmint-dressed credits page served on
+23:00:04.847   10 | // spotmint.store. Display data below mirrors the server's PRICE_MAP
+23:00:04.847 
+23:00:04.847 
+23:00:04.847 
+23:00:04.847 Import traces:
+23:00:04.847   Client Component Browser:
+23:00:04.847     ./app/spotmint/page.tsx [Client Component Browser]
+23:00:04.847     ./app/spotmint/page.tsx [Server Component]
+23:00:04.847 
+23:00:04.847   Client Component SSR:
+23:00:04.848     ./app/spotmint/page.tsx [Client Component SSR]
+23:00:04.848     ./app/spotmint/page.tsx [Server Component]
+23:00:04.848 
+23:00:04.848 https://nextjs.org/docs/messages/module-not-found
+23:00:04.848 
+23:00:04.848 
+23:00:04.848 ./app/spotmint/page.tsx:4:1
+23:00:04.848 Module not found: Can't resolve '../spotmint.css'
+23:00:04.848   2 | "use client";
+23:00:04.848   3 |
+23:00:04.848 > 4 | import "../spotmint.css";
+23:00:04.850     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+23:00:04.850   5 | import { useCallback, useEffect, useState } from "react";
+23:00:04.851   6 | import { signOut, useSession } from "next-auth/react";
+23:00:04.851   7 | import { useRouter } from "next/navigation";
+23:00:04.851 
+23:00:04.851 
+23:00:04.851 
+23:00:04.851 Import traces:
+23:00:04.851   Client Component Browser:
+23:00:04.851     ./app/spotmint/page.tsx [Client Component Browser]
+23:00:04.851     ./app/spotmint/page.tsx [Server Component]
+23:00:04.851 
+23:00:04.851   Client Component SSR:
+23:00:04.851     ./app/spotmint/page.tsx [Client Component SSR]
+23:00:04.851     ./app/spotmint/page.tsx [Server Component]
+23:00:04.851 
+23:00:04.851 https://nextjs.org/docs/messages/module-not-found
+23:00:04.851 
+23:00:04.852 
+23:00:04.852 ./app/spotmint/page.tsx:3:1
+23:00:04.852 Module not found: Can't resolve '../spotmint.css'
+23:00:04.852   1 | // FILE: app/spotmint/credits/page.tsx
+23:00:04.852   2 | "use client";
+23:00:04.852 > 3 | import "../spotmint.css";
+23:00:04.852     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+23:00:04.852   4 | import { useCallback, useEffect, useState } from "react";
+23:00:04.852   5 | import { signOut, useSession } from "next-auth/react";
+23:00:04.852   6 | import { useRouter } from "next/navigation";
+23:00:04.852 
+23:00:04.852 
+23:00:04.852 
+23:00:04.852 Import traces:
+23:00:04.852   Client Component Browser:
+23:00:04.852     ./app/spotmint/page.tsx [Client Component Browser]
+23:00:04.853     ./app/spotmint/page.tsx [Server Component]
+23:00:04.853 
+23:00:04.853   Client Component SSR:
+23:00:04.853     ./app/spotmint/page.tsx [Client Component SSR]
+23:00:04.853     ./app/spotmint/page.tsx [Server Component]
+23:00:04.853 
+23:00:04.853 https://nextjs.org/docs/messages/module-not-found
+23:00:04.853 
+23:00:04.853 
+23:00:04.853     at <unknown> (./app/spotmint/page.tsx:8:1)
+23:00:04.853     at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+23:00:04.853     at <unknown> (./app/spotmint/page.tsx:7:1)
+23:00:04.853     at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+23:00:04.853     at <unknown> (./app/spotmint/page.tsx:4:1)
+23:00:04.853     at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+23:00:04.853     at <unknown> (./app/spotmint/page.tsx:3:1)
+23:00:04.853     at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+23:00:04.999  ELIFECYCLE  Command failed with exit code 1.
+23:00:05.043 Error: Command "pnpm run build" exited with 1
