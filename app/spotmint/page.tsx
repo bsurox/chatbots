@@ -160,17 +160,20 @@ export default function SpotmintPage() {
     };
   }, []);
 
-  // v9: the app shows this page the instant the webview loads, so the
-  // session-loading beat doubles as the launch splash. The native
-  // splash plugin lands in the next Xcode build; until then this is
-  // what covers the gap - a centered gem + wordmark instead of a
-  // gray "Loading..." word. Also shown while a signed-out visitor is
-  // being redirected, so the app never paints a bare dark screen.
+  // The app shows this page the instant the webview loads, so the
+  // session-loading beat doubles as the launch splash (the native
+  // splash plugin lands in the next Xcode build). Also shown while
+  // a signed-out visitor is being redirected.
+  // v10: fixed full-screen overlay - z-index 60 sits above the tab
+  // bar (40) and modals (50), so the shell stays hidden until the
+  // app is ready, and fixed positioning centers on the physical
+  // screen instead of inside the padded page. Column flex keeps the
+  // gem locked dead-center above the wordmark.
   const splash = (
-    <div className="sp-wrap" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ textAlign: "center", paddingBottom: 60 }}>
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 60, background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         <GemIcon className="sp-gemlogo" style={{ width: 54, height: 54, marginLeft: 0 }} />
-        <div className="sp-brand" style={{ justifyContent: "center", fontSize: 30 }}>Spot<span>mint</span></div>
+        <div className="sp-brand" style={{ fontSize: 30, marginTop: 8 }}>Spot<span>mint</span></div>
       </div>
     </div>
   );
@@ -505,6 +508,6 @@ export default function SpotmintPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/page.tsx (v9 - branded launch splash)
+// END OF FILE - app/spotmint/page.tsx (v10 - fullscreen splash overlay)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
