@@ -1,6 +1,7 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles. Rides on the fp- canvas from the layout;
-   fq- prefix keeps quiz styles separate from the landing page. */
+/* Practice player styles v2. Verdict text is gone - the marks talk
+   now: a self-drawing red X on a wrong pick, a self-drawing green
+   circle-check on a right one. fq- prefix, rides the fp- canvas. */
 
 .fq-wrap { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
@@ -12,17 +13,26 @@
 .fq-q { font-size: 17.5px; line-height: 1.45; font-weight: 600; color: #fff; margin: 0 0 18px; }
 
 .fq-choices { display: grid; gap: 9px; }
-.fq-choice { text-align: left; width: 100%; padding: 13px 14px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; color: #ddd; font-size: 14.5px; line-height: 1.4; }
+.fq-choice { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; width: 100%; padding: 13px 14px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; color: #ddd; font-size: 14.5px; line-height: 1.4; }
 .fq-choice:disabled { cursor: default; }
 .fq-choice.on-right { background: rgba(34, 197, 94, 0.12); border: 2px solid #22c55e; color: #fff; }
 .fq-choice.on-wrong { background: rgba(239, 68, 68, 0.12); border: 2px solid #ef4444; color: #fff; }
 .fq-choice.dim { opacity: 0.45; }
+.fq-ct { flex: 1; }
+
+.fq-icon { flex: none; width: 22px; height: 22px; }
+.fq-icon svg { width: 100%; height: 100%; display: block; }
+.fq-icon .draw { fill: none; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: fq-draw 0.35s ease forwards; }
+.fq-icon .c1 { stroke: #22c55e; }
+.fq-icon .c2 { stroke: #22c55e; animation-delay: 0.28s; }
+.fq-icon .x1 { stroke: #ef4444; }
+.fq-icon .x2 { stroke: #ef4444; animation-delay: 0.16s; }
+@keyframes fq-draw { to { stroke-dashoffset: 0; } }
 
 @keyframes fq-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .fq-reveal { animation: fq-fade 0.25s ease; margin-top: 16px; }
-.fq-verdict { font-size: 15px; font-weight: 800; margin: 0 0 8px; }
-.fq-verdict.good { color: #22c55e; }
-.fq-verdict.bad { color: #ef4444; }
+.fq-ca-label { font-size: 12.5px; font-weight: 700; color: #888; margin: 0 0 6px; }
+.fq-ca { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.45); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; line-height: 1.4; font-weight: 600; color: #fff; margin: 0 0 10px; }
 .fq-explain { background: #111; border: 1px solid #262626; border-left: 3px solid var(--fp); border-radius: 10px; padding: 13px 14px; font-size: 14px; line-height: 1.55; color: #bbb; margin: 0 0 10px; }
 .fq-cite { font-size: 12.5px; font-weight: 700; color: var(--fp); margin: 0 0 16px; }
 .fq-next { width: 100%; padding: 14px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; }
@@ -44,6 +54,7 @@
 .fq-home { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #888; border: 1px solid #333; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v1)
+   END OF FILE - app/foremanprep/practice/practice.css (v2 -
+   drawn marks + correct-answer callout)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
