@@ -5,17 +5,33 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildPracticeSet, getDomain, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Practice player v1. A 10-question round from the whole bank:
-// tap an answer, get the verdict instantly with the explanation and
-// the book citation - the tabbing skill, taught one question at a
-// time. No login, no database writes yet: this is the free-feeling
-// core loop, and recorded attempts arrive with the domain picker.
-// The shuffle runs in useEffect so the server render and the client
-// render never disagree (hydration rule).
+// Practice player v2 (his feedback round 1): verdict words removed.
+// The marks carry the message - a red X draws itself on the wrong
+// pick, a green circle-check draws itself on a right pick, and a
+// wrong pick also spells out the correct answer above the
+// explanation box. Still no login and no database writes.
 
 const ROUND_SIZE = 10;
 
 type RecapRow = { id: string; q: string; ok: boolean };
+
+function CheckMark() {
+  return (
+    <svg viewBox="0 0 100 100">
+      <circle className="draw c1" cx="50" cy="50" pathLength={100} r="42" />
+      <path className="draw c2" d="M30 52 L45 66 L72 36" pathLength={100} />
+    </svg>
+  );
+}
+
+function XMark() {
+  return (
+    <svg viewBox="0 0 100 100">
+      <path className="draw x1" d="M32 32 L68 68" pathLength={100} />
+      <path className="draw x2" d="M68 32 L32 68" pathLength={100} />
+    </svg>
+  );
+}
 
 export default function PracticePage() {
   const router = useRouter();
@@ -147,16 +163,22 @@ export default function PracticePage() {
             onClick={() => pick(i)}
             type="button"
           >
-            {c}
+            <span className="fq-ct">{c}</span>
+            {revealed && i === picked ? (
+              <span className="fq-icon">{gotIt ? <CheckMark /> : <XMark />}</span>
+            ) : null}
           </button>
         ))}
       </div>
 
       {revealed ? (
         <div className="fq-reveal">
-          <p className={gotIt ? "fq-verdict good" : "fq-verdict bad"}>
-            {gotIt ? "Correct." : "Not this one."}
-          </p>
+          {gotIt ? null : (
+            <>
+              <p className="fq-ca-label">The correct answer is:</p>
+              <p className="fq-ca">{question.choices[question.answer]}</p>
+            </>
+          )}
           <p className="fq-explain">{question.explain}</p>
           <p className="fq-cite">Where it lives: {question.cite}</p>
           <button className="fq-next" onClick={next} type="button">
@@ -169,6 +191,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v1 - player)
+// END OF FILE - app/foremanprep/practice/page.tsx (v2 - drawn
+// marks + correct-answer callout)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
