@@ -1,19 +1,28 @@
 // FILE: app/foremanprep/practice/page.tsx
 "use client";
 import "./practice.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { buildPracticeSet, getDomain, type ForemanQuestion } from "@/lib/foremanprep/questions";
+import {
+  buildPracticeSet,
+  DOMAINS,
+  getDomain,
+  type DomainKey,
+  type ForemanQuestion,
+} from "@/lib/foremanprep/questions";
 
-// Practice player v4 (feedback round 3): the score recap now uses
-// the same drawn check and X marks as the questions themselves -
-// one visual language everywhere. Marks sit left of the answer
-// text; the explanation box and book citation appear on every
-// reveal, right or wrong.
+// Practice player v5 (Day 5): the subject picker. Drill one subject
+// or run the whole mix; every card shows the subject's real weight
+// on the 115-question exam. Finished rounds now post to the
+// attempts API - the server re-grades and stores them for
+// signed-in users, which is the raw material of the readiness
+// score. Anonymous rounds still play fine and just aren't saved.
 
 const ROUND_SIZE = 10;
 
+type Sel = DomainKey | "all";
 type RecapRow = { id: string; q: string; ok: boolean };
+type PickedAnswer = { questionId: string; picked: number };
 
 function CheckMark() {
   return (
@@ -35,23 +44,33 @@ function XMark() {
 
 export default function PracticePage() {
   const router = useRouter();
+  const [phase, setPhase] = useState<"pick" | "quiz">("pick");
+  const [sel, setSel] = useState<Sel>("all");
   const [qs, setQs] = useState<ForemanQuestion[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
   const [recap, setRecap] = useState<RecapRow[]>([]);
+  const [answers, setAnswers] = useState<PickedAnswer[]>([]);
   const [done, setDone] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    setQs(buildPracticeSet("all", ROUND_SIZE));
-  }, []);
-
-  function startOver() {
-    setQs(buildPracticeSet("all", ROUND_SIZE));
+  function startRound(key: Sel) {
+    setSel(key);
+    setQs(buildPracticeSet(key === "all" ? "all" : key, ROUND_SIZE));
     setIdx(0);
     setPicked(null);
     setCorrect(0);
     setRecap([]);
+    setAnswers([]);
+    setDone(false);
+    setSaved(false);
+    setPhase("quiz");
+  }
+
+  function backToPicker() {
+    setPhase("pick");
+    setQs(null);
     setDone(false);
   }
 
@@ -62,16 +81,73 @@ export default function PracticePage() {
     setPicked(i);
     if (ok) setCorrect((c) => c + 1);
     setRecap((r) => [...r, { id: question.id, q: question.q, ok }]);
+    setAnswers((a) => [...a, { questionId: question.id, picked: i }]);
+  }
+
+  function postRound(finalAnswers: PickedAnswer[]) {
+    fetch("/foremanprep/api/attempts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: "practice",
+        domain: sel === "all" ? null : sel,
+        answers: finalAnswers,
+      }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.saved) setSaved(true);
+      })
+      .catch(() => {});
   }
 
   function next() {
     if (!qs) return;
     if (idx + 1 >= qs.length) {
+      postRound(answers);
       setDone(true);
       return;
     }
     setIdx(idx + 1);
     setPicked(null);
+  }
+
+  if (phase === "pick") {
+    return (
+      <div className="fq-wrap">
+        <div className="fq-head">
+          <button
+            className="fq-back"
+            onClick={() => router.push("/foremanprep")}
+            type="button"
+          >
+            ForemanPrep
+          </button>
+        </div>
+        <p className="fq-title">Practice</p>
+        <p className="fq-hint">
+          Drill one subject or run the whole mix. The counts are each
+          subject's real weight on the 115-question exam.
+        </p>
+        <button className="fq-all" onClick={() => startRound("all")} type="button">
+          <span className="fq-sn">All subjects</span>
+          <span className="fq-sw">A mixed round, the way the exam feels</span>
+        </button>
+        <div className="fq-pick">
+          {DOMAINS.map((d) => (
+            <button
+              className="fq-sub"
+              key={d.key}
+              onClick={() => startRound(d.key)}
+              type="button"
+            >
+              <span className="fq-sn">{d.name}</span>
+              <span className="fq-sw">{d.examCount} of 115 on the exam</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!qs) {
@@ -100,6 +176,7 @@ export default function PracticePage() {
               <b>Keep drilling - closing that gap is the whole job.</b>
             )}
           </p>
+          {saved ? <p className="fq-saved">Saved to your account.</p> : null}
           <div className="fq-list">
             {recap.map((r) => (
               <div className="fq-row" key={r.id}>
@@ -110,15 +187,11 @@ export default function PracticePage() {
               </div>
             ))}
           </div>
-          <button className="fq-again" onClick={startOver} type="button">
+          <button className="fq-again" onClick={() => startRound(sel)} type="button">
             Go again - fresh shuffle
           </button>
-          <button
-            className="fq-home"
-            onClick={() => router.push("/foremanprep")}
-            type="button"
-          >
-            Back to ForemanPrep
+          <button className="fq-home" onClick={backToPicker} type="button">
+            Pick another subject
           </button>
         </div>
       </div>
@@ -139,12 +212,8 @@ export default function PracticePage() {
   return (
     <div className="fq-wrap">
       <div className="fq-head">
-        <button
-          className="fq-back"
-          onClick={() => router.push("/foremanprep")}
-          type="button"
-        >
-          ForemanPrep
+        <button className="fq-back" onClick={backToPicker} type="button">
+          Subjects
         </button>
         <span className="fq-prog">
           Question {idx + 1} / {qs.length}
@@ -185,7 +254,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v4 - recap
-// marks match the in-question marks)
+// END OF FILE - app/foremanprep/practice/page.tsx (v5 - subject
+// picker + rounds saved to the database)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
