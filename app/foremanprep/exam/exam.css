@@ -1,0 +1,54 @@
+/* FILE: app/foremanprep/exam/exam.css */
+/* Exam simulator styles. Rides the fp- canvas; fe- prefix keeps it
+   apart from the practice player. No per-question reveal here - you
+   answer, flag, navigate, then submit and grade, like test day. */
+
+.fe-wrap { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 18px calc(env(safe-area-inset-bottom) + 40px); }
+
+.fe-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; margin-bottom: 14px; background: #0a0a0a; border-bottom: 1px solid #1e1e1e; }
+.fe-clock { font-size: 20px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
+.fe-clock.low { color: #ef4444; }
+.fe-count { font-size: 13px; font-weight: 700; color: #999; }
+
+.fe-title { font-size: 25px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 10px; }
+.fe-lead { font-size: 15px; color: #aaa; line-height: 1.6; margin: 0 0 14px; }
+.fe-facts { display: grid; gap: 8px; margin: 0 0 22px; }
+.fe-fact { display: flex; gap: 10px; align-items: flex-start; background: #111; border: 1px solid #262626; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #ccc; line-height: 1.45; }
+.fe-fact b { color: var(--fp); flex: none; font-weight: 800; }
+.fe-start { width: 100%; padding: 15px 0; border-radius: 11px; font-weight: 800; font-size: 17px; border: none; cursor: pointer; background: var(--fp); color: #000; }
+
+.fe-flag { font-size: 13px; font-weight: 700; padding: 7px 13px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid #444; color: #aaa; }
+.fe-flag.on { background: rgba(249, 115, 22, 0.15); border-color: var(--fp); color: var(--fp); }
+
+.fe-q { font-size: 17.5px; line-height: 1.45; font-weight: 600; color: #fff; margin: 4px 0 18px; }
+.fe-choices { display: grid; gap: 9px; margin-bottom: 20px; }
+.fe-choice { display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; padding: 13px 14px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; color: #ddd; font-size: 14.5px; line-height: 1.4; }
+.fe-choice.on { background: var(--fp-soft); border: 2px solid var(--fp); color: #fff; }
+.fe-letter { flex: none; width: 26px; height: 26px; border-radius: 7px; background: #222; color: #bbb; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.fe-choice.on .fe-letter { background: var(--fp); color: #000; }
+
+.fe-nav { display: flex; gap: 9px; margin-bottom: 22px; }
+.fe-navbtn { flex: 1; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #161616; border: 1px solid #333; color: #ddd; }
+.fe-navbtn:disabled { opacity: 0.4; cursor: default; }
+.fe-navbtn.go { background: var(--fp); color: #000; border: none; }
+
+.fe-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 8px 0 24px; }
+.fe-cell { aspect-ratio: 1; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer; background: #141414; border: 1px solid #333; color: #888; position: relative; }
+.fe-cell.answered { background: var(--fp-soft); border-color: var(--fp); color: var(--fp); }
+.fe-cell.flagged::after { content: ""; position: absolute; top: 4px; right: 4px; width: 7px; height: 7px; border-radius: 50%; background: var(--fp); }
+.fe-legend { display: flex; gap: 16px; justify-content: center; font-size: 12px; color: #888; margin-bottom: 22px; }
+.fe-submit { width: 100%; padding: 15px 0; border-radius: 11px; font-weight: 800; font-size: 17px; border: none; cursor: pointer; background: var(--fp); color: #000; margin-bottom: 10px; }
+.fe-ghost { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #888; border: 1px solid #333; }
+.fe-warn { font-size: 13px; color: #f59e0b; text-align: center; margin: 0 0 14px; line-height: 1.5; }
+
+.fe-verdict { text-align: center; padding-top: 6vh; }
+.fe-big { font-size: 60px; font-weight: 800; letter-spacing: -1.5px; margin: 0 0 4px; font-variant-numeric: tabular-nums; }
+.fe-pass { color: #22c55e; }
+.fe-fail { color: #ef4444; }
+.fe-vscore { font-size: 17px; color: #ccc; margin: 0 0 6px; }
+.fe-vmsg { font-size: 15px; color: #999; line-height: 1.55; margin: 0 0 26px; }
+
+/* ============================================================
+   END OF FILE - app/foremanprep/exam/exam.css (v1 - simulator)
+   If you can see this comment, the paste was not truncated.
+   ============================================================ */
