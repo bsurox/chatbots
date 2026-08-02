@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildPracticeSet, getDomain, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Practice player v3 (feedback round 2): the drawn marks now sit
-// on the LEFT of the answer text, and the second green "correct
-// answer" callout is gone - the green highlight in the choice list
-// is the only place the correct answer shows. The explanation box
-// and book citation still appear on every reveal, right or wrong.
+// Practice player v4 (feedback round 3): the score recap now uses
+// the same drawn check and X marks as the questions themselves -
+// one visual language everywhere. Marks sit left of the answer
+// text; the explanation box and book citation appear on every
+// reveal, right or wrong.
 
 const ROUND_SIZE = 10;
 
@@ -103,8 +103,8 @@ export default function PracticePage() {
           <div className="fq-list">
             {recap.map((r) => (
               <div className="fq-row" key={r.id}>
-                <span className={r.ok ? "fq-mark good" : "fq-mark bad"}>
-                  {r.ok ? "+" : "x"}
+                <span className="fq-icon">
+                  {r.ok ? <CheckMark /> : <XMark />}
                 </span>
                 <p className="fq-rq">{r.q}</p>
               </div>
@@ -185,7 +185,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v3 - marks
-// on the left, callout removed)
+// END OF FILE - app/foremanprep/practice/page.tsx (v4 - recap
+// marks match the in-question marks)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
