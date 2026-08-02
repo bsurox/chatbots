@@ -63,6 +63,26 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // ForemanPrep island (v8). foremanprep.com serves the ForemanPrep
+  // surface and nothing AskEvo-branded. "/" is a REWRITE, not a
+  // redirect, so the address bar stays clean at foremanprep.com -
+  // that matters for ads and search. Any path that is not allowed
+  // bounces to "/", which lands back on the landing page.
+  if (hostname === "foremanprep.com" || hostname.endsWith(".foremanprep.com")) {
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/foremanprep", request.url));
+    }
+    const fpAllowed =
+      pathname.startsWith("/foremanprep") ||
+      pathname.startsWith("/api/") ||
+      pathname.startsWith("/privacy") ||
+      pathname.startsWith("/terms") ||
+      pathname.includes(".");
+    if (!fpAllowed) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -82,6 +102,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // v8: the support pipe is public. It carries its own rate limit and
+  // validation, and the ForemanPrep landing page posts its launch-list
+  // signups here from visitors who have no session at all. Without
+  // this early pass, a first-time visitor's signup would be bounced
+  // into the guest-auth dance and the POST would come back a GET.
+  if (pathname.startsWith("/api/support")) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/privacy")) {
     return NextResponse.next();
   }
@@ -91,6 +120,13 @@ export async function proxy(request: NextRequest) {
   }
 
   if (pathname.startsWith("/updates")) {
+    return NextResponse.next();
+  }
+
+  // v8: the ForemanPrep surface is public marketing - no session
+  // needed, and no guest row should be created for every ad click.
+  // Paid product pages will get their own gating when they arrive.
+  if (pathname.startsWith("/foremanprep")) {
     return NextResponse.next();
   }
 
@@ -130,7 +166,8 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v7 - store page blocked in-app)
+// END OF FILE - proxy.ts (v8 - ForemanPrep island + public
+// support pipe)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
