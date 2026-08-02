@@ -1,0 +1,81 @@
+/* FILE: app/foremanprep/foremanprep.css */
+/* ForemanPrep landing surface. Same dark canvas as the rest of the
+   site, safety-orange accent - this brand wears a hard hat. Mobile
+   first, widens to a centered marketing column on bigger screens. */
+
+.fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
+.fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
+.fp-page button { -webkit-tap-highlight-color: transparent; font-family: inherit; }
+
+.fp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+.fp-brand { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; color: #fff; }
+.fp-brand span { color: var(--fp); }
+.fp-chip { font-size: 12px; font-weight: 700; color: var(--fp); border: 1px solid rgba(249, 115, 22, 0.45); background: var(--fp-soft); border-radius: 999px; padding: 5px 11px; white-space: nowrap; }
+
+.fp-badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #999; border: 1px solid #2a2a2a; background: #111; border-radius: 999px; padding: 6px 12px; margin-bottom: 16px; }
+.fp-h1 { font-size: 36px; line-height: 1.12; font-weight: 800; letter-spacing: -0.8px; margin: 0 0 14px; }
+.fp-h1 span { color: var(--fp); }
+.fp-sub { font-size: 16px; line-height: 1.55; color: #aaa; margin: 0 0 22px; }
+.fp-cta { display: inline-block; padding: 14px 26px; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; }
+.fp-cta:active { transform: translateY(1px); }
+.fp-note { font-size: 13px; color: #777; margin: 12px 0 0; }
+.fp-note b { color: var(--fp); font-weight: 700; }
+
+.fp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 36px 0 0; }
+.fp-stat { background: #111; border: 1px solid #262626; border-radius: 12px; padding: 14px 12px; text-align: center; }
+.fp-sn { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+.fp-sl { font-size: 12px; color: #888; line-height: 1.35; }
+
+.fp-strip { margin: 36px 0 0; padding: 18px; border-radius: 14px; border: 1px solid rgba(249, 115, 22, 0.35); background: linear-gradient(180deg, rgba(249, 115, 22, 0.09), rgba(249, 115, 22, 0.03)); }
+.fp-st { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 6px; }
+.fp-sd { font-size: 14px; line-height: 1.55; color: #bbb; margin: 0; }
+
+.fp-h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; margin: 44px 0 16px; }
+.fp-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.fp-card { background: #111; border: 1px solid #262626; border-radius: 14px; padding: 16px; }
+.fp-cn { font-size: 15px; font-weight: 700; color: #fff; margin: 0 0 5px; }
+.fp-cn span { color: var(--fp); margin-right: 7px; }
+.fp-cd { font-size: 13.5px; line-height: 1.5; color: #999; margin: 0; }
+
+.fp-price { margin: 44px 0 0; border: 1px solid #262626; border-radius: 16px; overflow: hidden; }
+.fp-prow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid #1e1e1e; }
+.fp-pl { font-size: 14px; color: #aaa; }
+.fp-pv { font-size: 14px; font-weight: 700; color: #777; white-space: nowrap; }
+.fp-prow.fp-ours { background: var(--fp-soft); border-bottom: none; }
+.fp-prow.fp-ours .fp-pl { color: #fff; font-weight: 700; font-size: 15px; }
+.fp-prow.fp-ours .fp-pv { color: var(--fp); font-size: 18px; font-weight: 800; }
+.fp-strike { text-decoration: line-through; color: #666; font-weight: 600; margin-right: 8px; font-size: 13px; }
+
+.fp-signup { margin: 44px 0 0; padding: 22px 18px; border-radius: 16px; border: 1px solid rgba(249, 115, 22, 0.4); background: #101010; text-align: center; }
+.fp-fh { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; margin: 0 0 6px; }
+.fp-fs { font-size: 14px; color: #999; line-height: 1.5; margin: 0 0 16px; }
+.fp-row { display: flex; gap: 8px; }
+.fp-in { flex: 1; min-width: 0; background: #0a0a0a; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 13px 14px; font-size: 15px; font-family: inherit; }
+.fp-in:focus { outline: none; border-color: var(--fp); }
+.fp-in:disabled { opacity: 0.6; }
+.fp-go { padding: 13px 18px; border-radius: 10px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; background: var(--fp); color: #000; white-space: nowrap; }
+.fp-go:disabled { background: #1c1c1c; color: #555; cursor: not-allowed; }
+.fp-ok { margin: 14px 0 0; font-size: 14px; font-weight: 600; color: #4ade80; }
+.fp-err { margin: 14px 0 0; font-size: 13px; color: #f87171; }
+.fp-fine { font-size: 12px; color: #666; margin: 12px 0 0; line-height: 1.5; }
+
+.fp-foot { margin: 56px 0 0; padding: 22px 0 0; border-top: 1px solid #1e1e1e; text-align: center; }
+.fp-links { display: flex; justify-content: center; gap: 18px; margin-bottom: 12px; }
+.fp-link { background: none; border: none; padding: 0; font-size: 13px; color: #888; cursor: pointer; text-decoration: none; }
+.fp-legal { font-size: 11.5px; color: #555; line-height: 1.6; margin: 0; }
+
+@media (min-width: 640px) {
+  .fp-wrap { padding-top: 30px; }
+  .fp-h1 { font-size: 46px; }
+  .fp-stats { grid-template-columns: repeat(4, 1fr); }
+  .fp-grid { grid-template-columns: 1fr 1fr; }
+  .fp-row { max-width: 440px; margin: 0 auto; }
+}
+
+@keyframes fp-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fp-hero, .fp-stats, .fp-strip, .fp-grid, .fp-price, .fp-signup { animation: fp-fade 0.35s ease; }
+
+/* ============================================================
+   END OF FILE - app/foremanprep/foremanprep.css (v1 - landing)
+   If you can see this comment, the paste was not truncated.
+   ============================================================ */
