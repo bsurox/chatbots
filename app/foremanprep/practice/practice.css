@@ -1,0 +1,49 @@
+/* FILE: app/foremanprep/practice/practice.css */
+/* Practice player styles. Rides on the fp- canvas from the layout;
+   fq- prefix keeps quiz styles separate from the landing page. */
+
+.fq-wrap { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 40px); }
+
+.fq-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.fq-back { font-size: 13px; font-weight: 600; color: #888; text-decoration: none; background: none; border: none; padding: 0; cursor: pointer; }
+.fq-prog { font-size: 13px; font-weight: 700; color: #aaa; font-variant-numeric: tabular-nums; }
+
+.fq-chip { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: var(--fp); background: var(--fp-soft); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 999px; padding: 4px 10px; margin-bottom: 12px; }
+.fq-q { font-size: 17.5px; line-height: 1.45; font-weight: 600; color: #fff; margin: 0 0 18px; }
+
+.fq-choices { display: grid; gap: 9px; }
+.fq-choice { text-align: left; width: 100%; padding: 13px 14px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; color: #ddd; font-size: 14.5px; line-height: 1.4; }
+.fq-choice:disabled { cursor: default; }
+.fq-choice.on-right { background: rgba(34, 197, 94, 0.12); border: 2px solid #22c55e; color: #fff; }
+.fq-choice.on-wrong { background: rgba(239, 68, 68, 0.12); border: 2px solid #ef4444; color: #fff; }
+.fq-choice.dim { opacity: 0.45; }
+
+@keyframes fq-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fq-reveal { animation: fq-fade 0.25s ease; margin-top: 16px; }
+.fq-verdict { font-size: 15px; font-weight: 800; margin: 0 0 8px; }
+.fq-verdict.good { color: #22c55e; }
+.fq-verdict.bad { color: #ef4444; }
+.fq-explain { background: #111; border: 1px solid #262626; border-left: 3px solid var(--fp); border-radius: 10px; padding: 13px 14px; font-size: 14px; line-height: 1.55; color: #bbb; margin: 0 0 10px; }
+.fq-cite { font-size: 12.5px; font-weight: 700; color: var(--fp); margin: 0 0 16px; }
+.fq-next { width: 100%; padding: 14px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; }
+
+.fq-load { text-align: center; color: #777; font-size: 14px; padding: 60px 0; }
+
+.fq-done { text-align: center; padding-top: 10vh; }
+.fq-score { font-size: 52px; font-weight: 800; letter-spacing: -1px; color: #fff; margin: 0 0 4px; font-variant-numeric: tabular-nums; }
+.fq-score span { color: var(--fp); }
+.fq-msg { font-size: 15px; color: #aaa; line-height: 1.5; margin: 0 0 26px; }
+.fq-msg b { color: #fff; }
+.fq-list { text-align: left; display: grid; gap: 7px; margin-bottom: 26px; }
+.fq-row { display: flex; align-items: flex-start; gap: 10px; background: #111; border: 1px solid #262626; border-radius: 10px; padding: 11px 13px; }
+.fq-mark { font-size: 13px; font-weight: 800; line-height: 1.4; }
+.fq-mark.good { color: #22c55e; }
+.fq-mark.bad { color: #ef4444; }
+.fq-rq { font-size: 13px; color: #999; line-height: 1.4; margin: 0; }
+.fq-again { width: 100%; padding: 14px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; margin-bottom: 10px; }
+.fq-home { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #888; border: 1px solid #333; }
+
+/* ============================================================
+   END OF FILE - app/foremanprep/practice/practice.css (v1)
+   If you can see this comment, the paste was not truncated.
+   ============================================================ */
