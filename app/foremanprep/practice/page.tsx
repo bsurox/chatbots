@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildPracticeSet, getDomain, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Practice player v2 (his feedback round 1): verdict words removed.
-// The marks carry the message - a red X draws itself on the wrong
-// pick, a green circle-check draws itself on a right pick, and a
-// wrong pick also spells out the correct answer above the
-// explanation box. Still no login and no database writes.
+// Practice player v3 (feedback round 2): the drawn marks now sit
+// on the LEFT of the answer text, and the second green "correct
+// answer" callout is gone - the green highlight in the choice list
+// is the only place the correct answer shows. The explanation box
+// and book citation still appear on every reveal, right or wrong.
 
 const ROUND_SIZE = 10;
 
@@ -163,22 +163,16 @@ export default function PracticePage() {
             onClick={() => pick(i)}
             type="button"
           >
-            <span className="fq-ct">{c}</span>
             {revealed && i === picked ? (
               <span className="fq-icon">{gotIt ? <CheckMark /> : <XMark />}</span>
             ) : null}
+            <span className="fq-ct">{c}</span>
           </button>
         ))}
       </div>
 
       {revealed ? (
         <div className="fq-reveal">
-          {gotIt ? null : (
-            <>
-              <p className="fq-ca-label">The correct answer is:</p>
-              <p className="fq-ca">{question.choices[question.answer]}</p>
-            </>
-          )}
           <p className="fq-explain">{question.explain}</p>
           <p className="fq-cite">Where it lives: {question.cite}</p>
           <button className="fq-next" onClick={next} type="button">
@@ -191,7 +185,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v2 - drawn
-// marks + correct-answer callout)
+// END OF FILE - app/foremanprep/practice/page.tsx (v3 - marks
+// on the left, callout removed)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
