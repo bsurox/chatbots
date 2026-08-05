@@ -1,3 +1,4 @@
+// FILE: app/(auth)/layout.tsx
 "use client";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
@@ -10,14 +11,16 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   // Spotmint face (v5): when this door is reached from a Spotmint
-  // surface - the spotmint.store host or the wrapped app's signature -
-  // the auth screens wear Spotmint branding with AskEvo LLC in fine
-  // print. Detection happens client-side after mount: server-side
-  // header access here breaks prerendering on this Next version.
+  // surface - the spotmint.store host, the spotmint.ai host (v7), or
+  // the wrapped app's signature - the auth screens wear Spotmint
+  // branding with AskEvo LLC in fine print. Detection happens
+  // client-side after mount: server-side header access here breaks
+  // prerendering on this Next version.
   const [isSpotmint, setIsSpotmint] = useState(false);
   useEffect(() => {
     if (
       window.location.hostname.includes("spotmint.store") ||
+      window.location.hostname.includes("spotmint.ai") ||
       navigator.userAgent.includes("SpotmintApp")
     ) {
       setIsSpotmint(true);
@@ -36,8 +39,11 @@ export default function AuthLayout({
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-10">
           <div className="flex flex-col gap-2">
             {isSpotmint ? (
-              <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
-                Spot<span style={{ color: "var(--primary)" }}>mint</span>
+              <div className="mb-2">
+                <GemIcon className="mb-2 size-5" style={{ color: "var(--primary)" }} />
+                <div className="font-extrabold text-white text-xl tracking-tight">
+                  Spot<span style={{ color: "var(--primary)" }}>mint</span>
+                </div>
               </div>
             ) : (
               <div
@@ -68,7 +74,8 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v6 - gem green wordmark)
+// END OF FILE - app/(auth)/layout.tsx (v7 - spotmint.ai face
+// detection + mint gem over the wordmark)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
