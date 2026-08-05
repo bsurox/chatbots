@@ -1,3 +1,4 @@
+// FILE: proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
@@ -79,6 +80,28 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/terms") ||
       pathname.includes(".");
     if (!fpAllowed) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  // Spotmint.ai island (v9). The marketing domain from the launch
+  // email. Same pattern as ForemanPrep: "/" is a REWRITE, so the
+  // address bar stays clean at spotmint.ai while serving the create
+  // page. Anything off the Spotmint surface bounces back to "/", and
+  // the AskEvo-branded site never leaks onto this host.
+  if (hostname === "spotmint.ai" || hostname.endsWith(".spotmint.ai")) {
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/spotmint", request.url));
+    }
+    const aiAllowed =
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname.startsWith("/api/") ||
+      pathname.startsWith("/privacy") ||
+      pathname.startsWith("/terms") ||
+      pathname.startsWith("/spotmint") ||
+      pathname.includes(".");
+    if (!aiAllowed) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
@@ -166,8 +189,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v8 - ForemanPrep island + public
-// support pipe)
+// END OF FILE - proxy.ts (v9 - spotmint.ai island)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
