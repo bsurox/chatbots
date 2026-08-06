@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Exam simulator v3 (Day 7 feedback): the back pill on a live
+// Exam simulator v4 (Day 7 feedback): the back pill on a live
 // test now opens a confirm modal, and confirming ends the attempt
 // - answers, flags, and clock all reset - so the timed test can't
 // be paused by leaving. On the intro screen the back pill is
@@ -143,8 +143,7 @@ export default function ExamPage() {
         <p className="fe-mtitle">Leave the exam?</p>
         <p className="fe-mtext">
           This is a timed test. If you go back to ForemanPrep now, this
-          attempt ends and your answers and clock reset - you start over
-          next time.
+          attempt ends and your answers and clock reset.
         </p>
         <div className="fe-macts">
           <button className="fe-mcancel" onClick={() => setConfirmExit(false)} type="button">
@@ -371,6 +370,6 @@ export default function ExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v3 - exit confirm + reset)
+// END OF FILE - app/foremanprep/exam/page.tsx (v4 - trimmed modal copy)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
