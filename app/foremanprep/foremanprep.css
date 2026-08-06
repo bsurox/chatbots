@@ -1,7 +1,7 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep landing surface. Same dark canvas as the rest of the
-   site, safety-orange accent - this brand wears a hard hat. Mobile
-   first, widens to a centered marketing column on bigger screens. */
+/* ForemanPrep landing surface v2. Same dark canvas, safety-orange
+   accent. Adds the hero "try it" entry buttons into the live
+   practice and exam surfaces. Mobile first, widens on desktop. */
 
 .fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
 .fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
@@ -20,6 +20,11 @@
 .fp-cta:active { transform: translateY(1px); }
 .fp-note { font-size: 13px; color: #777; margin: 12px 0 0; }
 .fp-note b { color: var(--fp); font-weight: 700; }
+
+.fp-try { display: flex; gap: 10px; margin: 20px 0 8px; flex-wrap: wrap; }
+.fp-try-btn { flex: 1; min-width: 150px; text-align: center; padding: 13px 16px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #fff; color: #000; border: 1px solid #fff; text-decoration: none; }
+.fp-try-btn.ghost { background: transparent; color: #fff; border: 1px solid #444; }
+.fp-tryhint { font-size: 12.5px; color: #777; margin: 0; }
 
 .fp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 36px 0 0; }
 .fp-stat { background: #111; border: 1px solid #262626; border-radius: 12px; padding: 14px 12px; text-align: center; }
@@ -76,6 +81,6 @@
 .fp-hero, .fp-stats, .fp-strip, .fp-grid, .fp-price, .fp-signup { animation: fp-fade 0.35s ease; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v1 - landing)
+   END OF FILE - app/foremanprep/foremanprep.css (v2 - try buttons)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
