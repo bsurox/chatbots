@@ -1,7 +1,7 @@
 /* FILE: app/foremanprep/exam/exam.css */
-/* Exam simulator styles v2. Adds a visible back pill (fe-back) at
-   the top-left of every screen. fe- prefix, rides the fp- canvas.
-   No per-question reveal - answer, flag, navigate, submit, grade. */
+/* Exam simulator styles v3. Back pill top-left of every screen,
+   plus a confirm modal so nobody quits a live test by accident.
+   fe- prefix, rides the fp- canvas. */
 
 .fe-wrap { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
@@ -51,7 +51,15 @@
 .fe-vscore { font-size: 17px; color: #ccc; margin: 0 0 6px; }
 .fe-vmsg { font-size: 15px; color: #999; line-height: 1.55; margin: 0 0 26px; }
 
+.fe-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.72); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.fe-modal { max-width: 380px; width: 100%; background: #141414; border: 1px solid #333; border-radius: 16px; padding: 22px; }
+.fe-mtitle { font-size: 18px; font-weight: 800; color: #fff; margin: 0 0 8px; }
+.fe-mtext { font-size: 14px; color: #aaa; line-height: 1.5; margin: 0 0 20px; }
+.fe-macts { display: flex; gap: 10px; }
+.fe-mcancel { flex: 1; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #161616; border: 1px solid #333; color: #ddd; }
+.fe-myes { flex: 1; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #ef4444; border: none; color: #fff; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/exam/exam.css (v2 - back pill)
+   END OF FILE - app/foremanprep/exam/exam.css (v3 - exit modal)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
