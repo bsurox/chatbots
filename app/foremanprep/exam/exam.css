@@ -1,7 +1,7 @@
 /* FILE: app/foremanprep/exam/exam.css */
-/* Exam simulator styles. Rides the fp- canvas; fe- prefix keeps it
-   apart from the practice player. No per-question reveal here - you
-   answer, flag, navigate, then submit and grade, like test day. */
+/* Exam simulator styles v2. Adds a visible back pill (fe-back) at
+   the top-left of every screen. fe- prefix, rides the fp- canvas.
+   No per-question reveal - answer, flag, navigate, submit, grade. */
 
 .fe-wrap { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
@@ -17,6 +17,9 @@
 .fe-fact b { color: var(--fp); flex: none; font-weight: 800; }
 .fe-start { width: 100%; padding: 15px 0; border-radius: 11px; font-weight: 800; font-size: 17px; border: none; cursor: pointer; background: var(--fp); color: #000; }
 
+.fe-top { margin-bottom: 8px; }
+.fe-back { display: inline-flex; align-items: center; font-size: 13px; font-weight: 700; color: #bbb; background: #161616; border: 1px solid #333; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.fe-back::before { content: ""; display: inline-block; width: 7px; height: 7px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin-right: 7px; }
 .fe-flag { font-size: 13px; font-weight: 700; padding: 7px 13px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid #444; color: #aaa; }
 .fe-flag.on { background: rgba(249, 115, 22, 0.15); border-color: var(--fp); color: var(--fp); }
 
@@ -49,6 +52,6 @@
 .fe-vmsg { font-size: 15px; color: #999; line-height: 1.55; margin: 0 0 26px; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/exam/exam.css (v1 - simulator)
+   END OF FILE - app/foremanprep/exam/exam.css (v2 - back pill)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
