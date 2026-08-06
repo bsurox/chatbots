@@ -5,13 +5,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Exam simulator v1 (Day 6). Answer, flag, and jump around all the
-// questions, then submit and grade against the real 81/115 (70%)
-// bar - no answer is revealed until you turn it in, like PSI test
-// day. The clock runs at the real exam's pace (5.5 hours across
-// 115 questions) so a partial bank still feels authentic today and
-// becomes the true 115-question, 5.5-hour exam as batches land.
-// Finished exams post to the same attempts API as practice.
+// Exam simulator v2 (Day 7 feedback): a visible back pill sits
+// top-left of every screen - intro, running, and review - so you
+// can always get back to ForemanPrep. v1 note: Answer, flag, and
+// jump around all the questions, then submit and grade against the
+// real 81/115 (70%) bar - no answer is revealed until you turn it
+// in, like PSI test day. The clock runs at the real exam's pace
+// (5.5 hours across 115 questions) so a partial bank still feels
+// authentic today and becomes the true 115-question, 5.5-hour exam
+// as batches land. Finished exams post to the same attempts API.
 
 const REAL_SECONDS = 330 * 60;
 const REAL_QUESTIONS = 115;
@@ -112,10 +114,9 @@ export default function ExamPage() {
   if (phase === "intro") {
     return (
       <div className="fe-wrap">
-        <div className="fe-bar">
+        <div className="fe-top">
           <button
-            className="fe-ghost"
-            style={{ width: "auto", border: "none", padding: 0 }}
+            className="fe-back"
             onClick={() => router.push("/foremanprep")}
             type="button"
           >
@@ -190,6 +191,15 @@ export default function ExamPage() {
     const blanks = qs.length - answered;
     return (
       <div className="fe-wrap">
+        <div className="fe-top">
+          <button
+            className="fe-back"
+            onClick={() => router.push("/foremanprep")}
+            type="button"
+          >
+            ForemanPrep
+          </button>
+        </div>
         <div className="fe-bar">
           <span className={remaining < 300 ? "fe-clock low" : "fe-clock"}>{clock(remaining)}</span>
           <span className="fe-count">
@@ -249,6 +259,15 @@ export default function ExamPage() {
   const q = qs[idx];
   return (
     <div className="fe-wrap">
+      <div className="fe-top">
+        <button
+          className="fe-back"
+          onClick={() => router.push("/foremanprep")}
+          type="button"
+        >
+          ForemanPrep
+        </button>
+      </div>
       <div className="fe-bar">
         <span className={remaining < 300 ? "fe-clock low" : "fe-clock"}>{clock(remaining)}</span>
         <button
@@ -311,6 +330,6 @@ export default function ExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v1 - simulator)
+// END OF FILE - app/foremanprep/exam/page.tsx (v2 - back button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
