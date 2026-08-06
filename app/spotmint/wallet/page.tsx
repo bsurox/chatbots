@@ -1,3 +1,4 @@
+// FILE: app/spotmint/wallet/page.tsx
 "use client";
 import "../spotmint.css";
 import { useCallback, useEffect, useState } from "react";
@@ -5,24 +6,29 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BRAND } from "../brand";
 
-// Credits tab (car four of the shell train). Inside the app this page
-// is deliberately inert: it shows the balance and *names* the store -
-// no links, no prices, no purchase machinery - which is what keeps
-// the app commission-free on both stores. On the web the same page
-// gets a real Buy button through to the Spotmint store page. Balance
-// refreshes on foreground, so buying in Safari and hopping back into
-// the app shows the new number immediately. Reachable only by direct
-// URL until app/spotmint/layout.tsx v3 mounts the tab bar.
+// Credits tab (car four of the shell train). v2 platform split,
+// born from Apple's 3.1.3(b) rejection: the 2025 US-storefront rules
+// allow real link-outs to the default browser, so the iOS app now
+// shows an honest "Buy credits" button that opens the store in
+// Safari - no commission, fully compliant. Google Play permits no
+// such steering, so the ANDROID app keeps the v1 inert copy that
+// only names the store. The web keeps its in-site Buy button.
+// Balance refreshes on foreground, so buying in Safari and hopping
+// back into the app shows the new number immediately.
 
 export default function SpotmintWalletPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [credits, setCredits] = useState<number | null>(null);
   const [isApp, setIsApp] = useState(false);
+  const [isAndroidApp, setIsAndroidApp] = useState(false);
 
   useEffect(() => {
     if ((window as { Capacitor?: unknown }).Capacitor) {
       setIsApp(true);
+      if (/Android/i.test(navigator.userAgent)) {
+        setIsAndroidApp(true);
+      }
     }
   }, []);
 
@@ -75,16 +81,31 @@ export default function SpotmintWalletPage() {
         <div style={{ fontSize: 46, fontWeight: 800, color: "#fff", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
           {credits === null ? "..." : credits.toLocaleString()}
         </div>
-        <div style={{ marginTop: 6, fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>credits</div>
+        <div style={{ marginTop: 6, fontSize: 13, fontWeight: 700, color: "#22c55e" }}>credits</div>
       </div>
 
-      {isApp ? (
+      {isAndroidApp ? (
         <>
           <div style={{ display: "flex", justifyContent: "center", marginTop: 22 }}>
             <p className="sp-buy">Buy credits at {BRAND.storeDomain}</p>
           </div>
           <p className="sp-mm" style={{ textAlign: "center", marginTop: 14 }}>
             Open {BRAND.storeDomain} in your browser and sign in with this
+            same account - your new balance shows up here right away.
+          </p>
+        </>
+      ) : isApp ? (
+        <>
+          <button
+            type="button"
+            className="sp-gen"
+            style={{ marginTop: 22 }}
+            onClick={() => window.open("https://" + BRAND.storeDomain, "_blank")}
+          >
+            Buy credits
+          </button>
+          <p className="sp-mm" style={{ textAlign: "center", marginTop: 14 }}>
+            Opens {BRAND.storeDomain} in your browser. Sign in with this
             same account - your new balance shows up here right away.
           </p>
         </>
@@ -100,6 +121,6 @@ export default function SpotmintWalletPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/wallet/page.tsx (v1 - credits tab)
+// END OF FILE - app/spotmint/wallet/page.tsx (v2 - iOS link-out button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
