@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 
-// ForemanPrep landing page v1. Sells the product before it exists:
-// explains the exam, anchors the price against real course costs,
-// and captures launch-list emails through the existing support pipe
-// (no new backend today). The paid product arrives behind this page
-// over the coming weeks - this page's job is the $99 early-bird list.
+// ForemanPrep landing page v2 (Week 1 close). Now the front door
+// to a working product: the hero offers real entry into free
+// practice and the exam simulator, and still captures launch-list
+// emails through the existing support pipe. The paid gate arrives
+// on paywall day - today the whole thing is navigable end to end.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -119,6 +119,15 @@ export default function ForemanPrepPage() {
           <b>$99 early bird</b> at launch - regular $149. Prep courses charge
           $349 to $1,490 for less.
         </p>
+        <div className="fp-try">
+          <Link className="fp-try-btn" href="/foremanprep/practice">
+            Start free practice
+          </Link>
+          <Link className="fp-try-btn ghost" href="/foremanprep/exam">
+            Try the exam simulator
+          </Link>
+        </div>
+        <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
       </div>
 
       <div className="fp-stats">
@@ -232,6 +241,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v1 - landing + list)
+// END OF FILE - app/foremanprep/page.tsx (v2 - live entry points)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
