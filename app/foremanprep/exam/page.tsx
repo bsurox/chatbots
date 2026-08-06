@@ -5,15 +5,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Exam simulator v2 (Day 7 feedback): a visible back pill sits
-// top-left of every screen - intro, running, and review - so you
-// can always get back to ForemanPrep. v1 note: Answer, flag, and
-// jump around all the questions, then submit and grade against the
-// real 81/115 (70%) bar - no answer is revealed until you turn it
-// in, like PSI test day. The clock runs at the real exam's pace
-// (5.5 hours across 115 questions) so a partial bank still feels
-// authentic today and becomes the true 115-question, 5.5-hour exam
-// as batches land. Finished exams post to the same attempts API.
+// Exam simulator v3 (Day 7 feedback): the back pill on a live
+// test now opens a confirm modal, and confirming ends the attempt
+// - answers, flags, and clock all reset - so the timed test can't
+// be paused by leaving. On the intro screen the back pill is
+// still instant. v1 note: Answer, flag, and jump around all the
+// questions, then submit and grade against the real 81/115 (70%)
+// bar - no answer is revealed until you turn it in, like PSI test
+// day. The clock runs at the real exam's pace (5.5 hours across
+// 115 questions) so a partial bank still feels authentic today and
+// becomes the true 115-question, 5.5-hour exam as batches land.
+// Finished exams post to the same attempts API as practice.
 
 const REAL_SECONDS = 330 * 60;
 const REAL_QUESTIONS = 115;
@@ -43,6 +45,7 @@ export default function ExamPage() {
   const [flags, setFlags] = useState<Record<string, boolean>>({});
   const [remaining, setRemaining] = useState(0);
   const [score, setScore] = useState({ correct: 0, total: 0 });
+  const [confirmExit, setConfirmExit] = useState(false);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const grade = useCallback(
@@ -110,6 +113,50 @@ export default function ExamPage() {
   function toggleFlag(qid: string) {
     setFlags((f) => ({ ...f, [qid]: !f[qid] }));
   }
+
+  // A live test can't be paused by leaving. Confirming exit wipes
+  // the attempt - answers, flags, and clock - and returns to the
+  // intro so the next visit starts a fresh, fully timed run.
+  function requestBack() {
+    if (phase === "run" || phase === "review") {
+      setConfirmExit(true);
+      return;
+    }
+    router.push("/foremanprep");
+  }
+
+  function confirmLeave() {
+    if (tick.current) clearInterval(tick.current);
+    setConfirmExit(false);
+    setPhase("intro");
+    setQs([]);
+    setIdx(0);
+    setPicks({});
+    setFlags({});
+    setRemaining(0);
+    router.push("/foremanprep");
+  }
+
+  const exitModal = confirmExit ? (
+    <div className="fe-overlay">
+      <div className="fe-modal">
+        <p className="fe-mtitle">Leave the exam?</p>
+        <p className="fe-mtext">
+          This is a timed test. If you go back to ForemanPrep now, this
+          attempt ends and your answers and clock reset - you start over
+          next time.
+        </p>
+        <div className="fe-macts">
+          <button className="fe-mcancel" onClick={() => setConfirmExit(false)} type="button">
+            Keep testing
+          </button>
+          <button className="fe-myes" onClick={confirmLeave} type="button">
+            Leave and reset
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   if (phase === "intro") {
     return (
@@ -192,11 +239,7 @@ export default function ExamPage() {
     return (
       <div className="fe-wrap">
         <div className="fe-top">
-          <button
-            className="fe-back"
-            onClick={() => router.push("/foremanprep")}
-            type="button"
-          >
+          <button className="fe-back" onClick={requestBack} type="button">
             ForemanPrep
           </button>
         </div>
@@ -251,6 +294,7 @@ export default function ExamPage() {
         >
           Keep working
         </button>
+        {exitModal}
       </div>
     );
   }
@@ -260,11 +304,7 @@ export default function ExamPage() {
   return (
     <div className="fe-wrap">
       <div className="fe-top">
-        <button
-          className="fe-back"
-          onClick={() => router.push("/foremanprep")}
-          type="button"
-        >
+        <button className="fe-back" onClick={requestBack} type="button">
           ForemanPrep
         </button>
       </div>
@@ -325,11 +365,12 @@ export default function ExamPage() {
       <button className="fe-ghost" onClick={() => setPhase("review")} type="button">
         Review all questions
       </button>
+      {exitModal}
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v2 - back button)
+// END OF FILE - app/foremanprep/exam/page.tsx (v3 - exit confirm + reset)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
