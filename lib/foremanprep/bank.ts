@@ -303,6 +303,186 @@ export const BANK: ForemanQuestion[] = [
       "The four elements are offer and acceptance, consideration, competent parties, and legal purpose. A specific profit margin is a business decision, not a legal requirement for a contract to be binding.",
     cite: "NASCLA Guide, Ch. 7 - Required Contract Elements (p. 7-1)",
   },
+  {
+    id: "pc-023",
+    domain: "procurement",
+    q: "A maintenance bond guarantees that:",
+    choices: [
+      "The contractor submitted the lowest bid",
+      "For a stated period (typically one year), no defective workmanship or material will appear in the completed project",
+      "Subcontractors will be paid",
+      "The owner will make progress payments on time",
+    ],
+    answer: 1,
+    explain:
+      "A maintenance bond backs the quality of the finished work - if defective workmanship or materials show up within the stated period (often one year), it's covered. Paying subs is the payment bond; finishing the job is the performance bond.",
+    cite: "NASCLA Guide, Ch. 3 - Types of Bonds (p. 3-7)",
+  },
+  {
+    id: "pc-024",
+    domain: "procurement",
+    q: "A completion bond provides assurance primarily to:",
+    choices: [
+      "The subcontractors",
+      "The financial backers (lender) of a project that it will be completed",
+      "The contractor's employees",
+      "The building inspector",
+    ],
+    answer: 1,
+    explain:
+      "A completion bond assures the project's financial backers - the lender - that construction will be finished. It is aimed at whoever is funding the job, not the subs or the workers.",
+    cite: "NASCLA Guide, Ch. 3 - Types of Bonds (p. 3-7)",
+  },
+  {
+    id: "pc-025",
+    domain: "procurement",
+    q: "A fidelity bond protects a business owner against:",
+    choices: [
+      "Weather delays",
+      "Losses caused by dishonest acts of their own employees",
+      "Defective materials from suppliers",
+      "Nonpayment by the owner",
+    ],
+    answer: 1,
+    explain:
+      "A fidelity bond covers losses from employee dishonesty - theft or fraud by your own people. Contrast it with burglary and theft insurance, which covers outside acts but NOT employee acts.",
+    cite: "NASCLA Guide, Ch. 3 - Types of Bonds (p. 3-7)",
+  },
+  {
+    id: "pc-026",
+    domain: "procurement",
+    q: "Under the federal Miller Act, performance and payment bonds are required on federal construction projects valued at more than:",
+    choices: ["$25,000", "$50,000", "$100,000", "$500,000"],
+    answer: 2,
+    explain:
+      "The Miller Act requires performance and payment bonds on federal construction contracts greater than $100,000. It is the federal bonding law and a favorite exam fact.",
+    cite: "NASCLA Guide, Ch. 3 - Laws Governing Bonding of Federal Construction Projects (p. 3-8)",
+  },
+  {
+    id: "pc-027",
+    domain: "procurement",
+    q: "Under the Miller Act, the performance bond is normally required in an amount equal to what percent of the contract price?",
+    choices: ["25 percent", "50 percent", "75 percent", "100 percent"],
+    answer: 3,
+    explain:
+      "The Miller Act performance bond is normally 100 percent of the contracted price - the contracting officer sets an amount regarded as adequate, and that is typically the full contract value.",
+    cite: "NASCLA Guide, Ch. 3 - Laws Governing Bonding of Federal Construction Projects (p. 3-8)",
+  },
+  {
+    id: "pc-028",
+    domain: "procurement",
+    q: "State laws that require surety bonds on state and local public works projects, modeled on the federal Miller Act, are commonly called:",
+    choices: ["Little Miller Acts", "Lien laws", "Right-to-work laws", "Prompt payment acts"],
+    answer: 0,
+    explain:
+      "Most states have their own bonding laws for public works, patterned on the federal Miller Act - the 'Little Miller Acts.' They extend bond protection to state and local government jobs.",
+    cite: "NASCLA Guide, Ch. 3 - Laws Governing Bonding of Federal Construction Projects (p. 3-8)",
+  },
+  {
+    id: "pc-029",
+    domain: "procurement",
+    q: "The premium (cost) to obtain a construction bond typically runs about what share of the contract amount?",
+    choices: [
+      "Half a percent to two percent",
+      "Five to ten percent",
+      "Fifteen to twenty percent",
+      "Twenty-five percent",
+    ],
+    answer: 0,
+    explain:
+      "Bond premiums usually range from about one-half of one percent up to two percent of the contract amount, priced on the contractor's risk. It is a small fraction of the job, not a double-digit cost.",
+    cite: "NASCLA Guide, Ch. 3 - Bond Language (p. 3-7)",
+  },
+  {
+    id: "pc-030",
+    domain: "procurement",
+    q: "When deciding whether to issue a bond, a surety company evaluates all of the following EXCEPT:",
+    choices: [
+      "The contractor's financial stability and credit",
+      "The contractor's experience and equipment",
+      "The contractor's references",
+      "The color of the contractor's trucks",
+    ],
+    answer: 3,
+    explain:
+      "A surety underwrites the contractor: financial stability, credit, references, experience, and equipment to complete the work. Cosmetic things like vehicle color have nothing to do with it.",
+    cite: "NASCLA Guide, Ch. 3 - Qualifying for a Bond (p. 3-7)",
+  },
+  {
+    id: "pc-031",
+    domain: "procurement",
+    q: "How does a bank letter of credit differ from a bid bond?",
+    choices: [
+      "It is issued by a surety company",
+      "It is a bank cash guarantee that customarily covers only 5 to 10 percent of the contract, not a bond",
+      "It always covers 100 percent of the contract",
+      "It guarantees the work will be free of defects",
+    ],
+    answer: 1,
+    explain:
+      "A bank letter of credit is not a bond - it is a bank-backed cash guarantee, and it customarily covers only 5 to 10 percent of the contract rather than the full amount.",
+    cite: "NASCLA Guide, Ch. 3 - Bond Language (p. 3-7)",
+  },
+  {
+    id: "pc-032",
+    domain: "procurement",
+    q: "Commercial General Liability (CGL) insurance covers which of the following?",
+    choices: [
+      "Damage to the contractor's own tools",
+      "Bodily injury and property damage to third parties, plus personal and advertising injury",
+      "Employee injuries on the job",
+      "The contractor's lost income during a shutdown",
+    ],
+    answer: 1,
+    explain:
+      "CGL is the core liability policy: third-party bodily injury and property damage, plus personal injury (like slander) and advertising injury. On-the-job employee injuries are workers' comp, not CGL.",
+    cite: "NASCLA Guide, Ch. 3 - Commercial General Liability (CGL) (p. 3-4)",
+  },
+  {
+    id: "pc-033",
+    domain: "procurement",
+    q: "All-risk builder's risk insurance primarily covers:",
+    choices: [
+      "Employee injuries",
+      "The structure under construction plus its materials and fixtures",
+      "The contractor's vehicles",
+      "Legal defense costs in a lawsuit",
+    ],
+    answer: 1,
+    explain:
+      "Builder's risk (all-risk) covers the building under construction along with materials, equipment, and fixtures against loss - fire, theft, vandalism, weather. It protects the work in progress, not people or autos.",
+    cite: "NASCLA Guide, Ch. 3 - All-Risk Builder's Risk Insurance (p. 3-3)",
+  },
+  {
+    id: "pc-034",
+    domain: "procurement",
+    q: "Workers' compensation insurance premiums are:",
+    choices: [
+      "Split evenly between employer and employee",
+      "Paid entirely by the employer, with no part deducted from the employee's pay",
+      "Deducted from the employee's paycheck",
+      "Optional in every state",
+    ],
+    answer: 1,
+    explain:
+      "Workers' comp is employer-paid - no part comes out of the employee's wages - and it is required by law. It covers employees injured on the job regardless of fault.",
+    cite: "NASCLA Guide, Ch. 3 - Workers' Compensation Insurance (p. 3-5)",
+  },
+  {
+    id: "pc-035",
+    domain: "procurement",
+    q: "An umbrella liability policy is used to:",
+    choices: [
+      "Replace the need for any CGL policy",
+      "Supplement and extend coverage above the limits of the CGL policy",
+      "Cover only company vehicles",
+      "Insure the building during construction",
+    ],
+    answer: 1,
+    explain:
+      "Umbrella liability sits on top of the CGL, kicking in once that policy's limit is reached to add another layer of protection. It supplements the CGL rather than replacing it.",
+    cite: "NASCLA Guide, Ch. 3 - Umbrella Liability Insurance (p. 3-4)",
+  },
   // ---- General Requirements & Safety ---------------------------
   {
     id: "gr-001",
@@ -378,6 +558,241 @@ export const BANK: ForemanQuestion[] = [
     explain:
       "Float (or slack) is the wiggle room a non-critical activity has before it starts pushing the finish date. Critical-path activities have zero float, which is what makes them critical.",
     cite: "NASCLA Guide, Ch. 8 - Scheduling Methods (p. 8-2)",
+  },
+  {
+    id: "gr-007",
+    domain: "general",
+    q: "A bar chart (Gantt chart) schedule displays project activities as:",
+    choices: [
+      "A network of nodes and arrows showing every dependency",
+      "Horizontal bars plotted against a timeline",
+      "A pie chart of cost percentages",
+      "A list of subcontractor phone numbers",
+    ],
+    answer: 1,
+    explain:
+      "A bar (Gantt) chart shows each activity as a horizontal bar along a calendar timeline - easy to read at a glance. It is simpler than a critical-path network, which is built to show the dependencies between activities.",
+    cite: "NASCLA Guide, Ch. 8 - Scheduling Methods (p. 8-4)",
+  },
+  {
+    id: "gr-008",
+    domain: "general",
+    q: "Contingency time in a construction schedule is:",
+    choices: [
+      "Extra time added for unexpected delays or problems",
+      "The time spent on the critical path",
+      "Overtime paid to workers",
+      "The warranty period after completion",
+    ],
+    answer: 0,
+    explain:
+      "Contingency time is built-in cushion for the unexpected - weather, delivery slips, surprises. It keeps one hiccup from blowing the whole completion date.",
+    cite: "NASCLA Guide, Ch. 8 - Scheduling (p. 8-5)",
+  },
+  {
+    id: "gr-009",
+    domain: "general",
+    q: "A daily report on a construction project typically records:",
+    choices: [
+      "Only the final cost of the job",
+      "Weather, labor on site, work performed, and deliveries for that day",
+      "The owner's personal schedule",
+      "Next year's marketing plan",
+    ],
+    answer: 1,
+    explain:
+      "Daily reports document what happened on site each day - weather, crews present, work done, deliveries, delays. They are the paper trail that protects you in disputes and claims.",
+    cite: "NASCLA Guide, Ch. 8 - Tracking the Progress of the Project (p. 8-9)",
+  },
+  {
+    id: "gr-010",
+    domain: "general",
+    q: "A certificate of occupancy is issued:",
+    choices: [
+      "Before construction begins",
+      "At project closeout, allowing the building to be legally occupied",
+      "When the bid is accepted",
+      "Only for federal projects",
+    ],
+    answer: 1,
+    explain:
+      "The certificate of occupancy comes at the end - it certifies the building meets code and may be occupied. The notice to proceed is what kicks the job off at the start.",
+    cite: "NASCLA Guide, Ch. 8 - Job Completion and Closeout (p. 8-9)",
+  },
+  {
+    id: "gr-011",
+    domain: "general",
+    q: "In construction project management, quality assurance refers to:",
+    choices: [
+      "Inspecting only the finished product",
+      "The planned system of processes used to ensure work meets required standards",
+      "The lowest-cost way to build",
+      "A type of insurance policy",
+    ],
+    answer: 1,
+    explain:
+      "Quality assurance is the proactive system - procedures, submittals, checks - set up to make sure the work meets spec. It is about preventing defects through process, not just catching them at the end.",
+    cite: "NASCLA Guide, Ch. 8 - Quality Assurance (p. 8-10)",
+  },
+  {
+    id: "gr-012",
+    domain: "general",
+    q: "Why is cash flow management critical during a construction project?",
+    choices: [
+      "It determines the color scheme",
+      "Expenses often come due before progress payments arrive, so the contractor must manage the timing",
+      "It sets the OSHA penalty amount",
+      "It replaces the need for a schedule",
+    ],
+    answer: 1,
+    explain:
+      "Contractors routinely pay for labor and materials before the owner's progress payment lands. Managing that timing gap is what keeps a profitable job from running out of cash mid-project.",
+    cite: "NASCLA Guide, Ch. 8 - Cash Management (p. 8-6)",
+  },
+  {
+    id: "gr-013",
+    domain: "general",
+    q: "The federal agency that sets and enforces workplace safety standards, created by the Occupational Safety and Health Act of 1970, is:",
+    choices: ["The EPA", "OSHA", "The SBA", "The NLRB"],
+    answer: 1,
+    explain:
+      "OSHA - the Occupational Safety and Health Administration - was established by the OSH Act of 1970 to set and enforce workplace safety standards. The EPA handles environmental matters, a different lane.",
+    cite: "NASCLA Guide, Ch. 11 - Safety Standards (p. 11-1)",
+  },
+  {
+    id: "gr-014",
+    domain: "general",
+    q: "OSHA's safety and health regulations specifically for the construction industry are found in:",
+    choices: ["29 CFR 1910", "29 CFR 1926", "29 CFR 1904", "the Miller Act"],
+    answer: 1,
+    explain:
+      "29 CFR 1926 is the construction standard. 29 CFR 1910 is general industry and 1904 covers injury recordkeeping - a classic set of look-alike distractors.",
+    cite: "NASCLA Guide, Ch. 11 - Safety Standards (p. 11-1)",
+  },
+  {
+    id: "gr-015",
+    domain: "general",
+    q: "An Experience Modification Rating (EMR) above 1.0 means a contractor:",
+    choices: [
+      "Has a better-than-average safety record and lower premiums",
+      "Has a worse-than-average safety record and pays higher insurance premiums",
+      "Is exempt from OSHA inspections",
+      "Has completed OSHA 30 training",
+    ],
+    answer: 1,
+    explain:
+      "The EMR benchmarks a contractor's safety losses against average (1.0). Above 1.0 is worse than average and drives premiums up - and owners often screen out high-EMR contractors when awarding work.",
+    cite: "NASCLA Guide, Ch. 11 - Safety Standards (p. 11-1)",
+  },
+  {
+    id: "gr-016",
+    domain: "general",
+    q: "Which OSHA form is the log used to record work-related injuries and illnesses?",
+    choices: ["Form 300", "Form 300A", "Form 301", "Form 1926"],
+    answer: 0,
+    explain:
+      "OSHA Form 300 is the running log of recordable injuries and illnesses. Form 300A is the annual summary that gets posted, and Form 301 is the individual incident report.",
+    cite: "NASCLA Guide, Ch. 11 - OSHA Recordkeeping (p. 11-4)",
+  },
+  {
+    id: "gr-017",
+    domain: "general",
+    q: "Which OSHA violation type carries the most severe penalties, applying when an employer knowingly or with plain indifference commits a violation?",
+    choices: ["Other-than-serious", "De minimis", "Willful", "Failure to abate"],
+    answer: 2,
+    explain:
+      "A willful violation - knowing, or in plain indifference to the law - carries the steepest penalties (up to $156,259 per violation, and possible criminal charges if a death results). Other-than-serious and de minimis are the mild end.",
+    cite: "NASCLA Guide, Ch. 11 - Penalties (p. 11-8)",
+  },
+  {
+    id: "gr-018",
+    domain: "general",
+    q: "An employee who believes they were punished for reporting a safety concern to OSHA must file a discrimination complaint within how many days?",
+    choices: ["10 days", "30 days", "90 days", "One year"],
+    answer: 1,
+    explain:
+      "Retaliation against workers who exercise their OSHA rights is prohibited, and the employee must notify OSHA within 30 days of the discriminatory action for it to investigate.",
+    cite: "NASCLA Guide, Ch. 11 - Employee Rights (p. 11-7)",
+  },
+  {
+    id: "gr-019",
+    domain: "general",
+    q: "When working near overhead power lines, OSHA guidance is to keep workers and equipment at least how far away?",
+    choices: ["3 feet", "6 feet", "10 feet", "25 feet"],
+    answer: 2,
+    explain:
+      "Stay at least 10 feet from overhead power lines, and always assume the lines are energized until the utility confirms otherwise. Contact is a leading cause of jobsite electrocutions.",
+    cite: "NASCLA Guide, Ch. 11 - Overhead Power Line Safety (p. 11-6)",
+  },
+  {
+    id: "gr-020",
+    domain: "general",
+    q: "Before excavating, a contractor should identify underground utilities by:",
+    choices: [
+      "Digging a small test hole first",
+      "Calling 811 / the One Call Center to have utilities located",
+      "Checking the weather forecast",
+      "Notifying OSHA",
+    ],
+    answer: 1,
+    explain:
+      "Call 811 (the One Call / Common Ground Alliance system) before you dig so utilities get marked. Excavating blind risks striking gas, power, or water lines - a safety and cost disaster.",
+    cite: "NASCLA Guide, Ch. 11 - Underground Utility Safety (p. 11-6)",
+  },
+  {
+    id: "gr-021",
+    domain: "general",
+    q: "The EPA's Renovation, Repair and Painting (RRP) Rule for lead-based paint applies to renovations of housing and child-occupied facilities built:",
+    choices: ["Before 1978", "After 2000", "Before 1950 only", "In any year"],
+    answer: 0,
+    explain:
+      "The RRP rule targets pre-1978 housing, because lead-based paint was banned for residential use in 1978. Renovators disturbing paint in those buildings must be certified and follow lead-safe work practices.",
+    cite: "NASCLA Guide, Ch. 11 - Remodeling or Renovating with Lead-Based Paint (p. 11-13)",
+  },
+  {
+    id: "gr-022",
+    domain: "general",
+    q: "Before renovating pre-1978 housing, federal law requires the contractor to give owners and occupants:",
+    choices: [
+      "A copy of the contractor's license",
+      "The 'Protect Your Family From Lead in Your Home' pamphlet",
+      "A performance bond",
+      "An OSHA 300 log",
+    ],
+    answer: 1,
+    explain:
+      "The contractor must distribute the EPA pamphlet 'Protect Your Family From Lead in Your Home' and get confirmation of receipt before starting work on pre-1978 housing. It is a required notification, not optional.",
+    cite: "NASCLA Guide, Ch. 11 - Remodeling or Renovating with Lead-Based Paint (p. 11-13)",
+  },
+  {
+    id: "gr-023",
+    domain: "general",
+    q: "A construction site's stormwater discharges into U.S. waters are regulated under the Clean Water Act primarily through:",
+    choices: [
+      "An OSHA 300 log",
+      "A National Pollutant Discharge Elimination System (NPDES) permit",
+      "A performance bond",
+      "The Miller Act",
+    ],
+    answer: 1,
+    explain:
+      "The NPDES permitting system controls stormwater discharges from construction sites under the Clean Water Act. Disturbing enough land triggers the need for a stormwater permit and erosion/sediment controls.",
+    cite: "NASCLA Guide, Ch. 11 - National Pollutant Discharge Elimination System (p. 11-11)",
+  },
+  {
+    id: "gr-024",
+    domain: "general",
+    q: "If a contractor discovers hazardous waste on a jobsite, they must notify state and local authorities or:",
+    choices: [
+      "The building's architect",
+      "The National Response Center",
+      "The bonding company",
+      "The nearest hardware store",
+    ],
+    answer: 1,
+    explain:
+      "Discovering hazardous waste requires prompt notification to state/local authorities or the National Response Center. The waste must then be treated and disposed of at a permitted facility - you cannot just haul it off.",
+    cite: "NASCLA Guide, Ch. 11 - Hazardous Substances (p. 11-12)",
   },
   // ---- Site Construction ---------------------------------------
   {
@@ -687,6 +1102,6 @@ export const BANK: ForemanQuestion[] = [
 ];
 
 // ============================================================
-// END OF FILE - lib/foremanprep/bank.ts (v4 - +12 verified Chapter 7 Procurement questions)
+// END OF FILE - lib/foremanprep/bank.ts (v5 - +31 verified questions from Chapters 3, 8, 11)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
