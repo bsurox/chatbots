@@ -1,8 +1,7 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles v7. "Where it lives" citation bumped up
-   in size - it was too small to read. Tutor panel, back pills,
-   drawn marks, subject picker all as before. fq- prefix, rides
-   the fp- canvas. */
+/* Practice player styles v8. Adds a round-length picker (10 / 25 /
+   Full) on the subject screen, plus the bigger citation text and
+   the inline tutor panel. fq- prefix, rides the fp- canvas. */
 
 .fq-wrap { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
@@ -53,6 +52,11 @@
 
 .fq-title { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin: 0 0 4px; }
 .fq-hint { font-size: 14px; color: #999; line-height: 1.5; margin: 0 0 18px; }
+.fq-lenrow { margin: 0 0 16px; }
+.fq-lenlabel { display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #888; margin-bottom: 8px; }
+.fq-lenseg { display: flex; gap: 8px; }
+.fq-lenseg button { flex: 1; padding: 11px 0; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; background: #111; border: 1px solid #333; color: #aaa; }
+.fq-lenseg button.on { background: var(--fp-soft); border: 2px solid var(--fp); color: var(--fp); }
 .fq-all { width: 100%; text-align: left; padding: 15px 16px; border-radius: 14px; cursor: pointer; background: var(--fp-soft); border: 2px solid var(--fp); margin-bottom: 12px; }
 .fq-all .fq-sn { color: var(--fp); }
 .fq-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -78,7 +82,7 @@
 .fq-home { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #888; border: 1px solid #333; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v7 -
-   bigger citation text)
+   END OF FILE - app/foremanprep/practice/practice.css (v8 -
+   round-length picker)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
