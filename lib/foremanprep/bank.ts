@@ -825,6 +825,111 @@ export const BANK: ForemanQuestion[] = [
       "Type C is the least stable (for example, gravel, sand, or submerged soil) and needs the flattest sloping or the most robust protective system. Stable rock is the most stable; Type A is cohesive like clay.",
     cite: "OSHA 29 CFR 1926, Subpart P, Appendix A",
   },
+  {
+    id: "sc-004",
+    domain: "site",
+    q: "A physical site evaluation is generally carried out in which two phases?",
+    choices: [
+      "A preliminary investigation and a final investigation",
+      "A wet phase and a dry phase",
+      "A bid phase and a build phase",
+      "A rough grade and a fine grade",
+    ],
+    answer: 0,
+    explain:
+      "Site evaluation runs in two phases: a preliminary investigation of the site's physical state before design, and a final investigation just before and during design to set the foundation parameters. Both matter and are done in detail.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 2 - Site Evaluation (p. 13)",
+  },
+  {
+    id: "sc-005",
+    domain: "site",
+    q: "In the land development process, a feasibility evaluation is generally done:",
+    choices: [
+      "After construction is complete",
+      "Before the physical site evaluation",
+      "Only if the owner requests it",
+      "At the same time as final inspection",
+    ],
+    answer: 1,
+    explain:
+      "The feasibility evaluation comes first - there's no point doing a physical site evaluation if the intended use isn't compatible with the site's features, location, and zoning. Feasibility gates the rest.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 2 - Site Evaluation (p. 13)",
+  },
+  {
+    id: "sc-006",
+    domain: "site",
+    q: "In areas with cold temperatures, building foundations must be placed:",
+    choices: [
+      "At the exact ground surface",
+      "Below the frost line",
+      "Above any topsoil",
+      "At least 10 feet deep everywhere",
+    ],
+    answer: 1,
+    explain:
+      "Foundations go below the frost line so freezing and thawing of the soil can't heave and crack them. How far down that is depends on the local climate.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 4 - Excavations (p. 73)",
+  },
+  {
+    id: "sc-007",
+    domain: "site",
+    q: "For loose or noncohesive soil such as sand or gravel, which piece of equipment is effective for excavating and loading?",
+    choices: [
+      "A hydraulic excavator",
+      "A concrete pump",
+      "A tower crane only",
+      "A paving machine",
+    ],
+    answer: 0,
+    explain:
+      "Loose, noncohesive soils (sand, gravel) are dug and loaded efficiently with a hydraulic excavator. The soil type at the site is the main factor in choosing the excavation equipment.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 4 - Effects of Soil Types on Excavating Equipment (p. 73)",
+  },
+  {
+    id: "sc-008",
+    domain: "site",
+    q: "The term 'bank cubic yard' refers to the volume of soil:",
+    choices: [
+      "After it has been excavated and loosened",
+      "In its undisturbed, in-place state",
+      "After it has been compacted",
+      "Only when it is frozen",
+    ],
+    answer: 1,
+    explain:
+      "A bank cubic yard is soil measured in its natural, undisturbed state - before digging loosens it. Excavating increases the volume (called bulking), which is why hauled quantities exceed bank measure.",
+    cite: "Principles & Practices of Commercial Construction, Glossary - Bank cubic yard",
+  },
+  {
+    id: "sc-009",
+    domain: "site",
+    q: "There are two basic types of roadway pavement:",
+    choices: [
+      "Rigid and flexible",
+      "Hot and cold",
+      "Wet and dry",
+      "Public and private",
+    ],
+    answer: 0,
+    explain:
+      "Pavements are either rigid (concrete) or flexible (asphalt). Good pavement design aims for a useful life of roughly 10 to 20 years carrying the design traffic loads.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 3 - Pavements (p. 55)",
+  },
+  {
+    id: "sc-010",
+    domain: "site",
+    q: "A shallow foundation is best described as one that:",
+    choices: [
+      "Extends to bedrock hundreds of feet down",
+      "Sits a relatively short distance below finished grade, usually cast-in-place reinforced concrete footings",
+      "Uses driven steel piles",
+      "Floats on groundwater",
+    ],
+    answer: 1,
+    explain:
+      "A shallow foundation sits a short distance below grade and is usually cast-in-place reinforced concrete - isolated pad footings under columns or strip footings under bearing walls. Deep foundations (piles, caissons) are used when good soil is far down.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 5 - Foundations (p. 117)",
+  },
   // ---- Concrete ------------------------------------------------
   {
     id: "co-001",
@@ -871,6 +976,66 @@ export const BANK: ForemanQuestion[] = [
       "A lower water-cement ratio yields denser, stronger concrete. Adding water on site to make placement easier is the fastest way to weaken a slab - it raises the ratio and cuts strength.",
     cite: "Contractor's Guide to Quality Concrete Construction",
   },
+  {
+    id: "co-004",
+    domain: "concrete",
+    q: "The temporary structure that supports freshly placed plastic concrete until it cures is called:",
+    choices: [
+      "Rebar",
+      "Formwork",
+      "Aggregate",
+      "A control joint",
+    ],
+    answer: 1,
+    explain:
+      "Formwork is the temporary framing that holds plastic concrete in shape while it cures, and it also supports the reinforcing bars and construction loads until the concrete can carry itself.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 6 - Formwork (p. 139)",
+  },
+  {
+    id: "co-005",
+    domain: "concrete",
+    q: "Concrete is produced from portland cement and water paste combined with:",
+    choices: [
+      "Steel fibers only",
+      "Aggregate (fine and coarse)",
+      "Asphalt",
+      "Lime plaster",
+    ],
+    answer: 1,
+    explain:
+      "Concrete is cement-and-water paste plus aggregate. The paste coats the aggregate and, as it sets, fills the voids between particles and binds them into a dense, solid mass.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 7 - Aggregates for Concrete (p. 197)",
+  },
+  {
+    id: "co-006",
+    domain: "concrete",
+    q: "Reinforcing steel is added to concrete primarily because plain concrete is weak in:",
+    choices: [
+      "Compression",
+      "Tension",
+      "Weight",
+      "Color",
+    ],
+    answer: 1,
+    explain:
+      "Concrete is strong in compression but weak and brittle in tension. Steel, which has excellent tensile strength and is ductile, is added to carry the tension - that combination is reinforced concrete.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 8 - Principles of Reinforced Concrete (p. 242)",
+  },
+  {
+    id: "co-007",
+    domain: "concrete",
+    q: "'Clear cover' on a reinforced concrete member is:",
+    choices: [
+      "The paint applied to exposed concrete",
+      "The distance from the outside face of the concrete to the first surface of the reinforcing steel",
+      "The plastic sheeting used during curing",
+      "The gap between two form panels",
+    ],
+    answer: 1,
+    explain:
+      "Clear cover is the concrete distance from the surface to the nearest reinforcing bar. It embeds and protects the steel - from corrosion and fire - so getting it right is a code and durability issue.",
+    cite: "Principles & Practices of Commercial Construction, Glossary - Clear cover",
+  },
   // ---- Metals --------------------------------------------------
   {
     id: "me-001",
@@ -896,6 +1061,51 @@ export const BANK: ForemanQuestion[] = [
     explain:
       "The ribs lock the bar into the concrete so the two act together under load. Smooth bars would pull out. Corrosion is handled by cover and coatings, not the deformations.",
     cite: "Placing Reinforcing Bars (CRSI)",
+  },
+  {
+    id: "me-003",
+    domain: "metals",
+    q: "ASTM A36 structural steel has a minimum yield strength of about:",
+    choices: [
+      "18,000 psi",
+      "36,000 psi",
+      "50,000 psi",
+      "100,000 psi",
+    ],
+    answer: 1,
+    explain:
+      "A36 is the old-standby structural steel at 36,000 psi (248 MPa) yield. Knowing it separates it from the higher-strength A992 used in modern wide-flange shapes.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 11 - Structural Steel Properties (p. 328)",
+  },
+  {
+    id: "me-004",
+    domain: "metals",
+    q: "High-strength ASTM A992 structural steel, common in wide-flange shapes, has a yield strength of about:",
+    choices: [
+      "36,000 psi",
+      "50,000 psi",
+      "24,000 psi",
+      "75,000 psi",
+    ],
+    answer: 1,
+    explain:
+      "A992 yields at 50,000 psi (345 MPa), higher than A36's 36,000 psi. It's the modern standard for hot-rolled wide-flange (W-shape) beams and columns.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 11 - Structural Steel Properties (p. 328)",
+  },
+  {
+    id: "me-005",
+    domain: "metals",
+    q: "A key structural advantage of steel over concrete is that steel is:",
+    choices: [
+      "Strong only in compression",
+      "Equally strong in tension and compression, and ductile",
+      "Weak in tension",
+      "Unable to be welded",
+    ],
+    answer: 1,
+    explain:
+      "Steel is ductile and equally strong in tension and compression, which is why concrete and timber often rely on steel to boost their performance. It also has a high strength-to-weight ratio.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 11 - Structural Steel Properties (p. 328)",
   },
   // ---- Mechanical & Plumbing -----------------------------------
   {
@@ -949,6 +1159,36 @@ export const BANK: ForemanQuestion[] = [
       "The header spans the opening and carries the loads above it down to the jack (trimmer) studs on each side. The sill is at the bottom of a window opening; the sole plate runs along the floor.",
     cite: "Carpentry & Building Construction",
   },
+  {
+    id: "wd-003",
+    domain: "wood",
+    q: "Timber is durable as a structural material as long as it is protected from:",
+    choices: [
+      "Sunlight and wind",
+      "Decay and insects",
+      "Paint and stain",
+      "Cold weather",
+    ],
+    answer: 1,
+    explain:
+      "Wood has good tension and compression strength and lasts a long time when kept safe from decay (moisture/fungus) and insects. Preservative treatment is how that protection is achieved.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 10 - Structural Timber Frame (p. 300)",
+  },
+  {
+    id: "wd-004",
+    domain: "wood",
+    q: "A glulam member is:",
+    choices: [
+      "A single solid sawn timber",
+      "An engineered member built up from layers of wood bonded with adhesive (glue-laminated)",
+      "A steel beam wrapped in wood",
+      "A concrete beam",
+    ],
+    answer: 1,
+    explain:
+      "Glulam (glue-laminated timber) is built from layers of dimensioned lumber bonded together, letting designers make long-span, engineered beams and arches stronger and larger than a single solid timber.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 10 - Structural Timber Frame (p. 300)",
+  },
   // ---- Thermal & Moisture Protection ---------------------------
   {
     id: "tm-001",
@@ -979,6 +1219,36 @@ export const BANK: ForemanQuestion[] = [
     explain:
       "Flashing is a water-management detail: it channels water away from vulnerable joints and penetrations so it sheds off the building instead of soaking in. It is not structural or insulating.",
     cite: "NASCLA Contractors Guide, Thermal & Moisture Protection",
+  },
+  {
+    id: "tm-003",
+    domain: "thermal",
+    q: "Insulating materials in the building envelope are used to address which three requirements?",
+    choices: [
+      "Color, texture, and cost",
+      "Temperature control, flame-spread (fire) control, and sound transmission control",
+      "Wind, rain, and snow only",
+      "Plumbing, wiring, and ductwork",
+    ],
+    answer: 1,
+    explain:
+      "Insulation in the envelope does three jobs: holds temperature without wasting energy, helps control flame spread (fire ratings), and limits sound transmission. The right material can handle a combination of the three.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 14 - Thermal, Sound, and Moisture Control (p. 406)",
+  },
+  {
+    id: "tm-004",
+    domain: "thermal",
+    q: "An air vapor diffusion retarder should be placed on which side of an exterior wall?",
+    choices: [
+      "The warm side (inside in cold climates, outside in warm climates)",
+      "Always the outside",
+      "Always the inside",
+      "In the middle of the insulation",
+    ],
+    answer: 0,
+    explain:
+      "The vapor retarder goes on the warm side of the wall - inside in cold climates, outside in warm ones - so moisture in the warm air can't diffuse into the wall and condense inside the assembly.",
+    cite: "Principles & Practices of Commercial Construction, Glossary - Air vapor diffusion retarder",
   },
   // ---- Finishes ------------------------------------------------
   {
@@ -1011,6 +1281,36 @@ export const BANK: ForemanQuestion[] = [
       "Tape and successive coats of joint compound bridge and conceal the seams so the finished wall reads as one flat plane. Screws or nails fasten the panels; the mud is cosmetic and crack-resistant, not structural.",
     cite: "Gypsum Construction Handbook",
   },
+  {
+    id: "fn-003",
+    domain: "finishes",
+    q: "In a three-coat plaster (stucco) system, the 'brown coat' is:",
+    choices: [
+      "The first coat applied to the lath",
+      "The second coat, applied over the scratch coat",
+      "The final decorative coat",
+      "A waterproof membrane",
+    ],
+    answer: 1,
+    explain:
+      "Three-coat plaster goes scratch coat, then brown coat, then finish coat. The brown coat (about 3/8 inch) has a higher sand content, so less cement and less shrinkage, which helps minimize cracking.",
+    cite: "Principles & Practices of Commercial Construction, Glossary - Brown coat",
+  },
+  {
+    id: "fn-004",
+    domain: "finishes",
+    q: "Which of the following is an INTERIOR finish item rather than an exterior one?",
+    choices: [
+      "Cladding",
+      "Exterior glazing",
+      "Wall partitions and ceilings",
+      "Parking areas",
+    ],
+    answer: 2,
+    explain:
+      "Interior finishing covers partitions, wall and floor finishes, stairs, ceilings, trim, and cabinets. Cladding, exterior glazing, and parking areas fall under exterior finishing.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 16 - Building Envelope and Finishes (p. 472)",
+  },
   // ---- Masonry -------------------------------------------------
   {
     id: "ma-001",
@@ -1036,6 +1336,51 @@ export const BANK: ForemanQuestion[] = [
     explain:
       "CMU are called out by nominal size; the actual block is about 3/8 inch smaller each way (7-5/8 x 7-5/8 x 15-5/8) so that with a 3/8-inch mortar joint it lays out on an 8-inch module.",
     cite: "Modern Masonry",
+  },
+  {
+    id: "ma-003",
+    domain: "masonry",
+    q: "Standard concrete masonry units (CMU) are dimensioned to fit which module, so a standard block plus mortar joint measures 16 in. long by 8 in. high?",
+    choices: [
+      "The 12 in. module",
+      "The 16 in. module",
+      "The 24 in. module",
+      "The 10 in. module",
+    ],
+    answer: 1,
+    explain:
+      "CMU are built on the 16-inch module: a standard 8-inch block is 15-5/8 by 7-5/8 inches, and adding a 3/8-inch mortar joint brings it to 16 by 8. An 8-foot-high wall takes exactly 12 courses.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 9 - Building with CMU (p. 274)",
+  },
+  {
+    id: "ma-004",
+    domain: "masonry",
+    q: "A masonry wall on the exterior of a building that supports no gravity load but must resist wind is called a:",
+    choices: [
+      "Partition wall",
+      "Curtain wall",
+      "Load-bearing wall",
+      "Shear wall",
+    ],
+    answer: 1,
+    explain:
+      "An exterior non-load-bearing masonry wall is a curtain wall - it carries no gravity load but must resist lateral wind loads and transfer them to the frame. A non-load-bearing INTERIOR wall is a partition wall.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 9 - Masonry Construction (p. 274)",
+  },
+  {
+    id: "ma-005",
+    domain: "masonry",
+    q: "Concrete masonry units (concrete block) are manufactured from:",
+    choices: [
+      "A high-slump, flowable concrete mix",
+      "A dry, no-slump mix of portland cement, fine aggregate, sand, and water",
+      "Fired clay",
+      "Molten glass",
+    ],
+    answer: 1,
+    explain:
+      "CMU are made from a dry, no-slump concrete mix pressed and vibrated into molds, then steam-cured. Lightweight aggregates can replace normal-density fine aggregate to make lighter units.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 9 - Building with CMU (p. 274)",
   },
   // ---- Doors, Windows & Glazing --------------------------------
   {
@@ -1067,6 +1412,21 @@ export const BANK: ForemanQuestion[] = [
     explain:
       "Egress doors serving higher occupant loads must swing in the direction people travel to get out, so a crowd pushing to leave forces the door open rather than jamming it shut.",
     cite: "IBC Chapter 10, Means of Egress",
+  },
+  {
+    id: "dw-003",
+    domain: "doors",
+    q: "A curtain wall on a multistory building is:",
+    choices: [
+      "A load-bearing wall carrying the floors above",
+      "A nonload-bearing exterior wall that must still be designed to resist wind loads",
+      "An interior fire wall",
+      "A below-grade foundation wall",
+    ],
+    answer: 1,
+    explain:
+      "Curtain walls are nonload-bearing exterior walls that protect the interior and shape the building's appearance - but they still carry lateral wind loads back to the structural frame, so they must be designed for wind.",
+    cite: "Principles & Practices of Commercial Construction, Ch. 13 - Curtain Wall Construction (p. 387)",
   },
   // ---- Electrical ----------------------------------------------
   {
@@ -1102,6 +1462,6 @@ export const BANK: ForemanQuestion[] = [
 ];
 
 // ============================================================
-// END OF FILE - lib/foremanprep/bank.ts (v5 - +31 verified questions from Chapters 3, 8, 11)
+// END OF FILE - lib/foremanprep/bank.ts (v6 - +24 technical questions from Principles & Practices textbook)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
