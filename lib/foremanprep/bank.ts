@@ -51,7 +51,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "Retainage (commonly 5-10%) is held back from each progress payment to keep leverage for completion and correction of the work, and is released per the contract terms at or near final completion.",
-    cite: "NASCLA Guide, Ch. 7 - Contract Price and Payment Terms (p. 7-2)",
+    cite: "NASCLA Guide, Ch. 7 - Retainage (p. 7-3)",
   },
   {
     id: "pc-004",
@@ -101,7 +101,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "Liquidated damages set a fixed daily dollar amount for late completion, agreed up front so the owner does not have to prove actual losses. They are about time, not defects or damaged material.",
-    cite: "NASCLA Guide, Ch. 7 - Provisions to Limit Risk (p. 7-5)",
+    cite: "NASCLA Guide, Ch. 7 - Breach of Contract, liquidated damages (p. 7-4)",
   },
   {
     id: "pc-008",
@@ -517,6 +517,6 @@ export const BANK: ForemanQuestion[] = [
 ];
 
 // ============================================================
-// END OF FILE - lib/foremanprep/bank.ts (v2 - 38 questions, exact NASCLA Guide citations)
+// END OF FILE - lib/foremanprep/bank.ts (v3 - citations verified against Ch. 7 body pages)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
