@@ -11,12 +11,11 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v5 (Day 5): the subject picker. Drill one subject
-// or run the whole mix; every card shows the subject's real weight
-// on the 115-question exam. Finished rounds now post to the
-// attempts API - the server re-grades and stores them for
-// signed-in users, which is the raw material of the readiness
-// score. Anonymous rounds still play fine and just aren't saved.
+// Practice player v6 (Day 8): the AI tutor. Under every answered
+// question an "Ask the tutor why" button opens an inline chat
+// scoped to that exact question - it explains in plain terms and
+// points at the book and section. Everything from v5 stays: subject
+// picker, drawn marks, rounds posting to the attempts API.
 
 const ROUND_SIZE = 10;
 
@@ -54,6 +53,46 @@ export default function PracticePage() {
   const [answers, setAnswers] = useState<PickedAnswer[]>([]);
   const [done, setDone] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [thread, setThread] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [tutorInput, setTutorInput] = useState("");
+  const [tutorBusy, setTutorBusy] = useState(false);
+  const [tutorErr, setTutorErr] = useState("");
+
+  function resetTutor() {
+    setTutorOpen(false);
+    setThread([]);
+    setTutorInput("");
+    setTutorBusy(false);
+    setTutorErr("");
+  }
+
+  async function askTutor(questionId: string) {
+    const text = tutorInput.trim();
+    if (!text || tutorBusy) return;
+    const nextThread = [...thread, { role: "user" as const, content: text }];
+    setThread(nextThread);
+    setTutorInput("");
+    setTutorErr("");
+    setTutorBusy(true);
+    try {
+      const res = await fetch("/foremanprep/api/tutor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId, messages: nextThread }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.reply) {
+        setThread((t) => [...t, { role: "assistant", content: data.reply }]);
+      } else {
+        setTutorErr(data?.error ?? "The tutor is unavailable - try again.");
+      }
+    } catch {
+      setTutorErr("The tutor is unavailable - try again.");
+    } finally {
+      setTutorBusy(false);
+    }
+  }
 
   function startRound(key: Sel) {
     setSel(key);
@@ -65,6 +104,7 @@ export default function PracticePage() {
     setAnswers([]);
     setDone(false);
     setSaved(false);
+    resetTutor();
     setPhase("quiz");
   }
 
@@ -110,6 +150,7 @@ export default function PracticePage() {
     }
     setIdx(idx + 1);
     setPicked(null);
+    resetTutor();
   }
 
   if (phase === "pick") {
@@ -244,6 +285,56 @@ export default function PracticePage() {
         <div className="fq-reveal">
           <p className="fq-explain">{question.explain}</p>
           <p className="fq-cite">Where it lives: {question.cite}</p>
+          {tutorOpen ? (
+            <div className="fq-tutor">
+              <div className="fq-thread">
+                {thread.length === 0 && !tutorBusy ? (
+                  <div className="fq-msg tut">
+                    Ask me anything about this one - why the answer is right, what a
+                    term means, or where to find it in the books.
+                  </div>
+                ) : null}
+                {thread.map((m, i) => (
+                  <div
+                    className={m.role === "user" ? "fq-msg me" : "fq-msg tut"}
+                    key={`${m.role}-${i}`}
+                  >
+                    {m.content}
+                  </div>
+                ))}
+                {tutorBusy ? <div className="fq-msg tut thinking">Thinking...</div> : null}
+              </div>
+              {tutorErr ? <p className="fq-terr">{tutorErr}</p> : null}
+              <div className="fq-ask">
+                <input
+                  className="fq-askin"
+                  disabled={tutorBusy}
+                  onChange={(e) => setTutorInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") askTutor(question.id);
+                  }}
+                  placeholder="Ask the tutor..."
+                  value={tutorInput}
+                />
+                <button
+                  className="fq-asksend"
+                  disabled={tutorBusy || tutorInput.trim().length === 0}
+                  onClick={() => askTutor(question.id)}
+                  type="button"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              className="fq-asktut"
+              onClick={() => setTutorOpen(true)}
+              type="button"
+            >
+              Ask the tutor why
+            </button>
+          )}
           <button className="fq-next" onClick={next} type="button">
             {idx + 1 >= qs.length ? "See my score" : "Next question"}
           </button>
@@ -254,7 +345,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v5 - subject
-// picker + rounds saved to the database)
+// END OF FILE - app/foremanprep/practice/page.tsx (v6 - inline
+// AI tutor)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
