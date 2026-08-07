@@ -21,7 +21,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "A bid bond backs the bid itself: if the winning bidder walks away or cannot provide the required performance and payment bonds, the owner can claim against it. It does not cover schedule, defects, or subcontractor payment.",
-    cite: "NASCLA Contractors Guide, Bonds chapter",
+    cite: "NASCLA Guide, Ch. 3 - Types of Bonds (p. 3-7)",
   },
   {
     id: "pc-002",
@@ -36,7 +36,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 2,
     explain:
       "A performance bond gives the owner a financial backstop if the contractor defaults: the surety must see the work completed or cover the loss. Payment protection for subs and suppliers is the separate payment bond.",
-    cite: "NASCLA Contractors Guide, Bonds chapter",
+    cite: "NASCLA Guide, Ch. 3 - Types of Bonds (p. 3-7)",
   },
   {
     id: "pc-003",
@@ -51,7 +51,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "Retainage (commonly 5-10%) is held back from each progress payment to keep leverage for completion and correction of the work, and is released per the contract terms at or near final completion.",
-    cite: "NASCLA Contractors Guide, Contract Provisions chapter",
+    cite: "NASCLA Guide, Ch. 7 - Contract Price and Payment Terms (p. 7-2)",
   },
   {
     id: "pc-004",
@@ -61,7 +61,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 2,
     explain:
       "A change order is the written, agreed modification to the contract. An RFI asks a question, a submittal proposes materials or methods, and a punch list tracks closeout corrections - none of them change the contract by themselves.",
-    cite: "NASCLA Contractors Guide, Changes chapter",
+    cite: "NASCLA Guide, Ch. 7 - Making Changes to the Contract (p. 7-7)",
   },
   {
     id: "pc-005",
@@ -76,7 +76,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "The payment bond assures that subcontractors and suppliers get paid even if the prime contractor does not pay them, which also shields the owner from liens. Completion of the work is the separate performance bond.",
-    cite: "NASCLA Contractors Guide, Bonds chapter",
+    cite: "NASCLA Guide, Ch. 3 - Types of Bonds (p. 3-7)",
   },
   {
     id: "pc-006",
@@ -86,7 +86,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "An addendum revises the bid documents before bids come in, so every bidder prices the same scope. A change order only exists after a contract is signed. Mixing these two up is a classic exam trap.",
-    cite: "NASCLA Contractors Guide, Bidding chapter",
+    cite: "NASCLA Guide, Ch. 6 - Bid Documents (p. 6-1)",
   },
   {
     id: "pc-007",
@@ -101,7 +101,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "Liquidated damages set a fixed daily dollar amount for late completion, agreed up front so the owner does not have to prove actual losses. They are about time, not defects or damaged material.",
-    cite: "NASCLA Contractors Guide, Contract Provisions chapter",
+    cite: "NASCLA Guide, Ch. 7 - Provisions to Limit Risk (p. 7-5)",
   },
   {
     id: "pc-008",
@@ -111,7 +111,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "A mechanic's (or construction) lien places a claim against the improved property for unpaid labor or materials. Strict notice and filing deadlines apply, which is why prompt paperwork matters.",
-    cite: "NASCLA Contractors Guide, Liens chapter",
+    cite: "NASCLA Guide, Ch. 7 - Contract Management (lien laws)",
   },
   {
     id: "pc-009",
@@ -121,7 +121,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 0,
     explain:
       "Submittals (shop drawings, product data, samples) let the architect or engineer confirm what will be installed matches the design intent before anything is ordered or built. As-builts are recorded after construction.",
-    cite: "NASCLA Contractors Guide, Project Management chapter",
+    cite: "NASCLA Guide, Ch. 8 - Detailed Shop Drawings (p. 8-10)",
   },
   {
     id: "pc-010",
@@ -131,7 +131,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 0,
     explain:
       "The notice to proceed is the owner's official go-ahead, and the contract clock usually starts on its date. A certificate of occupancy comes at the end, when the building may be used.",
-    cite: "NASCLA Contractors Guide, Contract Provisions chapter",
+    cite: "NASCLA Guide, Ch. 8 - Contract Award (p. 8-8)",
   },
   // ---- General Requirements & Safety ---------------------------
   {
@@ -172,7 +172,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "Any delay to a critical-path activity delays the whole job, because that chain has zero float. Cost, risk, and who performs the work are separate questions.",
-    cite: "Construction Project Management, scheduling chapter",
+    cite: "NASCLA Guide, Ch. 8 - Critical Path Method (p. 8-5)",
   },
   {
     id: "gr-004",
@@ -197,7 +197,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 0,
     explain:
       "Every hazardous chemical on site must have an accessible Safety Data Sheet (SDS) covering hazards, PPE, first aid, and handling. Workers have the right to review them at any time.",
-    cite: "OSHA 29 CFR 1926.59 / Hazard Communication",
+    cite: "NASCLA Guide, Ch. 11 - Safety Data Sheets (SDS) (p. 11-6)",
   },
   {
     id: "gr-006",
@@ -207,7 +207,7 @@ export const BANK: ForemanQuestion[] = [
     answer: 1,
     explain:
       "Float (or slack) is the wiggle room a non-critical activity has before it starts pushing the finish date. Critical-path activities have zero float, which is what makes them critical.",
-    cite: "Construction Project Management, scheduling chapter",
+    cite: "NASCLA Guide, Ch. 8 - Scheduling Methods (p. 8-2)",
   },
   // ---- Site Construction ---------------------------------------
   {
@@ -517,6 +517,6 @@ export const BANK: ForemanQuestion[] = [
 ];
 
 // ============================================================
-// END OF FILE - lib/foremanprep/bank.ts (v1 - 38 questions)
+// END OF FILE - lib/foremanprep/bank.ts (v2 - 38 questions, exact NASCLA Guide citations)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
