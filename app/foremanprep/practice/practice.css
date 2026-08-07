@@ -1,7 +1,7 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles v5. Back controls are now visible pills
-   with a chevron (top-left of every screen). fq- prefix, rides
-   the fp- canvas. */
+/* Practice player styles v6. Adds the inline tutor chat panel that
+   opens under a missed question. Back pills, drawn marks, subject
+   picker all as before. fq- prefix, rides the fp- canvas. */
 
 .fq-wrap { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
@@ -36,6 +36,20 @@
 .fq-cite { font-size: 12.5px; font-weight: 700; color: var(--fp); margin: 0 0 16px; }
 .fq-next { width: 100%; padding: 14px 0; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; }
 
+.fq-asktut { width: 100%; padding: 12px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: transparent; color: var(--fp); border: 1px solid var(--fp); margin-bottom: 10px; }
+.fq-tutor { margin: 0 0 14px; border: 1px solid #2a2a2a; border-radius: 12px; background: #0d0d0d; overflow: hidden; }
+.fq-thread { max-height: 300px; overflow-y: auto; padding: 12px; display: grid; gap: 9px; }
+.fq-msg { font-size: 13.5px; line-height: 1.5; padding: 9px 12px; border-radius: 10px; max-width: 90%; }
+.fq-msg.me { justify-self: end; background: var(--fp-soft); border: 1px solid rgba(249, 115, 22, 0.4); color: #fff; }
+.fq-msg.tut { justify-self: start; background: #161616; border: 1px solid #2a2a2a; color: #ddd; }
+.fq-msg.thinking { color: #888; font-style: italic; }
+.fq-terr { font-size: 12.5px; color: #f87171; padding: 0 12px 8px; }
+.fq-ask { display: flex; gap: 8px; border-top: 1px solid #222; padding: 10px; }
+.fq-askin { flex: 1; min-width: 0; background: #111; color: #fff; border: 1px solid #333; border-radius: 9px; padding: 10px 12px; font-size: 14px; font-family: inherit; }
+.fq-askin:focus { outline: none; border-color: var(--fp); }
+.fq-asksend { padding: 10px 16px; border-radius: 9px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; background: var(--fp); color: #000; }
+.fq-asksend:disabled { background: #1c1c1c; color: #555; cursor: not-allowed; }
+
 .fq-title { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin: 0 0 4px; }
 .fq-hint { font-size: 14px; color: #999; line-height: 1.5; margin: 0 0 18px; }
 .fq-all { width: 100%; text-align: left; padding: 15px 16px; border-radius: 14px; cursor: pointer; background: var(--fp-soft); border: 2px solid var(--fp); margin-bottom: 12px; }
@@ -63,7 +77,7 @@
 .fq-home { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #888; border: 1px solid #333; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v5 -
-   visible back pills)
+   END OF FILE - app/foremanprep/practice/practice.css (v6 -
+   inline tutor panel)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
