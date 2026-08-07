@@ -133,6 +133,176 @@ export const BANK: ForemanQuestion[] = [
       "The notice to proceed is the owner's official go-ahead, and the contract clock usually starts on its date. A certificate of occupancy comes at the end, when the building may be used.",
     cite: "NASCLA Guide, Ch. 8 - Contract Award (p. 8-8)",
   },
+  {
+    id: "pc-011",
+    domain: "procurement",
+    q: "Under a lump-sum (fixed-price) contract, who generally bears the risk of cost overruns?",
+    choices: ["The owner", "The contractor", "The architect", "The surety"],
+    answer: 1,
+    explain:
+      "In a lump-sum contract the contractor agrees to a fixed price and assumes the risk of extra costs - but also keeps any savings. If materials or labor run over, the contractor absorbs it, not the owner.",
+    cite: "NASCLA Guide, Ch. 7 - Lump-Sum Contract (p. 7-5)",
+  },
+  {
+    id: "pc-012",
+    domain: "procurement",
+    q: "Under a cost-plus contract, the contractor is paid:",
+    choices: [
+      "A single fixed price agreed before work begins",
+      "The actual cost of labor and materials plus a markup fee",
+      "A set price per unit of work installed",
+      "Only for materials, with labor donated",
+    ],
+    answer: 1,
+    explain:
+      "Cost-plus reimburses the contractor for actual labor and material costs and adds a markup - a percentage or a fixed fee - for overhead and profit. It shifts more of the cost risk toward the owner.",
+    cite: "NASCLA Guide, Ch. 7 - Cost-Plus Contract (p. 7-6)",
+  },
+  {
+    id: "pc-013",
+    domain: "procurement",
+    q: "A unit-price contract is the best fit when:",
+    choices: [
+      "The full scope and quantities are known precisely in advance",
+      "The exact quantities of work cannot be determined in advance",
+      "The owner wants one guaranteed total price",
+      "The job has no measurable quantities",
+    ],
+    answer: 1,
+    explain:
+      "Unit-price sets a price per unit - per cubic yard, per linear foot - and the contractor is paid for the actual quantities used. It fits work like excavation where you cannot pin down exact quantities up front.",
+    cite: "NASCLA Guide, Ch. 7 - Unit-Price Contract (p. 7-6)",
+  },
+  {
+    id: "pc-014",
+    domain: "procurement",
+    q: "Under the design/build delivery method, the owner:",
+    choices: [
+      "Hires the designer and the builder under two separate contracts",
+      "Contracts with a single entity responsible for both design and construction",
+      "Acts as their own general contractor",
+      "Contracts only for design, then self-performs construction",
+    ],
+    answer: 1,
+    explain:
+      "Design/build gives the owner one point of responsibility - a single company handles design through construction. That differs from the traditional single-prime method, where design and construction are separate contracts.",
+    cite: "NASCLA Guide, Ch. 7 - Design/Build (p. 7-6)",
+  },
+  {
+    id: "pc-015",
+    domain: "procurement",
+    q: "How does binding arbitration differ from mediation?",
+    choices: [
+      "Arbitration is always free; mediation is not",
+      "In arbitration the arbitrator issues a legally binding decision, while a mediator cannot impose one",
+      "Mediation always takes place in a courtroom",
+      "Arbitration cannot be used for construction disputes",
+    ],
+    answer: 1,
+    explain:
+      "An arbitrator acts like a private judge and issues a binding decision. A mediator is only a neutral facilitator who helps the parties reach their own agreement and cannot force an outcome.",
+    cite: "NASCLA Guide, Ch. 7 - Alternative Dispute Resolution (p. 7-8)",
+  },
+  {
+    id: "pc-016",
+    domain: "procurement",
+    q: "Among the common forms of alternative dispute resolution, which is generally the first and least formal step?",
+    choices: ["Litigation", "Arbitration", "Negotiation", "A jury trial"],
+    answer: 2,
+    explain:
+      "Negotiation - the parties talking directly to reach agreement - is the simplest, cheapest first step. If it fails, disputes typically move to mediation, then arbitration, with court as the last resort.",
+    cite: "NASCLA Guide, Ch. 7 - Alternative Dispute Resolution (p. 7-7)",
+  },
+  {
+    id: "pc-017",
+    domain: "procurement",
+    q: "The most reliable way to get a substitute product accepted on a project is to:",
+    choices: [
+      "Install it and ask forgiveness later",
+      "Obtain prior approval during the bid stage",
+      "Substitute it only after final inspection",
+      "Pick any product of a lower price",
+    ],
+    answer: 1,
+    explain:
+      "Getting a substitution approved during the bid stage - the 'or equal' / prior-approval process - keeps the playing field level for all bidders and protects you. Substituting on your own after the fact risks rejection and rework.",
+    cite: "NASCLA Guide, Ch. 7 - Making Substitutions (p. 7-8)",
+  },
+  {
+    id: "pc-018",
+    domain: "procurement",
+    q: "If a contract provision is ambiguous and the parties dispute its meaning, courts will most often interpret it:",
+    choices: [
+      "In favor of whichever party is larger",
+      "Against the party who drafted the contract",
+      "In favor of the contractor automatically",
+      "By ignoring the ambiguous clause entirely",
+    ],
+    answer: 1,
+    explain:
+      "When wording is genuinely unclear, the interpretation generally goes against the party who wrote it. That is why drafting in plain, precise language protects you - vague terms get read in the other side's favor.",
+    cite: "NASCLA Guide, Ch. 7 - Legal Interpretation (p. 7-10)",
+  },
+  {
+    id: "pc-019",
+    domain: "procurement",
+    q: "Which agreement generally must be in writing to be legally enforceable?",
+    choices: [
+      "A quick change to a paint color",
+      "The sale or purchase of land",
+      "A verbal instruction to a crew member",
+      "A handshake on lunch plans",
+    ],
+    answer: 1,
+    explain:
+      "Oral agreements can be binding, but some - notably the sale or purchase of land - must be in writing to be enforceable. In general, putting construction agreements in writing is far safer than a handshake.",
+    cite: "NASCLA Guide, Ch. 7 - Are Oral Agreements Legally Binding? (p. 7-9)",
+  },
+  {
+    id: "pc-020",
+    domain: "procurement",
+    q: "In contract law, 'consideration' means:",
+    choices: [
+      "Being polite during negotiations",
+      "Each party gives up something of value in an exchange",
+      "The time taken to think over an offer",
+      "The contractor's profit margin",
+    ],
+    answer: 1,
+    explain:
+      "Consideration is the exchange - both parties must give up something of value, such as money for services. Without it there is no binding contract, only a one-sided promise.",
+    cite: "NASCLA Guide, Ch. 7 - Consideration (p. 7-2)",
+  },
+  {
+    id: "pc-021",
+    domain: "procurement",
+    q: "A contract may be voidable because a party lacked legal capacity if that party was:",
+    choices: [
+      "An experienced contractor",
+      "A minor, or someone mentally incompetent or under the influence of drugs or alcohol",
+      "A licensed architect",
+      "A corporation",
+    ],
+    answer: 1,
+    explain:
+      "Competent parties must be of legal age and sound mind. Minors, the mentally incompetent, and people under the influence may lack the capacity to be bound, so the contract can be voided.",
+    cite: "NASCLA Guide, Ch. 7 - Competent Parties (p. 7-2)",
+  },
+  {
+    id: "pc-022",
+    domain: "procurement",
+    q: "Which of the following is NOT one of the four required elements of a binding contract?",
+    choices: [
+      "Offer and acceptance",
+      "Consideration",
+      "A profit margin of at least 10 percent",
+      "Legal purpose",
+    ],
+    answer: 2,
+    explain:
+      "The four elements are offer and acceptance, consideration, competent parties, and legal purpose. A specific profit margin is a business decision, not a legal requirement for a contract to be binding.",
+    cite: "NASCLA Guide, Ch. 7 - Required Contract Elements (p. 7-1)",
+  },
   // ---- General Requirements & Safety ---------------------------
   {
     id: "gr-001",
@@ -517,6 +687,6 @@ export const BANK: ForemanQuestion[] = [
 ];
 
 // ============================================================
-// END OF FILE - lib/foremanprep/bank.ts (v3 - citations verified against Ch. 7 body pages)
+// END OF FILE - lib/foremanprep/bank.ts (v4 - +12 verified Chapter 7 Procurement questions)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
