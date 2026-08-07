@@ -11,14 +11,13 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v6 (Day 8): the AI tutor. Under every answered
-// question an "Ask the tutor why" button opens an inline chat
-// scoped to that exact question - it explains in plain terms and
-// points at the book and section. Everything from v5 stays: subject
-// picker, drawn marks, rounds posting to the attempts API.
+// Practice player v7: round-length picker. On the subject screen
+// the user chooses 10, 25, or the full subject before drilling, so
+// a big bank is not stuck serving 10 at a time. Everything else
+// stays: subject picker, AI tutor, drawn marks, rounds posting to
+// the attempts API.
 
-const ROUND_SIZE = 10;
-
+type Len = 10 | 25 | "all";
 type Sel = DomainKey | "all";
 type RecapRow = { id: string; q: string; ok: boolean };
 type PickedAnswer = { questionId: string; picked: number };
@@ -45,6 +44,7 @@ export default function PracticePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"pick" | "quiz">("pick");
   const [sel, setSel] = useState<Sel>("all");
+  const [roundLen, setRoundLen] = useState<Len>(10);
   const [qs, setQs] = useState<ForemanQuestion[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -96,7 +96,8 @@ export default function PracticePage() {
 
   function startRound(key: Sel) {
     setSel(key);
-    setQs(buildPracticeSet(key === "all" ? "all" : key, ROUND_SIZE));
+    const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
+    setQs(buildPracticeSet(key === "all" ? "all" : key, count));
     setIdx(0);
     setPicked(null);
     setCorrect(0);
@@ -170,6 +171,32 @@ export default function PracticePage() {
           Drill one subject or run the whole mix. The counts are each
           subject's real weight on the 115-question exam.
         </p>
+        <div className="fq-lenrow">
+          <span className="fq-lenlabel">Round length</span>
+          <div className="fq-lenseg">
+            <button
+              className={roundLen === 10 ? "on" : ""}
+              onClick={() => setRoundLen(10)}
+              type="button"
+            >
+              10
+            </button>
+            <button
+              className={roundLen === 25 ? "on" : ""}
+              onClick={() => setRoundLen(25)}
+              type="button"
+            >
+              25
+            </button>
+            <button
+              className={roundLen === "all" ? "on" : ""}
+              onClick={() => setRoundLen("all")}
+              type="button"
+            >
+              Full subject
+            </button>
+          </div>
+        </div>
         <button className="fq-all" onClick={() => startRound("all")} type="button">
           <span className="fq-sn">All subjects</span>
           <span className="fq-sw">A mixed round, the way the exam feels</span>
@@ -345,7 +372,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v6 - inline
-// AI tutor)
+// END OF FILE - app/foremanprep/practice/page.tsx (v7 - round-
+// length picker)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
