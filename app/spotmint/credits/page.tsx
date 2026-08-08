@@ -1,36 +1,75 @@
-// FILE: app/spotmint/credits/page.tsx
+// FILE: app/spotmint/wallet/page.tsx
 "use client";
 import "../spotmint.css";
 import { useCallback, useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BRAND } from "../brand";
 
-// The Spotmint store: Spotmint-dressed credits page served on
-// spotmint.store. Display data below mirrors the server's PRICE_MAP
-// in app/(chat)/api/checkout/route.ts - keep them in sync. The
-// server's table is what actually charges, so a mismatch here can
-// only mislabel, never misbill.
+// Credits tab (car four of the shell train). v3 = In-App Purchase,
+// born from Apple's second 3.1.1 rejection (IAP parity required).
+// iOS: the five credit packs sell through Apple via the RevenueCat
+// Capacitor plugin, reached through the runtime bridge
+// (window.Capacitor.Plugins.Purchases) so this web repo needs no
+// plugin dependency. Fulfillment: RevenueCat webhook -> /api/iap ->
+// credits on the account. The web link-out stays BELOW the packs
+// with the honest steering pitch (cheaper + 10% bonus on the web),
+// which the US storefront rules allow next to IAP. Old builds
+// without the plugin fall back to the v2 link-out automatically.
+// ANDROID keeps the v1 inert copy (Google forbids steering). Web
+// keeps its in-site Buy button. Balance refreshes on foreground.
 
-const BUNDLES: { id: string; name: string; price: string; credits: number; badge?: string }[] = [
-  { id: "starter", name: "Starter", price: "$5", credits: 220 },
-  { id: "power", name: "Power", price: "$15", credits: 800 },
-  { id: "pro", name: "Pro", price: "$40", credits: 2400 },
-  { id: "premium", name: "Premium", price: "$75", credits: 5000, badge: "Best value for video" },
-  { id: "ultra", name: "Ultra", price: "$150", credits: 11750 },
+const RC_API_KEY = "appl_TRYloIhCBQnCvVvZLqOXSVlepRu";
+
+const IAP_PACKS: { id: string; name: string; credits: number }[] = [
+  { id: "com.askevo.spotmint.credits.starter", name: "Starter", credits: 220 },
+  { id: "com.askevo.spotmint.credits.power2", name: "Power", credits: 800 },
+  { id: "com.askevo.spotmint.credits.pro", name: "Pro", credits: 2400 },
+  { id: "com.askevo.spotmint.credits.premium", name: "Premium", credits: 5000 },
+  { id: "com.askevo.spotmint.credits.ultra", name: "Ultra", credits: 11750 },
 ];
 
-export default function SpotmintStorePage() {
+type RcProduct = { identifier: string; priceString: string };
+type RcPlugin = {
+  configure: (opts: { apiKey: string; appUserID: string }) => Promise<void>;
+  getProducts: (opts: { productIdentifiers: string[] }) => Promise<{ products: RcProduct[] }>;
+  purchaseStoreProduct: (opts: { product: RcProduct }) => Promise<unknown>;
+};
+
+function getPurchasesBridge(): RcPlugin | null {
+  // v4: modern Capacitor plugins are not always pre-listed on
+  // Capacitor.Plugins - the JS proxy normally gets created by the
+  // plugin's own npm package, which this web repo deliberately never
+  // imports. registerPlugin on the runtime builds the proxy for the
+  // NATIVE plugin on demand, so we try the legacy registry first and
+  // then register the proxy ourselves.
+  const cap = (window as { Capacitor?: { Plugins?: { Purchases?: RcPlugin }; registerPlugin?: (name: string) => RcPlugin } }).Capacitor;
+  if (!cap) return null;
+  if (cap.Plugins?.Purchases) return cap.Plugins.Purchases;
+  try {
+    return cap.registerPlugin ? cap.registerPlugin("Purchases") : null;
+  } catch {
+    return null;
+  }
+}
+
+export default function SpotmintWalletPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [credits, setCredits] = useState<number | null>(null);
-  const [loading, setLoading] = useState<string | null>(null);
-  const [justPaid, setJustPaid] = useState(false);
-  const [showAccount, setShowAccount] = useState(false);
-  const [isIos, setIsIos] = useState(false);
+  const [isApp, setIsApp] = useState(false);
+  const [isAndroidApp, setIsAndroidApp] = useState(false);
+  const [iapProducts, setIapProducts] = useState<RcProduct[] | null>(null);
+  const [buying, setBuying] = useState<string | null>(null);
+  const [iapMsg, setIapMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) setIsIos(true);
+    if ((window as { Capacitor?: unknown }).Capacitor) {
+      setIsApp(true);
+      if (/Android/i.test(navigator.userAgent)) {
+        setIsAndroidApp(true);
+      }
+    }
   }, []);
 
   const loadCredits = useCallback(async () => {
@@ -46,40 +85,15 @@ export default function SpotmintStorePage() {
   useEffect(() => {
     if (status === "loading") return;
     if (!session?.user) {
-      router.push("/login?redirectUrl=/spotmint/credits");
+      router.push("/register?redirectUrl=/spotmint/wallet");
       return;
     }
     if (/^guest-\d+$/.test(session.user.email ?? "")) {
-      router.push("/login?redirectUrl=/spotmint/credits");
+      router.push("/register?redirectUrl=/spotmint/wallet");
       return;
     }
     loadCredits();
   }, [session, status, router, loadCredits]);
-
-  useEffect(() => {
-    // Back from a completed Stripe checkout: show the note and give the
-    // webhook a moment to land the credits, refreshing a couple times.
-    if (window.location.search.includes("success=1")) {
-      setJustPaid(true);
-      const t1 = setTimeout(loadCredits, 2000);
-      const t2 = setTimeout(loadCredits, 6000);
-      // v4: hop back into the app automatically. iOS shows its own
-      // "Open in Spotmint?" confirm for scheme launches from Safari -
-      // that single tap is the closest to auto the platform allows.
-      // If it is blocked or dismissed, the button below the payment
-      // note is the fallback.
-      const t3 = setTimeout(() => {
-        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-          window.location.href = "spotmint://open";
-        }
-      }, 1400);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-      };
-    }
-  }, [loadCredits]);
 
   useEffect(() => {
     const onVisible = () => {
@@ -89,23 +103,56 @@ export default function SpotmintStorePage() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [loadCredits]);
 
-  async function handleBuy(bundleId: string) {
-    setLoading(bundleId);
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bundle: bundleId }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-        return;
+  // iOS only: wake RevenueCat through the native bridge and fetch the
+  // five packs with Apple's own localized prices. Missing bridge
+  // (old build, Android, web) leaves iapProducts null and the page
+  // falls back to the link-out.
+  useEffect(() => {
+    const email = session?.user?.email ?? "";
+    if (!isApp || isAndroidApp || !email || /^guest-\d+$/.test(email)) return;
+    const rc = getPurchasesBridge();
+    if (!rc) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await rc.configure({ apiKey: RC_API_KEY, appUserID: email });
+        const res = await rc.getProducts({ productIdentifiers: IAP_PACKS.map((p) => p.id) });
+        if (!cancelled && res.products.length > 0) {
+          setIapProducts(res.products);
+        } else if (!cancelled) {
+          setIapMsg("Credit packs are temporarily unavailable here - the web store below has you covered.");
+        }
+      } catch {
+        // bridge exists but store fetch failed - link-out fallback stands
+        if (!cancelled) {
+          setIapMsg("Credit packs are temporarily unavailable here - the web store below has you covered.");
+        }
       }
-      setLoading(null);
-    } catch {
-      setLoading(null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isApp, isAndroidApp, session]);
+
+  async function buyPack(productId: string) {
+    if (buying) return;
+    const rc = getPurchasesBridge();
+    const product = iapProducts?.find((p) => p.identifier === productId);
+    if (!rc || !product) return;
+    setBuying(productId);
+    setIapMsg(null);
+    try {
+      await rc.purchaseStoreProduct({ product });
+      setIapMsg("Purchase complete - your credits are being added.");
+      setTimeout(loadCredits, 2000);
+      setTimeout(loadCredits, 6000);
+      setTimeout(loadCredits, 12000);
+    } catch (err) {
+      if (!(err as { userCancelled?: boolean })?.userCancelled) {
+        setIapMsg("Purchase did not go through. You were not charged beyond what Apple shows.");
+      }
     }
+    setBuying(null);
   }
 
   if (status === "loading") {
@@ -119,63 +166,72 @@ export default function SpotmintStorePage() {
     <div className="sp-wrap">
       <div className="sp-top">
         <div className="sp-brand">Spot<span>mint</span></div>
-        <div className="sp-credits">{credits === null ? "..." : credits.toLocaleString()} credits</div>
       </div>
-      <p className="sp-tag">Credits power every ad you create</p>
+      <p className="sp-tag">Your credits</p>
 
-      {justPaid && (
-        <div style={{ marginBottom: 18 }}>
-          <p className="sp-done">Payment received - your credits are being added to your balance.</p>
-          {isIos && (
-            <button type="button" className="sp-gen" onClick={() => { window.location.href = "spotmint://open"; }}>
-              Open the Spotmint app
-            </button>
-          )}
+      <div style={{ textAlign: "center", marginTop: 26 }}>
+        <div style={{ fontSize: 46, fontWeight: 800, color: "#fff", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+          {credits === null ? "..." : credits.toLocaleString()}
         </div>
-      )}
-
-      <label className="sp-label">Choose a pack</label>
-      <div className="sp-tiers">
-        {BUNDLES.map((b) => (
-          <button
-            key={b.id}
-            type="button"
-            className="sp-tier sp-pack"
-            onClick={() => handleBuy(b.id)}
-            disabled={loading !== null}
-          >
-            <div>
-              <div className="sp-tn">{b.name}</div>
-              <p className="sp-td">
-                {b.credits.toLocaleString()} credits{b.badge ? ` - ${b.badge}` : ""}
-              </p>
-            </div>
-            <div className="sp-tc">{loading === b.id ? "..." : b.price}</div>
-          </button>
-        ))}
-      </div>
-      <p className="sp-secure">Checkout is handled securely by Stripe. Credits land on your account within seconds of payment.</p>
-
-      <div className="sp-foot">
-        <button type="button" className="sp-acct" onClick={() => setShowAccount(true)} aria-label="Account">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
-          </svg>
-        </button>
+        <div style={{ marginTop: 6, fontSize: 13, fontWeight: 700, color: "#22c55e" }}>credits</div>
       </div>
 
-      {showAccount && (
-        <div className="sp-mask" onClick={() => setShowAccount(false)}>
-          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
-            <p className="sp-mt">Account</p>
-            <p className="sp-mm">Signed in as <em>{session?.user?.email}</em></p>
-            <div className="sp-mrow">
-              <button type="button" className="sp-mbtn" onClick={() => setShowAccount(false)}>Close</button>
-              <button type="button" className="sp-mbtn" onClick={() => signOut({ redirectTo: "/spotmint/credits" })}>Log out</button>
-            </div>
+      {isAndroidApp ? (
+        <>
+          <div style={{ display: "flex", justifyContent: "center", marginTop: 22 }}>
+            <p className="sp-buy">Buy credits at {BRAND.storeDomain}</p>
           </div>
-        </div>
+          <p className="sp-mm" style={{ textAlign: "center", marginTop: 14 }}>
+            Open {BRAND.storeDomain} in your browser and sign in with this
+            same account - your new balance shows up here right away.
+          </p>
+        </>
+      ) : isApp ? (
+        <>
+          {iapMsg && (
+            <p className="sp-done" style={{ marginTop: 18 }}>{iapMsg}</p>
+          )}
+          {iapProducts !== null && (
+            <div className="sp-tiers" style={{ marginTop: 18 }}>
+              {IAP_PACKS.map((pack) => {
+                const product = iapProducts.find((p) => p.identifier === pack.id);
+                if (!product) return null;
+                return (
+                  <button
+                    key={pack.id}
+                    type="button"
+                    className="sp-tier sp-pack"
+                    onClick={() => buyPack(pack.id)}
+                    disabled={buying !== null}
+                  >
+                    <div>
+                      <div className="sp-tn">{pack.name}</div>
+                      <p className="sp-td">{pack.credits.toLocaleString()} credits</p>
+                    </div>
+                    <div className="sp-tc">{buying === pack.id ? "..." : product.priceString}</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <button
+            type="button"
+            className="sp-gen"
+            style={{ marginTop: 22 }}
+            onClick={() => window.open("https://" + BRAND.storeDomain, "_blank")}
+          >
+            {iapProducts !== null ? "Save on the web store" : "Buy credits"}
+          </button>
+          <p className="sp-mm" style={{ textAlign: "center", marginTop: 14 }}>
+            {iapProducts !== null
+              ? "Same packs, lower prices, plus 10% bonus credits at " + BRAND.storeDomain + " - opens in your browser, same account."
+              : "Opens " + BRAND.storeDomain + " in your browser. Sign in with this same account - your new balance shows up here right away."}
+          </p>
+        </>
+      ) : (
+        <button type="button" className="sp-gen" style={{ marginTop: 22 }} onClick={() => router.push("/spotmint/credits")}>
+          Buy credits
+        </button>
       )}
 
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
@@ -184,6 +240,6 @@ export default function SpotmintStorePage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/credits/page.tsx (v5 - store defaults to login)
+// END OF FILE - app/spotmint/wallet/page.tsx (v4 - hardened plugin bridge)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
