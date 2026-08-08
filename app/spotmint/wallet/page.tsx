@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BRAND } from "../brand";
 
-// Credits tab (car four of the shell train). v3 = In-App Purchase,
+// Credits tab (car four of the shell train). v5 = In-App Purchase,
 // born from Apple's second 3.1.1 rejection (IAP parity required).
 // iOS: the five credit packs sell through Apple via the RevenueCat
 // Capacitor plugin, reached through the runtime bridge
@@ -37,8 +37,20 @@ type RcPlugin = {
 };
 
 function getPurchasesBridge(): RcPlugin | null {
-  const cap = (window as { Capacitor?: { Plugins?: { Purchases?: RcPlugin } } }).Capacitor;
-  return cap?.Plugins?.Purchases ?? null;
+  // v4: modern Capacitor plugins are not always pre-listed on
+  // Capacitor.Plugins - the JS proxy normally gets created by the
+  // plugin's own npm package, which this web repo deliberately never
+  // imports. registerPlugin on the runtime builds the proxy for the
+  // NATIVE plugin on demand, so we try the legacy registry first and
+  // then register the proxy ourselves.
+  const cap = (window as { Capacitor?: { Plugins?: { Purchases?: RcPlugin }; registerPlugin?: (name: string) => RcPlugin } }).Capacitor;
+  if (!cap) return null;
+  if (cap.Plugins?.Purchases) return cap.Plugins.Purchases;
+  try {
+    return cap.registerPlugin ? cap.registerPlugin("Purchases") : null;
+  } catch {
+    return null;
+  }
 }
 
 export default function SpotmintWalletPage() {
@@ -105,9 +117,16 @@ export default function SpotmintWalletPage() {
       try {
         await rc.configure({ apiKey: RC_API_KEY, appUserID: email });
         const res = await rc.getProducts({ productIdentifiers: IAP_PACKS.map((p) => p.id) });
-        if (!cancelled && res.products.length > 0) setIapProducts(res.products);
+        if (!cancelled && res.products.length > 0) {
+          setIapProducts(res.products);
+        } else if (!cancelled) {
+          setIapMsg("Credit packs are temporarily unavailable here - the web store below has you covered.");
+        }
       } catch {
         // bridge exists but store fetch failed - link-out fallback stands
+        if (!cancelled) {
+          setIapMsg("Credit packs are temporarily unavailable here - the web store below has you covered.");
+        }
       }
     })();
     return () => {
@@ -210,9 +229,11 @@ export default function SpotmintWalletPage() {
           </p>
         </>
       ) : (
-        <button type="button" className="sp-gen" style={{ marginTop: 22 }} onClick={() => router.push("/spotmint/credits")}>
-          Buy credits
-        </button>
+        <>
+          <button type="button" className="sp-gen" style={{ marginTop: 22 }} onClick={() => router.push("/spotmint/credits")}>
+            Buy credits
+          </button>
+        </>
       )}
 
       <p className="sp-note">{BRAND.poweredBy} - {BRAND.supportEmail}</p>
@@ -221,6 +242,6 @@ export default function SpotmintWalletPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/wallet/page.tsx (v3 - In-App Purchase packs)
+// END OF FILE - app/spotmint/wallet/page.tsx (v5 - one version stamp everywhere)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
