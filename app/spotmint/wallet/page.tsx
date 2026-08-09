@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BRAND } from "../brand";
 
-// Credits tab (car four of the shell train). v5 = In-App Purchase,
+// Credits tab (car four of the shell train). v6 = In-App Purchase,
 // born from Apple's second 3.1.1 rejection (IAP parity required).
 // iOS: the five credit packs sell through Apple via the RevenueCat
 // Capacitor plugin, reached through the runtime bridge
@@ -201,6 +201,7 @@ export default function SpotmintWalletPage() {
                     key={pack.id}
                     type="button"
                     className="sp-tier sp-pack"
+                    style={{ borderColor: "#262626", background: "#111214" }}
                     onClick={() => buyPack(pack.id)}
                     disabled={buying !== null}
                   >
@@ -220,7 +221,7 @@ export default function SpotmintWalletPage() {
             style={{ marginTop: 22 }}
             onClick={() => window.open("https://" + BRAND.storeDomain, "_blank")}
           >
-            {iapProducts !== null ? "Save on the web store" : "Buy credits"}
+            {iapProducts !== null ? "Purchase on the web store for less" : "Buy credits"}
           </button>
           <p className="sp-mm" style={{ textAlign: "center", marginTop: 14 }}>
             {iapProducts !== null
@@ -242,6 +243,6 @@ export default function SpotmintWalletPage() {
 }
 
 // ============================================================
-// END OF FILE - app/spotmint/wallet/page.tsx (v5 - one version stamp everywhere)
+// END OF FILE - app/spotmint/wallet/page.tsx (v6 - quiet pack boxes + clearer steering label)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
