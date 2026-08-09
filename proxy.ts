@@ -114,6 +114,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // v10: the RevenueCat webhook is public - it authenticates itself
+  // with the IAP_WEBHOOK_SECRET Authorization header inside the
+  // route. Without this early pass, the sessionless POST from
+  // RevenueCat gets bounced into the guest-auth dance (the exact
+  // trap the /api/support pass below documents) and RevenueCat sees
+  // a redirect instead of a 200, so purchases never grant credits.
+  if (pathname.startsWith("/api/iap")) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/adreel")) {
     if (!ADREEL_ENABLED) {
       return NextResponse.rewrite(new URL("/adreel-disabled", request.url));
@@ -189,7 +199,8 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v9 - spotmint.ai island)
+// END OF FILE - proxy.ts (v10 - public pass for the RevenueCat
+// webhook)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
