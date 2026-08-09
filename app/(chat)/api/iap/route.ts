@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 import { addCredits } from "@/lib/db/credits";
 import { db } from "@/lib/db/queries";
 
-// RevenueCat webhook (v1). Born from Apple's 3.1.1 rejection: iOS
+// RevenueCat webhook (v2). Born from Apple's 3.1.1 rejection: iOS
 // sells credit packs via In-App Purchase, RevenueCat validates the
 // receipt with Apple, then reports the sale here. This route grants
 // the credits. Same claim-then-grant idempotency as the Stripe
@@ -13,7 +13,11 @@ import { db } from "@/lib/db/queries";
 // and returns 500 so RevenueCat retries until the customer has what
 // they paid for. Auth = shared secret in the Authorization header,
 // configured identically in RevenueCat's webhook settings and the
-// IAP_WEBHOOK_SECRET env var.
+// IAP_WEBHOOK_SECRET env var. v2 adds self-diagnosis: GET reports
+// whether the secret env var is live (and its length) without ever
+// revealing it, and a 401 names the LENGTHS of the expected vs
+// received header so mismatches (Bearer prefix, stray whitespace,
+// stale deploy) identify themselves in RevenueCat's delivery log.
 
 const PRODUCT_CREDITS: Record<string, number> = {
   "com.askevo.spotmint.credits.starter": 220,
@@ -41,11 +45,19 @@ async function findUserIdByEmail(email: string): Promise<string | null> {
   return rows.length > 0 ? rows[0].id : null;
 }
 
+export function GET() {
+  // Safe config probe: confirms the deployed server actually holds a
+  // secret and how long it is - never the secret itself.
+  const secret = process.env.IAP_WEBHOOK_SECRET ?? "";
+  return Response.json({ ok: true, secretConfigured: secret.length > 0, secretLength: secret.length });
+}
+
 export async function POST(request: Request) {
   const secret = process.env.IAP_WEBHOOK_SECRET ?? "";
   const header = request.headers.get("authorization") ?? "";
   if (!secret || header !== secret) {
-    return new Response("Unauthorized", { status: 401 });
+    const detail = "Unauthorized: server secret length " + secret.length + ", received header length " + header.length;
+    return new Response(detail, { status: 401 });
   }
 
   let payload: { event?: { type?: string; app_user_id?: string; product_id?: string; transaction_id?: string; id?: string } };
@@ -92,6 +104,6 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/iap/route.ts (v1 - RevenueCat webhook)
+// END OF FILE - app/(chat)/api/iap/route.ts (v2 - self-diagnosing auth)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
