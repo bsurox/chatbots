@@ -1,13 +1,20 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v4. Landing plus the paywall wardrobe:
-   buy card, feature checklist, locked-gate card, and the thank-you
-   screen with a drawn check. Mobile first, widens on desktop. */
+/* ForemanPrep brand surface v5. Landing plus the paywall wardrobe:
+   buy card, feature checklist, locked-gate card, thank-you screen.
+   v5 adds .fp-wordmark - the two-tone brand treatment (Foreman
+   white, Prep orange) used inside back buttons and links. */
 
 .fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
 .fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
 .fp-page button { -webkit-tap-highlight-color: transparent; font-family: inherit; }
 
 .fp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+
+/* Two-tone wordmark for back buttons and links: Foreman white,
+   Prep orange - same treatment as the logo. Wrap the label as
+   Foreman<span>Prep</span> inside an .fp-wordmark. */
+.fp-wordmark { color: #fff; font-weight: 800; }
+.fp-wordmark span { color: var(--fp); }
 .fp-brand { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; color: #fff; }
 .fp-brand span { color: var(--fp); }
 .fp-chip { font-size: 12px; font-weight: 700; color: var(--fp); border: 1px solid rgba(249, 115, 22, 0.45); background: var(--fp-soft); border-radius: 999px; padding: 5px 11px; white-space: nowrap; }
@@ -116,6 +123,6 @@
 .fp-hero, .fp-stats, .fp-strip, .fp-grid, .fp-price, .fp-signup { animation: fp-fade 0.35s ease; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v4 - paywall wardrobe)
+   END OF FILE - app/foremanprep/foremanprep.css (v5 - wordmark)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
