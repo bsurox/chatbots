@@ -2,16 +2,33 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { fpTrackPurchase } from "../analytics";
 
 // Where buyers land after Stripe says yes. The webhook usually
 // grants access before this page finishes loading; we poll the
 // access API a few times so the status line flips to confirmed
 // without the buyer doing anything. If Stripe's webhook is having
 // a slow minute, the copy says so instead of looking broken.
+// v3: reports the purchase to Google Ads + Meta exactly once -
+// only on a real Stripe redirect (paid=1), guarded by
+// sessionStorage against refreshes, with the Stripe session id as
+// the transaction id so ad platforms can dedupe on their end too.
 
 export default function ThanksPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [checks, setChecks] = useState(0);
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("paid") !== "1") return;
+      if (window.sessionStorage.getItem("fp-purchase-tracked")) return;
+      window.sessionStorage.setItem("fp-purchase-tracked", "1");
+      fpTrackPurchase(params.get("session_id") || "");
+    } catch {
+      // Tracking must never break the thanks page.
+    }
+  }, []);
 
   useEffect(() => {
     if (confirmed || checks >= 5) return;
@@ -60,8 +77,8 @@ export default function ThanksPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/thanks/page.tsx (v2 - orange exam
-// button)
+// END OF FILE - app/foremanprep/thanks/page.tsx (v3 - purchase
+// conversion ping)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
