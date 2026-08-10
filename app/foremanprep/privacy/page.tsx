@@ -81,7 +81,10 @@ export default function ForemanPrivacyPage() {
           Foreman<span>Prep</span>
         </div>
         <Link className="fp-link" href="/foremanprep">
-          Back to ForemanPrep
+          Back to{" "}
+          <span className="fp-wordmark">
+            Foreman<span>Prep</span>
+          </span>
         </Link>
       </div>
       <p className="fp-badge">Privacy Policy - Last updated: {UPDATED}</p>
@@ -100,6 +103,7 @@ export default function ForemanPrivacyPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/privacy/page.tsx (v1 - privacy)
+// END OF FILE - app/foremanprep/privacy/page.tsx (v2 - wordmark
+// back link)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
