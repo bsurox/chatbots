@@ -1,10 +1,10 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v7. Landing plus the paywall wardrobe:
+/* ForemanPrep brand surface v8. Landing plus the paywall wardrobe:
    buy card, feature checklist, locked-gate card, thank-you screen.
-   v5 added .fp-wordmark (two-tone brand in back buttons). v6 added
-   the floating account badge (person icon + logout popover). v7
-   adds .fp-backpill - the chevron pill for Back-to-ForemanPrep
-   links, matching the practice/exam back buttons. */
+   v5 added .fp-wordmark. v6 added the floating account badge. v7
+   added .fp-backpill. v8 adds .fp-authbtn.exam - the orange exam
+   button used beside the white practice button on the buy page's
+   owned state and the thanks page. */
 
 .fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
 .fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
@@ -99,6 +99,7 @@
 .fp-authrow { display: grid; gap: 10px; }
 .fp-authbtn { display: block; width: 100%; text-align: center; padding: 14px 0; border-radius: 11px; font-weight: 700; font-size: 15px; cursor: pointer; background: #fff; color: #000; border: 1px solid #fff; text-decoration: none; }
 .fp-authbtn.ghost { background: transparent; color: #fff; border: 1px solid #444; }
+.fp-authbtn.exam { background: var(--fp); color: #000; border: 1px solid var(--fp); }
 .fp-owned { text-align: center; padding: 18px 0 6px; }
 .fp-ownedh { font-size: 19px; font-weight: 800; color: #22c55e; margin: 0 0 6px; }
 .fp-buyerr { font-size: 13px; font-weight: 600; color: #f87171; text-align: center; margin: 12px 0 0; }
@@ -141,6 +142,6 @@
 .fp-fabout:disabled { opacity: 0.6; cursor: default; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v7 - back pill)
+   END OF FILE - app/foremanprep/foremanprep.css (v8 - orange exam button)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
