@@ -13,7 +13,9 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v10 (paywall): the free tier serves ONE fixed
+// Practice player v11: the ForemanPrep back button wears the
+// two-tone wordmark (.fp-wordmark - Foreman white, Prep orange).
+// v10 notes (paywall): the free tier serves ONE fixed
 // 10-question sample round (buildDemoSet) - same questions every
 // time, so the free door never leaks the bank. Paid rounds draw
 // shuffled sets from all 156. 25 and Full subject are Full Access
@@ -204,7 +206,9 @@ export default function PracticePage() {
             onClick={() => router.push("/foremanprep")}
             type="button"
           >
-            ForemanPrep
+            <span className="fp-wordmark">
+              Foreman<span>Prep</span>
+            </span>
           </button>
         </div>
         <p className="fq-title">Practice</p>
@@ -435,7 +439,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v10 - fixed
-// free sample round, gated long rounds)
+// END OF FILE - app/foremanprep/practice/page.tsx (v11 - wordmark
+// back button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
