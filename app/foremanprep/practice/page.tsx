@@ -11,11 +11,11 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v7: round-length picker. On the subject screen
-// the user chooses 10, 25, or the full subject before drilling, so
-// a big bank is not stuck serving 10 at a time. Everything else
-// stays: subject picker, AI tutor, drawn marks, rounds posting to
-// the attempts API.
+// Practice player v8 (his UI spec): the round-length picker starts
+// UNSELECTED - picking a subject before a length blocks with a red
+// "Select a round length first." error, the same pattern as the
+// Spotmint format picker. Labels read "10 questions / 25 questions /
+// Full subject", and the exam-weight text wears ForemanPrep orange.
 
 type Len = 10 | 25 | "all";
 type Sel = DomainKey | "all";
@@ -44,7 +44,8 @@ export default function PracticePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"pick" | "quiz">("pick");
   const [sel, setSel] = useState<Sel>("all");
-  const [roundLen, setRoundLen] = useState<Len>(10);
+  const [roundLen, setRoundLen] = useState<Len | null>(null);
+  const [lenErr, setLenErr] = useState(false);
   const [qs, setQs] = useState<ForemanQuestion[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -95,6 +96,10 @@ export default function PracticePage() {
   }
 
   function startRound(key: Sel) {
+    if (roundLen === null) {
+      setLenErr(true);
+      return;
+    }
     setSel(key);
     const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
     setQs(buildPracticeSet(key === "all" ? "all" : key, count));
@@ -168,34 +173,47 @@ export default function PracticePage() {
         </div>
         <p className="fq-title">Practice</p>
         <p className="fq-hint">
-          Drill one subject or run the whole mix. The counts are each
-          subject's real weight on the 115-question exam.
+          Drill one subject or run the whole mix.{" "}
+          <span className="fq-hint-hl">
+            The counts are each subject's real weight on the 115-question
+            exam.
+          </span>
         </p>
         <div className="fq-lenrow">
           <span className="fq-lenlabel">Round length</span>
-          <div className="fq-lenseg">
+          <div className={lenErr ? "fq-lenseg err" : "fq-lenseg"}>
             <button
               className={roundLen === 10 ? "on" : ""}
-              onClick={() => setRoundLen(10)}
+              onClick={() => {
+                setRoundLen(10);
+                setLenErr(false);
+              }}
               type="button"
             >
-              10
+              10 questions
             </button>
             <button
               className={roundLen === 25 ? "on" : ""}
-              onClick={() => setRoundLen(25)}
+              onClick={() => {
+                setRoundLen(25);
+                setLenErr(false);
+              }}
               type="button"
             >
-              25
+              25 questions
             </button>
             <button
               className={roundLen === "all" ? "on" : ""}
-              onClick={() => setRoundLen("all")}
+              onClick={() => {
+                setRoundLen("all");
+                setLenErr(false);
+              }}
               type="button"
             >
               Full subject
             </button>
           </div>
+          {lenErr ? <p className="fq-lenerr">Select a round length first.</p> : null}
         </div>
         <button className="fq-all" onClick={() => startRound("all")} type="button">
           <span className="fq-sn">All subjects</span>
@@ -372,7 +390,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v7 - round-
-// length picker)
+// END OF FILE - app/foremanprep/practice/page.tsx (v8 - unselected-
+// first length picker)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
