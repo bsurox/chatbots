@@ -49,10 +49,12 @@ export async function POST(request: Request) {
       },
     ],
     mode: "payment",
-    // Card statements read ASKEVO* FOREMAN - same doctrine as the
-    // SPOTMINT suffix, so charges are recognizable and disputes stay
-    // rare. Receipt goes to the signed-in account's real email.
-    payment_intent_data: { statement_descriptor_suffix: "FOREMAN" },
+    // Card statements read ASKEVO* FOREMANPREP - full brand name,
+    // same doctrine as the SPOTMINT suffix, so charges are instantly
+    // recognizable and disputes stay rare. (Stripe caps the combined
+    // descriptor at 22 characters; ASKEVO* FOREMANPREP is 19.)
+    // Receipt goes to the signed-in account's real email.
+    payment_intent_data: { statement_descriptor_suffix: "FOREMANPREP" },
     customer_email: buyerEmail.includes("@") ? buyerEmail : undefined,
     success_url: successUrl,
     cancel_url: cancelUrl,
@@ -65,8 +67,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/checkout/route.ts (v1 -
-// $99 launch, FOREMAN suffix)
+// END OF FILE - app/foremanprep/api/checkout/route.ts (v2 -
+// FOREMANPREP suffix)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
