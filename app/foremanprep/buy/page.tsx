@@ -11,7 +11,9 @@ import { useEffect, useState } from "react";
 // the footer carries the branded Terms/Privacy links - a buyer can
 // never say the conditions were hidden. v3: the back link wears
 // the two-tone wordmark, and the refund note names the support
-// email so a claim always has somewhere to go.
+// email so a claim always has somewhere to go. v4: the back link
+// rides in the .fp-backpill chevron pill, matching the practice
+// and exam back buttons.
 
 type Access = { loggedIn: boolean; paid: boolean };
 
@@ -71,7 +73,7 @@ export default function BuyPage() {
   return (
     <div className="fp-wrap">
       <div className="fp-top">
-        <Link className="fp-link" href="/foremanprep">
+        <Link className="fp-backpill" href="/foremanprep">
           Back to{" "}
           <span className="fp-wordmark">
             Foreman<span>Prep</span>
@@ -170,8 +172,7 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v3 - wordmark +
-// support email)
+// END OF FILE - app/foremanprep/buy/page.tsx (v4 - back pill)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
