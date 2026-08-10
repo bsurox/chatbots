@@ -7,6 +7,9 @@ import Link from "next/link";
 // to verify pass guarantee claims), tutor messages processed by
 // Anthropic, one-time Stripe purchase, reminder-list emails.
 // Public page - the foremanprep layout wraps it.
+// v4: discloses the Google Ads tag + Meta pixel now that we run
+// ads - the old "no advertising cookies" line stopped being true
+// the moment the pixels shipped, so it changed the same day.
 
 const UPDATED = "August 10, 2026";
 
@@ -41,7 +44,7 @@ Usage data: basic technical information such as IP address, browser type, and ti
 
 We also use Stripe (payment processing), Resend (transactional email), and cloud hosting and database providers such as Vercel to run the service. Your ForemanPrep account is an AskEvo LLC account; if you use other AskEvo products, those products' providers apply as described in their policies.
 
-We do not sell your personal information, and we do not show advertising in our products.`,
+We do not sell your personal information. We do not show third-party advertising inside our products; we do use advertising measurement tools on our own website, as described in Section 7.`,
   },
   {
     t: "5. Data Retention and Deletion",
@@ -52,8 +55,10 @@ We do not sell your personal information, and we do not show advertising in our 
     b: `You may request access to, correction of, or deletion of your personal information by emailing support@askevo.ai. Depending on where you live (for example, California or the EEA/UK), you may have additional rights under local law. We honor valid requests and typically acknowledge them within 1-3 business days.`,
   },
   {
-    t: "7. Cookies",
-    b: `We use essential cookies to keep you signed in and to operate the service. We do not use advertising cookies.`,
+    t: "7. Cookies and Advertising Measurement",
+    b: `We use essential cookies to keep you signed in and to operate the service.
+
+We also advertise ForemanPrep on platforms like Google and Meta. To measure whether those ads work, we use their cookies and pixel technologies (the Google Ads tag and the Meta pixel) on foremanprep.com. These tools tell us things like which ad brought a visitor here and whether a visit led to a purchase. They apply only on our website - your study records, scores, and tutor conversations are never shared with advertising platforms. You can limit advertising cookies through your browser settings and through the ad preference controls that Google and Meta offer.`,
   },
   {
     t: "8. Children",
@@ -103,6 +108,7 @@ export default function ForemanPrivacyPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/privacy/page.tsx (v3 - back pill)
+// END OF FILE - app/foremanprep/privacy/page.tsx (v4 - ad
+// measurement disclosure)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
