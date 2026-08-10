@@ -17,6 +17,10 @@ export default function AuthLayout({
   // ForemanPrep face (v7): the same treatment for foremanprep.com -
   // buyers creating the account their purchase attaches to should
   // see the brand they came from, not AskEvo.
+  // v8: full ForemanPrep color scheme - the theme tokens are
+  // overridden inline when isForeman, so the background goes pure
+  // black (no green tint) and the primary buttons go safety orange
+  // without touching the shared auth form components.
   const [isSpotmint, setIsSpotmint] = useState(false);
   const [isForeman, setIsForeman] = useState(false);
   useEffect(() => {
@@ -31,8 +35,18 @@ export default function AuthLayout({
     }
   }, []);
   const branded = isSpotmint || isForeman;
+  // ForemanPrep theme: override the design tokens the auth forms
+  // are built on. Inline custom properties cascade to every child,
+  // so bg-background renders black and bg-primary renders orange.
+  const foremanTheme = {
+    "--background": "#0a0a0a",
+    "--sidebar": "#0a0a0a",
+    "--primary": "#f97316",
+    "--primary-foreground": "#000000",
+    "--ring": "#f97316",
+  } as React.CSSProperties;
   return (
-    <div className="flex h-dvh w-screen bg-sidebar">
+    <div className="flex h-dvh w-screen bg-sidebar" style={isForeman ? foremanTheme : undefined}>
       <div className={branded ? "flex w-full flex-col bg-background p-8 md:p-16" : "flex w-full flex-col bg-background p-8 xl:w-[600px] xl:shrink-0 xl:rounded-r-2xl xl:border-r xl:border-border/40 md:p-16"}>
         <Link
           className="flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
@@ -80,7 +94,7 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v7 - ForemanPrep face)
+// END OF FILE - app/(auth)/layout.tsx (v8 - ForemanPrep colors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
