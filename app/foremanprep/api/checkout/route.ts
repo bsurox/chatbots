@@ -13,6 +13,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 // manage. The webhook grants foreman_access on payment; this route
 // only creates the session. Guests cannot buy - the purchase must
 // attach to a real account the buyer can log back into.
+// v3: the success URL carries {CHECKOUT_SESSION_ID} - Stripe swaps
+// in the real session id at redirect time, and the thanks page uses
+// it as the ad-conversion transaction id so a refresh of the thanks
+// page can never double-count a purchase in Google Ads.
 
 const LAUNCH_PRICE_CENTS = 9900;
 const PRODUCT_NAME = "ForemanPrep Full Access - NASCLA Exam Prep";
@@ -33,7 +37,7 @@ export async function POST(request: Request) {
   }
 
   const reqUrl = new URL(request.url);
-  const successUrl = `${reqUrl.origin}/foremanprep/thanks?paid=1`;
+  const successUrl = `${reqUrl.origin}/foremanprep/thanks?paid=1&session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${reqUrl.origin}/foremanprep/buy`;
 
   const checkoutSession = await stripe.checkout.sessions.create({
@@ -67,8 +71,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/checkout/route.ts (v2 -
-// FOREMANPREP suffix)
+// END OF FILE - app/foremanprep/api/checkout/route.ts (v3 -
+// session_id on the success URL)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
