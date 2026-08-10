@@ -9,7 +9,9 @@ import { useEffect, useState } from "react";
 // account. The checkout route guards against double-buying. v2:
 // the guarantee note links the full conditions in the Terms, and
 // the footer carries the branded Terms/Privacy links - a buyer can
-// never say the conditions were hidden.
+// never say the conditions were hidden. v3: the back link wears
+// the two-tone wordmark, and the refund note names the support
+// email so a claim always has somewhere to go.
 
 type Access = { loggedIn: boolean; paid: boolean };
 
@@ -70,7 +72,10 @@ export default function BuyPage() {
     <div className="fp-wrap">
       <div className="fp-top">
         <Link className="fp-link" href="/foremanprep">
-          Back to ForemanPrep
+          Back to{" "}
+          <span className="fp-wordmark">
+            Foreman<span>Prep</span>
+          </span>
         </Link>
         <div className="fp-chip">Early-bird pricing</div>
       </div>
@@ -138,7 +143,7 @@ export default function BuyPage() {
           ASKEVO* FOREMANPREP. Your purchase attaches to your account, so
           you can study from any device. Pass guarantee: complete the
           course, and if you fail the real exam, email support for a full
-          refund. Conditions apply - see the{" "}
+          refund at support@askevo.ai. Conditions apply - see the{" "}
           <Link className="fp-link" href="/foremanprep/terms">
             full pass guarantee terms
           </Link>
@@ -165,8 +170,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v2 - guarantee
-// terms linked)
+// END OF FILE - app/foremanprep/buy/page.tsx (v3 - wordmark +
+// support email)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
