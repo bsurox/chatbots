@@ -1,7 +1,8 @@
 // FILE: app/foremanprep/practice/page.tsx
 "use client";
 import "./practice.css";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   buildPracticeSet,
@@ -11,7 +12,10 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v8 (his UI spec): the round-length picker starts
+// Practice player v9 (paywall): 10-question rounds stay free - the
+// hook that converts. 25 and Full subject are Full Access perks;
+// tapping them unpaid opens the gate card with the $99 button.
+// v8 notes: the round-length picker starts
 // UNSELECTED - picking a subject before a length blocks with a red
 // "Select a round length first." error, the same pattern as the
 // Spotmint format picker. Labels read "10 questions / 25 questions /
@@ -46,6 +50,28 @@ export default function PracticePage() {
   const [sel, setSel] = useState<Sel>("all");
   const [roundLen, setRoundLen] = useState<Len | null>(null);
   const [lenErr, setLenErr] = useState(false);
+  const [access, setAccess] = useState<{ loggedIn: boolean; paid: boolean } | null>(null);
+  const [showGate, setShowGate] = useState(false);
+
+  useEffect(() => {
+    fetch("/foremanprep/api/access")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setAccess({ loggedIn: Boolean(data.loggedIn), paid: Boolean(data.paid) });
+        else setAccess({ loggedIn: false, paid: false });
+      })
+      .catch(() => setAccess({ loggedIn: false, paid: false }));
+  }, []);
+
+  function pickLen(l: Len) {
+    if (l !== 10 && !access?.paid) {
+      setShowGate(true);
+      return;
+    }
+    setRoundLen(l);
+    setLenErr(false);
+    setShowGate(false);
+  }
   const [qs, setQs] = useState<ForemanQuestion[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -184,36 +210,45 @@ export default function PracticePage() {
           <div className={lenErr ? "fq-lenseg err" : "fq-lenseg"}>
             <button
               className={roundLen === 10 ? "on" : ""}
-              onClick={() => {
-                setRoundLen(10);
-                setLenErr(false);
-              }}
+              onClick={() => pickLen(10)}
               type="button"
             >
               10 questions
             </button>
             <button
               className={roundLen === 25 ? "on" : ""}
-              onClick={() => {
-                setRoundLen(25);
-                setLenErr(false);
-              }}
+              onClick={() => pickLen(25)}
               type="button"
             >
               25 questions
             </button>
             <button
               className={roundLen === "all" ? "on" : ""}
-              onClick={() => {
-                setRoundLen("all");
-                setLenErr(false);
-              }}
+              onClick={() => pickLen("all")}
               type="button"
             >
               Full subject
             </button>
           </div>
           {lenErr ? <p className="fq-lenerr">Select a round length first.</p> : null}
+          {access !== null && !access.paid ? (
+            <p className="fp-tryhint">
+              10-question rounds are free. 25 and Full subject come with Full
+              Access.
+            </p>
+          ) : null}
+          {showGate ? (
+            <div className="fp-gate">
+              <p className="fp-gateh">Longer rounds are a Full Access feature.</p>
+              <p className="fp-gated">
+                Unlock 25-question rounds, full-subject runs, and the complete
+                115-question exam simulator - one payment, no subscription.
+              </p>
+              <Link className="fp-gatebtn" href="/foremanprep/buy">
+                Get Full Access - $99 early bird
+              </Link>
+            </div>
+          ) : null}
         </div>
         <button className="fq-all" onClick={() => startRound("all")} type="button">
           <span className="fq-sn">All subjects</span>
@@ -390,7 +425,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v8 - unselected-
-// first length picker)
+// END OF FILE - app/foremanprep/practice/page.tsx (v9 - free 10s,
+// gated long rounds)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
