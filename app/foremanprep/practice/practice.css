@@ -1,7 +1,7 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles v8. Adds a round-length picker (10 / 25 /
-   Full) on the subject screen, plus the bigger citation text and
-   the inline tutor panel. fq- prefix, rides the fp- canvas. */
+/* Practice player styles v9. Length picker starts unselected and
+   blocks with a red error until chosen; the exam-weight lines and
+   the weights sentence wear ForemanPrep orange. fq- prefix. */
 
 .fq-wrap { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
@@ -57,12 +57,15 @@
 .fq-lenseg { display: flex; gap: 8px; }
 .fq-lenseg button { flex: 1; padding: 11px 0; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; background: #111; border: 1px solid #333; color: #aaa; }
 .fq-lenseg button.on { background: var(--fp-soft); border: 2px solid var(--fp); color: var(--fp); }
+.fq-lenseg.err button { border: 1px solid #ef4444; }
+.fq-lenerr { font-size: 13px; font-weight: 600; color: #f87171; margin: 8px 0 0; }
+.fq-hint-hl { color: var(--fp); font-weight: 600; }
 .fq-all { width: 100%; text-align: left; padding: 15px 16px; border-radius: 14px; cursor: pointer; background: var(--fp-soft); border: 2px solid var(--fp); margin-bottom: 12px; }
 .fq-all .fq-sn { color: var(--fp); }
 .fq-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 .fq-sub { text-align: left; padding: 13px 14px; border-radius: 12px; cursor: pointer; background: #111; border: 1px solid #333; }
 .fq-sn { display: block; font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 4px; }
-.fq-sw { display: block; font-size: 11.5px; font-weight: 600; color: #888; }
+.fq-sw { display: block; font-size: 11.5px; font-weight: 600; color: var(--fp); }
 .fq-saved { font-size: 13px; font-weight: 600; color: #22c55e; margin: -14px 0 22px; }
 
 .fq-load { text-align: center; color: #777; font-size: 14px; padding: 60px 0; }
@@ -82,7 +85,7 @@
 .fq-home { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #888; border: 1px solid #333; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v8 -
-   round-length picker)
+   END OF FILE - app/foremanprep/practice/practice.css (v9 -
+   unselected-first picker + orange weights)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
