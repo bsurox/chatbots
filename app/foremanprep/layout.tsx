@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import "./foremanprep.css";
 import AccountBadge from "./account-badge";
+import FpAnalytics from "./analytics";
 
 // Server-side wrapper for the ForemanPrep surface. Owns the css
 // import and the metadata: browser tabs and share cards say
@@ -11,6 +12,8 @@ import AccountBadge from "./account-badge";
 // v2 mounts the floating account badge on every ForemanPrep page:
 // invisible to signed-out visitors, a person icon with a Log out
 // popover for signed-in users.
+// v3 mounts FpAnalytics: the Google Ads tag + Meta pixel, active
+// only when the visitor is actually on foremanprep.com.
 
 export const metadata: Metadata = {
   title: "ForemanPrep - Pass the NASCLA Contractor Exam",
@@ -25,11 +28,12 @@ export default function ForemanPrepLayout({
     <div className="fp-page">
       {children}
       <AccountBadge />
+      <FpAnalytics />
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/layout.tsx (v2 - account badge)
+// END OF FILE - app/foremanprep/layout.tsx (v3 - analytics mount)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
