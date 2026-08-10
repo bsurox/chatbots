@@ -2,6 +2,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { fpTrackBeginCheckout } from "../analytics";
 
 // The ForemanPrep storefront v2. One product, one price: Full
 // Access, $99 early bird (regular $149). Signed-out visitors get
@@ -13,7 +14,9 @@ import { useEffect, useState } from "react";
 // the two-tone wordmark, and the refund note names the support
 // email so a claim always has somewhere to go. v4: the back link
 // rides in the .fp-backpill chevron pill, matching the practice
-// and exam back buttons.
+// and exam back buttons. v6: the buy click pings Meta
+// (InitiateCheckout) before handing off to Stripe, so the ad
+// platform learns from shoppers, not just completed buyers.
 
 type Access = { loggedIn: boolean; paid: boolean };
 
@@ -45,6 +48,7 @@ export default function BuyPage() {
     if (buying) return;
     setBuying(true);
     setErr("");
+    fpTrackBeginCheckout();
     try {
       const res = await fetch("/foremanprep/api/checkout", { method: "POST" });
       const data = await res.json().catch(() => null);
@@ -172,8 +176,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v5 - orange exam
-// button)
+// END OF FILE - app/foremanprep/buy/page.tsx (v6 - InitiateCheckout
+// ping on the buy click)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
