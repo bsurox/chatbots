@@ -86,7 +86,7 @@ export default function ForemanPrivacyPage() {
       </div>
       <p className="fp-badge">Privacy Policy - Last updated: {UPDATED}</p>
       {SECTIONS.map((s) => (
-        <div key={s.t} style={{ fontSize: 17, marginBottom: 26 }}>
+        <div key={s.t} style={{ marginBottom: 26 }}>
           <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, color: "#fff" }}>{s.t}</h2>
           <p style={{ whiteSpace: "pre-wrap", color: "#c7c7c7", fontSize: 14, lineHeight: 1.7, margin: 0 }}>{s.b}</p>
         </div>
