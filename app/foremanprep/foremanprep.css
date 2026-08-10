@@ -1,9 +1,10 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v6. Landing plus the paywall wardrobe:
+/* ForemanPrep brand surface v7. Landing plus the paywall wardrobe:
    buy card, feature checklist, locked-gate card, thank-you screen.
-   v5 added .fp-wordmark (two-tone brand in back buttons). v6 adds
-   the floating account badge: person icon pinned bottom-right for
-   signed-in users, with a status-and-logout popover card. */
+   v5 added .fp-wordmark (two-tone brand in back buttons). v6 added
+   the floating account badge (person icon + logout popover). v7
+   adds .fp-backpill - the chevron pill for Back-to-ForemanPrep
+   links, matching the practice/exam back buttons. */
 
 .fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
 .fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
@@ -16,6 +17,11 @@
    Foreman<span>Prep</span> inside an .fp-wordmark. */
 .fp-wordmark { color: #fff; font-weight: 800; }
 .fp-wordmark span { color: var(--fp); }
+
+/* Back-to-ForemanPrep pill: same look as the practice and exam
+   back buttons - dark pill, chevron, wordmark inside. */
+.fp-backpill { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: #bbb; background: #161616; border: 1px solid #333; border-radius: 999px; padding: 8px 14px; text-decoration: none; cursor: pointer; }
+.fp-backpill::before { content: ""; display: inline-block; width: 7px; height: 7px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin-right: 2px; }
 .fp-brand { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; color: #fff; }
 .fp-brand span { color: var(--fp); }
 .fp-chip { font-size: 12px; font-weight: 700; color: var(--fp); border: 1px solid rgba(249, 115, 22, 0.45); background: var(--fp-soft); border-radius: 999px; padding: 5px 11px; white-space: nowrap; }
@@ -135,6 +141,6 @@
 .fp-fabout:disabled { opacity: 0.6; cursor: default; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v6 - account badge)
+   END OF FILE - app/foremanprep/foremanprep.css (v7 - back pill)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
