@@ -99,7 +99,31 @@ export function buildExamForm(): ForemanQuestion[] {
   return shuffle(form);
 }
 
+// ---- Free sample round -------------------------------------------
+
+// The free tier always serves this exact set - same ten questions,
+// same order, every time. A rotating free round would leak the whole
+// bank ten questions at a time; a fixed sample stays a taste.
+export const DEMO_IDS: string[] = [
+  "pc-001",
+  "pc-002",
+  "pc-003",
+  "gr-001",
+  "gr-002",
+  "sc-001",
+  "co-001",
+  "mp-001",
+  "wd-001",
+  "el-001",
+];
+
+export function buildDemoSet(): ForemanQuestion[] {
+  return DEMO_IDS
+    .map((id) => getQuestion(id))
+    .filter((q): q is ForemanQuestion => q !== null);
+}
+
 // ============================================================
-// END OF FILE - lib/foremanprep/questions.ts (v2 - bank split out)
+// END OF FILE - lib/foremanprep/questions.ts (v3 - fixed demo set)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
