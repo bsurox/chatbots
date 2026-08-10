@@ -117,7 +117,7 @@ export default function BuyPage() {
               <Link className="fp-authbtn" href="/foremanprep/practice">
                 Go practice
               </Link>
-              <Link className="fp-authbtn ghost" href="/foremanprep/exam">
+              <Link className="fp-authbtn exam" href="/foremanprep/exam">
                 Take the exam simulator
               </Link>
             </div>
@@ -172,7 +172,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v4 - back pill)
+// END OF FILE - app/foremanprep/buy/page.tsx (v5 - orange exam
+// button)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
