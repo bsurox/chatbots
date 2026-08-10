@@ -1,13 +1,12 @@
 // FILE: app/foremanprep/page.tsx
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
-// ForemanPrep landing page v2 (Week 1 close). Now the front door
-// to a working product: the hero offers real entry into free
-// practice and the exam simulator, and still captures launch-list
-// emails through the existing support pipe. The paid gate arrives
-// on paywall day - today the whole thing is navigable end to end.
+// ForemanPrep landing page v3 (paywall). The doors are open: the
+// hero and price table point straight at /foremanprep/buy, feature
+// copy claims only what is actually built today, and the email form
+// becomes a "remind me" net for visitors not ready to buy yet.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -24,20 +23,20 @@ const FEATURES = [
     d: "Miss a question and ask why. The tutor explains it straight and points you to the exact book and section the answer lives in.",
   },
   {
-    n: "900+ practice questions",
-    d: "Written to the official 12-subject exam outline and weighted the way the real test is weighted.",
+    n: "156 questions and growing",
+    d: "Written to the official 12-subject exam outline, weighted the way the real test is weighted, and verified against the actual reference books.",
   },
   {
     n: "Full exam simulator",
     d: "115 questions on a 5.5-hour clock. Flag questions, review your misses, and train against the real 81-to-pass bar.",
   },
   {
-    n: "Audio lessons",
-    d: "Every subject as audio. Study on the drive to the site, not at a desk.",
+    n: "Book-and-page citations",
+    d: "Every answer tells you which book and which section it lives in - the open-book skill the exam really tests.",
   },
   {
-    n: "Readiness score",
-    d: "See your weak subjects and exactly what to drill next. Walk in on test day already knowing you're ready.",
+    n: "Built for the job site",
+    d: "Runs on any phone. Drill a 10-question round in the truck at lunch - no desk, no classroom.",
   },
   {
     n: "Pass guarantee",
@@ -52,14 +51,9 @@ const PRICES = [
 ];
 
 export default function ForemanPrepPage() {
-  const formRef = useRef<HTMLDivElement>(null);
   const [email, setEmail] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-
-  function scrollToForm() {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
 
   async function join() {
     const clean = email.trim();
@@ -99,7 +93,7 @@ export default function ForemanPrepPage() {
         <div className="fp-brand">
           Foreman<span>Prep</span>
         </div>
-        <div className="fp-chip">Launching this month</div>
+        <div className="fp-chip">Early-bird pricing live</div>
       </div>
 
       <div className="fp-hero">
@@ -112,11 +106,15 @@ export default function ForemanPrepPage() {
           unlimited practice, straight answers, and a study plan that fits
           around a job site, not a classroom.
         </p>
-        <button className="fp-cta" onClick={scrollToForm} type="button">
-          Get the early-bird price
-        </button>
+        <Link
+          className="fp-cta"
+          href="/foremanprep/buy"
+          style={{ textDecoration: "none" }}
+        >
+          Get Full Access - $99 early bird
+        </Link>
         <p className="fp-note">
-          <b>$99 early bird</b> at launch - regular $149. Prep courses charge
+          <b>$99 early bird</b> right now - regular $149. Prep courses charge
           $349 to $1,490 for less.
         </p>
         <div className="fp-try">
@@ -172,21 +170,28 @@ export default function ForemanPrepPage() {
           </div>
         ))}
         <div className="fp-prow fp-ours">
-          <div className="fp-pl">ForemanPrep - tutor, questions, simulator, audio</div>
+          <div className="fp-pl">ForemanPrep - tutor, questions, simulator</div>
           <div className="fp-pv">
             <span className="fp-strike">$149</span>$99 early bird
           </div>
         </div>
+        <Link
+          className="fp-cta"
+          href="/foremanprep/buy"
+          style={{ display: "block", marginTop: "14px", textAlign: "center", textDecoration: "none" }}
+        >
+          Get Full Access
+        </Link>
       </div>
 
-      <div className="fp-signup" ref={formRef}>
-        <p className="fp-fh">Lock in the $99 early-bird price</p>
+      <div className="fp-signup">
+        <p className="fp-fh">Not ready to buy today?</p>
         <p className="fp-fs">
-          ForemanPrep launches this month. Drop your email and you'll get the
-          early-bird link the day the doors open.
+          The $99 early-bird price won't last - it goes back to $149. Drop
+          your email and we'll remind you before it does.
         </p>
         {phase === "done" ? (
-          <p className="fp-ok">You're on the list. See you at launch.</p>
+          <p className="fp-ok">You're on the list. We'll give you a heads-up.</p>
         ) : (
           <div className="fp-row">
             <input
@@ -210,13 +215,13 @@ export default function ForemanPrepPage() {
               onClick={join}
               type="button"
             >
-              {phase === "sending" ? "Saving..." : "Count me in"}
+              {phase === "sending" ? "Saving..." : "Remind me"}
             </button>
           </div>
         )}
         {phase === "error" ? <p className="fp-err">{errorMsg}</p> : null}
         <p className="fp-fine">
-          One email at launch. No spam, ever.
+          One reminder email. No spam, ever.
         </p>
       </div>
 
@@ -241,6 +246,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v2 - live entry points)
+// END OF FILE - app/foremanprep/page.tsx (v3 - selling)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
