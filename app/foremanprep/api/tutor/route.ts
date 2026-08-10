@@ -2,26 +2,30 @@
 import "server-only";
 import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
+import { auth } from "@/app/(auth)/auth";
+import { guestRegex } from "@/lib/constants";
+import { hasForemanAccess } from "@/lib/db/foreman";
 import { getQuestion } from "@/lib/foremanprep/questions";
 
-// ForemanPrep tutor v1 (Day 8). A question-scoped tutor: the client
-// sends a question id plus the short back-and-forth so far, and the
-// model answers as a plain-spoken exam coach who always points at
-// the book and section. Haiku keeps the cost to fractions of a cent
-// per message. Cost fences, not paywalls, for now: a per-visitor
-// daily cap and hard limits on thread size and reply length - the
-// real gate arrives on paywall day.
+// ForemanPrep tutor v2 (paywall). A question-scoped tutor: the
+// client sends a question id plus the short back-and-forth so far,
+// and the model answers as a plain-spoken exam coach who always
+// points at the book and section. Haiku keeps the cost to fractions
+// of a cent per message. Tiers: Full Access owners get 25 messages
+// a day keyed to their account; everyone else gets 3 a day per IP -
+// enough to taste the tutor, not enough to live off it.
 
 const MODEL_ID = "claude-haiku-4-5";
 const MAX_TURNS = 12;
 const MAX_CHARS_PER_MSG = 1200;
 const MAX_OUTPUT_TOKENS = 400;
-const DAILY_CAP = 25;
+const PAID_DAILY_CAP = 25;
+const FREE_DAILY_CAP = 3;
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 const hits = new Map<string, number[]>();
 
-function isCapped(key: string): boolean {
+function isCapped(key: string, cap: number): boolean {
   const now = Date.now();
   if (hits.size > 2000) {
     for (const [k, times] of hits) {
@@ -29,7 +33,7 @@ function isCapped(key: string): boolean {
     }
   }
   const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (recent.length >= DAILY_CAP) {
+  if (recent.length >= cap) {
     hits.set(key, recent);
     return true;
   }
@@ -42,12 +46,33 @@ type Turn = { role: "user" | "assistant"; content: string };
 
 export async function POST(request: Request) {
   try {
-    const ip = (request.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
-    if (isCapped(ip)) {
-      return Response.json(
-        { error: "You've hit today's tutor limit. Come back tomorrow." },
-        { status: 429 }
-      );
+    // Tier check: Full Access owners are capped per account, everyone
+    // else per IP. Guests count as free - a throwaway guest row never
+    // owns a purchase.
+    const session = await auth();
+    const userId = session?.user?.id;
+    const email = session?.user?.email ?? "";
+    const realUser = Boolean(userId) && !guestRegex.test(email);
+    const paid = realUser && userId ? await hasForemanAccess(userId) : false;
+
+    if (paid && userId) {
+      if (isCapped(`u:${userId}`, PAID_DAILY_CAP)) {
+        return Response.json(
+          { error: "You've hit today's tutor limit. Come back tomorrow." },
+          { status: 429 }
+        );
+      }
+    } else {
+      const ip = (request.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+      if (isCapped(`ip:${ip}`, FREE_DAILY_CAP)) {
+        return Response.json(
+          {
+            error:
+              "That's the free tutor limit for today. Full Access includes 25 tutor messages a day.",
+          },
+          { status: 429 }
+        );
+      }
     }
 
     const body = await request.json();
@@ -100,6 +125,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/api/tutor/route.ts (v1)
+// END OF FILE - app/foremanprep/api/tutor/route.ts (v2 - paid and
+// free tiers)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
