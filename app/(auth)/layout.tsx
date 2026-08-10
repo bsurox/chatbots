@@ -1,4 +1,3 @@
-// FILE: app/(auth)/layout.tsx
 "use client";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
@@ -11,24 +10,30 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   // Spotmint face (v5): when this door is reached from a Spotmint
-  // surface - the spotmint.store host, the spotmint.ai host (v7), or
-  // the wrapped app's signature - the auth screens wear Spotmint
-  // branding with AskEvo LLC in fine print. Detection happens
-  // client-side after mount: server-side header access here breaks
-  // prerendering on this Next version.
+  // surface - the spotmint.store host or the wrapped app's signature -
+  // the auth screens wear Spotmint branding with AskEvo LLC in fine
+  // print. Detection happens client-side after mount: server-side
+  // header access here breaks prerendering on this Next version.
+  // ForemanPrep face (v7): the same treatment for foremanprep.com -
+  // buyers creating the account their purchase attaches to should
+  // see the brand they came from, not AskEvo.
   const [isSpotmint, setIsSpotmint] = useState(false);
+  const [isForeman, setIsForeman] = useState(false);
   useEffect(() => {
     if (
       window.location.hostname.includes("spotmint.store") ||
-      window.location.hostname.includes("spotmint.ai") ||
       navigator.userAgent.includes("SpotmintApp")
     ) {
       setIsSpotmint(true);
     }
+    if (window.location.hostname.includes("foremanprep.com")) {
+      setIsForeman(true);
+    }
   }, []);
+  const branded = isSpotmint || isForeman;
   return (
     <div className="flex h-dvh w-screen bg-sidebar">
-      <div className={isSpotmint ? "flex w-full flex-col bg-background p-8 md:p-16" : "flex w-full flex-col bg-background p-8 xl:w-[600px] xl:shrink-0 xl:rounded-r-2xl xl:border-r xl:border-border/40 md:p-16"}>
+      <div className={branded ? "flex w-full flex-col bg-background p-8 md:p-16" : "flex w-full flex-col bg-background p-8 xl:w-[600px] xl:shrink-0 xl:rounded-r-2xl xl:border-r xl:border-border/40 md:p-16"}>
         <Link
           className="flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
           href="/"
@@ -39,11 +44,12 @@ export default function AuthLayout({
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-10">
           <div className="flex flex-col gap-2">
             {isSpotmint ? (
-              <div className="mb-2">
-                <GemIcon className="mb-2 size-5" style={{ color: "var(--primary)" }} />
-                <div className="font-extrabold text-white text-xl tracking-tight">
-                  Spot<span style={{ color: "var(--primary)" }}>mint</span>
-                </div>
+              <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
+                Spot<span style={{ color: "var(--primary)" }}>mint</span>
+              </div>
+            ) : isForeman ? (
+              <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
+                Foreman<span style={{ color: "#f97316" }}>Prep</span>
               </div>
             ) : (
               <div
@@ -54,7 +60,7 @@ export default function AuthLayout({
               </div>
             )}
             {children}
-            {isSpotmint && (
+            {branded && (
               <p className="mt-6 text-center text-[11px] text-muted-foreground">
                 Powered by AskEvo LLC
               </p>
@@ -62,7 +68,7 @@ export default function AuthLayout({
           </div>
         </div>
       </div>
-      {!isSpotmint && (
+      {!branded && (
         <div className="hidden flex-1 flex-col overflow-hidden pl-12 xl:flex">
           <div className="flex-1 pt-4">
             <Preview />
@@ -74,8 +80,7 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v7 - spotmint.ai face
-// detection + mint gem over the wordmark)
+// END OF FILE - app/(auth)/layout.tsx (v7 - ForemanPrep face)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
