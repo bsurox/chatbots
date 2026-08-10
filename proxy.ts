@@ -69,9 +69,20 @@ export async function proxy(request: NextRequest) {
   // v9 opens the auth doors (/login, /register) on this host so
   // buyers can create the account their purchase attaches to; the
   // auth screens wear ForemanPrep dress via host detection.
+  // v10: /terms and /privacy on this host REWRITE to the
+  // ForemanPrep legal pages (pass guarantee, NASCLA disclaimers),
+  // so every path in - the signup checkbox links, the footers, a
+  // hand-typed URL - lands on ForemanPrep's own terms, never the
+  // generic AskEvo pages.
   if (hostname === "foremanprep.com" || hostname.endsWith(".foremanprep.com")) {
     if (pathname === "/") {
       return NextResponse.rewrite(new URL("/foremanprep", request.url));
+    }
+    if (pathname === "/terms" || pathname.startsWith("/terms/")) {
+      return NextResponse.rewrite(new URL("/foremanprep/terms", request.url));
+    }
+    if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
+      return NextResponse.rewrite(new URL("/foremanprep/privacy", request.url));
     }
     const fpAllowed =
       pathname.startsWith("/foremanprep") ||
@@ -169,7 +180,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v9 - ForemanPrep auth doors open)
+// END OF FILE - proxy.ts (v10 - ForemanPrep legal rewrites)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
