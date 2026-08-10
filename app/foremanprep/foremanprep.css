@@ -1,7 +1,7 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep landing surface v3. Same dark canvas, safety-orange
-   accent. Both hero "try it" buttons are white now. Mobile first,
-   widens on desktop. */
+/* ForemanPrep brand surface v4. Landing plus the paywall wardrobe:
+   buy card, feature checklist, locked-gate card, and the thank-you
+   screen with a drawn check. Mobile first, widens on desktop. */
 
 .fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
 .fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
@@ -69,6 +69,41 @@
 .fp-link { background: none; border: none; padding: 0; font-size: 13px; color: #888; cursor: pointer; text-decoration: none; }
 .fp-legal { font-size: 11.5px; color: #555; line-height: 1.6; margin: 0; }
 
+.fp-buycard { margin: 26px 0 0; padding: 24px 20px; border-radius: 18px; border: 2px solid var(--fp); background: #101010; }
+.fp-buyh { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin: 0 0 6px; }
+.fp-buysub { font-size: 14px; color: #999; line-height: 1.55; margin: 0 0 18px; }
+.fp-pricebig { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; }
+.fp-pricenow { font-size: 44px; font-weight: 800; letter-spacing: -1px; color: var(--fp); }
+.fp-pricewas { font-size: 18px; font-weight: 700; color: #666; text-decoration: line-through; }
+.fp-pricetag { font-size: 12.5px; font-weight: 700; color: #999; margin: 0 0 18px; }
+.fp-feats { display: grid; gap: 9px; margin: 0 0 20px; }
+.fp-feat { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; color: #ccc; }
+.fp-feat b { color: var(--fp); flex: none; font-weight: 800; }
+.fp-buybtn { width: 100%; padding: 16px 0; border-radius: 12px; font-weight: 800; font-size: 17px; border: none; cursor: pointer; background: var(--fp); color: #000; }
+.fp-buybtn:disabled { background: #1c1c1c; color: #555; cursor: not-allowed; }
+.fp-buynote { font-size: 12.5px; color: #777; text-align: center; line-height: 1.55; margin: 12px 0 0; }
+.fp-authrow { display: grid; gap: 10px; }
+.fp-authbtn { display: block; width: 100%; text-align: center; padding: 14px 0; border-radius: 11px; font-weight: 700; font-size: 15px; cursor: pointer; background: #fff; color: #000; border: 1px solid #fff; text-decoration: none; }
+.fp-authbtn.ghost { background: transparent; color: #fff; border: 1px solid #444; }
+.fp-owned { text-align: center; padding: 18px 0 6px; }
+.fp-ownedh { font-size: 19px; font-weight: 800; color: #22c55e; margin: 0 0 6px; }
+.fp-buyerr { font-size: 13px; font-weight: 600; color: #f87171; text-align: center; margin: 12px 0 0; }
+
+.fp-gate { margin: 22px 0 0; padding: 20px 18px; border-radius: 16px; border: 1px solid rgba(249, 115, 22, 0.45); background: var(--fp-soft); }
+.fp-gateh { font-size: 17px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+.fp-gated { font-size: 13.5px; color: #bbb; line-height: 1.55; margin: 0 0 14px; }
+.fp-gatebtn { display: block; width: 100%; text-align: center; padding: 13px 0; border-radius: 10px; font-weight: 800; font-size: 15px; border: none; cursor: pointer; background: var(--fp); color: #000; text-decoration: none; }
+
+.fp-thanks { text-align: center; padding-top: 10vh; }
+.fp-thanksmark { width: 74px; height: 74px; margin: 0 auto 18px; }
+.fp-thanksmark svg { width: 100%; height: 100%; display: block; }
+.fp-thanksmark .draw { fill: none; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: fp-draw 0.5s ease forwards; }
+.fp-thanksmark .c1 { stroke: #22c55e; }
+.fp-thanksmark .c2 { stroke: #22c55e; animation-delay: 0.42s; }
+@keyframes fp-draw { to { stroke-dashoffset: 0; } }
+.fp-thanksh { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; margin: 0 0 8px; }
+.fp-thankssub { font-size: 15px; color: #aaa; line-height: 1.55; margin: 0 0 26px; }
+
 @media (min-width: 640px) {
   .fp-wrap { padding-top: 30px; }
   .fp-h1 { font-size: 46px; }
@@ -81,6 +116,6 @@
 .fp-hero, .fp-stats, .fp-strip, .fp-grid, .fp-price, .fp-signup { animation: fp-fade 0.35s ease; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v3 - both buttons white)
+   END OF FILE - app/foremanprep/foremanprep.css (v4 - paywall wardrobe)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
