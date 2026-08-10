@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// The ForemanPrep storefront. One product, one price: Full Access,
-// $99 early bird (regular $149). Signed-out visitors get the auth
-// doors first - the purchase must attach to a real account. The
-// checkout route guards against double-buying; this page just asks
-// /api/access who it is talking to and renders the right state.
+// The ForemanPrep storefront v2. One product, one price: Full
+// Access, $99 early bird (regular $149). Signed-out visitors get
+// the auth doors first - the purchase must attach to a real
+// account. The checkout route guards against double-buying. v2:
+// the guarantee note links the full conditions in the Terms, and
+// the footer carries the branded Terms/Privacy links - a buyer can
+// never say the conditions were hidden.
 
 type Access = { loggedIn: boolean; paid: boolean };
 
@@ -132,14 +134,27 @@ export default function BuyPage() {
         )}
 
         <p className="fp-buynote">
-          Secure checkout by Stripe. Your purchase attaches to your account,
-          so you can study from any device. Pass guarantee terms: complete the
+          Secure checkout by Stripe - your card statement will read
+          ASKEVO* FOREMANPREP. Your purchase attaches to your account, so
+          you can study from any device. Pass guarantee: complete the
           course, and if you fail the real exam, email support for a full
-          refund.
+          refund. Conditions apply - see the{" "}
+          <Link className="fp-link" href="/foremanprep/terms">
+            full pass guarantee terms
+          </Link>
+          .
         </p>
       </div>
 
       <div className="fp-foot">
+        <div className="fp-links">
+          <Link className="fp-link" href="/foremanprep/terms">
+            Terms
+          </Link>
+          <Link className="fp-link" href="/foremanprep/privacy">
+            Privacy
+          </Link>
+        </div>
         <p className="fp-legal">
           ForemanPrep is a product of AskEvo LLC, Boise, Idaho. Not affiliated
           with or endorsed by NASCLA or PSI. Questions: support@askevo.ai
@@ -150,7 +165,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v1 - storefront)
+// END OF FILE - app/foremanprep/buy/page.tsx (v2 - guarantee
+// terms linked)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
