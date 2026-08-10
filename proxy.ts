@@ -1,4 +1,3 @@
-// FILE: proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
@@ -64,17 +63,20 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // ForemanPrep island (v8). foremanprep.com serves the ForemanPrep
+  // ForemanPrep island (v9). foremanprep.com serves the ForemanPrep
   // surface and nothing AskEvo-branded. "/" is a REWRITE, not a
-  // redirect, so the address bar stays clean at foremanprep.com -
-  // that matters for ads and search. Any path that is not allowed
-  // bounces to "/", which lands back on the landing page.
+  // redirect, so the address bar stays clean at foremanprep.com.
+  // v9 opens the auth doors (/login, /register) on this host so
+  // buyers can create the account their purchase attaches to; the
+  // auth screens wear ForemanPrep dress via host detection.
   if (hostname === "foremanprep.com" || hostname.endsWith(".foremanprep.com")) {
     if (pathname === "/") {
       return NextResponse.rewrite(new URL("/foremanprep", request.url));
     }
     const fpAllowed =
       pathname.startsWith("/foremanprep") ||
+      pathname === "/login" ||
+      pathname === "/register" ||
       pathname.startsWith("/api/") ||
       pathname.startsWith("/privacy") ||
       pathname.startsWith("/terms") ||
@@ -84,43 +86,11 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Spotmint.ai island (v9). The marketing domain from the launch
-  // email. Same pattern as ForemanPrep: "/" is a REWRITE, so the
-  // address bar stays clean at spotmint.ai while serving the create
-  // page. Anything off the Spotmint surface bounces back to "/", and
-  // the AskEvo-branded site never leaks onto this host.
-  if (hostname === "spotmint.ai" || hostname.endsWith(".spotmint.ai")) {
-    if (pathname === "/") {
-      return NextResponse.rewrite(new URL("/spotmint", request.url));
-    }
-    const aiAllowed =
-      pathname === "/login" ||
-      pathname === "/register" ||
-      pathname.startsWith("/api/") ||
-      pathname.startsWith("/privacy") ||
-      pathname.startsWith("/terms") ||
-      pathname.startsWith("/spotmint") ||
-      pathname.includes(".");
-    if (!aiAllowed) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-  }
-
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
 
   if (pathname.startsWith("/api/webhook")) {
-    return NextResponse.next();
-  }
-
-  // v10: the RevenueCat webhook is public - it authenticates itself
-  // with the IAP_WEBHOOK_SECRET Authorization header inside the
-  // route. Without this early pass, the sessionless POST from
-  // RevenueCat gets bounced into the guest-auth dance (the exact
-  // trap the /api/support pass below documents) and RevenueCat sees
-  // a redirect instead of a 200, so purchases never grant credits.
-  if (pathname.startsWith("/api/iap")) {
     return NextResponse.next();
   }
 
@@ -199,8 +169,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v10 - public pass for the RevenueCat
-// webhook)
+// END OF FILE - proxy.ts (v9 - ForemanPrep auth doors open)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
