@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  buildDemoSet,
   buildPracticeSet,
   DOMAINS,
   getDomain,
@@ -12,9 +13,11 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v9 (paywall): 10-question rounds stay free - the
-// hook that converts. 25 and Full subject are Full Access perks;
-// tapping them unpaid opens the gate card with the $99 button.
+// Practice player v10 (paywall): the free tier serves ONE fixed
+// 10-question sample round (buildDemoSet) - same questions every
+// time, so the free door never leaks the bank. Paid rounds draw
+// shuffled sets from all 156. 25 and Full subject are Full Access
+// perks; tapping them unpaid opens the gate card with the $99 button.
 // v8 notes: the round-length picker starts
 // UNSELECTED - picking a subject before a length blocks with a red
 // "Select a round length first." error, the same pattern as the
@@ -127,8 +130,15 @@ export default function PracticePage() {
       return;
     }
     setSel(key);
-    const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
-    setQs(buildPracticeSet(key === "all" ? "all" : key, count));
+    if (!access?.paid) {
+      // Free tier: always the same fixed sample round, whatever
+      // subject was tapped. Rotating draws would leak the whole
+      // bank ten questions at a time.
+      setQs(buildDemoSet());
+    } else {
+      const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
+      setQs(buildPracticeSet(key === "all" ? "all" : key, count));
+    }
     setIdx(0);
     setPicked(null);
     setCorrect(0);
@@ -233,8 +243,8 @@ export default function PracticePage() {
           {lenErr ? <p className="fq-lenerr">Select a round length first.</p> : null}
           {access !== null && !access.paid ? (
             <p className="fp-tryhint">
-              10-question rounds are free. 25 and Full subject come with Full
-              Access.
+              The free round is a fixed 10-question sample. Full Access
+              unlocks all 156 questions with fresh shuffles every round.
             </p>
           ) : null}
           {showGate ? (
@@ -274,7 +284,7 @@ export default function PracticePage() {
   if (!qs) {
     return (
       <div className="fq-wrap">
-        <p className="fq-load">Shuffling your questions...</p>
+        <p className="fq-load">Loading your questions...</p>
       </div>
     );
   }
@@ -309,7 +319,7 @@ export default function PracticePage() {
             ))}
           </div>
           <button className="fq-again" onClick={() => startRound(sel)} type="button">
-            Go again - fresh shuffle
+            {access?.paid ? "Go again - fresh shuffle" : "Run the sample again"}
           </button>
           <button className="fq-home" onClick={backToPicker} type="button">
             Pick another subject
@@ -425,7 +435,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v9 - free 10s,
-// gated long rounds)
+// END OF FILE - app/foremanprep/practice/page.tsx (v10 - fixed
+// free sample round, gated long rounds)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
