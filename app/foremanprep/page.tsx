@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 
-// ForemanPrep landing page v3 (paywall). The doors are open: the
-// hero and price table point straight at /foremanprep/buy, feature
-// copy claims only what is actually built today, and the email form
-// becomes a "remind me" net for visitors not ready to buy yet.
+// ForemanPrep landing page v4. Footer now links the ForemanPrep-
+// branded legal pages (/foremanprep/terms + /foremanprep/privacy)
+// instead of the generic AskEvo ones. v3 notes: hero and price
+// table point at /foremanprep/buy, feature copy claims only what
+// is built today, email form is a "remind me" net.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -227,10 +228,10 @@ export default function ForemanPrepPage() {
 
       <div className="fp-foot">
         <div className="fp-links">
-          <Link className="fp-link" href="/terms">
+          <Link className="fp-link" href="/foremanprep/terms">
             Terms
           </Link>
-          <Link className="fp-link" href="/privacy">
+          <Link className="fp-link" href="/foremanprep/privacy">
             Privacy
           </Link>
         </div>
@@ -246,6 +247,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v3 - selling)
+// END OF FILE - app/foremanprep/page.tsx (v4 - branded legal links)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
