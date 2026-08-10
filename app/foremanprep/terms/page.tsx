@@ -104,7 +104,7 @@ export default function ForemanTermsPage() {
         <div className="fp-brand">
           Foreman<span>Prep</span>
         </div>
-        <Link className="fp-link" href="/foremanprep">
+        <Link className="fp-backpill" href="/foremanprep">
           Back to{" "}
           <span className="fp-wordmark">
             Foreman<span>Prep</span>
@@ -127,7 +127,6 @@ export default function ForemanTermsPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/terms/page.tsx (v2 - wordmark
-// back link)
+// END OF FILE - app/foremanprep/terms/page.tsx (v3 - back pill)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
