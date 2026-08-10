@@ -1,8 +1,9 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v5. Landing plus the paywall wardrobe:
+/* ForemanPrep brand surface v6. Landing plus the paywall wardrobe:
    buy card, feature checklist, locked-gate card, thank-you screen.
-   v5 adds .fp-wordmark - the two-tone brand treatment (Foreman
-   white, Prep orange) used inside back buttons and links. */
+   v5 added .fp-wordmark (two-tone brand in back buttons). v6 adds
+   the floating account badge: person icon pinned bottom-right for
+   signed-in users, with a status-and-logout popover card. */
 
 .fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
 .fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
@@ -122,7 +123,18 @@
 @keyframes fp-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .fp-hero, .fp-stats, .fp-strip, .fp-grid, .fp-price, .fp-signup { animation: fp-fade 0.35s ease; }
 
+/* Floating account badge - only rendered when signed in. */
+.fp-fabwrap { position: fixed; right: 18px; bottom: calc(env(safe-area-inset-bottom) + 18px); z-index: 60; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.fp-fab { width: 48px; height: 48px; border-radius: 50%; background: #161616; border: 1px solid #3a3a3a; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5); }
+.fp-fab svg { width: 22px; height: 22px; display: block; }
+.fp-fab:active { transform: translateY(1px); }
+.fp-fabpop { background: #111; border: 1px solid #333; border-radius: 14px; padding: 14px; width: 216px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55); animation: fp-fade 0.2s ease; }
+.fp-fabstat { font-size: 12.5px; color: #999; margin: 0 0 10px; }
+.fp-fabstat b { color: var(--fp); font-weight: 700; }
+.fp-fabout { width: 100%; padding: 10px 0; border-radius: 9px; font-weight: 700; font-size: 14px; cursor: pointer; background: transparent; color: #f87171; border: 1px solid #7f1d1d; }
+.fp-fabout:disabled { opacity: 0.6; cursor: default; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v5 - wordmark)
+   END OF FILE - app/foremanprep/foremanprep.css (v6 - account badge)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
