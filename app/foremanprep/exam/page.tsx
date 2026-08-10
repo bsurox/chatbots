@@ -1,11 +1,15 @@
 // FILE: app/foremanprep/exam/page.tsx
 "use client";
 import "./exam.css";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Exam simulator v4 (Day 7 feedback): the back pill on a live
+// Exam simulator v5 (paywall): the full simulator is a Full Access
+// feature - the intro checks /api/access and unpaid visitors get a
+// locked card pointing at the storefront instead of a Start button.
+// v4 notes: the back pill on a live
 // test now opens a confirm modal, and confirming ends the attempt
 // - answers, flags, and clock all reset - so the timed test can't
 // be paused by leaving. On the intro screen the back pill is
@@ -46,7 +50,18 @@ export default function ExamPage() {
   const [remaining, setRemaining] = useState(0);
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [confirmExit, setConfirmExit] = useState(false);
+  const [access, setAccess] = useState<{ loggedIn: boolean; paid: boolean } | null>(null);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    fetch("/foremanprep/api/access")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setAccess({ loggedIn: Boolean(data.loggedIn), paid: Boolean(data.paid) });
+        else setAccess({ loggedIn: false, paid: false });
+      })
+      .catch(() => setAccess({ loggedIn: false, paid: false }));
+  }, []);
 
   const grade = useCallback(
     (form: ForemanQuestion[], chosen: Record<string, number>) => {
@@ -195,9 +210,27 @@ export default function ExamPage() {
             </span>
           </div>
         </div>
-        <button className="fe-start" onClick={begin} type="button">
-          Start the exam
-        </button>
+        {access === null ? (
+          <button className="fe-start" disabled type="button">
+            Checking access...
+          </button>
+        ) : access.paid ? (
+          <button className="fe-start" onClick={begin} type="button">
+            Start the exam
+          </button>
+        ) : (
+          <div className="fp-gate">
+            <p className="fp-gateh">The full exam simulator is a Full Access feature.</p>
+            <p className="fp-gated">
+              All 115 questions on the true 5.5-hour clock, graded against the
+              real 81-to-pass bar - the closest thing to test day you can get.
+              Free practice rounds stay open on the practice page.
+            </p>
+            <Link className="fp-gatebtn" href="/foremanprep/buy">
+              Get Full Access - $99 early bird
+            </Link>
+          </div>
+        )}
       </div>
     );
   }
@@ -370,6 +403,6 @@ export default function ExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v4 - trimmed modal copy)
+// END OF FILE - app/foremanprep/exam/page.tsx (v5 - Full Access gate)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
