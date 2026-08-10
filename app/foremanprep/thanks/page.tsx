@@ -46,7 +46,7 @@ export default function ThanksPage() {
           <Link className="fp-authbtn" href="/foremanprep/practice">
             Start practicing
           </Link>
-          <Link className="fp-authbtn ghost" href="/foremanprep/exam">
+          <Link className="fp-authbtn exam" href="/foremanprep/exam">
             Take a full exam
           </Link>
         </div>
@@ -60,7 +60,8 @@ export default function ThanksPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/thanks/page.tsx (v1 - welcome)
+// END OF FILE - app/foremanprep/thanks/page.tsx (v2 - orange exam
+// button)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
