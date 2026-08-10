@@ -1,12 +1,16 @@
 // FILE: app/foremanprep/layout.tsx
 import type { Metadata } from "next";
 import "./foremanprep.css";
+import AccountBadge from "./account-badge";
 
 // Server-side wrapper for the ForemanPrep surface. Owns the css
 // import and the metadata: browser tabs and share cards say
 // ForemanPrep, not AskEvo. The .fp-page div paints the dark canvas
 // and carries the brand's safety-orange variables for every page
 // that will live under /foremanprep as the product grows.
+// v2 mounts the floating account badge on every ForemanPrep page:
+// invisible to signed-out visitors, a person icon with a Log out
+// popover for signed-in users.
 
 export const metadata: Metadata = {
   title: "ForemanPrep - Pass the NASCLA Contractor Exam",
@@ -17,10 +21,15 @@ export const metadata: Metadata = {
 export default function ForemanPrepLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return <div className="fp-page">{children}</div>;
+  return (
+    <div className="fp-page">
+      {children}
+      <AccountBadge />
+    </div>
+  );
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/layout.tsx (v1 - landing shell)
+// END OF FILE - app/foremanprep/layout.tsx (v2 - account badge)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
