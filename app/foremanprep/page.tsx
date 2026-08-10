@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 
-// ForemanPrep landing page v4. Footer now links the ForemanPrep-
-// branded legal pages (/foremanprep/terms + /foremanprep/privacy)
-// instead of the generic AskEvo ones. v3 notes: hero and price
-// table point at /foremanprep/buy, feature copy claims only what
-// is built today, email form is a "remind me" net.
+// ForemanPrep landing page v5. A Log in button joins the header so
+// returning customers can get straight to their account - the top
+// row wraps on narrow phones so brand, chip, and button never
+// collide. v4 notes: footer links the ForemanPrep-branded legal
+// pages. v3 notes: hero and price table point at /foremanprep/buy,
+// feature copy claims only what is built today, email form is a
+// "remind me" net.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -90,11 +92,29 @@ export default function ForemanPrepPage() {
 
   return (
     <div className="fp-wrap">
-      <div className="fp-top">
+      <div className="fp-top" style={{ flexWrap: "wrap", gap: "8px" }}>
         <div className="fp-brand">
           Foreman<span>Prep</span>
         </div>
-        <div className="fp-chip">Early-bird pricing live</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="fp-chip">Early-bird pricing live</div>
+          <Link
+            href="/login"
+            style={{
+              fontSize: "13px",
+              fontWeight: 700,
+              color: "#fff",
+              background: "#161616",
+              border: "1px solid #333",
+              borderRadius: "999px",
+              padding: "5px 14px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Log in
+          </Link>
+        </div>
       </div>
 
       <div className="fp-hero">
@@ -247,6 +267,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v4 - branded legal links)
+// END OF FILE - app/foremanprep/page.tsx (v5 - header login button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
