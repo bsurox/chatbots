@@ -6,7 +6,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Exam simulator v5 (paywall): the full simulator is a Full Access
+// Exam simulator v6: every ForemanPrep brand button (intro, live
+// test, review, and the graded screen's Back to ForemanPrep) wears
+// the two-tone wordmark - Foreman white, Prep orange.
+// v5 notes (paywall): the full simulator is a Full Access
 // feature - the intro checks /api/access and unpaid visitors get a
 // locked card pointing at the storefront instead of a Start button.
 // v4 notes: the back pill on a live
@@ -181,7 +184,9 @@ export default function ExamPage() {
             onClick={() => router.push("/foremanprep")}
             type="button"
           >
-            ForemanPrep
+            <span className="fp-wordmark">
+              Foreman<span>Prep</span>
+            </span>
           </button>
         </div>
         <p className="fe-title">Exam simulator</p>
@@ -258,7 +263,10 @@ export default function ExamPage() {
             onClick={() => router.push("/foremanprep")}
             type="button"
           >
-            Back to ForemanPrep
+            Back to{" "}
+            <span className="fp-wordmark">
+              Foreman<span>Prep</span>
+            </span>
           </button>
         </div>
       </div>
@@ -272,7 +280,9 @@ export default function ExamPage() {
       <div className="fe-wrap">
         <div className="fe-top">
           <button className="fe-back" onClick={requestBack} type="button">
-            ForemanPrep
+            <span className="fp-wordmark">
+              Foreman<span>Prep</span>
+            </span>
           </button>
         </div>
         <div className="fe-bar">
@@ -337,7 +347,9 @@ export default function ExamPage() {
     <div className="fe-wrap">
       <div className="fe-top">
         <button className="fe-back" onClick={requestBack} type="button">
-          ForemanPrep
+          <span className="fp-wordmark">
+            Foreman<span>Prep</span>
+          </span>
         </button>
       </div>
       <div className="fe-bar">
@@ -403,6 +415,7 @@ export default function ExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v5 - Full Access gate)
+// END OF FILE - app/foremanprep/exam/page.tsx (v6 - wordmark
+// back buttons)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
