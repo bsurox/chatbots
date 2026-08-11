@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 
-// ForemanPrep landing page v5. A Log in button joins the header so
+// ForemanPrep landing page v6. The stats strip now says 17 states -
+// NASCLA's list is 17 states plus the US Virgin Islands (a
+// territory), so "18 states" overstated it; 17 matches the ad
+// campaigns exactly. v5 notes: Log in button joins the header so
 // returning customers can get straight to their account - the top
 // row wraps on narrow phones so brand, chip, and button never
 // collide. v4 notes: footer links the ForemanPrep-branded legal
@@ -16,7 +19,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const STATS = [
   { n: "115", l: "exam questions" },
   { n: "5.5 hrs", l: "on the clock" },
-  { n: "18", l: "states, one exam" },
+  { n: "17", l: "states, one exam" },
   { n: "70%", l: "needed to pass" },
 ];
 
@@ -267,6 +270,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v5 - header login button)
+// END OF FILE - app/foremanprep/page.tsx (v6 - 17 states stat)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
