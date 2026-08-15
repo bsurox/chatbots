@@ -14,11 +14,20 @@ import FpAnalytics from "./analytics";
 // popover for signed-in users.
 // v3 mounts FpAnalytics: the Google Ads tag + Meta pixel, active
 // only when the visitor is actually on foremanprep.com.
+// v4 sets the ForemanPrep favicon (public/fp-icon.png) via the
+// icons metadata, so tabs and Google results stop wearing the
+// AskEvo icon on this island. Auth pages (/login, /register) keep
+// the shared icon for now - separate host-aware fix if it bites.
 
 export const metadata: Metadata = {
   title: "ForemanPrep - Pass the NASCLA Contractor Exam",
   description:
     "AI-powered prep for the NASCLA Commercial General Building Contractor exam. Unlimited practice questions, a tutor that explains every answer, and a full 115-question exam simulator.",
+  icons: {
+    icon: [{ url: "/fp-icon.png", type: "image/png", sizes: "512x512" }],
+    shortcut: "/fp-icon.png",
+    apple: "/fp-icon.png",
+  },
 };
 
 export default function ForemanPrepLayout({
@@ -34,6 +43,6 @@ export default function ForemanPrepLayout({
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/layout.tsx (v3 - analytics mount)
+// END OF FILE - app/foremanprep/layout.tsx (v4 - fp favicon)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
