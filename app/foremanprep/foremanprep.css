@@ -41,7 +41,32 @@
 .fp-tryhint { font-size: 12.5px; color: #777; margin: 0; }
 
 .fp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 36px 0 0; }
-.fp-stat { background: #111; border: 1px solid #262626; border-radius: 12px; padding: 14px 12px; text-align: center; }
+.fp-stat { background: #111; border: 1px solid #262626; border-radius: 12px; padding: 14px 12px; text-align: center; position: relative; }
+
+/* Hover/tap tooltip on a stat card (v9). Shows on mouse hover and on
+   tap/keyboard focus (tabIndex on the card) so phones get it too. */
+.fp-stat .fp-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  max-width: 82vw;
+  background: #161616;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #c7c7c7;
+  text-align: left;
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+.fp-stat:hover .fp-tip, .fp-stat:focus .fp-tip, .fp-stat:focus-within .fp-tip { display: block; }
+.fp-stat:focus { outline: 1px solid #f97316; }
+.fp-tipcue { border-bottom: 2px dotted #f97316; cursor: help; }
 .fp-sn { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 3px; }
 .fp-sl { font-size: 12px; color: #888; line-height: 1.35; }
 
@@ -142,6 +167,6 @@
 .fp-fabout:disabled { opacity: 0.6; cursor: default; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v8 - orange exam button)
+   END OF FILE - app/foremanprep/foremanprep.css (v9 - stat tooltip)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
