@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 
-// ForemanPrep landing page v6. The stats strip now says 17 states -
-// NASCLA's list is 17 states plus the US Virgin Islands (a
-// territory), so "18 states" overstated it; 17 matches the ad
-// campaigns exactly. v5 notes: Log in button joins the header so
+// ForemanPrep landing page v7. The 17-states stat card now shows a
+// hover/tap tooltip listing every accepting state - proof on the
+// spot for the campaign's core claim. v6: stat corrected 18 -> 17
+// (NASCLA's list is 17 states + the US Virgin Islands, a territory;
+// 17 matches the ad campaigns and is the strictly honest count).
+// v5 notes: A Log in button joins the header so
 // returning customers can get straight to their account - the top
 // row wraps on narrow phones so brand, chip, and button never
 // collide. v4 notes: footer links the ForemanPrep-branded legal
@@ -154,9 +156,20 @@ export default function ForemanPrepPage() {
 
       <div className="fp-stats">
         {STATS.map((s) => (
-          <div className="fp-stat" key={s.l}>
-            <div className="fp-sn">{s.n}</div>
+          <div className="fp-stat" key={s.l} tabIndex={s.n === "17" ? 0 : undefined}>
+            <div className="fp-sn">
+              {s.n === "17" ? <span className="fp-tipcue">17</span> : s.n}
+            </div>
             <div className="fp-sl">{s.l}</div>
+            {s.n === "17" ? (
+              <div className="fp-tip">
+                The NASCLA Commercial General Building exam is accepted for
+                licensing in Alabama, Arizona, Arkansas, California, Florida,
+                Georgia, Louisiana, Mississippi, Nevada, New Mexico, North
+                Carolina, Oregon, South Carolina, Tennessee, Utah, Virginia,
+                and West Virginia.
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
@@ -270,6 +283,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v6 - 17 states stat)
+// END OF FILE - app/foremanprep/page.tsx (v7 - 17-states tooltip)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
