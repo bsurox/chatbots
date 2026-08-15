@@ -13,7 +13,10 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v11: the ForemanPrep back button wears the
+// Practice player v12: on the free tier, tapping a locked length
+// (25/Full) now DESELECTS the 10-question highlight while the gate
+// card shows - nothing paid can ever appear selected; tapping 10
+// re-highlights it. v11: the ForemanPrep back button wears the
 // two-tone wordmark (.fp-wordmark - Foreman white, Prep orange).
 // v10 notes (paywall): the free tier serves ONE fixed
 // 10-question sample round (buildDemoSet) - same questions every
@@ -70,6 +73,10 @@ export default function PracticePage() {
 
   function pickLen(l: Len) {
     if (l !== 10 && !access?.paid) {
+      // Free tier: a locked length can never LOOK selected. Tapping
+      // 25/Full clears the highlight entirely and shows the gate;
+      // tapping 10 again re-selects it and the gate goes away.
+      setRoundLen(null);
       setShowGate(true);
       return;
     }
@@ -439,7 +446,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v11 - wordmark
-// back button)
+// END OF FILE - app/foremanprep/practice/page.tsx (v12 - locked-length
+// deselect)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
