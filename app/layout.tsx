@@ -1,13 +1,25 @@
+// FILE: app/layout.tsx
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+// v3: the favicon links moved from hardcoded <head> tags into the
+// icons metadata. Raw <link> tags rendered on EVERY brand's pages
+// and beat the ForemanPrep island's own icon; as metadata, nested
+// layouts (app/foremanprep/layout.tsx) can override icons for their
+// segment. AskEvo/Spotmint keep the exact same icons as before.
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.askevo.ai"),
   title: "AskEvo",
   description: "AI-powered chat, image generation, and voice tools.",
+  icons: {
+    icon: [
+      { url: "/ae-icon.svg", type: "image/svg+xml" },
+      { url: "/logo.png", type: "image/png" },
+    ],
+  },
 };
 export const viewport = {
   maximumScale: 1,
@@ -47,8 +59,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
     <head>
-        <link href="/ae-icon.svg" rel="icon" type="image/svg+xml" />
-        <link href="/logo.png" rel="icon" type="image/png" />
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
@@ -76,7 +86,7 @@ export default function RootLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/layout.tsx (v2 - Inter font)
+// END OF FILE - app/layout.tsx (v3 - icons via metadata)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
