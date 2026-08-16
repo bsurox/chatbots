@@ -2,8 +2,11 @@
 "use client";
 import { useRef, useState } from "react";
 import { QUESTIONS } from "@/lib/foremanprep/questions";
+import { LESSONS } from "@/lib/foremanprep/lessons";
 
-// ForemanPrep audio admin (v1) - Chase's one-button factory floor.
+// ForemanPrep audio admin (v2) - Chase's one-button factory floor.
+// v2 adds Step 3: Generate lessons - voices the 12 drive-time
+// lesson scripts through the same route (kind "lesson").
 // Paste the FOREMAN_AUDIO_KEY, test one question to hear the voice,
 // then Generate All walks every question in the bank through the
 // audio-gen route twice (question audio + explanation audio),
@@ -16,7 +19,7 @@ import { QUESTIONS } from "@/lib/foremanprep/questions";
 
 const LETTERS = ["A", "B", "C", "D"];
 
-type Job = { id: string; kind: "q" | "e" };
+type Job = { id: string; kind: "q" | "e" | "lesson" };
 
 function jobText(job: Job): string {
   const q = QUESTIONS.find((x) => x.id === job.id);
@@ -35,6 +38,7 @@ const ALL_JOBS: Job[] = QUESTIONS.flatMap((q) => [
 ]);
 
 const TOTAL_CHARS = ALL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
+const LESSON_CHARS = LESSONS.reduce((sum, l) => sum + l.script.length, 0);
 
 const box = {
   background: "#111",
@@ -80,7 +84,30 @@ export default function AdminAudioPage() {
   const [failures, setFailures] = useState<string[]>([]);
   const [base, setBase] = useState("");
   const [note, setNote] = useState("");
+  const [lessonBusy, setLessonBusy] = useState(false);
+  const [lessonDone, setLessonDone] = useState(0);
+  const [lessonNow, setLessonNow] = useState("");
   const abortRef = useRef(false);
+
+  async function runLessons() {
+    if (!key.trim() || lessonBusy || running || testBusy) return;
+    setLessonBusy(true);
+    setLessonDone(0);
+    setNote("");
+    for (const l of LESSONS) {
+      setLessonNow(l.title);
+      const r = await generate({ id: l.key, kind: "lesson" });
+      if (r.ok && r.url) {
+        recordBase(r.url);
+      } else {
+        setFailures((f) => [...f, `lesson/${l.key}: ${r.error}`]);
+      }
+      setLessonDone((d) => d + 1);
+    }
+    setLessonNow("");
+    setNote("Lesson batch complete.");
+    setLessonBusy(false);
+  }
 
   async function generate(job: Job): Promise<{ ok: boolean; url?: string; chars?: number; error?: string }> {
     try {
@@ -229,6 +256,23 @@ export default function AdminAudioPage() {
         </p>
       </div>
 
+      <div style={box}>
+        <p style={{ fontSize: "13px", fontWeight: 700, color: "#fff", margin: "0 0 8px" }}>
+          Step 3 - generate the drive-time lessons
+        </p>
+        <p style={{ fontSize: "12.5px", color: "#999", margin: "0 0 10px" }}>
+          {LESSONS.length} lessons, about {Math.round(LESSON_CHARS / 1000)}k characters.
+          Each one takes a minute or two - the long scripts generate in pieces.
+        </p>
+        <button disabled={lessonBusy || running || testBusy} onClick={runLessons} style={btn} type="button">
+          {lessonBusy ? "Generating lessons..." : "Generate lessons"}
+        </button>
+        <p style={{ fontSize: "13.5px", color: "#ccc", margin: "12px 0 0", fontVariantNumeric: "tabular-nums" }}>
+          {lessonDone} / {LESSONS.length} lessons done
+          {lessonNow ? ` - working on ${lessonNow}` : ""}
+        </p>
+      </div>
+
       {note ? (
         <p style={{ fontSize: "13.5px", color: "#4ade80", margin: "0 0 12px" }}>{note}</p>
       ) : null}
@@ -257,8 +301,8 @@ export default function AdminAudioPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/admin-audio/page.tsx (v1 -
-// audio factory admin)
+// END OF FILE - app/foremanprep/admin-audio/page.tsx (v2 -
+// lesson generation)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
