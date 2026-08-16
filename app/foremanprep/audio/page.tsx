@@ -13,7 +13,11 @@ import {
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// ForemanPrep Audio study (v3) - the hands-free room. v3 adds
+// ForemanPrep Audio study (v4) - the hands-free room. v4: lessons
+// can PAUSE, not just stop - a Pause/Resume pill appears beside
+// Stop on the playing lesson row and beside Play all while the
+// chain runs. Pausing holds the spot in the current lesson;
+// resuming picks up mid-sentence; the chain still rolls on after. v3 adds
 // Play all: one tap at the top of the lesson list chains all
 // twelve lessons back to back - each one ends, the next begins -
 // through the same persistent gesture-blessed element, skipping
@@ -46,6 +50,7 @@ export default function AudioStudyPage() {
   const [lessonPlaying, setLessonPlaying] = useState<string | null>(null);
   const [lessonDead, setLessonDead] = useState<Record<string, boolean>>({});
   const [playAll, setPlayAll] = useState(false);
+  const [lessonPaused, setLessonPaused] = useState(false);
   const lessonAudio = useRef<HTMLAudioElement | null>(null);
   const playAllRef = useRef(false);
 
@@ -96,6 +101,7 @@ export default function AudioStudyPage() {
     }
     setLessonPlaying(null);
     setPlayAll(false);
+    setLessonPaused(false);
     playAllRef.current = false;
   }
 
@@ -137,6 +143,19 @@ export default function AudioStudyPage() {
       roll();
     });
     setLessonPlaying(l.key);
+    setLessonPaused(false);
+  }
+
+  function pauseResumeLesson() {
+    const a = lessonAudio.current;
+    if (!a || lessonPlaying === null) return;
+    if (lessonPaused) {
+      a.play().catch(() => {});
+      setLessonPaused(false);
+    } else {
+      a.pause();
+      setLessonPaused(true);
+    }
   }
 
   function toggleLesson(key: string) {
@@ -281,13 +300,20 @@ export default function AudioStudyPage() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "26px" }}>
         <p className="fa-sec" style={{ margin: 0 }}>Drive-time lessons</p>
         {access !== null && access.paid ? (
-          <button
-            className={playAll ? "fa-lbtn playing" : "fa-lbtn"}
-            onClick={togglePlayAll}
-            type="button"
-          >
-            {playAll ? "Stop" : "Play all"}
-          </button>
+          playAll ? (
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button className="fa-lbtn playing" onClick={pauseResumeLesson} type="button">
+                {lessonPaused ? "Resume" : "Pause"}
+              </button>
+              <button className="fa-lbtn" onClick={togglePlayAll} type="button">
+                Stop
+              </button>
+            </div>
+          ) : (
+            <button className="fa-lbtn" onClick={togglePlayAll} type="button">
+              Play all
+            </button>
+          )
         ) : null}
       </div>
       <p className="fa-secsub">
@@ -317,13 +343,18 @@ export default function AudioStudyPage() {
                 <button className="fa-lbtn" disabled type="button">
                   Coming soon
                 </button>
+              ) : lessonPlaying === l.key ? (
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button className="fa-lbtn playing" onClick={pauseResumeLesson} type="button">
+                    {lessonPaused ? "Resume" : "Pause"}
+                  </button>
+                  <button className="fa-lbtn" onClick={() => toggleLesson(l.key)} type="button">
+                    Stop
+                  </button>
+                </div>
               ) : (
-                <button
-                  className={lessonPlaying === l.key ? "fa-lbtn playing" : "fa-lbtn"}
-                  onClick={() => toggleLesson(l.key)}
-                  type="button"
-                >
-                  {lessonPlaying === l.key ? "Stop" : "Play"}
+                <button className="fa-lbtn" onClick={() => toggleLesson(l.key)} type="button">
+                  Play
                 </button>
               )}
             </div>
@@ -413,8 +444,8 @@ export default function AudioStudyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/audio/page.tsx (v3 - play all
-// lesson chain)
+// END OF FILE - app/foremanprep/audio/page.tsx (v4 - lesson
+// pause/resume)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
