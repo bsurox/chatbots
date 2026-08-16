@@ -2,8 +2,9 @@
 import "server-only";
 import { put } from "@vercel/blob";
 import { getQuestion } from "@/lib/foremanprep/questions";
+import { getLesson } from "@/lib/foremanprep/lessons";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // ForemanPrep audio generator (v1) - the one-time factory behind
 // the Listen feature. POSTs here turn a question into spoken audio
@@ -19,6 +20,12 @@ export const maxDuration = 60;
 // the write token is FPMEDIA_READ_WRITE_TOKEN and gets passed to
 // put() explicitly; a missing token now fails with a clear
 // message instead of a generic 500.
+// v3: kind "lesson" voices a drive-time lesson script (id = the
+// domain key, from lib/foremanprep/lessons). Long scripts are
+// split at paragraph breaks into chunks under the ElevenLabs
+// request ceiling and the mp3 buffers concatenated - same-codec
+// MPEG frames chain cleanly. maxDuration raised for the longer
+// lesson generations.
 
 const DEFAULT_VOICE = "pNInz6obpgDQGcFmaJgB";
 const LETTERS = ["A", "B", "C", "D"];
@@ -39,6 +46,27 @@ function explainText(id: string): string | null {
   return `The correct answer is ${letter}: ${q.choices[q.answer]}. ${q.explain} Reference: ${q.cite}.`;
 }
 
+// ElevenLabs rejects very long requests; lessons get split at
+// paragraph boundaries into requests under this ceiling.
+const CHUNK_LIMIT = 4500;
+
+function chunkScript(script: string): string[] {
+  const paras = script.split("\n\n");
+  const chunks: string[] = [];
+  let current = "";
+  for (const p of paras) {
+    const joined = current ? `${current}\n\n${p}` : p;
+    if (joined.length > CHUNK_LIMIT && current) {
+      chunks.push(current);
+      current = p;
+    } else {
+      current = joined;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
 export async function POST(request: Request) {
   let body: { key?: unknown; kind?: unknown; id?: unknown; voiceId?: unknown };
   try {
@@ -53,15 +81,21 @@ export async function POST(request: Request) {
     return Response.json({ error: "Not authorized." }, { status: 401 });
   }
 
-  const kind = body.kind === "q" || body.kind === "e" ? body.kind : null;
+  const kind =
+    body.kind === "q" || body.kind === "e" || body.kind === "lesson" ? body.kind : null;
   const id = typeof body.id === "string" ? body.id.trim() : "";
   if (!kind || !id || id.length > 40) {
     return Response.json({ error: "Missing kind or id." }, { status: 400 });
   }
 
-  const text = kind === "q" ? questionText(id) : explainText(id);
+  const text =
+    kind === "q"
+      ? questionText(id)
+      : kind === "e"
+        ? explainText(id)
+        : getLesson(id)?.script ?? null;
   if (!text) {
-    return Response.json({ error: `Unknown question id: ${id}` }, { status: 404 });
+    return Response.json({ error: `Unknown ${kind === "lesson" ? "lesson" : "question"} id: ${id}` }, { status: 404 });
   }
 
   const voiceId =
@@ -78,36 +112,41 @@ export async function POST(request: Request) {
   }
 
   try {
-    const tts = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`,
-      {
-        method: "POST",
-        headers: {
-          "xi-api-key": process.env.ELEVENLABS_API_KEY ?? "",
-          "Content-Type": "application/json",
-          Accept: "audio/mpeg",
-        },
-        body: JSON.stringify({
-          text,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
+    const pieces: Buffer[] = [];
+    for (const chunk of chunkScript(text)) {
+      const tts = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`,
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": process.env.ELEVENLABS_API_KEY ?? "",
+            "Content-Type": "application/json",
+            Accept: "audio/mpeg",
           },
-        }),
-      }
-    );
-
-    if (!tts.ok) {
-      const error = await tts.text();
-      console.error("ForemanPrep audio-gen ElevenLabs error:", error);
-      return Response.json(
-        { error: "Voice generation failed - check the ElevenLabs quota." },
-        { status: 502 }
+          body: JSON.stringify({
+            text: chunk,
+            model_id: "eleven_multilingual_v2",
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+            },
+          }),
+        }
       );
+
+      if (!tts.ok) {
+        const error = await tts.text();
+        console.error("ForemanPrep audio-gen ElevenLabs error:", error);
+        return Response.json(
+          { error: "Voice generation failed - check the ElevenLabs quota." },
+          { status: 502 }
+        );
+      }
+
+      pieces.push(Buffer.from(await tts.arrayBuffer()));
     }
 
-    const audio = Buffer.from(await tts.arrayBuffer());
+    const audio = Buffer.concat(pieces);
     const blob = await put(`foremanprep-audio/${kind}-${id}.mp3`, audio, {
       access: "public",
       addRandomSuffix: false,
@@ -123,8 +162,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v2 -
-// FPMEDIA blob token)
+// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v3 -
+// lesson kind + chunked long scripts)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
