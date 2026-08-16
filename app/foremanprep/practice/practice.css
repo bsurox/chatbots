@@ -1,8 +1,10 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles v10. Adds the question-report door under
-   the Next button. v9: length picker starts unselected and blocks
-   with a red error until chosen; the exam-weight lines and the
-   weights sentence wear ForemanPrep orange. fq- prefix. */
+/* Practice player styles v11. Listen pills: small orange ghost
+   buttons under the question that speak the question and, after
+   reveal, the explanation - ElevenLabs audio from blob storage.
+   v10: question-report door under the Next button. v9: length
+   picker starts unselected and blocks with a red error until
+   chosen; exam-weight lines wear ForemanPrep orange. fq- prefix. */
 
 .fq-wrap { max-width: 620px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
@@ -103,8 +105,15 @@
 .fq-reperr { color: #f87171; font-size: 12.5px; margin: 8px 0 0; }
 .fq-repok { margin: 12px 0 0; color: #4ade80; font-size: 13px; text-align: center; }
 
+
+/* Listen pills (v11) */
+.fq-listenrow { display: flex; flex-wrap: wrap; gap: 8px; margin: -8px 0 16px; }
+.fq-listen { display: inline-flex; align-items: center; gap: 7px; background: transparent; border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 999px; color: var(--fp); font-size: 12.5px; font-weight: 700; padding: 6px 13px; cursor: pointer; font-family: inherit; }
+.fq-listen.playing { background: rgba(249, 115, 22, 0.12); }
+.fq-listen:hover { background: rgba(249, 115, 22, 0.08); }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v10 -
-   question report)
+   END OF FILE - app/foremanprep/practice/practice.css (v11 -
+   listen pills)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
