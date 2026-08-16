@@ -6,7 +6,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Exam simulator v7: the flagged marker in the review jump grid
+// Exam simulator v8: the clock now keeps running on the Review
+// screen - the real exam never pauses, so neither do we. Hitting
+// zero during review auto-submits just like mid-question. The
+// review header already showed the clock; it just ticks now.
+// v7: the flagged marker in the review jump grid
 // is now a small orange flag glyph (was a dot), and the copy says
 // so - more obvious what to revisit.
 // v6: every ForemanPrep brand button (intro, live
@@ -94,7 +98,7 @@ export default function ExamPage() {
   );
 
   useEffect(() => {
-    if (phase !== "run") return;
+    if (phase !== "run" && phase !== "review") return;
     tick.current = setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) {
@@ -109,9 +113,10 @@ export default function ExamPage() {
     };
   }, [phase]);
 
-  // When the clock hits zero mid-exam, auto-submit with what we have.
+  // When the clock hits zero mid-exam OR mid-review, auto-submit
+  // with what we have - review time is exam time.
   useEffect(() => {
-    if (phase === "run" && remaining === 0 && qs.length > 0) {
+    if ((phase === "run" || phase === "review") && remaining === 0 && qs.length > 0) {
       grade(qs, picks);
     }
   }, [phase, remaining, qs, picks, grade]);
@@ -421,7 +426,7 @@ export default function ExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v7 - flag glyph
-// in the review grid)
+// END OF FILE - app/foremanprep/exam/page.tsx (v8 - clock runs
+// through review)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
