@@ -1,421 +1,65 @@
-// FILE: app/foremanprep/exam/page.tsx
-"use client";
-import "./exam.css";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
+/* FILE: app/foremanprep/exam/exam.css */
+/* Exam simulator styles v4. The flagged marker in the jump grid is
+   now a small orange flag glyph instead of a dot - obvious at a
+   glance. v3: back pill top-left of every screen, plus a confirm
+   modal so nobody quits a live test by accident.
+   fe- prefix, rides the fp- canvas. */
 
-// Exam simulator v6: every ForemanPrep brand button (intro, live
-// test, review, and the graded screen's Back to ForemanPrep) wears
-// the two-tone wordmark - Foreman white, Prep orange.
-// v5 notes (paywall): the full simulator is a Full Access
-// feature - the intro checks /api/access and unpaid visitors get a
-// locked card pointing at the storefront instead of a Start button.
-// v4 notes: the back pill on a live
-// test now opens a confirm modal, and confirming ends the attempt
-// - answers, flags, and clock all reset - so the timed test can't
-// be paused by leaving. On the intro screen the back pill is
-// still instant. v1 note: Answer, flag, and jump around all the
-// questions, then submit and grade against the real 81/115 (70%)
-// bar - no answer is revealed until you turn it in, like PSI test
-// day. The clock runs at the real exam's pace (5.5 hours across
-// 115 questions) so a partial bank still feels authentic today and
-// becomes the true 115-question, 5.5-hour exam as batches land.
-// Finished exams post to the same attempts API as practice.
+.fe-wrap { max-width: 640px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 18px calc(env(safe-area-inset-bottom) + 40px); }
 
-const REAL_SECONDS = 330 * 60;
-const REAL_QUESTIONS = 115;
-const PER_Q = Math.round(REAL_SECONDS / REAL_QUESTIONS);
-const PASS_PCT = 70;
+.fe-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; margin-bottom: 14px; background: #0a0a0a; border-bottom: 1px solid #1e1e1e; }
+.fe-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.fe-back { display: inline-flex; align-items: center; gap: 6px; background: #161616; border: 1px solid #333; border-radius: 999px; color: #ddd; font-size: 13px; font-weight: 700; padding: 6px 14px 6px 10px; cursor: pointer; text-decoration: none; }
+.fe-back::before { content: ""; width: 7px; height: 7px; border-left: 2px solid #ddd; border-bottom: 2px solid #ddd; transform: rotate(45deg); display: inline-block; }
+.fe-clock { font-size: 14px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.fe-clock.low { color: #f87171; }
+.fe-count { font-size: 12.5px; color: #888; }
+.fe-title { font-size: 22px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+.fe-lead { font-size: 13.5px; color: #999; line-height: 1.55; margin: 0 0 16px; }
+.fe-badge { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: var(--fp); background: var(--fp-soft); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 999px; padding: 4px 10px; margin-bottom: 12px; }
+.fe-q { font-size: 17.5px; font-weight: 700; color: #fff; line-height: 1.45; margin: 0 0 14px; }
+.fe-choices { display: grid; gap: 9px; margin-bottom: 16px; }
+.fe-choice { background: #111; border: 1px solid #2c2c2c; border-radius: 12px; color: #ddd; font-size: 14.5px; line-height: 1.4; padding: 12px 14px; text-align: left; cursor: pointer; }
+.fe-choice:hover { border-color: #444; }
+.fe-choice.picked { background: rgba(249, 115, 22, 0.13); border-color: var(--fp); color: #ffd9bd; }
+.fe-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 18px; }
+.fe-flag { font-size: 13px; font-weight: 700; padding: 7px 13px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid #444; color: #aaa; }
+.fe-flag.on { background: rgba(249, 115, 22, 0.15); border-color: var(--fp); color: var(--fp); }
+.fe-nav { display: flex; gap: 8px; }
+.fe-nav button { background: #161616; border: 1px solid #333; border-radius: 10px; color: #ddd; font-size: 13px; font-weight: 700; padding: 8px 14px; cursor: pointer; }
+.fe-nav button:disabled { opacity: 0.4; cursor: default; }
+.fe-review { width: 100%; background: #fff; border: none; border-radius: 12px; color: #000; font-size: 15px; font-weight: 800; padding: 13px 0; cursor: pointer; }
+.fe-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-bottom: 12px; }
+.fe-cell { position: relative; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #111; border: 1px solid #2c2c2c; border-radius: 8px; color: #999; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.fe-cell.answered { background: #1d1d1d; border-color: #4a4a4a; color: #fff; }
+.fe-cell.flagged::after { content: "\2691"; position: absolute; top: 1px; right: 3px; font-size: 11px; line-height: 1; color: var(--fp); }
+.fe-legend { display: flex; gap: 16px; font-size: 12px; color: #777; margin-bottom: 16px; }
+.fe-warn { font-size: 13px; color: #fbbf24; line-height: 1.5; margin: 0 0 12px; }
+.fe-submit { width: 100%; background: var(--fp); border: none; border-radius: 12px; color: #000; font-size: 15px; font-weight: 800; padding: 13px 0; cursor: pointer; margin-bottom: 9px; }
+.fe-submit:hover { filter: brightness(1.07); }
+.fe-ghost { width: 100%; background: transparent; border: 1px solid #333; border-radius: 12px; color: #bbb; font-size: 14px; font-weight: 700; padding: 12px 0; cursor: pointer; }
+.fe-scorewrap { text-align: center; padding-top: 24px; }
+.fe-band { font-size: 13px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 8px; }
+.fe-band.pass { color: #4ade80; }
+.fe-band.fail { color: #f87171; }
+.fe-score { font-size: 44px; font-weight: 800; color: #fff; margin: 0 0 4px; }
+.fe-sub { font-size: 14px; color: #999; line-height: 1.55; margin: 0 0 20px; }
+.fe-doms { text-align: left; display: grid; gap: 8px; margin-bottom: 20px; }
+.fe-dom { background: #111; border: 1px solid #262626; border-radius: 10px; padding: 10px 12px; }
+.fe-domrow { display: flex; justify-content: space-between; font-size: 13px; color: #ccc; margin-bottom: 6px; }
+.fe-dombar { height: 5px; background: #222; border-radius: 99px; overflow: hidden; }
+.fe-domfill { height: 100%; background: var(--fp); border-radius: 99px; }
+.fe-saved { font-size: 12.5px; color: #4ade80; margin: 0 0 10px; }
 
-const LETTERS = ["A", "B", "C", "D", "E", "F"];
+.fe-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; }
+.fe-modal { background: #141414; border: 1px solid #333; border-radius: 14px; max-width: 380px; width: 100%; padding: 20px; }
+.fe-mtitle { font-size: 16.5px; font-weight: 800; color: #fff; margin: 0 0 8px; }
+.fe-mtext { font-size: 13.5px; color: #aaa; line-height: 1.55; margin: 0 0 16px; }
+.fe-macts { display: flex; gap: 9px; }
+.fe-mcancel { flex: 1; background: #161616; border: 1px solid #333; border-radius: 10px; color: #ddd; font-size: 13.5px; font-weight: 700; padding: 10px 0; cursor: pointer; }
+.fe-myes { flex: 1; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.6); border-radius: 10px; color: #f87171; font-size: 13.5px; font-weight: 700; padding: 10px 0; cursor: pointer; }
 
-type Phase = "intro" | "run" | "review" | "graded";
-
-function clock(sec: number): string {
-  const s = Math.max(0, sec);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const ss = s % 60;
-  const mm = String(m).padStart(2, "0");
-  const sss = String(ss).padStart(2, "0");
-  return h > 0 ? `${h}:${mm}:${sss}` : `${mm}:${sss}`;
-}
-
-export default function ExamPage() {
-  const router = useRouter();
-  const [phase, setPhase] = useState<Phase>("intro");
-  const [qs, setQs] = useState<ForemanQuestion[]>([]);
-  const [idx, setIdx] = useState(0);
-  const [picks, setPicks] = useState<Record<string, number>>({});
-  const [flags, setFlags] = useState<Record<string, boolean>>({});
-  const [remaining, setRemaining] = useState(0);
-  const [score, setScore] = useState({ correct: 0, total: 0 });
-  const [confirmExit, setConfirmExit] = useState(false);
-  const [access, setAccess] = useState<{ loggedIn: boolean; paid: boolean } | null>(null);
-  const tick = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    fetch("/foremanprep/api/access")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) setAccess({ loggedIn: Boolean(data.loggedIn), paid: Boolean(data.paid) });
-        else setAccess({ loggedIn: false, paid: false });
-      })
-      .catch(() => setAccess({ loggedIn: false, paid: false }));
-  }, []);
-
-  const grade = useCallback(
-    (form: ForemanQuestion[], chosen: Record<string, number>) => {
-      if (tick.current) clearInterval(tick.current);
-      let correct = 0;
-      for (const q of form) {
-        if (chosen[q.id] === q.answer) correct += 1;
-      }
-      setScore({ correct, total: form.length });
-      setPhase("graded");
-      fetch("/foremanprep/api/attempts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: "exam",
-          domain: null,
-          answers: form
-            .filter((q) => chosen[q.id] !== undefined)
-            .map((q) => ({ questionId: q.id, picked: chosen[q.id] })),
-        }),
-      }).catch(() => {});
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (phase !== "run") return;
-    tick.current = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          if (tick.current) clearInterval(tick.current);
-          return 0;
-        }
-        return r - 1;
-      });
-    }, 1000);
-    return () => {
-      if (tick.current) clearInterval(tick.current);
-    };
-  }, [phase]);
-
-  // When the clock hits zero mid-exam, auto-submit with what we have.
-  useEffect(() => {
-    if (phase === "run" && remaining === 0 && qs.length > 0) {
-      grade(qs, picks);
-    }
-  }, [phase, remaining, qs, picks, grade]);
-
-  function begin() {
-    const form = buildExamForm();
-    setQs(form);
-    setIdx(0);
-    setPicks({});
-    setFlags({});
-    setRemaining(form.length * PER_Q);
-    setScore({ correct: 0, total: 0 });
-    setPhase("run");
-  }
-
-  function choose(qid: string, i: number) {
-    setPicks((p) => ({ ...p, [qid]: i }));
-  }
-
-  function toggleFlag(qid: string) {
-    setFlags((f) => ({ ...f, [qid]: !f[qid] }));
-  }
-
-  // A live test can't be paused by leaving. Confirming exit wipes
-  // the attempt - answers, flags, and clock - and returns to the
-  // intro so the next visit starts a fresh, fully timed run.
-  function requestBack() {
-    if (phase === "run" || phase === "review") {
-      setConfirmExit(true);
-      return;
-    }
-    router.push("/foremanprep");
-  }
-
-  function confirmLeave() {
-    if (tick.current) clearInterval(tick.current);
-    setConfirmExit(false);
-    setPhase("intro");
-    setQs([]);
-    setIdx(0);
-    setPicks({});
-    setFlags({});
-    setRemaining(0);
-    router.push("/foremanprep");
-  }
-
-  const exitModal = confirmExit ? (
-    <div className="fe-overlay">
-      <div className="fe-modal">
-        <p className="fe-mtitle">Leave the exam?</p>
-        <p className="fe-mtext">
-          This is a timed test. If you go back to ForemanPrep now, this
-          attempt ends and your answers and clock reset.
-        </p>
-        <div className="fe-macts">
-          <button className="fe-mcancel" onClick={() => setConfirmExit(false)} type="button">
-            Keep testing
-          </button>
-          <button className="fe-myes" onClick={confirmLeave} type="button">
-            Leave and reset
-          </button>
-        </div>
-      </div>
-    </div>
-  ) : null;
-
-  if (phase === "intro") {
-    return (
-      <div className="fe-wrap">
-        <div className="fe-top">
-          <button
-            className="fe-back"
-            onClick={() => router.push("/foremanprep")}
-            type="button"
-          >
-            <span className="fp-wordmark">
-              Foreman<span>Prep</span>
-            </span>
-          </button>
-        </div>
-        <p className="fe-title">Exam simulator</p>
-        <p className="fe-lead">
-          A full dress rehearsal for the real thing. Answer every question,
-          flag the ones you want to revisit, and submit when you are ready.
-        </p>
-        <div className="fe-facts">
-          <div className="fe-fact">
-            <b>Pace</b>
-            <span>
-              The clock runs at the real exam's speed - 5.5 hours across a
-              full 115 questions. Today's bank is smaller, so your clock is
-              sized to match that same pace.
-            </span>
-          </div>
-          <div className="fe-fact">
-            <b>Pass</b>
-            <span>70% is the real bar - 81 of 115 on exam day.</span>
-          </div>
-          <div className="fe-fact">
-            <b>Open book</b>
-            <span>
-              On the real exam you may bring the approved references. Practice
-              finding answers fast - that is the whole game.
-            </span>
-          </div>
-        </div>
-        {access === null ? (
-          <button className="fe-start" disabled type="button">
-            Checking access...
-          </button>
-        ) : access.paid ? (
-          <button className="fe-start" onClick={begin} type="button">
-            Start the exam
-          </button>
-        ) : (
-          <div className="fp-gate">
-            <p className="fp-gateh">The full exam simulator is a Full Access feature.</p>
-            <p className="fp-gated">
-              All 115 questions on the true 5.5-hour clock, graded against the
-              real 81-to-pass bar - the closest thing to test day you can get.
-              Free practice rounds stay open on the practice page.
-            </p>
-            <Link className="fp-gatebtn" href="/foremanprep/buy">
-              Get Full Access - $99 early bird
-            </Link>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (phase === "graded") {
-    const pct = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
-    const passed = pct >= PASS_PCT;
-    return (
-      <div className="fe-wrap">
-        <div className="fe-verdict">
-          <p className={passed ? "fe-big fe-pass" : "fe-big fe-fail"}>{pct}%</p>
-          <p className="fe-vscore">
-            {score.correct} of {score.total} correct
-          </p>
-          <p className="fe-vmsg">
-            {passed
-              ? "That clears the 70% bar. Keep stringing these together and test day is just another rep."
-              : "Short of the 70% bar this time. The review screen shows every miss - drill those subjects and run it again."}
-          </p>
-          <button className="fe-submit" onClick={begin} type="button">
-            Take it again
-          </button>
-          <button
-            className="fe-ghost"
-            onClick={() => router.push("/foremanprep")}
-            type="button"
-          >
-            Back to{" "}
-            <span className="fp-wordmark">
-              Foreman<span>Prep</span>
-            </span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (phase === "review") {
-    const answered = Object.keys(picks).length;
-    const blanks = qs.length - answered;
-    return (
-      <div className="fe-wrap">
-        <div className="fe-top">
-          <button className="fe-back" onClick={requestBack} type="button">
-            <span className="fp-wordmark">
-              Foreman<span>Prep</span>
-            </span>
-          </button>
-        </div>
-        <div className="fe-bar">
-          <span className={remaining < 300 ? "fe-clock low" : "fe-clock"}>{clock(remaining)}</span>
-          <span className="fe-count">
-            {answered} / {qs.length} answered
-          </span>
-        </div>
-        <p className="fe-title">Review</p>
-        <p className="fe-lead">
-          Tap any number to jump back. A dot marks a flagged question.
-        </p>
-        <div className="fe-grid">
-          {qs.map((q, i) => {
-            const cls =
-              "fe-cell" +
-              (picks[q.id] !== undefined ? " answered" : "") +
-              (flags[q.id] ? " flagged" : "");
-            return (
-              <button
-                className={cls}
-                key={q.id}
-                onClick={() => {
-                  setIdx(i);
-                  setPhase("run");
-                }}
-                type="button"
-              >
-                {i + 1}
-              </button>
-            );
-          })}
-        </div>
-        <div className="fe-legend">
-          <span>Filled = answered</span>
-          <span>Dot = flagged</span>
-        </div>
-        {blanks > 0 ? (
-          <p className="fe-warn">
-            {blanks} question{blanks === 1 ? "" : "s"} still blank. Blank
-            answers count as wrong on the real exam.
-          </p>
-        ) : null}
-        <button className="fe-submit" onClick={() => grade(qs, picks)} type="button">
-          Submit and grade
-        </button>
-        <button
-          className="fe-ghost"
-          onClick={() => setPhase("run")}
-          type="button"
-        >
-          Keep working
-        </button>
-        {exitModal}
-      </div>
-    );
-  }
-
-  // phase === "run"
-  const q = qs[idx];
-  return (
-    <div className="fe-wrap">
-      <div className="fe-top">
-        <button className="fe-back" onClick={requestBack} type="button">
-          <span className="fp-wordmark">
-            Foreman<span>Prep</span>
-          </span>
-        </button>
-      </div>
-      <div className="fe-bar">
-        <span className={remaining < 300 ? "fe-clock low" : "fe-clock"}>{clock(remaining)}</span>
-        <button
-          className={flags[q.id] ? "fe-flag on" : "fe-flag"}
-          onClick={() => toggleFlag(q.id)}
-          type="button"
-        >
-          {flags[q.id] ? "Flagged" : "Flag"}
-        </button>
-      </div>
-
-      <span className="fe-count">
-        Question {idx + 1} of {qs.length}
-      </span>
-      <p className="fe-q">{q.q}</p>
-
-      <div className="fe-choices">
-        {q.choices.map((c, i) => (
-          <button
-            className={picks[q.id] === i ? "fe-choice on" : "fe-choice"}
-            key={c}
-            onClick={() => choose(q.id, i)}
-            type="button"
-          >
-            <span className="fe-letter">{LETTERS[i]}</span>
-            <span>{c}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="fe-nav">
-        <button
-          className="fe-navbtn"
-          disabled={idx === 0}
-          onClick={() => setIdx((n) => Math.max(0, n - 1))}
-          type="button"
-        >
-          Previous
-        </button>
-        {idx + 1 < qs.length ? (
-          <button
-            className="fe-navbtn go"
-            onClick={() => setIdx((n) => Math.min(qs.length - 1, n + 1))}
-            type="button"
-          >
-            Next
-          </button>
-        ) : (
-          <button className="fe-navbtn go" onClick={() => setPhase("review")} type="button">
-            Review
-          </button>
-        )}
-      </div>
-
-      <button className="fe-ghost" onClick={() => setPhase("review")} type="button">
-        Review all questions
-      </button>
-      {exitModal}
-    </div>
-  );
-}
-
-// ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v6 - wordmark
-// back buttons)
-// If you can see this comment, the paste was not truncated.
-// ============================================================
+/* ============================================================
+   END OF FILE - app/foremanprep/exam/exam.css (v4 - flag glyph)
+   If you can see this comment, the paste was not truncated.
+   ============================================================ */
