@@ -13,7 +13,12 @@ import {
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// ForemanPrep Audio study (v2) - the hands-free room. v2 fix: the
+// ForemanPrep Audio study (v3) - the hands-free room. v3 adds
+// Play all: one tap at the top of the lesson list chains all
+// twelve lessons back to back - each one ends, the next begins -
+// through the same persistent gesture-blessed element, skipping
+// any missing file. Tapping a single lesson or Stop breaks the
+// chain. v2 fix: the
 // drill runs through ONE persistent audio element created inside
 // the Start tap. Mobile browsers block new players that start
 // without a fresh gesture, which froze the auto-chain after the
@@ -40,7 +45,9 @@ export default function AudioStudyPage() {
   // ----- lessons -----
   const [lessonPlaying, setLessonPlaying] = useState<string | null>(null);
   const [lessonDead, setLessonDead] = useState<Record<string, boolean>>({});
+  const [playAll, setPlayAll] = useState(false);
   const lessonAudio = useRef<HTMLAudioElement | null>(null);
+  const playAllRef = useRef(false);
 
   // ----- drill -----
   const [subject, setSubject] = useState<DomainKey | "all">("all");
@@ -88,6 +95,8 @@ export default function AudioStudyPage() {
       drillAudio.current = null;
     }
     setLessonPlaying(null);
+    setPlayAll(false);
+    playAllRef.current = false;
   }
 
   // Audio never outlives the page.
@@ -100,6 +109,36 @@ export default function AudioStudyPage() {
   }, []);
 
   // ----- lesson playback -----
+  // One persistent element for lessons too, created inside the tap
+  // that starts playback, so the Play all chain never gets blocked
+  // by mobile autoplay rules between lessons.
+  function playLessonAt(i: number) {
+    if (i >= LESSONS.length) {
+      setLessonPlaying(null);
+      setPlayAll(false);
+      playAllRef.current = false;
+      return;
+    }
+    const l = LESSONS[i];
+    if (!lessonAudio.current) lessonAudio.current = new Audio();
+    const a = lessonAudio.current;
+    const roll = () => {
+      if (playAllRef.current) playLessonAt(i + 1);
+      else setLessonPlaying(null);
+    };
+    a.onended = roll;
+    a.onerror = () => {
+      setLessonDead((d) => ({ ...d, [l.key]: true }));
+      roll();
+    };
+    a.src = `${AUDIO_BASE}/foremanprep-audio/lesson-${l.key}.mp3`;
+    a.play().catch(() => {
+      setLessonDead((d) => ({ ...d, [l.key]: true }));
+      roll();
+    });
+    setLessonPlaying(l.key);
+  }
+
   function toggleLesson(key: string) {
     if (!AUDIO_BASE) return;
     if (lessonPlaying === key) {
@@ -109,18 +148,23 @@ export default function AudioStudyPage() {
     stopEverything();
     setDrillQs(null);
     setDrillDone(false);
-    const a = new Audio(`${AUDIO_BASE}/foremanprep-audio/lesson-${key}.mp3`);
-    a.onended = () => setLessonPlaying(null);
-    a.onerror = () => {
-      setLessonDead((d) => ({ ...d, [key]: true }));
-      setLessonPlaying(null);
-    };
-    lessonAudio.current = a;
-    a.play().catch(() => {
-      setLessonDead((d) => ({ ...d, [key]: true }));
-      setLessonPlaying(null);
-    });
-    setLessonPlaying(key);
+    const idx = LESSONS.findIndex((l) => l.key === key);
+    if (idx < 0) return;
+    playLessonAt(idx);
+  }
+
+  function togglePlayAll() {
+    if (!AUDIO_BASE) return;
+    if (playAll) {
+      stopEverything();
+      return;
+    }
+    stopEverything();
+    setDrillQs(null);
+    setDrillDone(false);
+    setPlayAll(true);
+    playAllRef.current = true;
+    playLessonAt(0);
   }
 
   // ----- drill machine -----
@@ -234,7 +278,18 @@ export default function AudioStudyPage() {
         at lunch. Keep the screen on and unlocked while audio plays.
       </p>
 
-      <p className="fa-sec">Drive-time lessons</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "26px" }}>
+        <p className="fa-sec" style={{ margin: 0 }}>Drive-time lessons</p>
+        {access !== null && access.paid ? (
+          <button
+            className={playAll ? "fa-lbtn playing" : "fa-lbtn"}
+            onClick={togglePlayAll}
+            type="button"
+          >
+            {playAll ? "Stop" : "Play all"}
+          </button>
+        ) : null}
+      </div>
       <p className="fa-secsub">
         Twelve spoken recaps, one per exam subject - every fact pulled straight
         from the question bank.
@@ -358,8 +413,8 @@ export default function AudioStudyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/audio/page.tsx (v2 - persistent
-// drill player for mobile)
+// END OF FILE - app/foremanprep/audio/page.tsx (v3 - play all
+// lesson chain)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
