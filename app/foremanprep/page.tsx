@@ -4,7 +4,13 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v9. Full Access owners stop seeing the
+// ForemanPrep landing page v10. The audio claim is BACK and this
+// time it is true: a "Study with your ears" feature card and a
+// third try-button to /foremanprep/audio - every question voiced,
+// twelve drive-time lessons, hands-free drill. (The original
+// "audio lessons" claim was pulled in the launch honesty pass
+// until it was real. It is real now.)
+// v9: Full Access owners stop seeing the
 // sales furniture: the "What prep costs today" price table and the
 // price-reminder email box render only for visitors who have not
 // bought - a paying customer gets a landing page, not a pitch.
@@ -55,6 +61,10 @@ const FEATURES = [
   {
     n: "Built for the job site",
     d: "Runs on any phone. Drill a 10-question round in the truck at lunch - no desk, no classroom.",
+  },
+  {
+    n: "Study with your ears",
+    d: "Every question read aloud, twelve drive-time audio lessons, and a hands-free drill mode - hear the question, answer in your head, hear why. Made for the drive between jobs.",
   },
   {
     n: "Pass guarantee",
@@ -198,6 +208,9 @@ export default function ForemanPrepPage() {
           <Link className="fp-try-btn ghost" href="/foremanprep/exam">
             Try the exam simulator
           </Link>
+          <Link className="fp-try-btn ghost" href="/foremanprep/audio">
+            Audio study
+          </Link>
         </div>
         <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
       </div>
@@ -335,6 +348,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v9 - no pitch for owners)
+// END OF FILE - app/foremanprep/page.tsx (v10 - audio claim restored)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
