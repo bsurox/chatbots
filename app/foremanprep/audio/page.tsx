@@ -13,7 +13,12 @@ import {
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// ForemanPrep Audio study (v1) - the hands-free room. Two things
+// ForemanPrep Audio study (v2) - the hands-free room. v2 fix: the
+// drill runs through ONE persistent audio element created inside
+// the Start tap. Mobile browsers block new players that start
+// without a fresh gesture, which froze the auto-chain after the
+// first question; reusing the gesture-blessed element keeps the
+// question -> think -> answer -> next chain rolling untouched. Two things
 // live here. Drive-time lessons: twelve narrated subject recaps
 // (Full Access only), one tap to play. Audio drill: a continuous
 // no-hands quiz - Adam reads the question, a think-gap of silence
@@ -126,6 +131,9 @@ export default function AudioStudyPage() {
       ? buildPracticeSet(subject, Number.MAX_SAFE_INTEGER)
       : buildDemoSet();
     if (qs.length === 0) return;
+    // One persistent element, created inside the user's tap - the
+    // whole drill reuses it so phones never block the auto-chain.
+    drillAudio.current = new Audio();
     setDrillQs(qs);
     setDIdx(0);
     setPaused(false);
@@ -141,7 +149,8 @@ export default function AudioStudyPage() {
       startThink(qs, i);
       return;
     }
-    const a = new Audio(audioUrl(st, qs[i].id));
+    const a = drillAudio.current;
+    if (!a) return;
     a.onended = () => {
       if (st === "q") playStage(qs, i, "think");
       else queueNext(qs, i);
@@ -151,7 +160,7 @@ export default function AudioStudyPage() {
       if (st === "q") playStage(qs, i, "think");
       else queueNext(qs, i);
     };
-    drillAudio.current = a;
+    a.src = audioUrl(st, qs[i].id);
     a.play().catch(() => queueNext(qs, i));
   }
 
@@ -349,8 +358,8 @@ export default function AudioStudyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/audio/page.tsx (v1 - lessons +
-// hands-free drill)
+// END OF FILE - app/foremanprep/audio/page.tsx (v2 - persistent
+// drill player for mobile)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
