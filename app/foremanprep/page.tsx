@@ -4,7 +4,11 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v8. The header button now tells the
+// ForemanPrep landing page v9. Full Access owners stop seeing the
+// sales furniture: the "What prep costs today" price table and the
+// price-reminder email box render only for visitors who have not
+// bought - a paying customer gets a landing page, not a pitch.
+// v8: The header button tells the
 // truth about auth: signed-out visitors get Log in, signed-in
 // users get Log out (same next-auth signOut call as the account
 // badge, landing back on the home page). The access check treats
@@ -69,6 +73,7 @@ export default function ForemanPrepPage() {
   const [phase, setPhase] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
+  const [paid, setPaid] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -76,6 +81,7 @@ export default function ForemanPrepPage() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.loggedIn) setLoggedIn(true);
+        if (data?.paid) setPaid(true);
       })
       .catch(() => {});
   }, []);
@@ -240,6 +246,8 @@ export default function ForemanPrepPage() {
         ))}
       </div>
 
+      {paid ? null : (
+        <>
       <h2 className="fp-h2">What prep costs today</h2>
       <div className="fp-price">
         {PRICES.map((p) => (
@@ -303,6 +311,8 @@ export default function ForemanPrepPage() {
           One reminder email. No spam, ever.
         </p>
       </div>
+        </>
+      )}
 
       <div className="fp-foot">
         <div className="fp-links">
@@ -325,6 +335,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v8 - honest auth button)
+// END OF FILE - app/foremanprep/page.tsx (v9 - no pitch for owners)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
