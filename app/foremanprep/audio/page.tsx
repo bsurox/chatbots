@@ -13,7 +13,11 @@ import {
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// ForemanPrep Audio study (v4) - the hands-free room. v4: lessons
+// ForemanPrep Audio study (v5) - the hands-free room. v5: the
+// Play all button rides a touch higher - the header row aligns
+// flex-start instead of center, so the pill tops out level with
+// the "Drive-time lessons" heading and clears the subtext below
+// it. v4: lessons
 // can PAUSE, not just stop - a Pause/Resume pill appears beside
 // Stop on the playing lesson row and beside Play all while the
 // chain runs. Pausing holds the spot in the current lesson;
@@ -297,7 +301,7 @@ export default function AudioStudyPage() {
         at lunch. Keep the screen on and unlocked while audio plays.
       </p>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "26px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginTop: "26px" }}>
         <p className="fa-sec" style={{ margin: 0 }}>Drive-time lessons</p>
         {access !== null && access.paid ? (
           playAll ? (
@@ -444,8 +448,8 @@ export default function AudioStudyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/audio/page.tsx (v4 - lesson
-// pause/resume)
+// END OF FILE - app/foremanprep/audio/page.tsx (v5 - Play all
+// button raised off the subtext)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
