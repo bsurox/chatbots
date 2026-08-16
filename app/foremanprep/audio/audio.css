@@ -1,0 +1,46 @@
+/* FILE: app/foremanprep/audio/audio.css */
+/* ForemanPrep Audio study page (v1). fa- prefix, rides the fp-
+   canvas. Two rooms: the drive-time lesson list (one row per
+   subject, play/stop pill, minutes tag) and the hands-free drill
+   (subject select, think-gap segmented control, big start button,
+   live status while it runs). Gate card styles come from
+   foremanprep.css (.fp-gate family). */
+
+.fa-h { font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -0.4px; margin: 0 0 4px; }
+.fa-sub { font-size: 14px; color: #999; line-height: 1.55; margin: 0 0 22px; }
+.fa-sec { font-size: 16px; font-weight: 800; color: #fff; margin: 26px 0 4px; }
+.fa-secsub { font-size: 13px; color: #888; line-height: 1.5; margin: 0 0 12px; }
+.fa-hint { font-size: 12.5px; color: #f97316; line-height: 1.5; margin: 10px 0 0; }
+
+.fa-list { display: grid; gap: 8px; }
+.fa-lrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #111; border: 1px solid #2c2c2c; border-radius: 12px; padding: 12px 14px; }
+.fa-lname { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; }
+.fa-lmeta { display: block; font-size: 11.5px; font-weight: 600; color: var(--fp); margin-top: 3px; }
+.fa-lbtn { flex: none; background: transparent; border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 999px; color: var(--fp); font-size: 12.5px; font-weight: 700; padding: 7px 16px; cursor: pointer; font-family: inherit; }
+.fa-lbtn.playing { background: rgba(249, 115, 22, 0.12); }
+.fa-lbtn:disabled { opacity: 0.45; cursor: default; }
+
+.fa-drillbox { background: #111; border: 1px solid #2c2c2c; border-radius: 14px; padding: 16px; }
+.fa-label { display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #888; margin: 0 0 7px; }
+.fa-sel { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 9px; color: #eee; font-size: 14px; font-family: inherit; padding: 11px 12px; margin-bottom: 14px; }
+.fa-gapseg { display: flex; gap: 8px; margin-bottom: 16px; }
+.fa-gapseg button { flex: 1; padding: 10px 0; border-radius: 10px; font-weight: 700; font-size: 13.5px; cursor: pointer; background: #0a0a0a; border: 1px solid #333; color: #aaa; font-family: inherit; }
+.fa-gapseg button.on { background: var(--fp-soft); border: 2px solid var(--fp); color: var(--fp); }
+.fa-start { width: 100%; padding: 14px 0; border-radius: 11px; font-weight: 800; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; font-family: inherit; }
+.fa-start:hover { filter: brightness(1.07); }
+
+.fa-run { text-align: center; padding: 8px 0 2px; }
+.fa-count { font-size: 13px; font-weight: 700; color: #888; margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+.fa-stage { font-size: 19px; font-weight: 800; color: #fff; margin: 0 0 4px; }
+.fa-stage.think { color: var(--fp); }
+.fa-qpeek { font-size: 13px; color: #999; line-height: 1.5; margin: 0 0 14px; }
+.fa-controls { display: flex; gap: 8px; }
+.fa-ctl { flex: 1; padding: 12px 0; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; background: #161616; border: 1px solid #333; color: #ddd; font-family: inherit; }
+.fa-ctl.stop { color: #f87171; border-color: rgba(239, 68, 68, 0.5); }
+.fa-done { text-align: center; font-size: 15px; color: #4ade80; font-weight: 700; padding: 10px 0; }
+
+/* ============================================================
+   END OF FILE - app/foremanprep/audio/audio.css (v1 - lessons +
+   drill mode)
+   If you can see this comment, the paste was not truncated.
+   ============================================================ */
