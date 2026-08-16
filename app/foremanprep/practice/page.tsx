@@ -13,7 +13,13 @@ import {
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
 
-// Practice player v12: on the free tier, tapping a locked length
+// Practice player v13: every revealed question grows a quiet
+// "Report this question" door at the bottom of the card - a
+// student who has contradicting book info can send it (plus an
+// optional reply email) straight to support through the existing
+// /api/support mail pipe, with the question id, our answer key,
+// and our citation attached automatically for the review desk.
+// v12: on the free tier, tapping a locked length
 // (25/Full) now DESELECTS the 10-question highlight while the gate
 // card shows - nothing paid can ever appear selected; tapping 10
 // re-highlights it. v11: the ForemanPrep back button wears the
@@ -98,6 +104,54 @@ export default function PracticePage() {
   const [tutorBusy, setTutorBusy] = useState(false);
   const [tutorErr, setTutorErr] = useState("");
 
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportText, setReportText] = useState("");
+  const [reportEmail, setReportEmail] = useState("");
+  const [reportPhase, setReportPhase] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [reportErr, setReportErr] = useState("");
+
+  function resetReport() {
+    setReportOpen(false);
+    setReportText("");
+    setReportPhase("idle");
+    setReportErr("");
+  }
+
+  async function sendReport() {
+    if (!qs || reportPhase === "sending") return;
+    const question = qs[idx];
+    const text = reportText.trim();
+    if (!text) return;
+    setReportPhase("sending");
+    setReportErr("");
+    try {
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "ForemanPrep Question Report",
+          email: reportEmail.trim() || "reports@foremanprep.com",
+          comment:
+            "QUESTION REPORT - " + question.id + "\n\n" +
+            "Q: " + question.q + "\n\n" +
+            "Our answer key: " + question.choices[question.answer] + "\n" +
+            "Our citation: " + question.cite + "\n\n" +
+            "What the student says:\n" + text,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        setReportPhase("done");
+        return;
+      }
+      setReportPhase("error");
+      setReportErr(data?.error ?? "Could not send - please try again.");
+    } catch {
+      setReportPhase("error");
+      setReportErr("Could not send - please try again.");
+    }
+  }
+
   function resetTutor() {
     setTutorOpen(false);
     setThread([]);
@@ -156,6 +210,7 @@ export default function PracticePage() {
     setDone(false);
     setSaved(false);
     resetTutor();
+    resetReport();
     setPhase("quiz");
   }
 
@@ -202,6 +257,7 @@ export default function PracticePage() {
     setIdx(idx + 1);
     setPicked(null);
     resetTutor();
+    resetReport();
   }
 
   if (phase === "pick") {
@@ -439,6 +495,54 @@ export default function PracticePage() {
           <button className="fq-next" onClick={next} type="button">
             {idx + 1 >= qs.length ? "See my score" : "Next question"}
           </button>
+          {reportPhase === "done" ? (
+            <p className="fq-repok">Thanks - your report went straight to our review desk.</p>
+          ) : reportOpen ? (
+            <div className="fq-repbox">
+              <p className="fq-reph">What looks wrong with this question?</p>
+              <textarea
+                className="fq-repta"
+                disabled={reportPhase === "sending"}
+                maxLength={1200}
+                onChange={(e) => setReportText(e.target.value)}
+                placeholder="Tell us what's off. A book and page number that contradicts us is gold."
+                value={reportText}
+              />
+              <input
+                className="fq-repin"
+                disabled={reportPhase === "sending"}
+                inputMode="email"
+                maxLength={200}
+                onChange={(e) => setReportEmail(e.target.value)}
+                placeholder="Your email (optional - only if you want a reply)"
+                type="email"
+                value={reportEmail}
+              />
+              {reportPhase === "error" ? <p className="fq-reperr">{reportErr}</p> : null}
+              <div className="fq-repacts">
+                <button
+                  className="fq-repsend"
+                  disabled={reportPhase === "sending" || reportText.trim().length === 0}
+                  onClick={sendReport}
+                  type="button"
+                >
+                  {reportPhase === "sending" ? "Sending..." : "Send report"}
+                </button>
+                <button
+                  className="fq-repcancel"
+                  disabled={reportPhase === "sending"}
+                  onClick={() => setReportOpen(false)}
+                  type="button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button className="fq-repbtn" onClick={() => setReportOpen(true)} type="button">
+              Report this question
+            </button>
+          )}
         </div>
       ) : null}
     </div>
@@ -446,7 +550,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v12 - locked-length
-// deselect)
+// END OF FILE - app/foremanprep/practice/page.tsx (v13 - question
+// report)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
