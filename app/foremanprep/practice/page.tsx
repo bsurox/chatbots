@@ -14,7 +14,10 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v14: Listen pills. Every question can speak -
+// Practice player v15: the Listen pills wear a small headphone
+// glyph (inline SVG, inherits the pill's orange) so the audio
+// door is obvious at a glance - his ask for an ear/listen symbol
+// in the badge. v14: Listen pills. Every question can speak -
 // one pill reads the question and choices, and after the reveal a
 // second reads the answer and explanation (pre-generated
 // ElevenLabs audio from blob storage; see audio-config). Buttons
@@ -44,6 +47,26 @@ import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
 type Len = 10 | 25 | "all";
 type Sel = DomainKey | "all";
+
+// Small headphone glyph for the Listen pills - inherits the pill
+// color, so it stays brand-orange without any css changes.
+const LISTEN_ICON = (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    height="14"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+    width="14"
+  >
+    <path d="M4 14a8 8 0 0 1 16 0" />
+    <rect height="6" rx="2" width="4" x="3" y="14" />
+    <rect height="6" rx="2" width="4" x="17" y="14" />
+  </svg>
+);
 type RecapRow = { id: string; q: string; ok: boolean };
 type PickedAnswer = { questionId: string; picked: number };
 
@@ -479,6 +502,7 @@ export default function PracticePage() {
               onClick={() => playAudio("q", question.id)}
               type="button"
             >
+              {LISTEN_ICON}
               {playingKind === "q" ? "Stop" : "Listen"}
             </button>
           ) : null}
@@ -488,6 +512,7 @@ export default function PracticePage() {
               onClick={() => playAudio("e", question.id)}
               type="button"
             >
+              {LISTEN_ICON}
               {playingKind === "e" ? "Stop" : "Hear the explanation"}
             </button>
           ) : null}
@@ -623,7 +648,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v14 - listen
-// pills)
+// END OF FILE - app/foremanprep/practice/page.tsx (v15 - listen
+// glyph)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
