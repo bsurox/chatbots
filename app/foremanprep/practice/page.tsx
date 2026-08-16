@@ -2,7 +2,7 @@
 "use client";
 import "./practice.css";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   buildDemoSet,
@@ -12,8 +12,15 @@ import {
   type DomainKey,
   type ForemanQuestion,
 } from "@/lib/foremanprep/questions";
+import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v13: every revealed question grows a quiet
+// Practice player v14: Listen pills. Every question can speak -
+// one pill reads the question and choices, and after the reveal a
+// second reads the answer and explanation (pre-generated
+// ElevenLabs audio from blob storage; see audio-config). Buttons
+// self-hide if AUDIO_BASE is unset or a file is missing, audio
+// stops on next question / new round / leaving the page.
+// v13: every revealed question grows a quiet
 // "Report this question" door at the bottom of the card - a
 // student who has contradicting book info can send it (plus an
 // optional reply email) straight to support through the existing
@@ -103,6 +110,47 @@ export default function PracticePage() {
   const [tutorInput, setTutorInput] = useState("");
   const [tutorBusy, setTutorBusy] = useState(false);
   const [tutorErr, setTutorErr] = useState("");
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playingKind, setPlayingKind] = useState<"q" | "e" | null>(null);
+  const [audioDead, setAudioDead] = useState<Record<string, boolean>>({});
+
+  function stopAudio() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setPlayingKind(null);
+  }
+
+  // Never let audio outlive the page.
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) audioRef.current.pause();
+    };
+  }, []);
+
+  function playAudio(kind: "q" | "e", questionId: string) {
+    if (!AUDIO_BASE) return;
+    if (playingKind === kind) {
+      stopAudio();
+      return;
+    }
+    stopAudio();
+    const key = `${kind}-${questionId}`;
+    const a = new Audio(audioUrl(kind, questionId));
+    a.onended = () => setPlayingKind(null);
+    a.onerror = () => {
+      setAudioDead((d) => ({ ...d, [key]: true }));
+      setPlayingKind(null);
+    };
+    audioRef.current = a;
+    a.play().catch(() => {
+      setAudioDead((d) => ({ ...d, [key]: true }));
+      setPlayingKind(null);
+    });
+    setPlayingKind(kind);
+  }
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportText, setReportText] = useState("");
@@ -211,6 +259,7 @@ export default function PracticePage() {
     setSaved(false);
     resetTutor();
     resetReport();
+    stopAudio();
     setPhase("quiz");
   }
 
@@ -258,6 +307,7 @@ export default function PracticePage() {
     setPicked(null);
     resetTutor();
     resetReport();
+    stopAudio();
   }
 
   if (phase === "pick") {
@@ -421,6 +471,29 @@ export default function PracticePage() {
       <span className="fq-chip">{getDomain(question.domain)?.name ?? question.domain}</span>
       <p className="fq-q">{question.q}</p>
 
+      {AUDIO_BASE ? (
+        <div className="fq-listenrow">
+          {!audioDead[`q-${question.id}`] ? (
+            <button
+              className={playingKind === "q" ? "fq-listen playing" : "fq-listen"}
+              onClick={() => playAudio("q", question.id)}
+              type="button"
+            >
+              {playingKind === "q" ? "Stop" : "Listen"}
+            </button>
+          ) : null}
+          {picked !== null && !audioDead[`e-${question.id}`] ? (
+            <button
+              className={playingKind === "e" ? "fq-listen playing" : "fq-listen"}
+              onClick={() => playAudio("e", question.id)}
+              type="button"
+            >
+              {playingKind === "e" ? "Stop" : "Hear the explanation"}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="fq-choices">
         {question.choices.map((c, i) => (
           <button
@@ -550,7 +623,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v13 - question
-// report)
+// END OF FILE - app/foremanprep/practice/page.tsx (v14 - listen
+// pills)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
