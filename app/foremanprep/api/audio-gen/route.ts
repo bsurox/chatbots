@@ -15,6 +15,10 @@ export const maxDuration = 60;
 // spends ElevenLabs characters, so only the admin page with the
 // key can run it. Voice: ElevenLabs stock "Adam", overridable per
 // request for testing without a redeploy.
+// v2: the blob store is connected with the FPMEDIA env prefix, so
+// the write token is FPMEDIA_READ_WRITE_TOKEN and gets passed to
+// put() explicitly; a missing token now fails with a clear
+// message instead of a generic 500.
 
 const DEFAULT_VOICE = "pNInz6obpgDQGcFmaJgB";
 const LETTERS = ["A", "B", "C", "D"];
@@ -65,6 +69,14 @@ export async function POST(request: Request) {
       ? body.voiceId.trim()
       : DEFAULT_VOICE;
 
+  const blobToken = process.env.FPMEDIA_READ_WRITE_TOKEN ?? "";
+  if (!blobToken) {
+    return Response.json(
+      { error: "Storage not configured - FPMEDIA_READ_WRITE_TOKEN is missing." },
+      { status: 500 }
+    );
+  }
+
   try {
     const tts = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`,
@@ -100,6 +112,7 @@ export async function POST(request: Request) {
       access: "public",
       addRandomSuffix: false,
       contentType: "audio/mpeg",
+      token: blobToken,
     });
 
     return Response.json({ ok: true, url: blob.url, chars: text.length });
@@ -110,8 +123,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v1 -
-// question + explanation audio factory)
+// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v2 -
+// FPMEDIA blob token)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
