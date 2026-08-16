@@ -1,7 +1,8 @@
 /* FILE: app/foremanprep/exam/exam.css */
-/* Exam simulator styles v4. The flagged marker in the jump grid is
-   now a small orange flag glyph instead of a dot - obvious at a
-   glance. v3: back pill top-left of every screen, plus a confirm
+/* Exam simulator styles v5. The flag glyph sits a touch lower and
+   larger in the cell so it reads clearly instead of hugging the
+   corner. v4: flagged marker became an orange flag glyph (was a
+   dot). v3: back pill top-left of every screen, plus a confirm
    modal so nobody quits a live test by accident.
    fe- prefix, rides the fp- canvas. */
 
@@ -40,7 +41,7 @@
 .fe-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 8px 0 24px; }
 .fe-cell { aspect-ratio: 1; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer; background: #141414; border: 1px solid #333; color: #888; position: relative; }
 .fe-cell.answered { background: var(--fp-soft); border-color: var(--fp); color: var(--fp); }
-.fe-cell.flagged::after { content: "\2691"; position: absolute; top: 1px; right: 3px; font-size: 11px; line-height: 1; color: var(--fp); }
+.fe-cell.flagged::after { content: "\2691"; position: absolute; top: 5px; right: 6px; font-size: 13px; line-height: 1; color: var(--fp); }
 .fe-legend { display: flex; gap: 16px; justify-content: center; font-size: 12px; color: #888; margin-bottom: 22px; }
 .fe-submit { width: 100%; padding: 15px 0; border-radius: 11px; font-weight: 800; font-size: 17px; border: none; cursor: pointer; background: var(--fp); color: #000; margin-bottom: 10px; }
 .fe-ghost { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: #888; border: 1px solid #333; }
@@ -62,6 +63,6 @@
 .fe-myes { flex: 1; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #ef4444; border: none; color: #fff; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/exam/exam.css (v4 - flag glyph)
+   END OF FILE - app/foremanprep/exam/exam.css (v5 - flag nudged)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
