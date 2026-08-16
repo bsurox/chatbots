@@ -1,9 +1,15 @@
 // FILE: app/foremanprep/page.tsx
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v7. The 17-states stat card now shows a
+// ForemanPrep landing page v8. The header button now tells the
+// truth about auth: signed-out visitors get Log in, signed-in
+// users get Log out (same next-auth signOut call as the account
+// badge, landing back on the home page). The access check treats
+// guests as signed out, so throwaway sessions never see Log out.
+// v7: The 17-states stat card shows a
 // hover/tap tooltip listing every accepting state - proof on the
 // spot for the campaign's core claim. v6: stat corrected 18 -> 17
 // (NASCLA's list is 17 states + the US Virgin Islands, a territory;
@@ -62,6 +68,17 @@ export default function ForemanPrepPage() {
   const [email, setEmail] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  useEffect(() => {
+    fetch("/foremanprep/api/access")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.loggedIn) setLoggedIn(true);
+      })
+      .catch(() => {});
+  }, []);
 
   async function join() {
     const clean = email.trim();
@@ -103,22 +120,47 @@ export default function ForemanPrepPage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div className="fp-chip">Early-bird pricing live</div>
-          <Link
-            href="/login"
-            style={{
-              fontSize: "13px",
-              fontWeight: 700,
-              color: "#fff",
-              background: "#161616",
-              border: "1px solid #333",
-              borderRadius: "999px",
-              padding: "5px 14px",
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Log in
-          </Link>
+          {loggedIn ? (
+            <button
+              disabled={signingOut}
+              onClick={() => {
+                setSigningOut(true);
+                signOut({ redirectTo: "/foremanprep" });
+              }}
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                fontFamily: "inherit",
+                color: "#fff",
+                background: "#161616",
+                border: "1px solid #333",
+                borderRadius: "999px",
+                padding: "5px 14px",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+              }}
+              type="button"
+            >
+              {signingOut ? "Signing out..." : "Log out"}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                color: "#fff",
+                background: "#161616",
+                border: "1px solid #333",
+                borderRadius: "999px",
+                padding: "5px 14px",
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Log in
+            </Link>
+          )}
         </div>
       </div>
 
@@ -283,6 +325,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v7 - 17-states tooltip)
+// END OF FILE - app/foremanprep/page.tsx (v8 - honest auth button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
