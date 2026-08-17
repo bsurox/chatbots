@@ -1,5 +1,8 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles v11. Listen pills: small orange ghost
+/* Practice player styles v12. Answer letters: every choice wears
+   an A/B/C/D chip like the exam simulator (.fq-letter mirrors
+   .fe-letter), tinting green/red with the reveal - nicer and more
+   authentic, per Chase. v11: Listen pills - small orange ghost
    buttons under the question that speak the question and, after
    reveal, the explanation - ElevenLabs audio from blob storage.
    v10: question-report door under the Next button. v9: length
@@ -23,6 +26,9 @@
 .fq-choice.on-wrong { background: rgba(239, 68, 68, 0.12); border: 2px solid #ef4444; color: #fff; }
 .fq-choice.dim { opacity: 0.45; }
 .fq-ct { flex: 1; }
+.fq-letter { flex: none; width: 26px; height: 26px; border-radius: 7px; background: #222; color: #bbb; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.fq-choice.on-right .fq-letter { background: #22c55e; color: #000; }
+.fq-choice.on-wrong .fq-letter { background: #ef4444; color: #fff; }
 
 .fq-icon { flex: none; width: 22px; height: 22px; }
 .fq-icon svg { width: 100%; height: 100%; display: block; }
@@ -113,7 +119,7 @@
 .fq-listen:hover { background: rgba(249, 115, 22, 0.08); }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v11 -
-   listen pills)
+   END OF FILE - app/foremanprep/practice/practice.css (v12 -
+   answer letter chips)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
