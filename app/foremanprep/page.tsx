@@ -4,7 +4,11 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v12. Full Access owners no longer see
+// ForemanPrep landing page v13. The "Free to try right now - no
+// sign-up needed." line under the try-buttons also hides for Full
+// Access members - nothing on an owner's page should talk like
+// they haven't bought yet.
+// v12 notes: Full Access owners no longer see
 // the hero "Get Full Access - $99 early bird" button or the price
 // line under it - a paid member has nothing left to buy, so the
 // hero goes straight to the try-buttons. Guests and free accounts
@@ -226,7 +230,9 @@ export default function ForemanPrepPage() {
             Audio study
           </Link>
         </div>
-        <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
+        {paid ? null : (
+          <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
+        )}
       </div>
 
       <div className="fp-stats">
@@ -362,7 +368,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v12 - hero buy button
+// END OF FILE - app/foremanprep/page.tsx (v13 - free-to-try line
 // hidden for paid members)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
