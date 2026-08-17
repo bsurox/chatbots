@@ -13,11 +13,13 @@ import {
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// ForemanPrep Audio study (v5) - the hands-free room. v5: the
-// Play all button rides a touch higher - the header row aligns
-// flex-start instead of center, so the pill tops out level with
-// the "Drive-time lessons" heading and clears the subtext below
-// it. v4: lessons
+// ForemanPrep Audio study (v6) - the hands-free room. v6: the
+// Play all pill (and its Pause/Stop pair while the chain runs)
+// gets a real upward nudge - a translateY(-7px) on the button
+// group - because the v5 flex-start alignment alone was too
+// subtle. The pill now clearly sits up beside the "Drive-time
+// lessons" heading instead of crowding the subtext below.
+// v4: lessons
 // can PAUSE, not just stop - a Pause/Resume pill appears beside
 // Stop on the playing lesson row and beside Play all while the
 // chain runs. Pausing holds the spot in the current lesson;
@@ -304,20 +306,22 @@ export default function AudioStudyPage() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginTop: "26px" }}>
         <p className="fa-sec" style={{ margin: 0 }}>Drive-time lessons</p>
         {access !== null && access.paid ? (
-          playAll ? (
-            <div style={{ display: "flex", gap: "6px" }}>
-              <button className="fa-lbtn playing" onClick={pauseResumeLesson} type="button">
-                {lessonPaused ? "Resume" : "Pause"}
-              </button>
+          <div style={{ display: "flex", gap: "6px", transform: "translateY(-7px)" }}>
+            {playAll ? (
+              <>
+                <button className="fa-lbtn playing" onClick={pauseResumeLesson} type="button">
+                  {lessonPaused ? "Resume" : "Pause"}
+                </button>
+                <button className="fa-lbtn" onClick={togglePlayAll} type="button">
+                  Stop
+                </button>
+              </>
+            ) : (
               <button className="fa-lbtn" onClick={togglePlayAll} type="button">
-                Stop
+                Play all
               </button>
-            </div>
-          ) : (
-            <button className="fa-lbtn" onClick={togglePlayAll} type="button">
-              Play all
-            </button>
-          )
+            )}
+          </div>
         ) : null}
       </div>
       <p className="fa-secsub">
@@ -448,8 +452,8 @@ export default function AudioStudyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/audio/page.tsx (v5 - Play all
-// button raised off the subtext)
+// END OF FILE - app/foremanprep/audio/page.tsx (v6 - Play all
+// pill nudged up 7px off the subtext)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
