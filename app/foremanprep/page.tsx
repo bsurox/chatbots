@@ -4,7 +4,12 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v10. The audio claim is BACK and this
+// ForemanPrep landing page v11. The hero practice button drops the
+// word "free" for Full Access owners: they see "Start practice",
+// everyone else (guests and free accounts) keeps "Start free
+// practice" - a customer already paid, so nothing they own gets
+// pitched as free.
+// v10 notes: The audio claim is BACK and this
 // time it is true: a "Study with your ears" feature card and a
 // third try-button to /foremanprep/audio - every question voiced,
 // twelve drive-time lessons, hands-free drill. (The original
@@ -203,7 +208,7 @@ export default function ForemanPrepPage() {
         </p>
         <div className="fp-try">
           <Link className="fp-try-btn" href="/foremanprep/practice">
-            Start free practice
+            {paid ? "Start practice" : "Start free practice"}
           </Link>
           <Link className="fp-try-btn ghost" href="/foremanprep/exam">
             Try the exam simulator
@@ -348,6 +353,6 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v10 - audio claim restored)
+// END OF FILE - app/foremanprep/page.tsx (v11 - Start practice for paid)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
