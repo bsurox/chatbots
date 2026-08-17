@@ -6,7 +6,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildExamForm, type ForemanQuestion } from "@/lib/foremanprep/questions";
 
-// Exam simulator v8: the clock now keeps running on the Review
+// Exam simulator v9: the Flag button moved DOWN out of the sticky
+// clock bar - it now sits on the same line as "Question X of Y",
+// right above the question text, so flagging happens where the
+// question lives. The sticky bar keeps just the clock.
+// v8: the clock now keeps running on the Review
 // screen - the real exam never pauses, so neither do we. Hitting
 // zero during review auto-submits just like mid-question. The
 // review header already showed the clock; it just ticks now.
@@ -365,6 +369,12 @@ export default function ExamPage() {
       </div>
       <div className="fe-bar">
         <span className={remaining < 300 ? "fe-clock low" : "fe-clock"}>{clock(remaining)}</span>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+        <span className="fe-count">
+          Question {idx + 1} of {qs.length}
+        </span>
         <button
           className={flags[q.id] ? "fe-flag on" : "fe-flag"}
           onClick={() => toggleFlag(q.id)}
@@ -373,10 +383,6 @@ export default function ExamPage() {
           {flags[q.id] ? "Flagged" : "Flag"}
         </button>
       </div>
-
-      <span className="fe-count">
-        Question {idx + 1} of {qs.length}
-      </span>
       <p className="fe-q">{q.q}</p>
 
       <div className="fe-choices">
@@ -426,7 +432,7 @@ export default function ExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/exam/page.tsx (v8 - clock runs
-// through review)
+// END OF FILE - app/foremanprep/exam/page.tsx (v9 - flag button
+// beside the question)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
