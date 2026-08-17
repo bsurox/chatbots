@@ -14,7 +14,11 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v15: the Listen pills wear a small headphone
+// Practice player v16: every answer choice wears an A/B/C/D
+// letter chip, same look as the exam simulator - the chip rides
+// at the left of the choice and tints green/red with the reveal
+// (styles in practice.css v12). Nicer and more authentic.
+// v15: the Listen pills wear a small headphone
 // glyph (inline SVG, inherits the pill's orange) so the audio
 // door is obvious at a glance - his ask for an ear/listen symbol
 // in the badge. v14: Listen pills. Every question can speak -
@@ -47,6 +51,8 @@ import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
 type Len = 10 | 25 | "all";
 type Sel = DomainKey | "all";
+
+const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
 // Small headphone glyph for the Listen pills - inherits the pill
 // color, so it stays brand-orange without any css changes.
@@ -528,10 +534,11 @@ export default function PracticePage() {
             onClick={() => pick(i)}
             type="button"
           >
+            <span className="fq-letter">{LETTERS[i]}</span>
+            <span className="fq-ct">{c}</span>
             {revealed && i === picked ? (
               <span className="fq-icon">{gotIt ? <CheckMark /> : <XMark />}</span>
             ) : null}
-            <span className="fq-ct">{c}</span>
           </button>
         ))}
       </div>
@@ -648,7 +655,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v15 - listen
-// glyph)
+// END OF FILE - app/foremanprep/practice/page.tsx (v16 - A/B/C/D
+// letter chips on answers)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
