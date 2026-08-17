@@ -4,7 +4,12 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v11. The hero practice button drops the
+// ForemanPrep landing page v12. Full Access owners no longer see
+// the hero "Get Full Access - $99 early bird" button or the price
+// line under it - a paid member has nothing left to buy, so the
+// hero goes straight to the try-buttons. Guests and free accounts
+// see the hero exactly as before.
+// v11 notes: The hero practice button drops the
 // word "free" for Full Access owners: they see "Start practice",
 // everyone else (guests and free accounts) keeps "Start free
 // practice" - a customer already paid, so nothing they own gets
@@ -195,17 +200,21 @@ export default function ForemanPrepPage() {
           unlimited practice, straight answers, and a study plan that fits
           around a job site, not a classroom.
         </p>
-        <Link
-          className="fp-cta"
-          href="/foremanprep/buy"
-          style={{ textDecoration: "none" }}
-        >
-          Get Full Access - $99 early bird
-        </Link>
-        <p className="fp-note">
-          <b>$99 early bird</b> right now - regular $149. Prep courses charge
-          $349 to $1,490 for less.
-        </p>
+        {paid ? null : (
+          <>
+            <Link
+              className="fp-cta"
+              href="/foremanprep/buy"
+              style={{ textDecoration: "none" }}
+            >
+              Get Full Access - $99 early bird
+            </Link>
+            <p className="fp-note">
+              <b>$99 early bird</b> right now - regular $149. Prep courses
+              charge $349 to $1,490 for less.
+            </p>
+          </>
+        )}
         <div className="fp-try">
           <Link className="fp-try-btn" href="/foremanprep/practice">
             {paid ? "Start practice" : "Start free practice"}
@@ -353,6 +362,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v11 - Start practice for paid)
+// END OF FILE - app/foremanprep/page.tsx (v12 - hero buy button
+// hidden for paid members)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
