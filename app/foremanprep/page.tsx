@@ -4,7 +4,15 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v15. The footer now links the SEO
+// ForemanPrep landing page v16. BUILD FIX: Next 16's prerenderer
+// rejects Date.now() during client-component render (the v14/v15
+// builds went red on exactly that line - nothing after css v11
+// ever deployed). The clock read now lives in a useEffect:
+// earlyBird starts true (correct through Sept 7), and after
+// hydration the effect flips it false once the deadline has
+// passed. Charge correctness never depended on this - the
+// checkout route reads the clock server-side per request.
+// v15 notes: The footer now links the SEO
 // guide library (/foremanprep/guides) so visitors and Google both
 // have a crawl path from the front door into the five guide
 // articles. One link, no other changes from v14.
@@ -118,7 +126,11 @@ export default function ForemanPrepPage() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [paid, setPaid] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const earlyBird = Date.now() < PRICE_FLIP_MS;
+  const [earlyBird, setEarlyBird] = useState(true);
+
+  useEffect(() => {
+    if (Date.now() >= PRICE_FLIP_MS) setEarlyBird(false);
+  }, []);
 
   useEffect(() => {
     fetch("/foremanprep/api/access")
@@ -421,7 +433,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v15 - footer link to
-// the exam guides library)
+// END OF FILE - app/foremanprep/page.tsx (v16 - clock read moved
+// into an effect so the Next 16 prerender passes)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
