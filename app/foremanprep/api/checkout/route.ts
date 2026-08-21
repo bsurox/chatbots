@@ -17,6 +17,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 // in the real session id at redirect time, and the thanks page uses
 // it as the ad-conversion transaction id so a refresh of the thanks
 // page can never double-count a purchase in Google Ads.
+// v4: allow_promotion_codes on the session - the Stripe checkout
+// page now shows an optional "Add promotion code" field, so
+// referral codes created in the dashboard (like CREW20) can be
+// redeemed. No code entered = normal price, nothing else changes.
 
 const LAUNCH_PRICE_CENTS = 9900;
 const PRODUCT_NAME = "ForemanPrep Full Access - NASCLA Exam Prep";
@@ -53,6 +57,7 @@ export async function POST(request: Request) {
       },
     ],
     mode: "payment",
+    allow_promotion_codes: true,
     // Card statements read ASKEVO* FOREMANPREP - full brand name,
     // same doctrine as the SPOTMINT suffix, so charges are instantly
     // recognizable and disputes stay rare. (Stripe caps the combined
@@ -71,8 +76,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/checkout/route.ts (v3 -
-// session_id on the success URL)
+// END OF FILE - app/foremanprep/api/checkout/route.ts (v4 -
+// promotion code field enabled)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
