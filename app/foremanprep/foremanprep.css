@@ -1,10 +1,15 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v8. Landing plus the paywall wardrobe:
+/* ForemanPrep brand surface v11. Landing plus the paywall wardrobe:
    buy card, feature checklist, locked-gate card, thank-you screen.
    v5 added .fp-wordmark. v6 added the floating account badge. v7
-   added .fp-backpill. v8 adds .fp-authbtn.exam - the orange exam
+   added .fp-backpill. v8 added .fp-authbtn.exam - the orange exam
    button used beside the white practice button on the buy page's
-   owned state and the thanks page. */
+   owned state and the thanks page. v9/v10 were the 17-states
+   tooltip and its underline cleanup. v11 adds the early-bird
+   deadline advertisement worn by landing v14: .fp-deadline (hero
+   pill) and .fp-deadnote (price-table line). Both render only for
+   visitors without Full Access and come down with the Sept 8
+   price-flip round. */
 
 .fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
 .fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
@@ -34,6 +39,13 @@
 .fp-cta:active { transform: translateY(1px); }
 .fp-note { font-size: 13px; color: #777; margin: 12px 0 0; }
 .fp-note b { color: var(--fp); font-weight: 700; }
+
+/* Early-bird deadline advertisement (landing v14, unpaid visitors
+   only). The hero pill names the end date; the small deadnote line
+   sits in the price table. Removed at the Sept 8 price flip. */
+.fp-deadline { display: inline-block; font-size: 14px; font-weight: 800; color: var(--fp); border: 1px solid rgba(249, 115, 22, 0.55); background: var(--fp-soft); border-radius: 999px; padding: 8px 16px; margin: 0 0 16px; }
+.fp-deadline b { color: #fff; font-weight: 800; }
+.fp-deadnote { text-align: center; font-size: 13px; font-weight: 700; color: var(--fp); margin: 14px 0 0; }
 
 .fp-try { display: flex; gap: 10px; margin: 20px 0 8px; flex-wrap: wrap; }
 .fp-try-btn { flex: 1; min-width: 150px; text-align: center; padding: 13px 16px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #fff; color: #000; border: 1px solid #fff; text-decoration: none; }
@@ -167,6 +179,6 @@
 .fp-fabout:disabled { opacity: 0.6; cursor: default; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v10 - no tipcue underline)
+   END OF FILE - app/foremanprep/foremanprep.css (v11 - deadline advertisement)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
