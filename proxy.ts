@@ -1,3 +1,4 @@
+// FILE: proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
@@ -83,6 +84,27 @@ export async function proxy(request: NextRequest) {
     }
     if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
       return NextResponse.rewrite(new URL("/foremanprep/privacy", request.url));
+    }
+    // v11: clean marketing URLs. The product lives under
+    // /foremanprep/* internally, but on this host the short paths
+    // are the public addresses: foremanprep.com/buy, /practice,
+    // /exam, /audio, /thanks, and the SEO surfaces /guides and
+    // /states all REWRITE onto the island. The address bar stays
+    // clean, the guide pages' canonical tags point at these short
+    // URLs, and the island sitemap lists them.
+    const cleanFp = [
+      "/buy",
+      "/practice",
+      "/exam",
+      "/audio",
+      "/thanks",
+      "/guides",
+      "/states",
+    ];
+    if (cleanFp.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+      return NextResponse.rewrite(
+        new URL("/foremanprep" + pathname, request.url)
+      );
     }
     const fpAllowed =
       pathname.startsWith("/foremanprep") ||
@@ -180,7 +202,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v10 - ForemanPrep legal rewrites)
+// END OF FILE - proxy.ts (v11 - ForemanPrep clean URL rewrites)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
