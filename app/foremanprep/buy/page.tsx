@@ -4,8 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v2. One product, one price: Full
-// Access, $99 early bird (regular $149). Signed-out visitors get
+// The ForemanPrep storefront v7. One product, one price: Full
+// Access - $99 early bird until Sept 7, 2026, 11:59 PM Mountain,
+// $149 from that moment on. v7 makes the page read the clock
+// (PRICE_FLIP_MS, same constant as checkout v5 and landing v14):
+// the big price, the buy button, the header chip, and a new
+// deadline line under the price all flip themselves at 11:59 PM -
+// no midnight commit. Checkout v5 is the charge authority.
+// Earlier notes: Signed-out visitors get
 // the auth doors first - the purchase must attach to a real
 // account. The checkout route guards against double-buying. v2:
 // the guarantee note links the full conditions in the Terms, and
@@ -20,6 +26,10 @@ import { fpTrackBeginCheckout } from "../analytics";
 
 type Access = { loggedIn: boolean; paid: boolean };
 
+// Sept 7, 2026, 11:59 PM MDT (UTC-6) = Sept 8, 05:59 UTC.
+// Month index 8 = September.
+const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
+
 const FEATURES = [
   "156 practice questions written to the real 12-subject exam outline - and growing",
   "Full 115-question exam simulator on the true 5.5-hour clock",
@@ -33,6 +43,7 @@ export default function BuyPage() {
   const [access, setAccess] = useState<Access | null>(null);
   const [buying, setBuying] = useState(false);
   const [err, setErr] = useState("");
+  const earlyBird = Date.now() < PRICE_FLIP_MS;
 
   useEffect(() => {
     fetch("/foremanprep/api/access")
@@ -83,7 +94,7 @@ export default function BuyPage() {
             Foreman<span>Prep</span>
           </span>
         </Link>
-        <div className="fp-chip">Early-bird pricing</div>
+        {earlyBird ? <div className="fp-chip">Early bird ends Sept 7</div> : null}
       </div>
 
       <div className="fp-buycard">
@@ -94,13 +105,24 @@ export default function BuyPage() {
           open-book test.
         </p>
         <div className="fp-pricebig">
-          <span className="fp-pricenow">$99</span>
-          <span className="fp-pricewas">$149</span>
+          {earlyBird ? (
+            <>
+              <span className="fp-pricenow">$99</span>
+              <span className="fp-pricewas">$149</span>
+            </>
+          ) : (
+            <span className="fp-pricenow">$149</span>
+          )}
         </div>
         <p className="fp-pricetag">
           One-time payment. No subscription. Prep courses charge $349 to
           $1,490.
         </p>
+        {earlyBird ? (
+          <p className="fp-deadnote">
+            Early-bird price ends Monday, Sept 7 - then it's $149
+          </p>
+        ) : null}
         <div className="fp-feats">
           {FEATURES.map((f) => (
             <div className="fp-feat" key={f}>
@@ -129,7 +151,7 @@ export default function BuyPage() {
         ) : access.loggedIn ? (
           <>
             <button className="fp-buybtn" disabled={buying} onClick={buy} type="button">
-              {buying ? "Opening secure checkout..." : "Get Full Access - $99"}
+              {buying ? "Opening secure checkout..." : earlyBird ? "Get Full Access - $99" : "Get Full Access - $149"}
             </button>
             {err ? <p className="fp-buyerr">{err}</p> : null}
           </>
@@ -176,8 +198,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v6 - InitiateCheckout
-// ping on the buy click)
+// END OF FILE - app/foremanprep/buy/page.tsx (v7 - price and
+// deadline flip themselves at Sept 7, 11:59 PM MDT)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
