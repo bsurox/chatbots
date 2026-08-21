@@ -8,7 +8,8 @@ import { hasForemanAccess } from "@/lib/db/foreman";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
 // ForemanPrep Full Access - one-time purchase, launch price $99
-// (regular $149 arrives by editing LAUNCH_PRICE_CENTS). Inline
+// (the $149 regular price arrives on its own at PRICE_FLIP_MS,
+// no edit needed - see v5 note below). Inline
 // price_data like the credits store: no dashboard products to
 // manage. The webhook grants foreman_access on payment; this route
 // only creates the session. Guests cannot buy - the purchase must
@@ -21,8 +22,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 // page now shows an optional "Add promotion code" field, so
 // referral codes created in the dashboard (like CREW20) can be
 // redeemed. No code entered = normal price, nothing else changes.
+// v5: the price reads the clock. Before Sept 7, 2026, 11:59 PM
+// Mountain (= Sept 8 05:59 UTC) checkout charges the $99 early
+// bird; from that moment it charges the $149 regular price by
+// itself - no midnight commit. This route is the charge authority;
+// landing v14 carries the same constant for its display strings.
 
-const LAUNCH_PRICE_CENTS = 9900;
+const EARLY_PRICE_CENTS = 9900;
+const REGULAR_PRICE_CENTS = 14900;
+// Sept 7, 2026, 11:59 PM MDT (UTC-6) = Sept 8, 05:59 UTC.
+// Month index 8 = September.
+const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
 const PRODUCT_NAME = "ForemanPrep Full Access - NASCLA Exam Prep";
 
 export async function POST(request: Request) {
@@ -51,7 +61,7 @@ export async function POST(request: Request) {
         price_data: {
           currency: "usd",
           product_data: { name: PRODUCT_NAME },
-          unit_amount: LAUNCH_PRICE_CENTS,
+          unit_amount: Date.now() < PRICE_FLIP_MS ? EARLY_PRICE_CENTS : REGULAR_PRICE_CENTS,
         },
         quantity: 1,
       },
@@ -76,8 +86,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/checkout/route.ts (v4 -
-// promotion code field enabled)
+// END OF FILE - app/foremanprep/api/checkout/route.ts (v5 -
+// price flips itself to $149 at Sept 7, 11:59 PM MDT)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
