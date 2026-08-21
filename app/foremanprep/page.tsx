@@ -4,7 +4,11 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v14. The early-bird deadline is now
+// ForemanPrep landing page v15. The footer now links the SEO
+// guide library (/foremanprep/guides) so visitors and Google both
+// have a crawl path from the front door into the five guide
+// articles. One link, no other changes from v14.
+// v14 notes: The early-bird deadline is now
 // advertised, and the page flips its own prices on the clock. A
 // PRICE_FLIP_MS constant marks Sept 7, 2026, 11:59 PM Mountain
 // (= Sept 8 05:59 UTC). Before that moment, visitors without Full
@@ -395,6 +399,9 @@ export default function ForemanPrepPage() {
 
       <div className="fp-foot">
         <div className="fp-links">
+          <Link className="fp-link" href="/foremanprep/guides">
+            Exam guides
+          </Link>
           <Link className="fp-link" href="/foremanprep/terms">
             Terms
           </Link>
@@ -414,7 +421,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v14 - deadline ads +
-// self-flipping $149 price at Sept 7, 11:59 PM MDT)
+// END OF FILE - app/foremanprep/page.tsx (v15 - footer link to
+// the exam guides library)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
