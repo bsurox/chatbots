@@ -1,131 +1,52 @@
-// FILE: app/foremanprep/page.tsx
+// FILE: app/foremanprep/buy/page.tsx
 "use client";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { fpTrackBeginCheckout } from "../analytics";
 
-// ForemanPrep landing page v16. BUILD FIX: Next 16's prerenderer
-// rejects Date.now() during client-component render (the v14/v15
-// builds went red on exactly that line - nothing after css v11
-// ever deployed). The clock read now lives in a useEffect:
-// earlyBird starts true (correct through Sept 7), and after
-// hydration the effect flips it false once the deadline has
-// passed. Charge correctness never depended on this - the
-// checkout route reads the clock server-side per request.
-// v15 notes: The footer now links the SEO
-// guide library (/foremanprep/guides) so visitors and Google both
-// have a crawl path from the front door into the five guide
-// articles. One link, no other changes from v14.
-// v14 notes: The early-bird deadline is now
-// advertised, and the page flips its own prices on the clock. A
-// PRICE_FLIP_MS constant marks Sept 7, 2026, 11:59 PM Mountain
-// (= Sept 8 05:59 UTC). Before that moment, visitors without Full
-// Access see: header chip "Early bird ends Sept 7", a .fp-deadline
-// pill above the hero CTA, a .fp-deadnote line in the price table,
-// and the remind-me box naming the Sept 8 flip (styles: css v11).
-// From 11:59 PM on, every deadline element disappears by itself
-// and all price strings read $149 - no midnight commit needed.
-// The checkout route (v5) carries the same constant and is the
-// authority on what actually gets charged. Owners see none of it.
-// v13 notes: The "Free to try right now - no
-// sign-up needed." line under the try-buttons also hides for Full
-// Access members - nothing on an owner's page should talk like
-// they haven't bought yet.
-// v12 notes: Full Access owners no longer see
-// the hero "Get Full Access - $99 early bird" button or the price
-// line under it - a paid member has nothing left to buy, so the
-// hero goes straight to the try-buttons. Guests and free accounts
-// see the hero exactly as before.
-// v11 notes: The hero practice button drops the
-// word "free" for Full Access owners: they see "Start practice",
-// everyone else (guests and free accounts) keeps "Start free
-// practice" - a customer already paid, so nothing they own gets
-// pitched as free.
-// v10 notes: The audio claim is BACK and this
-// time it is true: a "Study with your ears" feature card and a
-// third try-button to /foremanprep/audio - every question voiced,
-// twelve drive-time lessons, hands-free drill. (The original
-// "audio lessons" claim was pulled in the launch honesty pass
-// until it was real. It is real now.)
-// v9: Full Access owners stop seeing the
-// sales furniture: the "What prep costs today" price table and the
-// price-reminder email box render only for visitors who have not
-// bought - a paying customer gets a landing page, not a pitch.
-// v8: The header button tells the
-// truth about auth: signed-out visitors get Log in, signed-in
-// users get Log out (same next-auth signOut call as the account
-// badge, landing back on the home page). The access check treats
-// guests as signed out, so throwaway sessions never see Log out.
-// v7: The 17-states stat card shows a
-// hover/tap tooltip listing every accepting state - proof on the
-// spot for the campaign's core claim. v6: stat corrected 18 -> 17
-// (NASCLA's list is 17 states + the US Virgin Islands, a territory;
-// 17 matches the ad campaigns and is the strictly honest count).
-// v5 notes: A Log in button joins the header so
-// returning customers can get straight to their account - the top
-// row wraps on narrow phones so brand, chip, and button never
-// collide. v4 notes: footer links the ForemanPrep-branded legal
-// pages. v3 notes: hero and price table point at /foremanprep/buy,
-// feature copy claims only what is built today, email form is a
-// "remind me" net.
+// The ForemanPrep storefront v8. BUILD FIX: same Next 16 rule as
+// landing v16 - no Date.now() during client render, so the clock
+// read moved into a useEffect (earlyBird starts true, corrects
+// after hydration once Sept 7 has passed). The charge itself was
+// always server-side in checkout v5. One product, one price: Full
+// Access - $99 early bird until Sept 7, 2026, 11:59 PM Mountain,
+// $149 from that moment on. v7 makes the page read the clock
+// (PRICE_FLIP_MS, same constant as checkout v5 and landing v14):
+// the big price, the buy button, the header chip, and a new
+// deadline line under the price all flip themselves at 11:59 PM -
+// no midnight commit. Checkout v5 is the charge authority.
+// Earlier notes: Signed-out visitors get
+// the auth doors first - the purchase must attach to a real
+// account. The checkout route guards against double-buying. v2:
+// the guarantee note links the full conditions in the Terms, and
+// the footer carries the branded Terms/Privacy links - a buyer can
+// never say the conditions were hidden. v3: the back link wears
+// the two-tone wordmark, and the refund note names the support
+// email so a claim always has somewhere to go. v4: the back link
+// rides in the .fp-backpill chevron pill, matching the practice
+// and exam back buttons. v6: the buy click pings Meta
+// (InitiateCheckout) before handing off to Stripe, so the ad
+// platform learns from shoppers, not just completed buyers.
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+type Access = { loggedIn: boolean; paid: boolean };
 
-// Early-bird end: Sept 7, 2026, 11:59 PM Mountain Daylight Time
-// (UTC-6) = Sept 8, 05:59 UTC. Month index 8 = September.
+// Sept 7, 2026, 11:59 PM MDT (UTC-6) = Sept 8, 05:59 UTC.
+// Month index 8 = September.
 const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
 
-const STATS = [
-  { n: "115", l: "exam questions" },
-  { n: "5.5 hrs", l: "on the clock" },
-  { n: "17", l: "states, one exam" },
-  { n: "70%", l: "needed to pass" },
-];
-
 const FEATURES = [
-  {
-    n: "AI tutor, on call 24/7",
-    d: "Miss a question and ask why. The tutor explains it straight and points you to the exact book and section the answer lives in.",
-  },
-  {
-    n: "156 questions and growing",
-    d: "Written to the official 12-subject exam outline, weighted the way the real test is weighted, and verified against the actual reference books.",
-  },
-  {
-    n: "Full exam simulator",
-    d: "115 questions on a 5.5-hour clock. Flag questions, review your misses, and train against the real 81-to-pass bar.",
-  },
-  {
-    n: "Book-and-page citations",
-    d: "Every answer tells you which book and which section it lives in - the open-book skill the exam really tests.",
-  },
-  {
-    n: "Built for the job site",
-    d: "Runs on any phone. Drill a 10-question round in the truck at lunch - no desk, no classroom.",
-  },
-  {
-    n: "Study with your ears",
-    d: "Every question read aloud, twelve drive-time audio lessons, and a hands-free drill mode - hear the question, answer in your head, hear why. Made for the drive between jobs.",
-  },
-  {
-    n: "Pass guarantee",
-    d: "Finish the course and fail the real exam? Full refund. That simple.",
-  },
+  "156 practice questions written to the real 12-subject exam outline - and growing",
+  "Full 115-question exam simulator on the true 5.5-hour clock",
+  "AI tutor on every question - plain answers that point to the exact book and page",
+  "Every subject, every round length, unlimited practice",
+  "Book-and-page citations that train the open-book skill the exam really tests",
+  "Pass guarantee: finish the course and fail the real exam? Full refund.",
 ];
 
-const PRICES = [
-  { l: "Live prep classes", v: "$1,095 - $1,490" },
-  { l: "Self-study courses", v: "$349 - $695" },
-  { l: "Official practice exams", v: "$99 - $299" },
-];
-
-export default function ForemanPrepPage() {
-  const [email, setEmail] = useState("");
-  const [phase, setPhase] = useState<"idle" | "sending" | "done" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [paid, setPaid] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
+export default function BuyPage() {
+  const [access, setAccess] = useState<Access | null>(null);
+  const [buying, setBuying] = useState(false);
+  const [err, setErr] = useState("");
   const [earlyBird, setEarlyBird] = useState(true);
 
   useEffect(() => {
@@ -136,284 +57,138 @@ export default function ForemanPrepPage() {
     fetch("/foremanprep/api/access")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.loggedIn) setLoggedIn(true);
-        if (data?.paid) setPaid(true);
+        if (data) setAccess({ loggedIn: Boolean(data.loggedIn), paid: Boolean(data.paid) });
+        else setAccess({ loggedIn: false, paid: false });
       })
-      .catch(() => {});
+      .catch(() => setAccess({ loggedIn: false, paid: false }));
   }, []);
 
-  async function join() {
-    const clean = email.trim();
-    if (!EMAIL_RE.test(clean)) {
-      setPhase("error");
-      setErrorMsg("Please enter a valid email.");
-      return;
-    }
-    setPhase("sending");
+  async function buy() {
+    if (buying) return;
+    setBuying(true);
+    setErr("");
+    fpTrackBeginCheckout();
     try {
-      const res = await fetch("/api/support", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "ForemanPrep Launch List",
-          email: clean,
-          comment:
-            "FOREMANPREP LAUNCH LIST signup from the foremanprep.com landing page.",
-        }),
-      });
-      if (res.ok) {
-        setPhase("done");
+      const res = await fetch("/foremanprep/api/checkout", { method: "POST" });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.url) {
+        window.location.href = data.url;
         return;
       }
-      const data = await res.json().catch(() => null);
-      setPhase("error");
-      setErrorMsg(data?.error ?? "Could not sign you up - please try again.");
+      if (res.ok && data?.already) {
+        setAccess({ loggedIn: true, paid: true });
+        setBuying(false);
+        return;
+      }
+      if (res.status === 401 || res.status === 403) {
+        setAccess({ loggedIn: false, paid: false });
+        setBuying(false);
+        return;
+      }
+      setErr("Could not start checkout - please try again.");
+      setBuying(false);
     } catch {
-      setPhase("error");
-      setErrorMsg("Could not sign you up - please try again.");
+      setErr("Could not start checkout - please try again.");
+      setBuying(false);
     }
   }
 
   return (
     <div className="fp-wrap">
-      <div className="fp-top" style={{ flexWrap: "wrap", gap: "8px" }}>
-        <div className="fp-brand">
-          Foreman<span>Prep</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {paid || !earlyBird ? null : (
-            <div className="fp-chip">Early bird ends Sept 7</div>
-          )}
-          {loggedIn ? (
-            <button
-              disabled={signingOut}
-              onClick={() => {
-                setSigningOut(true);
-                signOut({ redirectTo: "/foremanprep" });
-              }}
-              style={{
-                fontSize: "13px",
-                fontWeight: 700,
-                fontFamily: "inherit",
-                color: "#fff",
-                background: "#161616",
-                border: "1px solid #333",
-                borderRadius: "999px",
-                padding: "5px 14px",
-                whiteSpace: "nowrap",
-                cursor: "pointer",
-              }}
-              type="button"
-            >
-              {signingOut ? "Signing out..." : "Log out"}
-            </button>
+      <div className="fp-top">
+        <Link className="fp-backpill" href="/foremanprep">
+          Back to{" "}
+          <span className="fp-wordmark">
+            Foreman<span>Prep</span>
+          </span>
+        </Link>
+        {earlyBird ? <div className="fp-chip">Early bird ends Sept 7</div> : null}
+      </div>
+
+      <div className="fp-buycard">
+        <p className="fp-buyh">ForemanPrep Full Access</p>
+        <p className="fp-buysub">
+          Everything you need to walk into the NASCLA Commercial General
+          Building Contractor exam ready - built around the real 115-question,
+          open-book test.
+        </p>
+        <div className="fp-pricebig">
+          {earlyBird ? (
+            <>
+              <span className="fp-pricenow">$99</span>
+              <span className="fp-pricewas">$149</span>
+            </>
           ) : (
-            <Link
-              href="/login"
-              style={{
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "#fff",
-                background: "#161616",
-                border: "1px solid #333",
-                borderRadius: "999px",
-                padding: "5px 14px",
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Log in
-            </Link>
+            <span className="fp-pricenow">$149</span>
           )}
         </div>
-      </div>
-
-      <div className="fp-hero">
-        <div className="fp-badge">NASCLA Commercial General Building Contractor Exam</div>
-        <h1 className="fp-h1">
-          Pass your contractor exam. <span>First try.</span>
-        </h1>
-        <p className="fp-sub">
-          The AI tutor that gets working tradesmen through the NASCLA exam -
-          unlimited practice, straight answers, and a study plan that fits
-          around a job site, not a classroom.
+        <p className="fp-pricetag">
+          One-time payment. No subscription. Prep courses charge $349 to
+          $1,490.
         </p>
-        {paid ? null : (
-          <>
-            {earlyBird ? (
-              <p className="fp-deadline">
-                Early-bird $99 ends <b>Monday, Sept 7</b> - $149 starting
-                Sept 8
-              </p>
-            ) : null}
-            <Link
-              className="fp-cta"
-              href="/foremanprep/buy"
-              style={{ textDecoration: "none" }}
-            >
-              {earlyBird ? "Get Full Access - $99 early bird" : "Get Full Access - $149"}
-            </Link>
-            <p className="fp-note">
-              {earlyBird ? (
-                <>
-                  <b>$99 early bird</b> right now - regular $149. Prep courses
-                  charge $349 to $1,490 for less.
-                </>
-              ) : (
-                <>
-                  One payment, everything included. Prep courses charge $349
-                  to $1,490 for less.
-                </>
-              )}
-            </p>
-          </>
-        )}
-        <div className="fp-try">
-          <Link className="fp-try-btn" href="/foremanprep/practice">
-            {paid ? "Start practice" : "Start free practice"}
-          </Link>
-          <Link className="fp-try-btn ghost" href="/foremanprep/exam">
-            Try the exam simulator
-          </Link>
-          <Link className="fp-try-btn ghost" href="/foremanprep/audio">
-            Audio study
-          </Link>
-        </div>
-        {paid ? null : (
-          <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
-        )}
-      </div>
-
-      <div className="fp-stats">
-        {STATS.map((s) => (
-          <div className="fp-stat" key={s.l} tabIndex={s.n === "17" ? 0 : undefined}>
-            <div className="fp-sn">
-              {s.n === "17" ? <span className="fp-tipcue">17</span> : s.n}
-            </div>
-            <div className="fp-sl">{s.l}</div>
-            {s.n === "17" ? (
-              <div className="fp-tip">
-                The NASCLA Commercial General Building exam is accepted for
-                licensing in Alabama, Arizona, Arkansas, California, Florida,
-                Georgia, Louisiana, Mississippi, Nevada, New Mexico, North
-                Carolina, Oregon, South Carolina, Tennessee, Utah, Virginia,
-                and West Virginia.
-              </div>
-            ) : null}
-          </div>
-        ))}
-      </div>
-
-      <div className="fp-strip">
-        <p className="fp-st">The exam is open book. That's the trap.</p>
-        <p className="fp-sd">
-          You can bring 24 approved reference books into the test - thousands
-          of pages, with under 3 minutes per question. Nobody fails because
-          they can't build. They fail because they can't find the answer fast
-          enough. ForemanPrep trains exactly that: every practice question
-          teaches you which book, which section, and how to get there fast.
-        </p>
-      </div>
-
-      <h2 className="fp-h2">What you get</h2>
-      <div className="fp-grid">
-        {FEATURES.map((f) => (
-          <div className="fp-card" key={f.n}>
-            <p className="fp-cn">
-              <span>+</span>
-              {f.n}
-            </p>
-            <p className="fp-cd">{f.d}</p>
-          </div>
-        ))}
-      </div>
-
-      {paid ? null : (
-        <>
-      <h2 className="fp-h2">What prep costs today</h2>
-      <div className="fp-price">
-        {PRICES.map((p) => (
-          <div className="fp-prow" key={p.l}>
-            <div className="fp-pl">{p.l}</div>
-            <div className="fp-pv">{p.v}</div>
-          </div>
-        ))}
-        <div className="fp-prow fp-ours">
-          <div className="fp-pl">ForemanPrep - tutor, questions, simulator</div>
-          <div className="fp-pv">
-            {earlyBird ? (
-              <>
-                <span className="fp-strike">$149</span>$99 early bird
-              </>
-            ) : (
-              "$149"
-            )}
-          </div>
-        </div>
         {earlyBird ? (
           <p className="fp-deadnote">
-            Early-bird price ends Sept 7 - then it's $149
+            Early-bird price ends Monday, Sept 7 - then it's $149
           </p>
         ) : null}
-        <Link
-          className="fp-cta"
-          href="/foremanprep/buy"
-          style={{ display: "block", marginTop: "14px", textAlign: "center", textDecoration: "none" }}
-        >
-          Get Full Access
-        </Link>
-      </div>
+        <div className="fp-feats">
+          {FEATURES.map((f) => (
+            <div className="fp-feat" key={f}>
+              <b>+</b>
+              <span>{f}</span>
+            </div>
+          ))}
+        </div>
 
-      {earlyBird ? (
-      <div className="fp-signup">
-        <p className="fp-fh">Not ready to buy today?</p>
-        <p className="fp-fs">
-          The $99 early-bird price ends Sept 7 - it goes to $149 on Sept 8.
-          Drop your email and we'll remind you before it does.
-        </p>
-        {phase === "done" ? (
-          <p className="fp-ok">You're on the list. We'll give you a heads-up.</p>
-        ) : (
-          <div className="fp-row">
-            <input
-              className="fp-in"
-              disabled={phase === "sending"}
-              inputMode="email"
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (phase === "error") setPhase("idle");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") join();
-              }}
-              placeholder="you@example.com"
-              type="email"
-              value={email}
-            />
-            <button
-              className="fp-go"
-              disabled={phase === "sending"}
-              onClick={join}
-              type="button"
-            >
-              {phase === "sending" ? "Saving..." : "Remind me"}
+        {access === null ? (
+          <button className="fp-buybtn" disabled type="button">
+            Loading...
+          </button>
+        ) : access.paid ? (
+          <div className="fp-owned">
+            <p className="fp-ownedh">You already own Full Access.</p>
+            <div className="fp-authrow">
+              <Link className="fp-authbtn" href="/foremanprep/practice">
+                Go practice
+              </Link>
+              <Link className="fp-authbtn exam" href="/foremanprep/exam">
+                Take the exam simulator
+              </Link>
+            </div>
+          </div>
+        ) : access.loggedIn ? (
+          <>
+            <button className="fp-buybtn" disabled={buying} onClick={buy} type="button">
+              {buying ? "Opening secure checkout..." : earlyBird ? "Get Full Access - $99" : "Get Full Access - $149"}
             </button>
+            {err ? <p className="fp-buyerr">{err}</p> : null}
+          </>
+        ) : (
+          <div className="fp-authrow">
+            <Link className="fp-authbtn" href="/register">
+              Create your account to buy
+            </Link>
+            <Link className="fp-authbtn ghost" href="/login">
+              I already have an account
+            </Link>
           </div>
         )}
-        {phase === "error" ? <p className="fp-err">{errorMsg}</p> : null}
-        <p className="fp-fine">
-          One reminder email. No spam, ever.
+
+        <p className="fp-buynote">
+          Secure checkout by Stripe - your card statement will read
+          ASKEVO* FOREMANPREP. Your purchase attaches to your account, so
+          you can study from any device. Pass guarantee: complete the
+          course, and if you fail the real exam, email support for a full
+          refund at support@askevo.ai. Conditions apply - see the{" "}
+          <Link className="fp-link" href="/foremanprep/terms">
+            full pass guarantee terms
+          </Link>
+          .
         </p>
       </div>
-      ) : null}
-        </>
-      )}
 
       <div className="fp-foot">
         <div className="fp-links">
-          <Link className="fp-link" href="/foremanprep/guides">
-            Exam guides
-          </Link>
           <Link className="fp-link" href="/foremanprep/terms">
             Terms
           </Link>
@@ -423,17 +198,16 @@ export default function ForemanPrepPage() {
         </div>
         <p className="fp-legal">
           ForemanPrep is a product of AskEvo LLC, Boise, Idaho. Not affiliated
-          with or endorsed by NASCLA or PSI. NASCLA is a registered trademark
-          of the National Association of State Contractors Licensing Agencies.
-          Questions: support@askevo.ai
+          with or endorsed by NASCLA or PSI. Questions: support@askevo.ai
         </p>
       </div>
     </div>
   );
 }
 
-// ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v16 - clock read moved
-// into an effect so the Next 16 prerender passes)
-// If you can see this comment, the paste was not truncated.
-// ============================================================
+// -----------------------------------------------------------
+// END OF FILE - app/foremanprep/buy/page.tsx (v8 - clock read
+// moved into an effect so the Next 16 prerender passes)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
