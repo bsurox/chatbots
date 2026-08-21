@@ -4,7 +4,14 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v16. BUILD FIX: Next 16's prerenderer
+// ForemanPrep landing page v17. Deadline advertising slimmed to
+// ONE badge (his spec): the header chip stays and now reads
+// "Early bird pricing ends Sept 7" (the word "pricing" added for
+// clarity), the orange pill that sat above the Get Full Access
+// button is REMOVED, and the price-table deadline line under
+// "What prep costs today" stays as-is. The .fp-deadline css class
+// goes unused here - left in css v11 on purpose, no css round.
+// v16 notes: BUILD FIX: Next 16's prerenderer
 // rejects Date.now() during client-component render (the v14/v15
 // builds went red on exactly that line - nothing after css v11
 // ever deployed). The clock read now lives in a useEffect:
@@ -182,7 +189,7 @@ export default function ForemanPrepPage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {paid || !earlyBird ? null : (
-            <div className="fp-chip">Early bird ends Sept 7</div>
+            <div className="fp-chip">Early bird pricing ends Sept 7</div>
           )}
           {loggedIn ? (
             <button
@@ -240,12 +247,6 @@ export default function ForemanPrepPage() {
         </p>
         {paid ? null : (
           <>
-            {earlyBird ? (
-              <p className="fp-deadline">
-                Early-bird $99 ends <b>Monday, Sept 7</b> - $149 starting
-                Sept 8
-              </p>
-            ) : null}
             <Link
               className="fp-cta"
               href="/foremanprep/buy"
@@ -433,7 +434,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v16 - clock read moved
-// into an effect so the Next 16 prerender passes)
+// END OF FILE - app/foremanprep/page.tsx (v17 - one deadline
+// badge: header chip reworded, hero pill removed)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
