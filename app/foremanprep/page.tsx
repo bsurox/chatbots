@@ -4,7 +4,18 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v13. The "Free to try right now - no
+// ForemanPrep landing page v14. The early-bird deadline is now
+// advertised, and the page flips its own prices on the clock. A
+// PRICE_FLIP_MS constant marks Sept 7, 2026, 11:59 PM Mountain
+// (= Sept 8 05:59 UTC). Before that moment, visitors without Full
+// Access see: header chip "Early bird ends Sept 7", a .fp-deadline
+// pill above the hero CTA, a .fp-deadnote line in the price table,
+// and the remind-me box naming the Sept 8 flip (styles: css v11).
+// From 11:59 PM on, every deadline element disappears by itself
+// and all price strings read $149 - no midnight commit needed.
+// The checkout route (v5) carries the same constant and is the
+// authority on what actually gets charged. Owners see none of it.
+// v13 notes: The "Free to try right now - no
 // sign-up needed." line under the try-buttons also hides for Full
 // Access members - nothing on an owner's page should talk like
 // they haven't bought yet.
@@ -47,6 +58,10 @@ import { useEffect, useState } from "react";
 // "remind me" net.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Early-bird end: Sept 7, 2026, 11:59 PM Mountain Daylight Time
+// (UTC-6) = Sept 8, 05:59 UTC. Month index 8 = September.
+const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
 
 const STATS = [
   { n: "115", l: "exam questions" },
@@ -99,6 +114,7 @@ export default function ForemanPrepPage() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [paid, setPaid] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const earlyBird = Date.now() < PRICE_FLIP_MS;
 
   useEffect(() => {
     fetch("/foremanprep/api/access")
@@ -149,7 +165,9 @@ export default function ForemanPrepPage() {
           Foreman<span>Prep</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div className="fp-chip">Early-bird pricing live</div>
+          {paid || !earlyBird ? null : (
+            <div className="fp-chip">Early bird ends Sept 7</div>
+          )}
           {loggedIn ? (
             <button
               disabled={signingOut}
@@ -206,16 +224,31 @@ export default function ForemanPrepPage() {
         </p>
         {paid ? null : (
           <>
+            {earlyBird ? (
+              <p className="fp-deadline">
+                Early-bird $99 ends <b>Monday, Sept 7</b> - $149 starting
+                Sept 8
+              </p>
+            ) : null}
             <Link
               className="fp-cta"
               href="/foremanprep/buy"
               style={{ textDecoration: "none" }}
             >
-              Get Full Access - $99 early bird
+              {earlyBird ? "Get Full Access - $99 early bird" : "Get Full Access - $149"}
             </Link>
             <p className="fp-note">
-              <b>$99 early bird</b> right now - regular $149. Prep courses
-              charge $349 to $1,490 for less.
+              {earlyBird ? (
+                <>
+                  <b>$99 early bird</b> right now - regular $149. Prep courses
+                  charge $349 to $1,490 for less.
+                </>
+              ) : (
+                <>
+                  One payment, everything included. Prep courses charge $349
+                  to $1,490 for less.
+                </>
+              )}
             </p>
           </>
         )}
@@ -292,9 +325,20 @@ export default function ForemanPrepPage() {
         <div className="fp-prow fp-ours">
           <div className="fp-pl">ForemanPrep - tutor, questions, simulator</div>
           <div className="fp-pv">
-            <span className="fp-strike">$149</span>$99 early bird
+            {earlyBird ? (
+              <>
+                <span className="fp-strike">$149</span>$99 early bird
+              </>
+            ) : (
+              "$149"
+            )}
           </div>
         </div>
+        {earlyBird ? (
+          <p className="fp-deadnote">
+            Early-bird price ends Sept 7 - then it's $149
+          </p>
+        ) : null}
         <Link
           className="fp-cta"
           href="/foremanprep/buy"
@@ -304,11 +348,12 @@ export default function ForemanPrepPage() {
         </Link>
       </div>
 
+      {earlyBird ? (
       <div className="fp-signup">
         <p className="fp-fh">Not ready to buy today?</p>
         <p className="fp-fs">
-          The $99 early-bird price won't last - it goes back to $149. Drop
-          your email and we'll remind you before it does.
+          The $99 early-bird price ends Sept 7 - it goes to $149 on Sept 8.
+          Drop your email and we'll remind you before it does.
         </p>
         {phase === "done" ? (
           <p className="fp-ok">You're on the list. We'll give you a heads-up.</p>
@@ -344,6 +389,7 @@ export default function ForemanPrepPage() {
           One reminder email. No spam, ever.
         </p>
       </div>
+      ) : null}
         </>
       )}
 
@@ -368,7 +414,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v13 - free-to-try line
-// hidden for paid members)
+// END OF FILE - app/foremanprep/page.tsx (v14 - deadline ads +
+// self-flipping $149 price at Sept 7, 11:59 PM MDT)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
