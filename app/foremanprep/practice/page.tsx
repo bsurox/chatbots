@@ -14,7 +14,12 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v16: every answer choice wears an A/B/C/D
+// Practice player v17: leaving a round for the subjects list now
+// kills the audio instantly - backToPicker() stops any playing
+// Listen / explanation clip before switching screens (his catch:
+// audio kept talking over the picker). Next-question and unmount
+// already stopped it; the picker door was the one leak.
+// v16 notes: every answer choice wears an A/B/C/D
 // letter chip, same look as the exam simulator - the chip rides
 // at the left of the choice and tints green/red with the reveal
 // (styles in practice.css v12). Nicer and more authentic.
@@ -293,6 +298,7 @@ export default function PracticePage() {
   }
 
   function backToPicker() {
+    stopAudio();
     setPhase("pick");
     setQs(null);
     setDone(false);
@@ -655,7 +661,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v16 - A/B/C/D
-// letter chips on answers)
+// END OF FILE - app/foremanprep/practice/page.tsx (v17 - audio
+// stops when returning to the subjects list)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
