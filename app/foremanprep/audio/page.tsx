@@ -3,6 +3,7 @@
 import "./audio.css";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   buildDemoSet,
   buildPracticeSet,
@@ -13,7 +14,17 @@ import {
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// ForemanPrep Audio study (v6) - the hands-free room. v6: the
+// ForemanPrep Audio study (v7) - leaving means stopping. The
+// back pill is now a button: if a lesson, the Play all chain, or
+// the drill is live (paused counts), it opens a confirm modal -
+// "Leave audio study?" - and confirming does a FULL stop and
+// reset (stopDrill: elements discarded, chain and drill state
+// cleared) before navigating home, so coming back is always a
+// clean slate. Nothing playing = back navigates straight away,
+// with the same reset run defensively. Unmount cleanup hardened
+// to discard the elements too, not just pause them (styles:
+// audio.css v2 fa-overlay family).
+// v6 notes: the
 // Play all pill (and its Pause/Stop pair while the chain runs)
 // gets a real upward nudge - a translateY(-7px) on the button
 // group - because the v5 flex-start alignment alone was too
@@ -50,7 +61,9 @@ type Stage = "q" | "think" | "e";
 const GAPS = [5, 10, 15];
 
 export default function AudioStudyPage() {
+  const router = useRouter();
   const [access, setAccess] = useState<Access | null>(null);
+  const [confirmExit, setConfirmExit] = useState(false);
 
   // ----- lessons -----
   const [lessonPlaying, setLessonPlaying] = useState<string | null>(null);
@@ -111,12 +124,19 @@ export default function AudioStudyPage() {
     playAllRef.current = false;
   }
 
-  // Audio never outlives the page.
+  // Audio never outlives the page - and never survives it either:
+  // elements are discarded, not just paused, so nothing resumes.
   useEffect(() => {
     return () => {
       clearTimers();
-      if (lessonAudio.current) lessonAudio.current.pause();
-      if (drillAudio.current) drillAudio.current.pause();
+      if (lessonAudio.current) {
+        lessonAudio.current.pause();
+        lessonAudio.current = null;
+      }
+      if (drillAudio.current) {
+        drillAudio.current.pause();
+        drillAudio.current = null;
+      }
     };
   }, []);
 
@@ -284,18 +304,59 @@ export default function AudioStudyPage() {
     pausedRef.current = false;
   }
 
+  function backToHome() {
+    const active =
+      lessonPlaying !== null || playAll || drillQs !== null;
+    if (active) {
+      setConfirmExit(true);
+      return;
+    }
+    stopDrill();
+    router.push("/foremanprep");
+  }
+
+  function confirmLeave() {
+    stopDrill();
+    setConfirmExit(false);
+    router.push("/foremanprep");
+  }
+
   const q = drillQs ? drillQs[dIdx] : null;
 
   return (
     <div className="fp-wrap">
       <div className="fp-top">
-        <Link className="fp-backpill" href="/foremanprep">
+        <button className="fp-backpill" onClick={backToHome} type="button">
           Back to{" "}
           <span className="fp-wordmark">
             Foreman<span>Prep</span>
           </span>
-        </Link>
+        </button>
       </div>
+
+      {confirmExit ? (
+        <div className="fa-overlay">
+          <div className="fa-modal">
+            <p className="fa-mtitle">Leave audio study?</p>
+            <p className="fa-mtext">
+              Going back stops and resets anything you are listening to -
+              lessons, Play all, and the drill start over next time.
+            </p>
+            <div className="fa-macts">
+              <button
+                className="fa-mcancel"
+                onClick={() => setConfirmExit(false)}
+                type="button"
+              >
+                Keep listening
+              </button>
+              <button className="fa-myes" onClick={confirmLeave} type="button">
+                Leave and reset
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <p className="fa-h">Audio study</p>
       <p className="fa-sub">
@@ -452,8 +513,8 @@ export default function AudioStudyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/audio/page.tsx (v6 - Play all
-// pill nudged up 7px off the subtext)
+// END OF FILE - app/foremanprep/audio/page.tsx (v7 - back button
+// confirms mid-listen and fully resets on leave)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
