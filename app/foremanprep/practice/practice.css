@@ -1,5 +1,12 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles v12. Answer letters: every choice wears
+/* Practice player styles v13. Exam timer dress: the pick screen's
+   Off/On toggle pill with its sliding knob (.fq-timertoggle,
+   .fq-knob), the descriptor line under it (.fq-timernote), the
+   countdown clock beside the question counter (.fq-clock, red
+   .low state under a minute), and the results screen's time-ran-
+   out line (.fq-timeout). Paid-only feature; free tier sees the
+   toggle as a locked upsell.
+   v12 notes: Answer letters: every choice wears
    an A/B/C/D chip like the exam simulator (.fq-letter mirrors
    .fe-letter), tinting green/red with the reveal - nicer and more
    authentic, per Chase. v11: Listen pills - small orange ghost
@@ -118,8 +125,22 @@
 .fq-listen.playing { background: rgba(249, 115, 22, 0.12); }
 .fq-listen:hover { background: rgba(249, 115, 22, 0.08); }
 
+/* Exam timer (v13): pick-screen toggle + quiz clock. */
+.fq-timerrow { display: flex; align-items: center; gap: 12px; margin: 14px 0 6px; }
+.fq-timertoggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #bbb; background: #161616; border: 1px solid #333; border-radius: 999px; padding: 7px 14px 7px 8px; cursor: pointer; font-family: inherit; }
+.fq-timertoggle:active { transform: translateY(1px); }
+.fq-knob { width: 30px; height: 16px; border-radius: 999px; background: #333; position: relative; transition: background 0.15s; }
+.fq-knob::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #888; transition: transform 0.15s, background 0.15s; }
+.fq-timertoggle.on { color: var(--fp); border-color: rgba(249, 115, 22, 0.5); }
+.fq-timertoggle.on .fq-knob { background: rgba(249, 115, 22, 0.35); }
+.fq-timertoggle.on .fq-knob::after { transform: translateX(14px); background: var(--fp); }
+.fq-timernote { font-size: 12.5px; color: #777; margin: 0 0 18px; line-height: 1.55; max-width: 560px; }
+.fq-clock { font-weight: 800; color: var(--fp); margin-right: 10px; font-variant-numeric: tabular-nums; }
+.fq-clock.low { color: #f87171; }
+.fq-timeout { font-size: 13.5px; color: #f87171; font-weight: 700; margin: 0 0 14px; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v12 -
-   answer letter chips)
+   END OF FILE - app/foremanprep/practice/practice.css (v13 -
+   exam timer toggle and clock)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
