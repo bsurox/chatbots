@@ -14,7 +14,19 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v17: leaving a round for the subjects list now
+// Practice player v18: the EXAM TIMER, per question. A pick-
+// screen toggle (default OFF, paid-only - free taps open the
+// gate card) puts each question on the real exam's pace: 330
+// minutes / 115 questions = 2 min 52 sec. The clock starts when
+// a question appears, STOPS the moment an answer is clicked (so
+// explanations and the tutor cost nothing), and resets fresh on
+// Next. If it hits zero the question auto-reveals unanswered -
+// marked wrong in the recap, not posted as a pick - and the
+// student reads the why like any other reveal. Styles:
+// practice.css v13. Also: the gate card's buy button now reads
+// the clock like landing v16, so it stops saying $99 after the
+// Sept 7 flip (clock read in an effect - Next 16 prerender rule).
+// v17 notes: leaving a round for the subjects list now
 // kills the audio instantly - backToPicker() stops any playing
 // Listen / explanation clip before switching screens (his catch:
 // audio kept talking over the picker). Next-question and unmount
@@ -55,6 +67,21 @@ import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 // Full subject", and the exam-weight text wears ForemanPrep orange.
 
 type Len = 10 | 25 | "all";
+
+// Real exam pace: 115 scored questions in 330 minutes = 172
+// seconds a question, rounded.
+const QUESTION_SECONDS = Math.round((330 * 60) / 115);
+// Sept 7, 2026, 11:59 PM MDT (UTC-6) = Sept 8, 05:59 UTC.
+const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
+
+function fmtClock(total: number): string {
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const sec = total % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(sec).padStart(2, "0");
+  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
+}
 type Sel = DomainKey | "all";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
@@ -107,6 +134,13 @@ export default function PracticePage() {
   const [lenErr, setLenErr] = useState(false);
   const [access, setAccess] = useState<{ loggedIn: boolean; paid: boolean } | null>(null);
   const [showGate, setShowGate] = useState(false);
+  const [timerOn, setTimerOn] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [earlyBird, setEarlyBird] = useState(true);
+
+  useEffect(() => {
+    if (Date.now() >= PRICE_FLIP_MS) setEarlyBird(false);
+  }, []);
 
   useEffect(() => {
     fetch("/foremanprep/api/access")
@@ -130,6 +164,14 @@ export default function PracticePage() {
     setRoundLen(l);
     setLenErr(false);
     setShowGate(false);
+  }
+
+  function toggleTimer() {
+    if (!access?.paid) {
+      setShowGate(true);
+      return;
+    }
+    setTimerOn((t) => !t);
   }
   const [qs, setQs] = useState<ForemanQuestion[] | null>(null);
   const [idx, setIdx] = useState(0);
@@ -163,6 +205,30 @@ export default function PracticePage() {
       if (audioRef.current) audioRef.current.pause();
     };
   }, []);
+
+  // Exam timer heartbeat: ticks only while a question is open in
+  // an active round. Pauses during the reveal (explanations are
+  // study time, not exam time) and never runs on pick/results.
+  useEffect(() => {
+    if (phase !== "quiz" || done || timeLeft === null) return;
+    if (picked !== null || timeLeft <= 0) return;
+    const t = setTimeout(() => {
+      setTimeLeft((sLeft) => (sLeft === null ? null : sLeft - 1));
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [phase, done, timeLeft, picked]);
+
+  // Zero on the clock: the question auto-reveals unanswered -
+  // recap marks it wrong, nothing is posted as a pick, and the
+  // student reads the explanation like any other reveal.
+  useEffect(() => {
+    if (phase !== "quiz" || done || timeLeft !== 0) return;
+    if (!qs || picked !== null) return;
+    const question = qs[idx];
+    setPicked(-1);
+    setRecap((r) => [...r, { id: question.id, q: question.q, ok: false }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, done, timeLeft, picked]);
 
   function playAudio(kind: "q" | "e", questionId: string) {
     if (!AUDIO_BASE) return;
@@ -275,15 +341,18 @@ export default function PracticePage() {
       return;
     }
     setSel(key);
+    let set: ForemanQuestion[];
     if (!access?.paid) {
       // Free tier: always the same fixed sample round, whatever
       // subject was tapped. Rotating draws would leak the whole
       // bank ten questions at a time.
-      setQs(buildDemoSet());
+      set = buildDemoSet();
     } else {
       const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
-      setQs(buildPracticeSet(key === "all" ? "all" : key, count));
+      set = buildPracticeSet(key === "all" ? "all" : key, count);
     }
+    setQs(set);
+    setTimeLeft(timerOn && access?.paid ? QUESTION_SECONDS : null);
     setIdx(0);
     setPicked(null);
     setCorrect(0);
@@ -302,6 +371,7 @@ export default function PracticePage() {
     setPhase("pick");
     setQs(null);
     setDone(false);
+    setTimeLeft(null);
   }
 
   function pick(i: number) {
@@ -340,6 +410,7 @@ export default function PracticePage() {
     }
     setIdx(idx + 1);
     setPicked(null);
+    if (timeLeft !== null) setTimeLeft(QUESTION_SECONDS);
     resetTutor();
     resetReport();
     stopAudio();
@@ -393,6 +464,24 @@ export default function PracticePage() {
             </button>
           </div>
           {lenErr ? <p className="fq-lenerr">Select a round length first.</p> : null}
+          <div className="fq-timerrow">
+            <span className="fq-lenlabel">Exam timer</span>
+            <button
+              className={timerOn && access?.paid ? "fq-timertoggle on" : "fq-timertoggle"}
+              onClick={toggleTimer}
+              type="button"
+            >
+              <span className="fq-knob" />
+              {timerOn && access?.paid ? "On" : "Off"}
+            </button>
+          </div>
+          <p className="fq-timernote">
+            {access !== null && !access.paid
+              ? "Full Access feature - the 1:1 exam-pace clock comes with the full course."
+              : timerOn
+                ? "Scaled 1:1 to the real exam - 2 min 52 sec per question, the same pace as 115 questions in 5.5 hours. The clock stops when you answer and resets fresh on every question."
+                : "Put every question on the real exam clock - 2 min 52 sec each, scaled 1:1 to the actual test. Stops while you read explanations."}
+          </p>
           {access !== null && !access.paid ? (
             <p className="fp-tryhint">
               The free round is a fixed 10-question sample. Full Access
@@ -407,7 +496,7 @@ export default function PracticePage() {
                 115-question exam simulator - one payment, no subscription.
               </p>
               <Link className="fp-gatebtn" href="/foremanprep/buy">
-                Get Full Access - $99 early bird
+                {earlyBird ? "Get Full Access - $99 early bird" : "Get Full Access - $149"}
               </Link>
             </div>
           ) : null}
@@ -499,6 +588,11 @@ export default function PracticePage() {
           Subjects
         </button>
         <span className="fq-prog">
+          {timeLeft !== null ? (
+            <span className={timeLeft <= 30 ? "fq-clock low" : "fq-clock"}>
+              {fmtClock(timeLeft)}
+            </span>
+          ) : null}
           Question {idx + 1} / {qs.length}
         </span>
       </div>
@@ -551,6 +645,9 @@ export default function PracticePage() {
 
       {revealed ? (
         <div className="fq-reveal">
+          {picked === -1 ? (
+            <p className="fq-timeout">Out of time on this one - 2:52 is the real pace. Read the why, then keep rolling.</p>
+          ) : null}
           <p className="fq-explain">{question.explain}</p>
           <p className="fq-cite">Where it lives: {question.cite}</p>
           {tutorOpen ? (
@@ -661,7 +758,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v17 - audio
-// stops when returning to the subjects list)
+// END OF FILE - app/foremanprep/practice/page.tsx (v18 - per-
+// question 1:1 exam timer, paid-only, off by default)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
