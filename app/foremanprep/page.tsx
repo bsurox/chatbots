@@ -4,7 +4,10 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v17. Deadline advertising slimmed to
+// ForemanPrep landing page v18. The footer gains a "State guides"
+// link beside "Exam guides" - the crawl door into the 17 new
+// state pages at /foremanprep/states. One link, nothing else.
+// v17 notes: Deadline advertising slimmed to
 // ONE badge (his spec): the header chip stays and now reads
 // "Early bird pricing ends Sept 7" (the word "pricing" added for
 // clarity), the orange pill that sat above the Get Full Access
@@ -415,6 +418,9 @@ export default function ForemanPrepPage() {
           <Link className="fp-link" href="/foremanprep/guides">
             Exam guides
           </Link>
+          <Link className="fp-link" href="/foremanprep/states">
+            State guides
+          </Link>
           <Link className="fp-link" href="/foremanprep/terms">
             Terms
           </Link>
@@ -434,7 +440,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v17 - one deadline
-// badge: header chip reworded, hero pill removed)
+// END OF FILE - app/foremanprep/page.tsx (v18 - footer link to
+// the state guides)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
