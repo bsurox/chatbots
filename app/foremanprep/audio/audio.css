@@ -1,6 +1,8 @@
 /* FILE: app/foremanprep/audio/audio.css */
-/* ForemanPrep Audio study page (v1). fa- prefix, rides the fp-
-   canvas. Two rooms: the drive-time lesson list (one row per
+/* ForemanPrep Audio study page (v2). fa- prefix, rides the fp-
+   canvas. v2 adds the leave-confirmation modal (fa-overlay
+   family, same look as the exam simulator's) shown when the back
+   button is tapped mid-listen. Two rooms: the drive-time lesson list (one row per
    subject, play/stop pill, minutes tag) and the hands-free drill
    (subject select, think-gap segmented control, big start button,
    live status while it runs). Gate card styles come from
@@ -39,8 +41,17 @@
 .fa-ctl.stop { color: #f87171; border-color: rgba(239, 68, 68, 0.5); }
 .fa-done { text-align: center; font-size: 15px; color: #4ade80; font-weight: 700; padding: 10px 0; }
 
+/* Leave-confirmation modal - mirrors the exam simulator's. */
+.fa-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.72); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.fa-modal { max-width: 380px; width: 100%; background: #141414; border: 1px solid #333; border-radius: 16px; padding: 22px; }
+.fa-mtitle { font-size: 18px; font-weight: 800; color: #fff; margin: 0 0 8px; }
+.fa-mtext { font-size: 14px; color: #aaa; line-height: 1.5; margin: 0 0 20px; }
+.fa-macts { display: flex; gap: 10px; }
+.fa-mcancel { flex: 1; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #161616; border: 1px solid #333; color: #ddd; }
+.fa-myes { flex: 1; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #ef4444; border: none; color: #fff; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/audio/audio.css (v1 - lessons +
-   drill mode)
+   END OF FILE - app/foremanprep/audio/audio.css (v2 - leave
+   confirmation modal)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
