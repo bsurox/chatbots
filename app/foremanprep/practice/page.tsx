@@ -14,7 +14,13 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v18: the EXAM TIMER, per question. A pick-
+// Practice player v19: the gate card now names what got tapped.
+// A free user tapping the exam timer sees "The exam timer is a
+// Full Access feature."; tapping 25/Full subject keeps "Longer
+// rounds are a Full Access feature." - one gateSrc state set by
+// whichever door was knocked, and the gate body now lists the
+// timer among the perks.
+// v18 notes: the EXAM TIMER, per question. A pick-
 // screen toggle (default OFF, paid-only - free taps open the
 // gate card) puts each question on the real exam's pace: 330
 // minutes / 115 questions = 2 min 52 sec. The clock starts when
@@ -135,6 +141,7 @@ export default function PracticePage() {
   const [access, setAccess] = useState<{ loggedIn: boolean; paid: boolean } | null>(null);
   const [showGate, setShowGate] = useState(false);
   const [timerOn, setTimerOn] = useState(false);
+  const [gateSrc, setGateSrc] = useState<"len" | "timer">("len");
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [earlyBird, setEarlyBird] = useState(true);
 
@@ -158,6 +165,7 @@ export default function PracticePage() {
       // 25/Full clears the highlight entirely and shows the gate;
       // tapping 10 again re-selects it and the gate goes away.
       setRoundLen(null);
+      setGateSrc("len");
       setShowGate(true);
       return;
     }
@@ -168,6 +176,7 @@ export default function PracticePage() {
 
   function toggleTimer() {
     if (!access?.paid) {
+      setGateSrc("timer");
       setShowGate(true);
       return;
     }
@@ -490,10 +499,15 @@ export default function PracticePage() {
           ) : null}
           {showGate ? (
             <div className="fp-gate">
-              <p className="fp-gateh">Longer rounds are a Full Access feature.</p>
+              <p className="fp-gateh">
+                {gateSrc === "timer"
+                  ? "The exam timer is a Full Access feature."
+                  : "Longer rounds are a Full Access feature."}
+              </p>
               <p className="fp-gated">
-                Unlock 25-question rounds, full-subject runs, and the complete
-                115-question exam simulator - one payment, no subscription.
+                Unlock the 1:1 exam-pace timer, 25-question rounds,
+                full-subject runs, and the complete 115-question exam
+                simulator - one payment, no subscription.
               </p>
               <Link className="fp-gatebtn" href="/foremanprep/buy">
                 {earlyBird ? "Get Full Access - $99 early bird" : "Get Full Access - $149"}
@@ -758,7 +772,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v18 - per-
-// question 1:1 exam timer, paid-only, off by default)
+// END OF FILE - app/foremanprep/practice/page.tsx (v19 - gate
+// card names the tapped feature: timer vs longer rounds)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
