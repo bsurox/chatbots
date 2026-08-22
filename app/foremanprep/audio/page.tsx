@@ -14,7 +14,14 @@ import {
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// ForemanPrep Audio study (v7) - leaving means stopping. The
+// ForemanPrep Audio study (v8) - the BROWSER back arrow gets the
+// same manners as the on-page pill. On mount the page plants a
+// sentinel history entry; pressing browser-back mid-listen lands
+// on the sentinel, we re-plant it and open the same confirm
+// modal. With nothing live, the handler steps politely out of the
+// way (removes itself and lets the back-out through). The active
+// check also learned that a FINISHED drill needs no confirmation.
+// v7 notes: leaving means stopping. The
 // back pill is now a button: if a lesson, the Play all chain, or
 // the drill is live (paused counts), it opens a confirm modal -
 // "Leave audio study?" - and confirming does a FULL stop and
@@ -138,6 +145,34 @@ export default function AudioStudyPage() {
         drillAudio.current = null;
       }
     };
+  }, []);
+
+  // Live-audio test shared by both back doors. A finished drill
+  // (results screen) has nothing left to lose - no confirm.
+  const activeRef = useRef(false);
+  const audioActive =
+    lessonPlaying !== null || playAll || (drillQs !== null && !drillDone);
+  useEffect(() => {
+    activeRef.current = audioActive;
+  }, [audioActive]);
+
+  // Browser back arrow: a sentinel history entry absorbs the first
+  // back press. Mid-listen, we re-plant the sentinel and open the
+  // confirm modal; idle, the handler removes itself and passes the
+  // navigation through untouched.
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+    const onPop = () => {
+      if (activeRef.current) {
+        window.history.pushState(null, "", window.location.href);
+        setConfirmExit(true);
+      } else {
+        window.removeEventListener("popstate", onPop);
+        window.history.back();
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   // ----- lesson playback -----
@@ -305,9 +340,7 @@ export default function AudioStudyPage() {
   }
 
   function backToHome() {
-    const active =
-      lessonPlaying !== null || playAll || drillQs !== null;
-    if (active) {
+    if (audioActive) {
       setConfirmExit(true);
       return;
     }
@@ -513,8 +546,8 @@ export default function AudioStudyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/audio/page.tsx (v7 - back button
-// confirms mid-listen and fully resets on leave)
+// END OF FILE - app/foremanprep/audio/page.tsx (v8 - browser back
+// arrow gets the confirm modal too)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
