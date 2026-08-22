@@ -14,7 +14,12 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v19: the gate card now names what got tapped.
+// Practice player v20: free users open the picker with 10
+// questions pre-selected - it is their only legal round length,
+// so the "Select a round length first" dance is gone for them.
+// Bouncing off a locked length re-selects 10 instead of clearing.
+// Paid users keep the deliberate blank picker and choose freely.
+// v19 notes: the gate card now names what got tapped.
 // A free user tapping the exam timer sees "The exam timer is a
 // Full Access feature."; tapping 25/Full subject keeps "Longer
 // rounds are a Full Access feature." - one gateSrc state set by
@@ -159,12 +164,21 @@ export default function PracticePage() {
       .catch(() => setAccess({ loggedIn: false, paid: false }));
   }, []);
 
+  // Free tier: 10 questions is the only round length there is, so
+  // it arrives pre-selected. Paid users start blank and pick.
+  useEffect(() => {
+    if (access !== null && !access.paid) {
+      setRoundLen(10);
+      setLenErr(false);
+    }
+  }, [access]);
+
   function pickLen(l: Len) {
     if (l !== 10 && !access?.paid) {
       // Free tier: a locked length can never LOOK selected. Tapping
-      // 25/Full clears the highlight entirely and shows the gate;
-      // tapping 10 again re-selects it and the gate goes away.
-      setRoundLen(null);
+      // 25/Full snaps the highlight back to 10 (the only legal
+      // choice) and shows the gate.
+      setRoundLen(10);
       setGateSrc("len");
       setShowGate(true);
       return;
@@ -772,7 +786,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v19 - gate
-// card names the tapped feature: timer vs longer rounds)
+// END OF FILE - app/foremanprep/practice/page.tsx (v20 - free
+// tier defaults to the 10-question round)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
