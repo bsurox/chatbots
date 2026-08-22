@@ -166,6 +166,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // v12: requests for real files - any dotted path (/fp-icon.png,
+  // images, fonts) - never enter the auth dance below. Cookie-less
+  // fetchers (Chrome's favicon fetcher, Google's favicon crawler)
+  // were bouncing /fp-icon.png through /api/auth/guest in an
+  // endless redirect loop and giving up, which is why tabs and
+  // search results could show no icon while normal logged-in
+  // browsing looked fine. Files either exist in /public or 404 -
+  // deciding that never needs a session.
+  if (pathname.includes(".")) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
@@ -202,7 +214,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v11 - ForemanPrep clean URL rewrites)
+// END OF FILE - proxy.ts (v12 - static files skip the auth dance)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
