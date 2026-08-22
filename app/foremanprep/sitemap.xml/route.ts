@@ -1,25 +1,30 @@
 // FILE: app/foremanprep/sitemap.xml/route.ts
 import { GUIDES } from "@/lib/foremanprep/guides";
+import { STATES } from "@/lib/foremanprep/states";
 
-// ForemanPrep sitemap (v1). Served at /foremanprep/sitemap.xml,
+// ForemanPrep sitemap (v2). Served at /foremanprep/sitemap.xml,
 // which on foremanprep.com is the address you submit to Google
 // Search Console (the root /sitemap.xml path is excluded from the
 // proxy by the app-wide matcher, so the island carries its own).
 // Lists the CLEAN public URLs that proxy.ts v11 rewrites onto the
-// island - the same addresses the guide pages declare as their
-// canonicals. When the state pages ship, their URLs join the list
-// here (v2).
+// island - the same addresses the guide and state pages declare
+// as their canonicals. v2 adds the 17 state guides plus /states.
 
 const BASE = "https://foremanprep.com";
 const GUIDES_UPDATED = "2026-08-21";
+const STATES_UPDATED = "2026-08-22";
 
 export function GET(): Response {
-  const staticPaths = ["/", "/guides", "/practice", "/exam", "/audio", "/buy"];
+  const staticPaths = ["/", "/guides", "/states", "/practice", "/exam", "/audio", "/buy"];
   const urls: Array<{ loc: string; lastmod?: string }> = [
     ...staticPaths.map((p) => ({ loc: BASE + (p === "/" ? "" : p) })),
     ...GUIDES.map((g) => ({
       loc: `${BASE}/guides/${g.slug}`,
       lastmod: GUIDES_UPDATED,
+    })),
+    ...STATES.map((st) => ({
+      loc: `${BASE}/states/${st.slug}`,
+      lastmod: STATES_UPDATED,
     })),
   ];
 
@@ -46,8 +51,8 @@ export function GET(): Response {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/sitemap.xml/route.ts (v1 -
-// island sitemap with clean URLs)
+// END OF FILE - app/foremanprep/sitemap.xml/route.ts (v2 -
+// state guide URLs added)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
