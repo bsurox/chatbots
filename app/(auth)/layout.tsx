@@ -1,3 +1,4 @@
+// FILE: app/(auth)/layout.tsx
 "use client";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +22,13 @@ export default function AuthLayout({
   // overridden inline when isForeman, so the background goes pure
   // black (no green tint) and the primary buttons go safety orange
   // without touching the shared auth form components.
+  // v9: the favicon follows the brand too. Browsers keep ONE icon
+  // per site and the newest fetch wins - these shared doors were
+  // declaring the AskEvo icon on foremanprep.com, so a login visit
+  // stamped the whole site with the wrong brand (his Mac). When
+  // isForeman, the icon links are rewritten client-side to
+  // /fp-icon.png, same after-mount pattern as the rest of this
+  // file. AskEvo and Spotmint faces are untouched.
   const [isSpotmint, setIsSpotmint] = useState(false);
   const [isForeman, setIsForeman] = useState(false);
   useEffect(() => {
@@ -34,6 +42,23 @@ export default function AuthLayout({
       setIsForeman(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isForeman) return;
+    const links = document.querySelectorAll(
+      'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
+    );
+    for (const link of Array.from(links)) {
+      (link as HTMLLinkElement).href = "/fp-icon.png";
+    }
+    if (links.length === 0) {
+      const link = document.createElement("link");
+      link.rel = "icon";
+      link.type = "image/png";
+      link.href = "/fp-icon.png";
+      document.head.appendChild(link);
+    }
+  }, [isForeman]);
   const branded = isSpotmint || isForeman;
   // ForemanPrep theme: override the design tokens the auth forms
   // are built on. Inline custom properties cascade to every child,
@@ -94,7 +119,8 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v8 - ForemanPrep colors)
+// END OF FILE - app/(auth)/layout.tsx (v9 - brand favicon on the
+// ForemanPrep auth doors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
