@@ -4,11 +4,21 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v23. The strip's buy button goes
-// ORANGE (his call): it now wears .fp-cta - the same dress as the
-// hero's Get Full Access button - instead of the white
-// .fp-try-btn, so the buy action reads as the primary one next to
-// the white ghost try button. v22 notes: the button label reads
+// ForemanPrep landing page v24. Business & Law gets its BLUE
+// identity + more visibility (his calls): (1) the B&L strip wears
+// .fp-blzone - sky blue border, glow, and buttons - so the second
+// product reads as its own thing next to the safety orange;
+// (2) a striphead row puts a blue "Learn more" pill at the top of
+// the box, door to the new B&L landing page at /bl-prep; (3) the
+// strip's buy button goes blue (.fp-ctabl); (4) a small blue
+// badge sits high in the hero - "We prep the Business & Law exam
+// too" - so nobody scrolls to discover the second product (hides
+// for B&L owners, like the strip); (5) the remind-me box wears
+// .fp-float: on wide screens (1300px+) it becomes a right-side
+// rail that follows the scroll, with a dismiss x; phones keep it
+// exactly where it was.
+// v23 notes: the strip's buy button went orange (superseded by
+// the blue in this version). v22 notes: the button label reads
 // "Get Business & Law Prep - $79" - the product's actual name,
 // matching the buy page card. v21 notes:
 // the B&L strip grew a BUY button: solid button buys (links
@@ -168,6 +178,7 @@ export default function ForemanPrepPage() {
   const [blOwned, setBlOwned] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [earlyBird, setEarlyBird] = useState(true);
+  const [signupHidden, setSignupHidden] = useState(false);
 
   useEffect(() => {
     if (Date.now() >= PRICE_FLIP_MS) setEarlyBird(false);
@@ -318,6 +329,15 @@ export default function ForemanPrepPage() {
         {paid ? null : (
           <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
         )}
+        {blOwned ? null : (
+          <Link
+            className="fp-blbadge"
+            href="/foremanprep/bl-prep"
+            style={{ marginTop: "14px" }}
+          >
+            We prep the Business &amp; Law exam too
+          </Link>
+        )}
       </div>
 
       <div className="fp-stats">
@@ -403,8 +423,13 @@ export default function ForemanPrepPage() {
       )}
 
       {blOwned ? null : (
-        <div className="fp-strip">
-          <p className="fp-st">The trade exam is only half the license.</p>
+        <div className="fp-strip fp-blzone">
+          <div className="fp-striphead">
+            <p className="fp-st">The trade exam is only half the license.</p>
+            <Link className="fp-learnpill" href="/foremanprep/bl-prep">
+              Learn more
+            </Link>
+          </div>
           <p className="fp-sd">
             Most NASCLA states also make you pass a separate Business &amp;
             Law exam - contracts, lien law, payroll and taxes, insurance,
@@ -421,11 +446,7 @@ export default function ForemanPrepPage() {
               marginTop: "12px",
             }}
           >
-            <Link
-              className="fp-cta"
-              href="/foremanprep/buy"
-              style={{ textDecoration: "none" }}
-            >
+            <Link className="fp-ctabl" href="/foremanprep/buy">
               Get Business &amp; Law Prep - $79
             </Link>
             <Link className="fp-try-btn ghost" href="/foremanprep/bl">
@@ -435,8 +456,16 @@ export default function ForemanPrepPage() {
         </div>
       )}
 
-      {paid || !earlyBird ? null : (
-      <div className="fp-signup">
+      {paid || !earlyBird || signupHidden ? null : (
+      <div className="fp-signup fp-float">
+        <button
+          aria-label="Hide this box"
+          className="fp-floatx"
+          onClick={() => setSignupHidden(true)}
+          type="button"
+        >
+          x
+        </button>
         <p className="fp-fh">Not ready to buy today?</p>
         <p className="fp-fs">
           The $99 early-bird price ends Sept 7 - it goes to $149 on Sept 8.
@@ -508,7 +537,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v23 - strip buy button
-// wears the orange fp-cta dress)
+// END OF FILE - app/foremanprep/page.tsx (v24 - blue B&L
+// identity, hero badge, Learn more door, floating remind-me rail)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
