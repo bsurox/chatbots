@@ -1,3 +1,4 @@
+// FILE: app/(chat)/api/webhook/route.ts
 import "server-only";
 import { sql } from "drizzle-orm";
 import Stripe from "stripe";
@@ -13,6 +14,11 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 // guarantees a grant only happens for the first delivery. ForemanPrep
 // purchases claim with credits=0 - the row is the receipt, not a grant
 // amount.
+// v4: Business & Law purchases. Checkout marks them with metadata
+// foremanprep_bl = "1"; the grant runs through the same claim/release
+// discipline and lands as product "bl" (the access layer merges it to
+// "bundle" for buyers who already own Full Access, and vice versa).
+
 async function claimSession(sessionId: string, userId: string, credits: number): Promise<boolean> {
   const res = await db.execute(sql`INSERT INTO stripe_events (session_id, user_id, credits) VALUES (${sessionId}, ${userId}, ${credits}) ON CONFLICT (session_id) DO NOTHING RETURNING session_id`);
   const rows = Array.isArray(res) ? res : (res as { rows: unknown[] }).rows;
@@ -39,16 +45,22 @@ export async function POST(request: Request) {
     const session = event.data.object as Stripe.Checkout.Session;
     const userId = session.metadata?.userId;
     const isForemanPrep = session.metadata?.foremanprep === "1";
+    const isForemanBl = session.metadata?.foremanprep_bl === "1";
     const credits = Number(session.metadata?.credits ?? 0);
 
-    if (userId && isForemanPrep && session.payment_status === "paid") {
-      // v3: ForemanPrep Full Access. Same claim/release discipline as
-      // credits: claim first, grant second, release and 500 on grant
-      // failure so Stripe retries and the buyer never pays for nothing.
+    if (userId && (isForemanPrep || isForemanBl) && session.payment_status === "paid") {
+      // ForemanPrep products - Full Access or Business & Law. Same
+      // claim/release discipline as credits: claim first, grant
+      // second, release and 500 on grant failure so Stripe retries
+      // and the buyer never pays for nothing.
       const firstDelivery = await claimSession(session.id, userId, 0);
       if (firstDelivery) {
         try {
-          await grantForemanAccess({ userId, source: "stripe" });
+          await grantForemanAccess({
+            userId,
+            source: "stripe",
+            product: isForemanBl ? "bl" : "gc",
+          });
         } catch (grantErr) {
           console.error("ForemanPrep access grant failed, releasing claim:", grantErr);
           await releaseClaim(session.id);
@@ -75,7 +87,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/webhook/route.ts (v3 - foreman
-// access grants + idempotent credits)
+// END OF FILE - app/(chat)/api/webhook/route.ts (v4 - B&L
+// purchases grant product "bl" via the same claim discipline)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
