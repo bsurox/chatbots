@@ -1,5 +1,15 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v11. Landing plus the paywall wardrobe:
+/* ForemanPrep brand surface v12. Business & Law gets its own BLUE
+   identity: .fp-blzone swaps the brand variables to sky blue so
+   every fp- component inside it recolors itself, with explicit
+   overrides for the strip and chip (their orange is hardcoded).
+   .fp-ctabl is the blue buy button for use OUTSIDE a blzone (the
+   landing strip). .fp-blbadge and .fp-learnpill are the small
+   blue doors to the B&L landing page. .fp-float turns the
+   remind-me box into a right-side rail that follows the scroll on
+   wide screens (1300px and up) with a dismiss x; phones keep it
+   in the page flow untouched.
+   v11 notes: Landing plus the paywall wardrobe:
    buy card, feature checklist, locked-gate card, thank-you screen.
    v5 added .fp-wordmark. v6 added the floating account badge. v7
    added .fp-backpill. v8 added .fp-authbtn.exam - the orange exam
@@ -178,7 +188,26 @@
 .fp-fabout { width: 100%; padding: 10px 0; border-radius: 9px; font-weight: 700; font-size: 14px; cursor: pointer; background: transparent; color: #f87171; border: 1px solid #7f1d1d; }
 .fp-fabout:disabled { opacity: 0.6; cursor: default; }
 
+/* v12: Business & Law blue identity + floating remind-me rail */
+.fp-blzone { --fp: #38bdf8; --fp-soft: rgba(56, 189, 248, 0.12); }
+.fp-blzone.fp-strip, .fp-blzone .fp-strip { border-color: rgba(56, 189, 248, 0.35); background: linear-gradient(180deg, rgba(56, 189, 248, 0.09), rgba(56, 189, 248, 0.03)); }
+.fp-blzone .fp-chip { border-color: rgba(56, 189, 248, 0.45); }
+.fp-blzone .fp-deadline { border-color: rgba(56, 189, 248, 0.55); }
+.fp-ctabl { display: inline-block; padding: 14px 26px; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: #38bdf8; color: #000; text-decoration: none; }
+.fp-ctabl:active { transform: translateY(1px); }
+.fp-blbadge { display: inline-block; font-size: 12.5px; font-weight: 700; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.1); border-radius: 999px; padding: 6px 13px; text-decoration: none; }
+.fp-striphead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0 0 6px; }
+.fp-striphead .fp-st { margin: 0; }
+.fp-learnpill { font-size: 12px; font-weight: 700; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.1); border-radius: 999px; padding: 5px 11px; text-decoration: none; white-space: nowrap; }
+.fp-floatx { display: none; position: absolute; top: 8px; right: 10px; background: none; border: none; color: #666; font-size: 15px; font-weight: 700; cursor: pointer; padding: 4px 8px; }
+.fp-floatx:hover { color: #aaa; }
+@media (min-width: 1300px) {
+  .fp-float { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); width: 290px; margin: 0; z-index: 40; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55); }
+  .fp-float .fp-floatx { display: block; }
+}
+
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v11 - deadline advertisement)
+   END OF FILE - app/foremanprep/foremanprep.css (v12 - B&L blue
+   identity, floating remind-me rail)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
