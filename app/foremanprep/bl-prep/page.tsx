@@ -2,7 +2,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-// Business & Law landing page (v1) - the blue sibling of the
+// Business & Law landing page (v2 - both buy buttons now link
+// /foremanprep/buy?product=bl so the buy page opens B&L-first and
+// blue; nothing else changed). Original v1 notes below. - the blue sibling of the
 // ForemanPrep front door. Same skeleton as the main landing (hero,
 // stats, open-book strip, features grid, price table, footer) but
 // everything is about the state Business & Law exam, and the whole
@@ -88,7 +90,7 @@ export default function BlPrepLandingPage() {
           </p>
           <Link
             className="fp-cta"
-            href="/foremanprep/buy"
+            href="/foremanprep/buy?product=bl"
             style={{ textDecoration: "none" }}
           >
             Get Business &amp; Law Prep - $79
@@ -157,7 +159,7 @@ export default function BlPrepLandingPage() {
           </div>
           <Link
             className="fp-cta"
-            href="/foremanprep/buy"
+            href="/foremanprep/buy?product=bl"
             style={{ display: "block", marginTop: "14px", textAlign: "center", textDecoration: "none" }}
           >
             Get Business &amp; Law Prep
@@ -195,7 +197,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v1 - the blue
-// B&L landing page)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v2 - buy
+// buttons use the B&L door)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
