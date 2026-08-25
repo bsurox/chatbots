@@ -85,7 +85,8 @@ export async function proxy(request: NextRequest) {
     if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
       return NextResponse.rewrite(new URL("/foremanprep/privacy", request.url));
     }
-    // v11: clean marketing URLs. The product lives under
+    // v13: /bl joins the clean URLs - foremanprep.com/bl is the
+    // Business & Law practice room. v11: clean marketing URLs. The product lives under
     // /foremanprep/* internally, but on this host the short paths
     // are the public addresses: foremanprep.com/buy, /practice,
     // /exam, /audio, /thanks, and the SEO surfaces /guides and
@@ -94,6 +95,7 @@ export async function proxy(request: NextRequest) {
     // URLs, and the island sitemap lists them.
     const cleanFp = [
       "/buy",
+      "/bl",
       "/practice",
       "/exam",
       "/audio",
@@ -214,7 +216,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v12 - static files skip the auth dance)
+// END OF FILE - proxy.ts (v13 - /bl clean URL for Business & Law)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
