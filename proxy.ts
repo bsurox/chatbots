@@ -85,7 +85,8 @@ export async function proxy(request: NextRequest) {
     if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
       return NextResponse.rewrite(new URL("/foremanprep/privacy", request.url));
     }
-    // v13: /bl joins the clean URLs - foremanprep.com/bl is the
+    // v14: /bl-prep joins too - the Business & Law landing page.
+    // v13: /bl joined the clean URLs - foremanprep.com/bl is the
     // Business & Law practice room. v11: clean marketing URLs. The product lives under
     // /foremanprep/* internally, but on this host the short paths
     // are the public addresses: foremanprep.com/buy, /practice,
@@ -96,6 +97,7 @@ export async function proxy(request: NextRequest) {
     const cleanFp = [
       "/buy",
       "/bl",
+      "/bl-prep",
       "/practice",
       "/exam",
       "/audio",
@@ -216,7 +218,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v13 - /bl clean URL for Business & Law)
+// END OF FILE - proxy.ts (v14 - /bl-prep clean URL added)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
