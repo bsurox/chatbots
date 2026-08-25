@@ -13,7 +13,9 @@ import {
   type BlQuestion,
 } from "@/lib/foremanprep/blquestions";
 
-// Business & Law practice room (v1). The second exam most NASCLA
+// Business & Law practice room (v2 - the gate's buy button now
+// links /foremanprep/buy?product=bl so the store opens B&L-first
+// and blue; nothing else changed). Original v1 notes below. The second exam most NASCLA
 // states require gets the same player the trade exam has: pick a
 // domain or the whole mix, letter-chip choices, instant reveal
 // with the why and the citation, recap and score at the end,
@@ -293,7 +295,7 @@ export default function BlPracticePage() {
                 this is a separate add-on, and it stacks onto your
                 account.
               </p>
-              <Link className="fp-gatebtn" href="/foremanprep/buy">
+              <Link className="fp-gatebtn" href="/foremanprep/buy?product=bl">
                 Get Business &amp; Law prep - $79
               </Link>
             </div>
@@ -474,7 +476,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v1 - B&L practice
-// room: 10 domains, fixed free sample, $79 gate)
+// END OF FILE - app/foremanprep/bl/page.tsx (v2 - gate buy
+// button uses the B&L door)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
