@@ -4,15 +4,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v10 - the card you can still BUY
-// rides on top (his catch: a Full Access owner clicking "Get
-// Business & Law" landed on a card shouting "You already own Full
-// Access" - confusing). The rule: whichever product the account
-// already owns sinks to the bottom; the buyable card renders
-// first. Full Access owner without B&L -> B&L card on top. B&L
-// owner without Full Access -> Full Access on top (unchanged).
-// Owns neither or both -> the normal order. Both cards are
-// otherwise byte-identical to v9.
+// The ForemanPrep storefront v11 - the BUNDLE card. Visitors who
+// own NEITHER product get a third card: both courses in one
+// checkout at exactly the two prices summed - $99 + $79 = $178
+// until the Sept 7 flip, $149 + $79 = $228 after (no discount, no
+// separate price to maintain; the card's numbers ride the same
+// clock as everything else). It posts {"product":"bundle"} and
+// checkout v7 builds a two-line-item Stripe session. The card
+// hides itself the moment an account owns either piece - partial
+// owners buy the missing half alone.
+// v10 notes: the card you can still BUY rides on top (his catch:
+// a Full Access owner clicking "Get Business & Law" landed on a
+// card shouting "You already own Full Access"). Whichever product
+// the account already owns sinks to the bottom; owns-neither and
+// owns-both keep the normal order.
 // v9 notes: two products, two cards. Card 1 is Full Access
 // exactly as v8 built it: $99 early bird until Sept 7, 2026,
 // 11:59 PM Mountain, $149 from that moment, clock read in an
@@ -54,7 +59,7 @@ const BL_FEATURES = [
 
 export default function BuyPage() {
   const [access, setAccess] = useState<Access | null>(null);
-  const [buying, setBuying] = useState<"gc" | "bl" | null>(null);
+  const [buying, setBuying] = useState<"gc" | "bl" | "bundle" | null>(null);
   const [err, setErr] = useState("");
   const [earlyBird, setEarlyBird] = useState(true);
 
@@ -62,7 +67,7 @@ export default function BuyPage() {
     if (Date.now() >= PRICE_FLIP_MS) setEarlyBird(false);
   }, []);
 
-  useEffect(() => {
+  function loadAccess() {
     fetch("/foremanprep/api/access")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -77,18 +82,23 @@ export default function BuyPage() {
         }
       })
       .catch(() => setAccess({ loggedIn: false, paid: false, bl: false }));
+  }
+
+  useEffect(() => {
+    loadAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function buy(product: "gc" | "bl") {
+  async function buy(product: "gc" | "bl" | "bundle") {
     if (buying !== null) return;
     setBuying(product);
     setErr("");
-    fpTrackBeginCheckout(product === "bl" ? "bl" : undefined);
+    fpTrackBeginCheckout(product === "gc" ? undefined : product);
     try {
       const res = await fetch("/foremanprep/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product === "bl" ? { product: "bl" } : {}),
+        body: JSON.stringify(product === "gc" ? {} : { product }),
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.url) {
@@ -96,13 +106,19 @@ export default function BuyPage() {
         return;
       }
       if (res.ok && data?.already) {
-        setAccess((a) =>
-          a
-            ? product === "bl"
-              ? { ...a, loggedIn: true, bl: true }
-              : { ...a, loggedIn: true, paid: true }
-            : a
-        );
+        // For a single product we know exactly what they own; for a
+        // blocked bundle we re-ask the server rather than guess.
+        if (product === "bundle") {
+          loadAccess();
+        } else {
+          setAccess((a) =>
+            a
+              ? product === "bl"
+                ? { ...a, loggedIn: true, bl: true }
+                : { ...a, loggedIn: true, paid: true }
+              : a
+          );
+        }
         setBuying(null);
         return;
       }
@@ -293,6 +309,86 @@ export default function BuyPage() {
     </div>
   );
 
+  // The bundle card shows while access is still loading (most
+  // visitors own nothing) and disappears the moment the account
+  // owns either piece.
+  const showBundle = access === null || (!access.paid && !access.bl);
+
+  const bundleCard = (
+    <div className="fp-buycard">
+      <p className="fp-buyh">Get Both - Full Access + Business &amp; Law</p>
+      <p className="fp-buysub">
+        Most NASCLA states make you pass both exams. Buy the whole
+        license in one checkout - the trade course and the Business
+        &amp; Law course, on one account, one receipt.
+      </p>
+      <div className="fp-pricebig">
+        <span className="fp-pricenow">{earlyBird ? "$178" : "$228"}</span>
+      </div>
+      <p className="fp-pricetag">
+        {earlyBird
+          ? "That's the $99 early bird plus the $79 - same price as buying separately, one less checkout."
+          : "That's $149 plus $79 - same price as buying separately, one less checkout."}
+      </p>
+      {earlyBird ? (
+        <p className="fp-deadnote">
+          The Full Access half jumps to $149 after Monday, Sept 7
+        </p>
+      ) : null}
+      <div className="fp-feats">
+        <div className="fp-feat">
+          <b>+</b>
+          <span>Everything in Full Access - 156 questions, exam simulator, AI tutor, audio study, pass guarantee</span>
+        </div>
+        <div className="fp-feat">
+          <b>+</b>
+          <span>Everything in Business &amp; Law Prep - 120 questions across all 10 B&amp;L domains</span>
+        </div>
+        <div className="fp-feat">
+          <b>+</b>
+          <span>One-time payment, no subscription, both courses yours for good</span>
+        </div>
+      </div>
+
+      {access === null ? (
+        <button className="fp-buybtn" disabled type="button">
+          Loading...
+        </button>
+      ) : access.loggedIn ? (
+        <>
+          <button
+            className="fp-buybtn"
+            disabled={buying !== null}
+            onClick={() => buy("bundle")}
+            type="button"
+          >
+            {buying === "bundle"
+              ? "Opening secure checkout..."
+              : earlyBird
+                ? "Get Both - $178"
+                : "Get Both - $228"}
+          </button>
+          {err ? <p className="fp-buyerr">{err}</p> : null}
+        </>
+      ) : (
+        <div className="fp-authrow">
+          <Link className="fp-authbtn" href="/register">
+            Create your account to buy
+          </Link>
+          <Link className="fp-authbtn ghost" href="/login">
+            I already have an account
+          </Link>
+        </div>
+      )}
+
+      <p className="fp-buynote">
+        One secure Stripe checkout, statement reads ASKEVO* FOREMANPREP,
+        receipt itemizes both courses. The pass guarantee covers the
+        Full Access course, same terms as buying it alone.
+      </p>
+    </div>
+  );
+
   return (
     <div className="fp-wrap">
       <div className="fp-top">
@@ -316,6 +412,7 @@ export default function BuyPage() {
           {blCard}
         </>
       )}
+      {showBundle ? bundleCard : null}
 
       <div className="fp-foot">
         <div className="fp-links">
@@ -336,8 +433,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v10 - the card
-// you can still buy renders on top)
+// END OF FILE - app/foremanprep/buy/page.tsx (v11 - bundle
+// card: both courses, one checkout, prices summed)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
