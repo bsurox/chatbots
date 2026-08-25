@@ -4,9 +4,13 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v22. Button label fix (his call): the
-// strip's buy button reads "Get Business & Law Prep - $79" - the
-// product's actual name, matching the buy page card. v21 notes:
+// ForemanPrep landing page v23. The strip's buy button goes
+// ORANGE (his call): it now wears .fp-cta - the same dress as the
+// hero's Get Full Access button - instead of the white
+// .fp-try-btn, so the buy action reads as the primary one next to
+// the white ghost try button. v22 notes: the button label reads
+// "Get Business & Law Prep - $79" - the product's actual name,
+// matching the buy page card. v21 notes:
 // the B&L strip grew a BUY button: solid button buys (links
 // /foremanprep/buy, where the B&L card renders first for Full
 // Access owners), ghost button tries the free sample. Deliberately
@@ -417,7 +421,11 @@ export default function ForemanPrepPage() {
               marginTop: "12px",
             }}
           >
-            <Link className="fp-try-btn" href="/foremanprep/buy">
+            <Link
+              className="fp-cta"
+              href="/foremanprep/buy"
+              style={{ textDecoration: "none" }}
+            >
               Get Business &amp; Law Prep - $79
             </Link>
             <Link className="fp-try-btn ghost" href="/foremanprep/bl">
@@ -500,7 +508,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v22 - strip buy button
-// says Get Business & Law Prep)
+// END OF FILE - app/foremanprep/page.tsx (v23 - strip buy button
+// wears the orange fp-cta dress)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
