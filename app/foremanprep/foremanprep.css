@@ -1,5 +1,8 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v13. Adds the bundle card's two-brand
+/* ForemanPrep brand surface v14. The floating remind-me rail
+   moves to the LEFT side (his call: the chat button and panel own
+   the bottom-right, and the two were fighting over the corner).
+   v13 notes: adds the bundle card's two-brand
    gradient dress (.fp-bundlecard / .fp-bundlebtn). v12 notes: Business & Law gets its own BLUE
    identity: .fp-blzone swaps the brand variables to sky blue so
    every fp- component inside it recolors itself, with explicit
@@ -203,7 +206,7 @@
 .fp-floatx { display: none; position: absolute; top: 8px; right: 10px; background: none; border: none; color: #666; font-size: 15px; font-weight: 700; cursor: pointer; padding: 4px 8px; }
 .fp-floatx:hover { color: #aaa; }
 @media (min-width: 1300px) {
-  .fp-float { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); width: 290px; margin: 0; z-index: 40; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55); }
+  .fp-float { position: fixed; left: 18px; top: 50%; transform: translateY(-50%); width: 290px; margin: 0; z-index: 40; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55); }
   .fp-float .fp-floatx { display: block; }
 }
 
@@ -217,7 +220,7 @@
 .fp-bundlebtn:disabled { background: #1c1c1c; color: #555; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v13 - the
-   half-orange half-blue bundle card)
+   END OF FILE - app/foremanprep/foremanprep.css (v14 - remind-me
+   rail moves to the left, clear of the chat)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
