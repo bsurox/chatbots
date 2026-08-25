@@ -13,27 +13,33 @@ import { fpTrackPurchase } from "../analytics";
 // only on a real Stripe redirect (paid=1), guarded by
 // sessionStorage against refreshes, with the Stripe session id as
 // the transaction id so ad platforms can dedupe on their end too.
-// v4: product-aware. Checkout appends &product=bl on Business &
-// Law purchases; this page then tracks the $79 value, polls the
-// access API's bl flag instead of paid, and swaps the copy and
-// buttons to point at the B&L practice room. With no product param
-// everything reads exactly as v3 did.
+// v4 notes: product-aware - checkout appends the product param on
+// B&L purchases and this page confirms, tracks, and routes
+// accordingly.
+// v5: the bundle. product=bundle confirms only when BOTH
+// entitlements are live, tracks the summed value, and shows both
+// doors - practice and Business & Law. Plain Full Access
+// purchases still read exactly like v3.
+
+type Product = "gc" | "bl" | "bundle";
 
 export default function ThanksPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [checks, setChecks] = useState(0);
-  const [isBl, setIsBl] = useState(false);
+  const [product, setProduct] = useState<Product>("gc");
 
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("product") === "bl") setIsBl(true);
+      const p = params.get("product");
+      const bought: Product = p === "bl" ? "bl" : p === "bundle" ? "bundle" : "gc";
+      setProduct(bought);
       if (params.get("paid") !== "1") return;
       if (window.sessionStorage.getItem("fp-purchase-tracked")) return;
       window.sessionStorage.setItem("fp-purchase-tracked", "1");
       fpTrackPurchase(
         params.get("session_id") || "",
-        params.get("product") === "bl" ? "bl" : undefined
+        bought === "gc" ? undefined : bought
       );
     } catch {
       // Tracking must never break the thanks page.
@@ -46,14 +52,26 @@ export default function ThanksPage() {
       fetch("/foremanprep/api/access")
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
-          const owned = isBl ? data?.bl : data?.paid;
+          const owned =
+            product === "bl"
+              ? data?.bl
+              : product === "bundle"
+                ? data?.paid && data?.bl
+                : data?.paid;
           if (owned) setConfirmed(true);
           setChecks((c) => c + 1);
         })
         .catch(() => setChecks((c) => c + 1));
     }, checks === 0 ? 400 : 1600);
     return () => clearTimeout(t);
-  }, [checks, confirmed, isBl]);
+  }, [checks, confirmed, product]);
+
+  const confirmedLine =
+    product === "bl"
+      ? "Business & Law prep is active on your account. Time to get to work."
+      : product === "bundle"
+        ? "Full Access AND Business & Law are both active on your account. Time to get to work."
+        : "Full Access is active on your account. Time to get to work.";
 
   return (
     <div className="fp-wrap">
@@ -67,16 +85,23 @@ export default function ThanksPage() {
         <p className="fp-thanksh">You're in.</p>
         <p className="fp-thankssub">
           {confirmed
-            ? isBl
-              ? "Business & Law prep is active on your account. Time to get to work."
-              : "Full Access is active on your account. Time to get to work."
+            ? confirmedLine
             : "Payment received - your access is activating now. If things still look locked in a minute, refresh this page."}
         </p>
         <div className="fp-authrow">
-          {isBl ? (
+          {product === "bl" ? (
             <Link className="fp-authbtn" href="/foremanprep/bl">
               Start Business & Law practice
             </Link>
+          ) : product === "bundle" ? (
+            <>
+              <Link className="fp-authbtn" href="/foremanprep/practice">
+                Start practicing
+              </Link>
+              <Link className="fp-authbtn exam" href="/foremanprep/bl">
+                Business & Law room
+              </Link>
+            </>
           ) : (
             <>
               <Link className="fp-authbtn" href="/foremanprep/practice">
@@ -98,8 +123,8 @@ export default function ThanksPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/thanks/page.tsx (v4 - product-
-// aware: B&L purchases confirm, track, and route to /bl)
+// END OF FILE - app/foremanprep/thanks/page.tsx (v5 - bundle
+// purchases confirm both products and open both doors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
