@@ -4,7 +4,15 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v20. Two B&L strip changes (his call):
+// ForemanPrep landing page v22. Button label fix (his call): the
+// strip's buy button reads "Get Business & Law Prep - $79" - the
+// product's actual name, matching the buy page card. v21 notes:
+// the B&L strip grew a BUY button: solid button buys (links
+// /foremanprep/buy, where the B&L card renders first for Full
+// Access owners), ghost button tries the free sample. Deliberately
+// NOT named anything with "Full Access" - that name belongs to
+// the GC product at the top of this page.
+// v20 notes: two B&L strip changes (his call):
 // 1) COPY - "stacks onto the same account as Full Access" read
 // like jargon to a visitor who hasn't bought anything yet, so the
 // line now ends "the same account as your NASCLA GC access".
@@ -401,13 +409,21 @@ export default function ForemanPrepPage() {
             sample, one-time $79. No subscription, and it stacks onto the
             same account as your NASCLA GC access.
           </p>
-          <Link
-            className="fp-try-btn ghost"
-            href="/foremanprep/bl"
-            style={{ display: "inline-block", marginTop: "12px" }}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+              marginTop: "12px",
+            }}
           >
-            Try Business &amp; Law practice
-          </Link>
+            <Link className="fp-try-btn" href="/foremanprep/buy">
+              Get Business &amp; Law Prep - $79
+            </Link>
+            <Link className="fp-try-btn ghost" href="/foremanprep/bl">
+              Try Business &amp; Law practice
+            </Link>
+          </div>
         </div>
       )}
 
@@ -484,7 +500,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v20 - B&L strip
-// reworded and moved below the price table)
+// END OF FILE - app/foremanprep/page.tsx (v22 - strip buy button
+// says Get Business & Law Prep)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
