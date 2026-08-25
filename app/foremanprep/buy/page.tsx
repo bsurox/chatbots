@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v11 - the BUNDLE card. Visitors who
+// The ForemanPrep storefront v12 - context-aware order + themes
+// (his calls): (1) arriving with ?product=bl in the URL - every
+// B&L buy button now links that way - puts the B&L card FIRST;
+// plain arrivals keep Full Access first. (2) The B&L card wears
+// the blue theme (.fp-blzone - border, price, and buy button all
+// go sky blue). (3) The bundle card wears BOTH brands: a border,
+// price, and button fading orange into blue (.fp-bundlecard).
+// v11 notes: the BUNDLE card. Visitors who
 // own NEITHER product get a third card: both courses in one
 // checkout at exactly the two prices summed - $99 + $79 = $178
 // until the Sept 7 flip, $149 + $79 = $228 after (no discount, no
@@ -62,9 +69,16 @@ export default function BuyPage() {
   const [buying, setBuying] = useState<"gc" | "bl" | "bundle" | null>(null);
   const [err, setErr] = useState("");
   const [earlyBird, setEarlyBird] = useState(true);
+  const [blFocus, setBlFocus] = useState(false);
 
   useEffect(() => {
     if (Date.now() >= PRICE_FLIP_MS) setEarlyBird(false);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("product") === "bl") setBlFocus(true);
+    } catch {
+      // A bad URL should never break the store.
+    }
   }, []);
 
   function loadAccess() {
@@ -135,10 +149,13 @@ export default function BuyPage() {
     }
   }
 
-  // The buyable card renders first. Only one case flips the order:
-  // a Full Access owner who has not bought B&L yet came here for
-  // exactly one thing - show it to them at the top.
-  const blFirst = access !== null && access.paid && !access.bl;
+  // The buyable card renders first, and context wins: arriving
+  // through any B&L door (?product=bl) puts the B&L card on top
+  // immediately - so does being a Full Access owner who has not
+  // bought B&L. Someone who already owns B&L never gets it first.
+  const blFirst = blFocus
+    ? !access?.bl
+    : access !== null && access.paid && !access.bl;
 
   const gcCard = (
     <div className="fp-buycard">
@@ -234,7 +251,7 @@ export default function BuyPage() {
   );
 
   const blCard = (
-    <div className="fp-buycard">
+    <div className="fp-buycard fp-blzone">
       <p className="fp-buyh">Business &amp; Law Prep</p>
       <p className="fp-buysub">
         The trade exam is only half the license: most NASCLA states
@@ -315,7 +332,7 @@ export default function BuyPage() {
   const showBundle = access === null || (!access.paid && !access.bl);
 
   const bundleCard = (
-    <div className="fp-buycard">
+    <div className="fp-buycard fp-bundlecard">
       <p className="fp-buyh">Get Both - Full Access + Business &amp; Law</p>
       <p className="fp-buysub">
         Most NASCLA states make you pass both exams. Buy the whole
@@ -357,7 +374,7 @@ export default function BuyPage() {
       ) : access.loggedIn ? (
         <>
           <button
-            className="fp-buybtn"
+            className="fp-buybtn fp-bundlebtn"
             disabled={buying !== null}
             onClick={() => buy("bundle")}
             type="button"
@@ -433,8 +450,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v11 - bundle
-// card: both courses, one checkout, prices summed)
+// END OF FILE - app/foremanprep/buy/page.tsx (v12 - B&L doors
+// land B&L-first, blue B&L card, two-brand bundle card)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
