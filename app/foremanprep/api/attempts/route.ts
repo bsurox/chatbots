@@ -7,6 +7,7 @@ import {
   recordForemanAnswer,
   startForemanAttempt,
 } from "@/lib/db/foreman";
+import { getBlQuestion } from "@/lib/foremanprep/blquestions";
 import { getQuestion } from "@/lib/foremanprep/questions";
 
 // Records a finished practice round (and later, mock exams) for
@@ -15,6 +16,11 @@ import { getQuestion } from "@/lib/foremanprep/questions";
 // data can never be polluted by a buggy or dishonest client.
 // Anonymous visitors get {saved: false} and lose nothing - practice
 // stays public, progress-saving is the account perk.
+// v2: Business & Law rounds. Question ids starting bl- resolve
+// against the B&L bank, and their answer rows are stored with a
+// bl- prefixed domain ("bl-li", "bl-fm", ...) so B&L accuracy
+// never mixes into the GC exam's readiness stats - the GC domain
+// keys stay exactly the set the practice page has always read.
 
 type RawAnswer = { questionId?: unknown; picked?: unknown };
 
@@ -50,14 +56,15 @@ export async function POST(request: Request) {
         continue;
       }
       if (seen.has(a.questionId)) continue;
-      const q = getQuestion(a.questionId);
+      const isBl = a.questionId.startsWith("bl-");
+      const q = isBl ? getBlQuestion(a.questionId) : getQuestion(a.questionId);
       if (!q) continue;
       const picked = Math.trunc(a.picked);
       if (picked < 0 || picked >= q.choices.length) continue;
       seen.add(a.questionId);
       verified.push({
         questionId: q.id,
-        domain: q.domain,
+        domain: isBl ? "bl-" + q.domain : q.domain,
         picked,
         isCorrect: picked === q.answer,
       });
@@ -86,6 +93,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/api/attempts/route.ts (v1)
+// END OF FILE - app/foremanprep/api/attempts/route.ts (v2 -
+// bl- ids grade against the B&L bank, stats stay separated)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
