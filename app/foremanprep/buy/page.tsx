@@ -4,19 +4,24 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v9 - now TWO products, two cards.
-// Card 1 is Full Access exactly as v8 built it: $99 early bird
-// until Sept 7, 2026, 11:59 PM Mountain, $149 from that moment,
-// clock read in an effect (Next 16 prerender rule), checkout is
-// the charge authority. Card 2 is new: Business & Law Prep at a
-// flat $79 - the second exam most NASCLA states require. Each
-// card has its own buy button; the button posts {"product":"bl"}
-// for B&L and nothing for Full Access, so checkout v6 charges the
-// right thing. Owning one product never hides the other card -
-// Full Access owners see the B&L card as the natural next step
-// (the webhook merges the second purchase into a bundle), and
-// B&L-only buyers see Full Access above it. Both owned = both
-// cards flip to their owned state.
+// The ForemanPrep storefront v10 - the card you can still BUY
+// rides on top (his catch: a Full Access owner clicking "Get
+// Business & Law" landed on a card shouting "You already own Full
+// Access" - confusing). The rule: whichever product the account
+// already owns sinks to the bottom; the buyable card renders
+// first. Full Access owner without B&L -> B&L card on top. B&L
+// owner without Full Access -> Full Access on top (unchanged).
+// Owns neither or both -> the normal order. Both cards are
+// otherwise byte-identical to v9.
+// v9 notes: two products, two cards. Card 1 is Full Access
+// exactly as v8 built it: $99 early bird until Sept 7, 2026,
+// 11:59 PM Mountain, $149 from that moment, clock read in an
+// effect (Next 16 prerender rule), checkout is the charge
+// authority. Card 2: Business & Law Prep at a flat $79. Each
+// card's buy button posts {"product":"bl"} for B&L and nothing
+// for Full Access, so checkout v6 charges the right thing.
+// Owning one product never hides the other card (the webhook
+// merges a second purchase into a bundle).
 // v8 and earlier notes preserved: signed-out visitors get the
 // auth doors first (a purchase must attach to a real account),
 // the checkout route guards double-buying per product, the
@@ -44,7 +49,7 @@ const BL_FEATURES = [
   "Instant explanations with citations on every question",
   "Unlimited rounds, fresh shuffles, progress saved to your account",
   "One-time $79 - no subscription, yours for good",
-  "Already have Full Access? This stacks onto the same account.",
+  "Already have the NASCLA GC course? This stacks onto the same account.",
 ];
 
 export default function BuyPage() {
@@ -114,6 +119,180 @@ export default function BuyPage() {
     }
   }
 
+  // The buyable card renders first. Only one case flips the order:
+  // a Full Access owner who has not bought B&L yet came here for
+  // exactly one thing - show it to them at the top.
+  const blFirst = access !== null && access.paid && !access.bl;
+
+  const gcCard = (
+    <div className="fp-buycard">
+      <p className="fp-buyh">ForemanPrep Full Access</p>
+      <p className="fp-buysub">
+        Everything you need to walk into the NASCLA Commercial General
+        Building Contractor exam ready - built around the real 115-question,
+        open-book test.
+      </p>
+      <div className="fp-pricebig">
+        {earlyBird ? (
+          <>
+            <span className="fp-pricenow">$99</span>
+            <span className="fp-pricewas">$149</span>
+          </>
+        ) : (
+          <span className="fp-pricenow">$149</span>
+        )}
+      </div>
+      <p className="fp-pricetag">
+        One-time payment. No subscription. Prep courses charge $349 to
+        $1,490.
+      </p>
+      {earlyBird ? (
+        <p className="fp-deadnote">
+          Early-bird price ends Monday, Sept 7 - then it's $149
+        </p>
+      ) : null}
+      <div className="fp-feats">
+        {FEATURES.map((f) => (
+          <div className="fp-feat" key={f}>
+            <b>+</b>
+            <span>{f}</span>
+          </div>
+        ))}
+      </div>
+
+      {access === null ? (
+        <button className="fp-buybtn" disabled type="button">
+          Loading...
+        </button>
+      ) : access.paid ? (
+        <div className="fp-owned">
+          <p className="fp-ownedh">You already own Full Access.</p>
+          <div className="fp-authrow">
+            <Link className="fp-authbtn" href="/foremanprep/practice">
+              Go practice
+            </Link>
+            <Link className="fp-authbtn exam" href="/foremanprep/exam">
+              Take the exam simulator
+            </Link>
+          </div>
+        </div>
+      ) : access.loggedIn ? (
+        <>
+          <button
+            className="fp-buybtn"
+            disabled={buying !== null}
+            onClick={() => buy("gc")}
+            type="button"
+          >
+            {buying === "gc"
+              ? "Opening secure checkout..."
+              : earlyBird
+                ? "Get Full Access - $99"
+                : "Get Full Access - $149"}
+          </button>
+          {err ? <p className="fp-buyerr">{err}</p> : null}
+        </>
+      ) : (
+        <div className="fp-authrow">
+          <Link className="fp-authbtn" href="/register">
+            Create your account to buy
+          </Link>
+          <Link className="fp-authbtn ghost" href="/login">
+            I already have an account
+          </Link>
+        </div>
+      )}
+
+      <p className="fp-buynote">
+        Secure checkout by Stripe - your card statement will read
+        ASKEVO* FOREMANPREP. Your purchase attaches to your account, so
+        you can study from any device. Pass guarantee: complete the
+        course, and if you fail the real exam, email support for a full
+        refund at support@askevo.ai. Conditions apply - see the{" "}
+        <Link className="fp-link" href="/foremanprep/terms">
+          full pass guarantee terms
+        </Link>
+        .
+      </p>
+    </div>
+  );
+
+  const blCard = (
+    <div className="fp-buycard">
+      <p className="fp-buyh">Business &amp; Law Prep</p>
+      <p className="fp-buysub">
+        The trade exam is only half the license: most NASCLA states
+        also require a separate Business &amp; Law exam. This is the
+        drill room for it - the state-neutral core those exams are
+        built on, with state-specific layers rolling out.
+      </p>
+      <div className="fp-pricebig">
+        <span className="fp-pricenow">$79</span>
+      </div>
+      <p className="fp-pricetag">
+        One-time payment. No subscription. B&amp;L courses run $195 to
+        $295 - or $79 for practice questions that expire in 3 months.
+        Ours don't expire.
+      </p>
+      <div className="fp-feats">
+        {BL_FEATURES.map((f) => (
+          <div className="fp-feat" key={f}>
+            <b>+</b>
+            <span>{f}</span>
+          </div>
+        ))}
+      </div>
+
+      {access === null ? (
+        <button className="fp-buybtn" disabled type="button">
+          Loading...
+        </button>
+      ) : access.bl ? (
+        <div className="fp-owned">
+          <p className="fp-ownedh">You already own Business &amp; Law prep.</p>
+          <div className="fp-authrow">
+            <Link className="fp-authbtn" href="/foremanprep/bl">
+              Go practice Business &amp; Law
+            </Link>
+          </div>
+        </div>
+      ) : access.loggedIn ? (
+        <>
+          <button
+            className="fp-buybtn"
+            disabled={buying !== null}
+            onClick={() => buy("bl")}
+            type="button"
+          >
+            {buying === "bl"
+              ? "Opening secure checkout..."
+              : "Get Business & Law Prep - $79"}
+          </button>
+          {err ? <p className="fp-buyerr">{err}</p> : null}
+        </>
+      ) : (
+        <div className="fp-authrow">
+          <Link className="fp-authbtn" href="/register">
+            Create your account to buy
+          </Link>
+          <Link className="fp-authbtn ghost" href="/login">
+            I already have an account
+          </Link>
+        </div>
+      )}
+
+      <p className="fp-buynote">
+        Same secure Stripe checkout, same account, statement reads
+        ASKEVO* FOREMANPREP. Want to look first? Try the free
+        10-question sample on the{" "}
+        <Link className="fp-link" href="/foremanprep/bl">
+          Business &amp; Law practice page
+        </Link>
+        .
+      </p>
+    </div>
+  );
+
   return (
     <div className="fp-wrap">
       <div className="fp-top">
@@ -126,170 +305,17 @@ export default function BuyPage() {
         {earlyBird ? <div className="fp-chip">Early bird ends Sept 7</div> : null}
       </div>
 
-      <div className="fp-buycard">
-        <p className="fp-buyh">ForemanPrep Full Access</p>
-        <p className="fp-buysub">
-          Everything you need to walk into the NASCLA Commercial General
-          Building Contractor exam ready - built around the real 115-question,
-          open-book test.
-        </p>
-        <div className="fp-pricebig">
-          {earlyBird ? (
-            <>
-              <span className="fp-pricenow">$99</span>
-              <span className="fp-pricewas">$149</span>
-            </>
-          ) : (
-            <span className="fp-pricenow">$149</span>
-          )}
-        </div>
-        <p className="fp-pricetag">
-          One-time payment. No subscription. Prep courses charge $349 to
-          $1,490.
-        </p>
-        {earlyBird ? (
-          <p className="fp-deadnote">
-            Early-bird price ends Monday, Sept 7 - then it's $149
-          </p>
-        ) : null}
-        <div className="fp-feats">
-          {FEATURES.map((f) => (
-            <div className="fp-feat" key={f}>
-              <b>+</b>
-              <span>{f}</span>
-            </div>
-          ))}
-        </div>
-
-        {access === null ? (
-          <button className="fp-buybtn" disabled type="button">
-            Loading...
-          </button>
-        ) : access.paid ? (
-          <div className="fp-owned">
-            <p className="fp-ownedh">You already own Full Access.</p>
-            <div className="fp-authrow">
-              <Link className="fp-authbtn" href="/foremanprep/practice">
-                Go practice
-              </Link>
-              <Link className="fp-authbtn exam" href="/foremanprep/exam">
-                Take the exam simulator
-              </Link>
-            </div>
-          </div>
-        ) : access.loggedIn ? (
-          <>
-            <button
-              className="fp-buybtn"
-              disabled={buying !== null}
-              onClick={() => buy("gc")}
-              type="button"
-            >
-              {buying === "gc"
-                ? "Opening secure checkout..."
-                : earlyBird
-                  ? "Get Full Access - $99"
-                  : "Get Full Access - $149"}
-            </button>
-            {err ? <p className="fp-buyerr">{err}</p> : null}
-          </>
-        ) : (
-          <div className="fp-authrow">
-            <Link className="fp-authbtn" href="/register">
-              Create your account to buy
-            </Link>
-            <Link className="fp-authbtn ghost" href="/login">
-              I already have an account
-            </Link>
-          </div>
-        )}
-
-        <p className="fp-buynote">
-          Secure checkout by Stripe - your card statement will read
-          ASKEVO* FOREMANPREP. Your purchase attaches to your account, so
-          you can study from any device. Pass guarantee: complete the
-          course, and if you fail the real exam, email support for a full
-          refund at support@askevo.ai. Conditions apply - see the{" "}
-          <Link className="fp-link" href="/foremanprep/terms">
-            full pass guarantee terms
-          </Link>
-          .
-        </p>
-      </div>
-
-      <div className="fp-buycard">
-        <p className="fp-buyh">Business &amp; Law Prep</p>
-        <p className="fp-buysub">
-          The trade exam is only half the license: most NASCLA states
-          also require a separate Business &amp; Law exam. This is the
-          drill room for it - the state-neutral core those exams are
-          built on, with state-specific layers rolling out.
-        </p>
-        <div className="fp-pricebig">
-          <span className="fp-pricenow">$79</span>
-        </div>
-        <p className="fp-pricetag">
-          One-time payment. No subscription. B&amp;L courses run $195 to
-          $295 - or $79 for practice questions that expire in 3 months.
-          Ours don't expire.
-        </p>
-        <div className="fp-feats">
-          {BL_FEATURES.map((f) => (
-            <div className="fp-feat" key={f}>
-              <b>+</b>
-              <span>{f}</span>
-            </div>
-          ))}
-        </div>
-
-        {access === null ? (
-          <button className="fp-buybtn" disabled type="button">
-            Loading...
-          </button>
-        ) : access.bl ? (
-          <div className="fp-owned">
-            <p className="fp-ownedh">You already own Business &amp; Law prep.</p>
-            <div className="fp-authrow">
-              <Link className="fp-authbtn" href="/foremanprep/bl">
-                Go practice Business &amp; Law
-              </Link>
-            </div>
-          </div>
-        ) : access.loggedIn ? (
-          <>
-            <button
-              className="fp-buybtn"
-              disabled={buying !== null}
-              onClick={() => buy("bl")}
-              type="button"
-            >
-              {buying === "bl"
-                ? "Opening secure checkout..."
-                : "Get Business & Law Prep - $79"}
-            </button>
-            {err ? <p className="fp-buyerr">{err}</p> : null}
-          </>
-        ) : (
-          <div className="fp-authrow">
-            <Link className="fp-authbtn" href="/register">
-              Create your account to buy
-            </Link>
-            <Link className="fp-authbtn ghost" href="/login">
-              I already have an account
-            </Link>
-          </div>
-        )}
-
-        <p className="fp-buynote">
-          Same secure Stripe checkout, same account, statement reads
-          ASKEVO* FOREMANPREP. Want to look first? Try the free
-          10-question sample on the{" "}
-          <Link className="fp-link" href="/foremanprep/bl">
-            Business &amp; Law practice page
-          </Link>
-          .
-        </p>
-      </div>
+      {blFirst ? (
+        <>
+          {blCard}
+          {gcCard}
+        </>
+      ) : (
+        <>
+          {gcCard}
+          {blCard}
+        </>
+      )}
 
       <div className="fp-foot">
         <div className="fp-links">
@@ -310,8 +336,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v9 - two cards:
-// Full Access on the clock, Business & Law at flat $79)
+// END OF FILE - app/foremanprep/buy/page.tsx (v10 - the card
+// you can still buy renders on top)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
