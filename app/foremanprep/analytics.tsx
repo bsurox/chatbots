@@ -3,32 +3,43 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
-// ForemanPrep ad measurement (v2). Loads the Google Ads tag and the
+// ForemanPrep ad measurement (v3). Loads the Google Ads tag and the
 // Meta pixel ONLY when the page is served on foremanprep.com - the
 // same island pages viewed through askevo.ai stay untracked, so ad
 // data never mixes across brands. Both loaders queue events until
 // the real scripts arrive, and the helpers below self-initialize,
 // so a conversion fired early in a page's life is never lost.
-// The price riding on Meta events reads the clock (v2): $99 until
+// The price riding on Meta events reads the clock: $99 until
 // Sept 7, 2026, 11:59 PM Mountain (= Sept 8 05:59 UTC), $149 from
-// that moment - same PRICE_FLIP_MS constant as checkout v5 and
-// landing v14, evaluated at event time so no edit is needed at the
-// flip. ONE thing stays manual: the fixed $99 value inside the
-// Google Ads conversion SETTING lives in their dashboard - edit it
-// to $149 on Sept 8. PageView re-fires on route changes so
-// Meta sees real browsing, not just the landing hit.
+// that moment - same PRICE_FLIP_MS constant as checkout, evaluated
+// at event time so no edit is needed at the flip. ONE thing stays
+// manual: the fixed $99 value inside the Google Ads conversion
+// SETTING lives in their dashboard - edit it to $149 on Sept 8.
+// PageView re-fires on route changes so Meta sees real browsing.
+// v3: both track helpers accept an optional product tag. "bl" =
+// Business & Law prep at its flat $79; anything else keeps the
+// clock-based Full Access price. Google conversion events now
+// carry value + currency explicitly - ignored while the dashboard
+// setting is fixed-value, correct automatically if that setting is
+// ever switched to per-transaction values. Existing callers that
+// pass no product keep exactly the old behavior.
 
 const GOOGLE_TAG_ID = "AW-18382529129";
 const GOOGLE_PURCHASE_LABEL = "kXy2CObaw98cEOnEvL1E";
 const META_PIXEL_ID = "3451854201639118";
 const EARLY_PRICE_USD = 99.0;
 const REGULAR_PRICE_USD = 149.0;
+const BL_PRICE_USD = 79.0;
 // Sept 7, 2026, 11:59 PM MDT (UTC-6) = Sept 8, 05:59 UTC.
 // Month index 8 = September.
 const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
 
 function priceUsd(): number {
   return Date.now() < PRICE_FLIP_MS ? EARLY_PRICE_USD : REGULAR_PRICE_USD;
+}
+
+function eventValueUsd(product?: string): number {
+  return product === "bl" ? BL_PRICE_USD : priceUsd();
 }
 
 function isForemanHost(): boolean {
@@ -83,20 +94,28 @@ function ensureLoaded(): boolean {
   return true;
 }
 
-export function fpTrackBeginCheckout(): void {
+export function fpTrackBeginCheckout(product?: string): void {
   if (!ensureLoaded()) return;
   const w = window as any;
-  w.fbq("track", "InitiateCheckout", { value: priceUsd(), currency: "USD" });
+  w.fbq("track", "InitiateCheckout", {
+    value: eventValueUsd(product),
+    currency: "USD",
+  });
 }
 
-export function fpTrackPurchase(transactionId: string): void {
+export function fpTrackPurchase(transactionId: string, product?: string): void {
   if (!ensureLoaded()) return;
   const w = window as any;
   w.gtag("event", "conversion", {
     send_to: GOOGLE_TAG_ID + "/" + GOOGLE_PURCHASE_LABEL,
     transaction_id: transactionId,
+    value: eventValueUsd(product),
+    currency: "USD",
   });
-  w.fbq("track", "Purchase", { value: priceUsd(), currency: "USD" });
+  w.fbq("track", "Purchase", {
+    value: eventValueUsd(product),
+    currency: "USD",
+  });
 }
 
 export default function FpAnalytics() {
@@ -122,8 +141,8 @@ export default function FpAnalytics() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/analytics.tsx (v2 - event values
-// flip themselves to $149 at Sept 7, 11:59 PM MDT)
+// END OF FILE - app/foremanprep/analytics.tsx (v3 - product-
+// aware event values: bl = $79 flat, gc = clock price)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
