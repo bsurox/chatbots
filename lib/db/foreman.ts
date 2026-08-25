@@ -27,6 +27,9 @@ import { db } from "./queries";
 // MERGES: buying the second product upgrades the row to "bundle",
 // and a grant can never downgrade or overwrite what someone
 // already owns.
+// v3: product "bundle" - the buy-both-at-once purchase. It grants
+// the bundle plan directly (and merging is trivial: whatever you
+// held before, owning both is strictly more).
 
 export const foremanAccess = pgTable("foreman_access", {
   userId: uuid("user_id").primaryKey(),
@@ -98,7 +101,7 @@ export async function hasBlAccess(userId: string): Promise<boolean> {
 export async function grantForemanAccess(params: {
   userId: string;
   source?: string;
-  product?: "gc" | "bl";
+  product?: "gc" | "bl" | "bundle";
   expiresAt?: Date | null;
 }) {
   const source = params.source ?? "stripe";
@@ -110,7 +113,9 @@ export async function grantForemanAccess(params: {
   // resurrect a lapsed product for free.
   const existing = await getAccessRow(params.userId);
   let plan: string;
-  if (product === "gc") {
+  if (product === "bundle") {
+    plan = "bundle";
+  } else if (product === "gc") {
     plan =
       existing && (existing.plan === "bl" || existing.plan === "bundle")
         ? "bundle"
@@ -214,7 +219,7 @@ export async function getForemanDomainStats(userId: string): Promise<DomainStat[
 }
 
 // ============================================================
-// END OF FILE - lib/db/foreman.ts (v2 - plan-aware access:
-// full / bl / bundle, merging grants)
+// END OF FILE - lib/db/foreman.ts (v3 - bundle purchases grant
+// both products in one write)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
