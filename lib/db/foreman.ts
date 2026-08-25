@@ -16,6 +16,17 @@ import { db } from "./queries";
 // were created directly in Postgres via setup SQL (Day 3), these
 // definitions just let us query them type-safely, and every helper
 // the product needs lives in this one file.
+// v2 - the plan column now carries WHICH product was bought, with
+// no schema change and no migration:
+//   "full"   = ForemanPrep Full Access (every existing row)
+//   "bl"     = Business & Law prep only
+//   "bundle" = both products
+// hasForemanAccess answers for the GC exam product exactly as
+// before (existing "full" rows are untouched and keep working);
+// hasBlAccess answers for Business & Law; grantForemanAccess now
+// MERGES: buying the second product upgrades the row to "bundle",
+// and a grant can never downgrade or overwrite what someone
+// already owns.
 
 export const foremanAccess = pgTable("foreman_access", {
   userId: uuid("user_id").primaryKey(),
@@ -58,26 +69,57 @@ export type ForemanAttempt = typeof foremanAttempts.$inferSelect;
 
 // ---- Access (the paywall asks this) ------------------------------
 
-export async function hasForemanAccess(userId: string): Promise<boolean> {
+async function getAccessRow(userId: string): Promise<ForemanAccess | null> {
   const rows = await db
     .select()
     .from(foremanAccess)
     .where(eq(foremanAccess.userId, userId));
   const row = rows[0];
+  if (!row) return null;
+  if (row.expiresAt && row.expiresAt.getTime() < Date.now()) return null;
+  return row;
+}
+
+// GC exam product (Full Access). Any plan except a bl-only row
+// counts - "full", "bundle", and any legacy value all keep working.
+export async function hasForemanAccess(userId: string): Promise<boolean> {
+  const row = await getAccessRow(userId);
   if (!row) return false;
-  if (row.expiresAt && row.expiresAt.getTime() < Date.now()) return false;
-  return true;
+  return row.plan !== "bl";
+}
+
+// Business & Law product.
+export async function hasBlAccess(userId: string): Promise<boolean> {
+  const row = await getAccessRow(userId);
+  if (!row) return false;
+  return row.plan === "bl" || row.plan === "bundle";
 }
 
 export async function grantForemanAccess(params: {
   userId: string;
   source?: string;
-  plan?: string;
+  product?: "gc" | "bl";
   expiresAt?: Date | null;
 }) {
   const source = params.source ?? "stripe";
-  const plan = params.plan ?? "full";
+  const product = params.product ?? "gc";
   const expiresAt = params.expiresAt ?? null;
+
+  // Merge with what the user already owns. An expired row does not
+  // merge - it counts as owning nothing, so a new purchase cannot
+  // resurrect a lapsed product for free.
+  const existing = await getAccessRow(params.userId);
+  let plan: string;
+  if (product === "gc") {
+    plan =
+      existing && (existing.plan === "bl" || existing.plan === "bundle")
+        ? "bundle"
+        : "full";
+  } else {
+    plan =
+      existing && existing.plan !== "bl" ? "bundle" : "bl";
+  }
+
   await db
     .insert(foremanAccess)
     .values({ userId: params.userId, plan, source, expiresAt })
@@ -172,6 +214,7 @@ export async function getForemanDomainStats(userId: string): Promise<DomainStat[
 }
 
 // ============================================================
-// END OF FILE - lib/db/foreman.ts (v1 - tables + helpers)
+// END OF FILE - lib/db/foreman.ts (v2 - plan-aware access:
+// full / bl / bundle, merging grants)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
