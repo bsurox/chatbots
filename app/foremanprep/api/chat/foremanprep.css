@@ -1,0 +1,213 @@
+/* FILE: app/foremanprep/foremanprep.css */
+/* ForemanPrep brand surface v12. Business & Law gets its own BLUE
+   identity: .fp-blzone swaps the brand variables to sky blue so
+   every fp- component inside it recolors itself, with explicit
+   overrides for the strip and chip (their orange is hardcoded).
+   .fp-ctabl is the blue buy button for use OUTSIDE a blzone (the
+   landing strip). .fp-blbadge and .fp-learnpill are the small
+   blue doors to the B&L landing page. .fp-float turns the
+   remind-me box into a right-side rail that follows the scroll on
+   wide screens (1300px and up) with a dismiss x; phones keep it
+   in the page flow untouched.
+   v11 notes: Landing plus the paywall wardrobe:
+   buy card, feature checklist, locked-gate card, thank-you screen.
+   v5 added .fp-wordmark. v6 added the floating account badge. v7
+   added .fp-backpill. v8 added .fp-authbtn.exam - the orange exam
+   button used beside the white practice button on the buy page's
+   owned state and the thanks page. v9/v10 were the 17-states
+   tooltip and its underline cleanup. v11 adds the early-bird
+   deadline advertisement worn by landing v14: .fp-deadline (hero
+   pill) and .fp-deadnote (price-table line). Both render only for
+   visitors without Full Access and come down with the Sept 8
+   price-flip round. */
+
+.fp-page { --fp: #f97316; --fp-soft: rgba(249, 115, 22, 0.12); min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 64px; }
+.fp-wrap { max-width: 660px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 20px 0; }
+.fp-page button { -webkit-tap-highlight-color: transparent; font-family: inherit; }
+
+.fp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+
+/* Two-tone wordmark for back buttons and links: Foreman white,
+   Prep orange - same treatment as the logo. Wrap the label as
+   Foreman<span>Prep</span> inside an .fp-wordmark. */
+.fp-wordmark { color: #fff; font-weight: 800; }
+.fp-wordmark span { color: var(--fp); }
+
+/* Back-to-ForemanPrep pill: same look as the practice and exam
+   back buttons - dark pill, chevron, wordmark inside. */
+.fp-backpill { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: #bbb; background: #161616; border: 1px solid #333; border-radius: 999px; padding: 8px 14px; text-decoration: none; cursor: pointer; }
+.fp-backpill::before { content: ""; display: inline-block; width: 7px; height: 7px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin-right: 2px; }
+.fp-brand { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; color: #fff; }
+.fp-brand span { color: var(--fp); }
+.fp-chip { font-size: 12px; font-weight: 700; color: var(--fp); border: 1px solid rgba(249, 115, 22, 0.45); background: var(--fp-soft); border-radius: 999px; padding: 5px 11px; white-space: nowrap; }
+
+.fp-badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #999; border: 1px solid #2a2a2a; background: #111; border-radius: 999px; padding: 6px 12px; margin-bottom: 16px; }
+.fp-h1 { font-size: 36px; line-height: 1.12; font-weight: 800; letter-spacing: -0.8px; margin: 0 0 14px; }
+.fp-h1 span { color: var(--fp); }
+.fp-sub { font-size: 16px; line-height: 1.55; color: #aaa; margin: 0 0 22px; }
+.fp-cta { display: inline-block; padding: 14px 26px; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; }
+.fp-cta:active { transform: translateY(1px); }
+.fp-note { font-size: 13px; color: #777; margin: 12px 0 0; }
+.fp-note b { color: var(--fp); font-weight: 700; }
+
+/* Early-bird deadline advertisement (landing v14, unpaid visitors
+   only). The hero pill names the end date; the small deadnote line
+   sits in the price table. Removed at the Sept 8 price flip. */
+.fp-deadline { display: inline-block; font-size: 14px; font-weight: 800; color: var(--fp); border: 1px solid rgba(249, 115, 22, 0.55); background: var(--fp-soft); border-radius: 999px; padding: 8px 16px; margin: 0 0 16px; }
+.fp-deadline b { color: #fff; font-weight: 800; }
+.fp-deadnote { text-align: center; font-size: 13px; font-weight: 700; color: var(--fp); margin: 14px 0 0; }
+
+.fp-try { display: flex; gap: 10px; margin: 20px 0 8px; flex-wrap: wrap; }
+.fp-try-btn { flex: 1; min-width: 150px; text-align: center; padding: 13px 16px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #fff; color: #000; border: 1px solid #fff; text-decoration: none; }
+.fp-try-btn.ghost { background: #fff; color: #000; border: 1px solid #fff; }
+.fp-tryhint { font-size: 12.5px; color: #777; margin: 0; }
+
+.fp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 36px 0 0; }
+.fp-stat { background: #111; border: 1px solid #262626; border-radius: 12px; padding: 14px 12px; text-align: center; position: relative; }
+
+/* Hover/tap tooltip on a stat card (v9). Shows on mouse hover and on
+   tap/keyboard focus (tabIndex on the card) so phones get it too. */
+.fp-stat .fp-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  max-width: 82vw;
+  background: #161616;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #c7c7c7;
+  text-align: left;
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+.fp-stat:hover .fp-tip, .fp-stat:focus .fp-tip, .fp-stat:focus-within .fp-tip { display: block; }
+.fp-stat:focus { outline: 1px solid #f97316; }
+.fp-tipcue { cursor: help; }
+.fp-sn { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+.fp-sl { font-size: 12px; color: #888; line-height: 1.35; }
+
+.fp-strip { margin: 36px 0 0; padding: 18px; border-radius: 14px; border: 1px solid rgba(249, 115, 22, 0.35); background: linear-gradient(180deg, rgba(249, 115, 22, 0.09), rgba(249, 115, 22, 0.03)); }
+.fp-st { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 6px; }
+.fp-sd { font-size: 14px; line-height: 1.55; color: #bbb; margin: 0; }
+
+.fp-h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; margin: 44px 0 16px; }
+.fp-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.fp-card { background: #111; border: 1px solid #262626; border-radius: 14px; padding: 16px; }
+.fp-cn { font-size: 15px; font-weight: 700; color: #fff; margin: 0 0 5px; }
+.fp-cn span { color: var(--fp); margin-right: 7px; }
+.fp-cd { font-size: 13.5px; line-height: 1.5; color: #999; margin: 0; }
+
+.fp-price { margin: 44px 0 0; border: 1px solid #262626; border-radius: 16px; overflow: hidden; }
+.fp-prow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid #1e1e1e; }
+.fp-pl { font-size: 14px; color: #aaa; }
+.fp-pv { font-size: 14px; font-weight: 700; color: #777; white-space: nowrap; }
+.fp-prow.fp-ours { background: var(--fp-soft); border-bottom: none; }
+.fp-prow.fp-ours .fp-pl { color: #fff; font-weight: 700; font-size: 15px; }
+.fp-prow.fp-ours .fp-pv { color: var(--fp); font-size: 18px; font-weight: 800; }
+.fp-strike { text-decoration: line-through; color: #666; font-weight: 600; margin-right: 8px; font-size: 13px; }
+
+.fp-signup { margin: 44px 0 0; padding: 22px 18px; border-radius: 16px; border: 1px solid rgba(249, 115, 22, 0.4); background: #101010; text-align: center; }
+.fp-fh { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; margin: 0 0 6px; }
+.fp-fs { font-size: 14px; color: #999; line-height: 1.5; margin: 0 0 16px; }
+.fp-row { display: flex; gap: 8px; }
+.fp-in { flex: 1; min-width: 0; background: #0a0a0a; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 13px 14px; font-size: 15px; font-family: inherit; }
+.fp-in:focus { outline: none; border-color: var(--fp); }
+.fp-in:disabled { opacity: 0.6; }
+.fp-go { padding: 13px 18px; border-radius: 10px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; background: var(--fp); color: #000; white-space: nowrap; }
+.fp-go:disabled { background: #1c1c1c; color: #555; cursor: not-allowed; }
+.fp-ok { margin: 14px 0 0; font-size: 14px; font-weight: 600; color: #4ade80; }
+.fp-err { margin: 14px 0 0; font-size: 13px; color: #f87171; }
+.fp-fine { font-size: 12px; color: #666; margin: 12px 0 0; line-height: 1.5; }
+
+.fp-foot { margin: 56px 0 0; padding: 22px 0 0; border-top: 1px solid #1e1e1e; text-align: center; }
+.fp-links { display: flex; justify-content: center; gap: 18px; margin-bottom: 12px; }
+.fp-link { background: none; border: none; padding: 0; font-size: 13px; color: #888; cursor: pointer; text-decoration: none; }
+.fp-legal { font-size: 11.5px; color: #555; line-height: 1.6; margin: 0; }
+
+.fp-buycard { margin: 26px 0 0; padding: 24px 20px; border-radius: 18px; border: 2px solid var(--fp); background: #101010; }
+.fp-buyh { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin: 0 0 6px; }
+.fp-buysub { font-size: 14px; color: #999; line-height: 1.55; margin: 0 0 18px; }
+.fp-pricebig { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; }
+.fp-pricenow { font-size: 44px; font-weight: 800; letter-spacing: -1px; color: var(--fp); }
+.fp-pricewas { font-size: 18px; font-weight: 700; color: #666; text-decoration: line-through; }
+.fp-pricetag { font-size: 12.5px; font-weight: 700; color: #999; margin: 0 0 18px; }
+.fp-feats { display: grid; gap: 9px; margin: 0 0 20px; }
+.fp-feat { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; color: #ccc; }
+.fp-feat b { color: var(--fp); flex: none; font-weight: 800; }
+.fp-buybtn { width: 100%; padding: 16px 0; border-radius: 12px; font-weight: 800; font-size: 17px; border: none; cursor: pointer; background: var(--fp); color: #000; }
+.fp-buybtn:disabled { background: #1c1c1c; color: #555; cursor: not-allowed; }
+.fp-buynote { font-size: 12.5px; color: #777; text-align: center; line-height: 1.55; margin: 12px 0 0; }
+.fp-authrow { display: grid; gap: 10px; }
+.fp-authbtn { display: block; width: 100%; text-align: center; padding: 14px 0; border-radius: 11px; font-weight: 700; font-size: 15px; cursor: pointer; background: #fff; color: #000; border: 1px solid #fff; text-decoration: none; }
+.fp-authbtn.ghost { background: transparent; color: #fff; border: 1px solid #444; }
+.fp-authbtn.exam { background: var(--fp); color: #000; border: 1px solid var(--fp); }
+.fp-owned { text-align: center; padding: 18px 0 6px; }
+.fp-ownedh { font-size: 19px; font-weight: 800; color: #22c55e; margin: 0 0 6px; }
+.fp-buyerr { font-size: 13px; font-weight: 600; color: #f87171; text-align: center; margin: 12px 0 0; }
+
+.fp-gate { margin: 22px 0 0; padding: 20px 18px; border-radius: 16px; border: 1px solid rgba(249, 115, 22, 0.45); background: var(--fp-soft); }
+.fp-gateh { font-size: 17px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+.fp-gated { font-size: 13.5px; color: #bbb; line-height: 1.55; margin: 0 0 14px; }
+.fp-gatebtn { display: block; width: 100%; text-align: center; padding: 13px 0; border-radius: 10px; font-weight: 800; font-size: 15px; border: none; cursor: pointer; background: var(--fp); color: #000; text-decoration: none; }
+
+.fp-thanks { text-align: center; padding-top: 10vh; }
+.fp-thanksmark { width: 74px; height: 74px; margin: 0 auto 18px; }
+.fp-thanksmark svg { width: 100%; height: 100%; display: block; }
+.fp-thanksmark .draw { fill: none; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: fp-draw 0.5s ease forwards; }
+.fp-thanksmark .c1 { stroke: #22c55e; }
+.fp-thanksmark .c2 { stroke: #22c55e; animation-delay: 0.42s; }
+@keyframes fp-draw { to { stroke-dashoffset: 0; } }
+.fp-thanksh { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; margin: 0 0 8px; }
+.fp-thankssub { font-size: 15px; color: #aaa; line-height: 1.55; margin: 0 0 26px; }
+
+@media (min-width: 640px) {
+  .fp-wrap { padding-top: 30px; }
+  .fp-h1 { font-size: 46px; }
+  .fp-stats { grid-template-columns: repeat(4, 1fr); }
+  .fp-grid { grid-template-columns: 1fr 1fr; }
+  .fp-row { max-width: 440px; margin: 0 auto; }
+}
+
+@keyframes fp-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fp-hero, .fp-stats, .fp-strip, .fp-grid, .fp-price, .fp-signup { animation: fp-fade 0.35s ease; }
+
+/* Floating account badge - only rendered when signed in. */
+.fp-fabwrap { position: fixed; right: 18px; bottom: calc(env(safe-area-inset-bottom) + 18px); z-index: 60; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.fp-fab { width: 48px; height: 48px; border-radius: 50%; background: #161616; border: 1px solid #3a3a3a; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5); }
+.fp-fab svg { width: 22px; height: 22px; display: block; }
+.fp-fab:active { transform: translateY(1px); }
+.fp-fabpop { background: #111; border: 1px solid #333; border-radius: 14px; padding: 14px; width: 216px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55); animation: fp-fade 0.2s ease; }
+.fp-fabstat { font-size: 12.5px; color: #999; margin: 0 0 10px; }
+.fp-fabstat b { color: var(--fp); font-weight: 700; }
+.fp-fabout { width: 100%; padding: 10px 0; border-radius: 9px; font-weight: 700; font-size: 14px; cursor: pointer; background: transparent; color: #f87171; border: 1px solid #7f1d1d; }
+.fp-fabout:disabled { opacity: 0.6; cursor: default; }
+
+/* v12: Business & Law blue identity + floating remind-me rail */
+.fp-blzone { --fp: #38bdf8; --fp-soft: rgba(56, 189, 248, 0.12); }
+.fp-blzone.fp-strip, .fp-blzone .fp-strip { border-color: rgba(56, 189, 248, 0.35); background: linear-gradient(180deg, rgba(56, 189, 248, 0.09), rgba(56, 189, 248, 0.03)); }
+.fp-blzone .fp-chip { border-color: rgba(56, 189, 248, 0.45); }
+.fp-blzone .fp-deadline { border-color: rgba(56, 189, 248, 0.55); }
+.fp-ctabl { display: inline-block; padding: 14px 26px; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; background: #38bdf8; color: #000; text-decoration: none; }
+.fp-ctabl:active { transform: translateY(1px); }
+.fp-blbadge { display: inline-block; font-size: 12.5px; font-weight: 700; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.1); border-radius: 999px; padding: 6px 13px; text-decoration: none; }
+.fp-striphead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0 0 6px; }
+.fp-striphead .fp-st { margin: 0; }
+.fp-learnpill { font-size: 12px; font-weight: 700; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.1); border-radius: 999px; padding: 5px 11px; text-decoration: none; white-space: nowrap; }
+.fp-floatx { display: none; position: absolute; top: 8px; right: 10px; background: none; border: none; color: #666; font-size: 15px; font-weight: 700; cursor: pointer; padding: 4px 8px; }
+.fp-floatx:hover { color: #aaa; }
+@media (min-width: 1300px) {
+  .fp-float { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); width: 290px; margin: 0; z-index: 40; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55); }
+  .fp-float .fp-floatx { display: block; }
+}
+
+/* ============================================================
+   END OF FILE - app/foremanprep/foremanprep.css (v12 - B&L blue
+   identity, floating remind-me rail)
+   If you can see this comment, the paste was not truncated.
+   ============================================================ */
