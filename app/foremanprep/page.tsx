@@ -4,9 +4,16 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v18. The footer gains a "State guides"
-// link beside "Exam guides" - the crawl door into the 17 new
-// state pages at /foremanprep/states. One link, nothing else.
+// ForemanPrep landing page v19. Business & Law joins the page: a
+// strip after the features grid pitches the second exam most
+// NASCLA states require (120-question drill room, $79 one-time,
+// free sample door at /foremanprep/bl), and the footer gains a
+// "Business & Law" link. The strip hides for accounts that
+// already own B&L - same doctrine as every other pitch on this
+// page: never sell someone what they already bought. The access
+// fetch now also reads the bl flag.
+// v18 notes: footer gained the "State guides" link - the crawl
+// door into the 17 state pages at /foremanprep/states.
 // v17 notes: Deadline advertising slimmed to
 // ONE badge (his spec): the header chip stays and now reads
 // "Early bird pricing ends Sept 7" (the word "pricing" added for
@@ -135,6 +142,7 @@ export default function ForemanPrepPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [paid, setPaid] = useState(false);
+  const [blOwned, setBlOwned] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [earlyBird, setEarlyBird] = useState(true);
 
@@ -148,6 +156,7 @@ export default function ForemanPrepPage() {
       .then((data) => {
         if (data?.loggedIn) setLoggedIn(true);
         if (data?.paid) setPaid(true);
+        if (data?.bl) setBlOwned(true);
       })
       .catch(() => {});
   }, []);
@@ -332,6 +341,27 @@ export default function ForemanPrepPage() {
         ))}
       </div>
 
+      {blOwned ? null : (
+        <div className="fp-strip">
+          <p className="fp-st">The trade exam is only half the license.</p>
+          <p className="fp-sd">
+            Most NASCLA states also make you pass a separate Business &amp;
+            Law exam - contracts, lien law, payroll and taxes, insurance,
+            estimating math. We built the drill room for that too: 120
+            practice questions with instant explanations, free 10-question
+            sample, one-time $79. No subscription, and it stacks onto the
+            same account as Full Access.
+          </p>
+          <Link
+            className="fp-try-btn ghost"
+            href="/foremanprep/bl"
+            style={{ display: "inline-block", marginTop: "12px" }}
+          >
+            Try Business &amp; Law practice
+          </Link>
+        </div>
+      )}
+
       {paid ? null : (
         <>
       <h2 className="fp-h2">What prep costs today</h2>
@@ -415,6 +445,9 @@ export default function ForemanPrepPage() {
 
       <div className="fp-foot">
         <div className="fp-links">
+          <Link className="fp-link" href="/foremanprep/bl">
+            Business &amp; Law
+          </Link>
           <Link className="fp-link" href="/foremanprep/guides">
             Exam guides
           </Link>
@@ -440,7 +473,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v18 - footer link to
-// the state guides)
+// END OF FILE - app/foremanprep/page.tsx (v19 - Business & Law
+// strip and footer link)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
