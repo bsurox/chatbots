@@ -20,7 +20,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 // v6: Business & Law prep. POST body {"product":"bl"} buys B&L at
 // a flat $79 (no early-bird clock); anything else - including the
 // bodiless POST every existing button sends - buys Full Access
-// exactly as before. Each product checks its own already-owned
+// exactly as before.
+// v7: the bundle. {"product":"bundle"} buys BOTH in one checkout -
+// two line items on one Stripe session (Full Access at the clock
+// price, B&L at $79), so the receipt itemizes both and the total
+// is always exactly the two prices summed - no discount, no
+// separate bundle price to maintain. Blocked for anyone who
+// already owns either piece: they buy the missing half alone. Each product checks its own already-owned
 // guard, so a Full Access owner CAN buy B&L (the webhook merges the
 // grant to "bundle") but nobody can pay twice for the same thing.
 // B&L success URLs append &product=bl so the thanks page confirms
@@ -47,11 +53,25 @@ export async function POST(request: Request) {
 
   // Which product? Tolerates the bodiless POST of older buttons.
   const body = await request.json().catch(() => null);
-  const product = body?.product === "bl" ? "bl" : "gc";
+  const product =
+    body?.product === "bl"
+      ? "bl"
+      : body?.product === "bundle"
+        ? "bundle"
+        : "gc";
 
   // Already own it? Never let someone pay twice for the same thing.
+  // The bundle is for clean slates only - owning either piece means
+  // buying the missing one individually instead.
   if (product === "bl") {
     if (await hasBlAccess(session.user.id)) {
+      return Response.json({ already: true });
+    }
+  } else if (product === "bundle") {
+    if (
+      (await hasForemanAccess(session.user.id)) ||
+      (await hasBlAccess(session.user.id))
+    ) {
       return Response.json({ already: true });
     }
   } else if (await hasForemanAccess(session.user.id)) {
@@ -60,30 +80,37 @@ export async function POST(request: Request) {
 
   const reqUrl = new URL(request.url);
   const successUrl =
-    product === "bl"
-      ? `${reqUrl.origin}/foremanprep/thanks?paid=1&product=bl&session_id={CHECKOUT_SESSION_ID}`
-      : `${reqUrl.origin}/foremanprep/thanks?paid=1&session_id={CHECKOUT_SESSION_ID}`;
+    product === "gc"
+      ? `${reqUrl.origin}/foremanprep/thanks?paid=1&session_id={CHECKOUT_SESSION_ID}`
+      : `${reqUrl.origin}/foremanprep/thanks?paid=1&product=${product}&session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${reqUrl.origin}/foremanprep/buy`;
+
+  const gcItem = {
+    price_data: {
+      currency: "usd",
+      product_data: { name: PRODUCT_NAME },
+      unit_amount:
+        Date.now() < PRICE_FLIP_MS ? EARLY_PRICE_CENTS : REGULAR_PRICE_CENTS,
+    },
+    quantity: 1,
+  };
+  const blItem = {
+    price_data: {
+      currency: "usd",
+      product_data: { name: BL_PRODUCT_NAME },
+      unit_amount: BL_PRICE_CENTS,
+    },
+    quantity: 1,
+  };
 
   const checkoutSession = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: product === "bl" ? BL_PRODUCT_NAME : PRODUCT_NAME,
-          },
-          unit_amount:
-            product === "bl"
-              ? BL_PRICE_CENTS
-              : Date.now() < PRICE_FLIP_MS
-                ? EARLY_PRICE_CENTS
-                : REGULAR_PRICE_CENTS,
-        },
-        quantity: 1,
-      },
-    ],
+    line_items:
+      product === "bundle"
+        ? [gcItem, blItem]
+        : product === "bl"
+          ? [blItem]
+          : [gcItem],
     mode: "payment",
     allow_promotion_codes: true,
     // Card statements read ASKEVO* FOREMANPREP - full brand name,
@@ -98,14 +125,16 @@ export async function POST(request: Request) {
     metadata:
       product === "bl"
         ? { userId: session.user.id, foremanprep_bl: "1" }
-        : { userId: session.user.id, foremanprep: "1" },
+        : product === "bundle"
+          ? { userId: session.user.id, foremanprep_bundle: "1" }
+          : { userId: session.user.id, foremanprep: "1" },
   });
   return Response.json({ url: checkoutSession.url });
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/checkout/route.ts (v6 -
-// two products: Full Access on the clock, B&L at flat $79)
+// END OF FILE - app/foremanprep/api/checkout/route.ts (v7 -
+// bundle: both products, two line items, one checkout)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
