@@ -1,23 +1,26 @@
 // FILE: app/foremanprep/layout.tsx
 import type { Metadata } from "next";
 import "./foremanprep.css";
-import AccountBadge from "./account-badge";
 import FpAnalytics from "./analytics";
+import ChatWidget from "./chat-widget";
 
 // Server-side wrapper for the ForemanPrep surface. Owns the css
 // import and the metadata: browser tabs and share cards say
 // ForemanPrep, not AskEvo. The .fp-page div paints the dark canvas
 // and carries the brand's safety-orange variables for every page
 // that will live under /foremanprep as the product grows.
-// v2 mounts the floating account badge on every ForemanPrep page:
-// invisible to signed-out visitors, a person icon with a Log out
-// popover for signed-in users.
-// v3 mounts FpAnalytics: the Google Ads tag + Meta pixel, active
-// only when the visitor is actually on foremanprep.com.
-// v4 sets the ForemanPrep favicon (public/fp-icon.png) via the
+// v5 (his call): the floating account badge is RETIRED - the
+// landing header's Log in / Log out button covers auth, and the
+// bottom-right slot now belongs to the live chat. ChatWidget
+// mounts here ONCE and decides for itself where to render: the
+// two landing pages and the two practice rooms only - never the
+// exam simulator, audio, buy, or content pages.
+// v4 set the ForemanPrep favicon (public/fp-icon.png) via the
 // icons metadata, so tabs and Google results stop wearing the
-// AskEvo icon on this island. Auth pages (/login, /register) keep
-// the shared icon for now - separate host-aware fix if it bites.
+// AskEvo icon on this island. v3 mounted FpAnalytics: the Google
+// Ads tag + Meta pixel, active only when the visitor is actually
+// on foremanprep.com. v2 had mounted the account badge (now
+// removed).
 
 export const metadata: Metadata = {
   title: "ForemanPrep - Pass the NASCLA Contractor Exam",
@@ -36,13 +39,14 @@ export default function ForemanPrepLayout({
   return (
     <div className="fp-page">
       {children}
-      <AccountBadge />
+      <ChatWidget />
       <FpAnalytics />
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/layout.tsx (v4 - fp favicon)
+// END OF FILE - app/foremanprep/layout.tsx (v5 - account badge
+// retired, live chat widget mounted)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
