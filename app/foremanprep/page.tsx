@@ -4,7 +4,9 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v24. Business & Law gets its BLUE
+// ForemanPrep landing page v25. The strip's buy button now links
+// /foremanprep/buy?product=bl - the B&L door - so the buy page
+// opens with the B&L card first and in blue. v24 notes: Business & Law gets its BLUE
 // identity + more visibility (his calls): (1) the B&L strip wears
 // .fp-blzone - sky blue border, glow, and buttons - so the second
 // product reads as its own thing next to the safety orange;
@@ -446,7 +448,7 @@ export default function ForemanPrepPage() {
               marginTop: "12px",
             }}
           >
-            <Link className="fp-ctabl" href="/foremanprep/buy">
+            <Link className="fp-ctabl" href="/foremanprep/buy?product=bl">
               Get Business &amp; Law Prep - $79
             </Link>
             <Link className="fp-try-btn ghost" href="/foremanprep/bl">
@@ -537,7 +539,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v24 - blue B&L
-// identity, hero badge, Learn more door, floating remind-me rail)
+// END OF FILE - app/foremanprep/page.tsx (v25 - strip buy button
+// enters through the B&L door)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
