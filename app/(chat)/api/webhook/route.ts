@@ -18,6 +18,9 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 // foremanprep_bl = "1"; the grant runs through the same claim/release
 // discipline and lands as product "bl" (the access layer merges it to
 // "bundle" for buyers who already own Full Access, and vice versa).
+// v5: bundle purchases (both products, one checkout). Metadata
+// foremanprep_bundle = "1" grants product "bundle" - both
+// entitlements in a single claim-guarded write.
 
 async function claimSession(sessionId: string, userId: string, credits: number): Promise<boolean> {
   const res = await db.execute(sql`INSERT INTO stripe_events (session_id, user_id, credits) VALUES (${sessionId}, ${userId}, ${credits}) ON CONFLICT (session_id) DO NOTHING RETURNING session_id`);
@@ -46,9 +49,10 @@ export async function POST(request: Request) {
     const userId = session.metadata?.userId;
     const isForemanPrep = session.metadata?.foremanprep === "1";
     const isForemanBl = session.metadata?.foremanprep_bl === "1";
+    const isBundle = session.metadata?.foremanprep_bundle === "1";
     const credits = Number(session.metadata?.credits ?? 0);
 
-    if (userId && (isForemanPrep || isForemanBl) && session.payment_status === "paid") {
+    if (userId && (isForemanPrep || isForemanBl || isBundle) && session.payment_status === "paid") {
       // ForemanPrep products - Full Access or Business & Law. Same
       // claim/release discipline as credits: claim first, grant
       // second, release and 500 on grant failure so Stripe retries
@@ -59,7 +63,7 @@ export async function POST(request: Request) {
           await grantForemanAccess({
             userId,
             source: "stripe",
-            product: isForemanBl ? "bl" : "gc",
+            product: isBundle ? "bundle" : isForemanBl ? "bl" : "gc",
           });
         } catch (grantErr) {
           console.error("ForemanPrep access grant failed, releasing claim:", grantErr);
@@ -87,7 +91,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/webhook/route.ts (v4 - B&L
-// purchases grant product "bl" via the same claim discipline)
+// END OF FILE - app/(chat)/api/webhook/route.ts (v5 - bundle
+// purchases grant both products in one claim)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
