@@ -1,5 +1,6 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v12. Business & Law gets its own BLUE
+/* ForemanPrep brand surface v13. Adds the bundle card's two-brand
+   gradient dress (.fp-bundlecard / .fp-bundlebtn). v12 notes: Business & Law gets its own BLUE
    identity: .fp-blzone swaps the brand variables to sky blue so
    every fp- component inside it recolors itself, with explicit
    overrides for the strip and chip (their orange is hardcoded).
@@ -206,8 +207,17 @@
   .fp-float .fp-floatx { display: block; }
 }
 
+/* v13: the bundle card wears BOTH brands - a border, price, and
+   buy button that fade from ForemanPrep orange into B&L blue.
+   The B&L buy card itself needs no new css: it wraps in
+   .fp-blzone and every var(--fp) inside turns blue. */
+.fp-bundlecard { border: 2px solid transparent; background: linear-gradient(#101010, #101010) padding-box, linear-gradient(90deg, #f97316, #38bdf8) border-box; }
+.fp-bundlecard .fp-pricenow { background: linear-gradient(90deg, #f97316, #38bdf8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.fp-bundlebtn { background: linear-gradient(90deg, #f97316, #38bdf8); color: #000; }
+.fp-bundlebtn:disabled { background: #1c1c1c; color: #555; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v12 - B&L blue
-   identity, floating remind-me rail)
+   END OF FILE - app/foremanprep/foremanprep.css (v13 - the
+   half-orange half-blue bundle card)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
