@@ -16,9 +16,11 @@ import { usePathname } from "next/navigation";
 // manual: the fixed $99 value inside the Google Ads conversion
 // SETTING lives in their dashboard - edit it to $149 on Sept 8.
 // PageView re-fires on route changes so Meta sees real browsing.
-// v3: both track helpers accept an optional product tag. "bl" =
-// Business & Law prep at its flat $79; anything else keeps the
-// clock-based Full Access price. Google conversion events now
+// v4: product "bundle" values events at the two products summed -
+// clock price plus $79 - matching what checkout v7 charges for the
+// buy-both card. v3 notes: both track helpers accept an optional
+// product tag. "bl" = Business & Law prep at its flat $79;
+// anything else keeps the clock-based Full Access price. Google conversion events now
 // carry value + currency explicitly - ignored while the dashboard
 // setting is fixed-value, correct automatically if that setting is
 // ever switched to per-transaction values. Existing callers that
@@ -39,7 +41,9 @@ function priceUsd(): number {
 }
 
 function eventValueUsd(product?: string): number {
-  return product === "bl" ? BL_PRICE_USD : priceUsd();
+  if (product === "bl") return BL_PRICE_USD;
+  if (product === "bundle") return priceUsd() + BL_PRICE_USD;
+  return priceUsd();
 }
 
 function isForemanHost(): boolean {
@@ -141,8 +145,8 @@ export default function FpAnalytics() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/analytics.tsx (v3 - product-
-// aware event values: bl = $79 flat, gc = clock price)
+// END OF FILE - app/foremanprep/analytics.tsx (v4 - bundle
+// events value at clock price + $79)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
