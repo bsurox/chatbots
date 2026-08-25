@@ -4,10 +4,21 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v19. Business & Law joins the page: a
+// ForemanPrep landing page v20. Two B&L strip changes (his call):
+// 1) COPY - "stacks onto the same account as Full Access" read
+// like jargon to a visitor who hasn't bought anything yet, so the
+// line now ends "the same account as your NASCLA GC access".
+// 2) PLACEMENT - the whole B&L box moves BELOW the "What prep
+// costs today" table. The price furniture's paid-gate is split in
+// two so the strip can sit between the price table and the
+// remind-me box for visitors, while Full Access owners - who
+// never see the price furniture at all - still get the strip
+// after the features grid. Hide rule unchanged: an account that
+// owns B&L never sees the pitch.
+// v19 notes: Business & Law joined the page: a
 // strip after the features grid pitches the second exam most
 // NASCLA states require (120-question drill room, $79 one-time,
-// free sample door at /foremanprep/bl), and the footer gains a
+// free sample door at /foremanprep/bl), and the footer gained a
 // "Business & Law" link. The strip hides for accounts that
 // already own B&L - same doctrine as every other pitch on this
 // page: never sell someone what they already bought. The access
@@ -341,27 +352,6 @@ export default function ForemanPrepPage() {
         ))}
       </div>
 
-      {blOwned ? null : (
-        <div className="fp-strip">
-          <p className="fp-st">The trade exam is only half the license.</p>
-          <p className="fp-sd">
-            Most NASCLA states also make you pass a separate Business &amp;
-            Law exam - contracts, lien law, payroll and taxes, insurance,
-            estimating math. We built the drill room for that too: 120
-            practice questions with instant explanations, free 10-question
-            sample, one-time $79. No subscription, and it stacks onto the
-            same account as Full Access.
-          </p>
-          <Link
-            className="fp-try-btn ghost"
-            href="/foremanprep/bl"
-            style={{ display: "inline-block", marginTop: "12px" }}
-          >
-            Try Business &amp; Law practice
-          </Link>
-        </div>
-      )}
-
       {paid ? null : (
         <>
       <h2 className="fp-h2">What prep costs today</h2>
@@ -397,8 +387,31 @@ export default function ForemanPrepPage() {
           Get Full Access
         </Link>
       </div>
+        </>
+      )}
 
-      {earlyBird ? (
+      {blOwned ? null : (
+        <div className="fp-strip">
+          <p className="fp-st">The trade exam is only half the license.</p>
+          <p className="fp-sd">
+            Most NASCLA states also make you pass a separate Business &amp;
+            Law exam - contracts, lien law, payroll and taxes, insurance,
+            estimating math. We built the drill room for that too: 120
+            practice questions with instant explanations, free 10-question
+            sample, one-time $79. No subscription, and it stacks onto the
+            same account as your NASCLA GC access.
+          </p>
+          <Link
+            className="fp-try-btn ghost"
+            href="/foremanprep/bl"
+            style={{ display: "inline-block", marginTop: "12px" }}
+          >
+            Try Business &amp; Law practice
+          </Link>
+        </div>
+      )}
+
+      {paid || !earlyBird ? null : (
       <div className="fp-signup">
         <p className="fp-fh">Not ready to buy today?</p>
         <p className="fp-fs">
@@ -439,8 +452,6 @@ export default function ForemanPrepPage() {
           One reminder email. No spam, ever.
         </p>
       </div>
-      ) : null}
-        </>
       )}
 
       <div className="fp-foot">
@@ -473,7 +484,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v19 - Business & Law
-// strip and footer link)
+// END OF FILE - app/foremanprep/page.tsx (v20 - B&L strip
+// reworded and moved below the price table)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
