@@ -9,22 +9,32 @@ import { fpTrackPurchase } from "../analytics";
 // access API a few times so the status line flips to confirmed
 // without the buyer doing anything. If Stripe's webhook is having
 // a slow minute, the copy says so instead of looking broken.
-// v3: reports the purchase to Google Ads + Meta exactly once -
+// v3 notes: reports the purchase to Google Ads + Meta exactly once,
 // only on a real Stripe redirect (paid=1), guarded by
 // sessionStorage against refreshes, with the Stripe session id as
 // the transaction id so ad platforms can dedupe on their end too.
+// v4: product-aware. Checkout appends &product=bl on Business &
+// Law purchases; this page then tracks the $79 value, polls the
+// access API's bl flag instead of paid, and swaps the copy and
+// buttons to point at the B&L practice room. With no product param
+// everything reads exactly as v3 did.
 
 export default function ThanksPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [checks, setChecks] = useState(0);
+  const [isBl, setIsBl] = useState(false);
 
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
+      if (params.get("product") === "bl") setIsBl(true);
       if (params.get("paid") !== "1") return;
       if (window.sessionStorage.getItem("fp-purchase-tracked")) return;
       window.sessionStorage.setItem("fp-purchase-tracked", "1");
-      fpTrackPurchase(params.get("session_id") || "");
+      fpTrackPurchase(
+        params.get("session_id") || "",
+        params.get("product") === "bl" ? "bl" : undefined
+      );
     } catch {
       // Tracking must never break the thanks page.
     }
@@ -36,13 +46,14 @@ export default function ThanksPage() {
       fetch("/foremanprep/api/access")
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
-          if (data?.paid) setConfirmed(true);
+          const owned = isBl ? data?.bl : data?.paid;
+          if (owned) setConfirmed(true);
           setChecks((c) => c + 1);
         })
         .catch(() => setChecks((c) => c + 1));
     }, checks === 0 ? 400 : 1600);
     return () => clearTimeout(t);
-  }, [checks, confirmed]);
+  }, [checks, confirmed, isBl]);
 
   return (
     <div className="fp-wrap">
@@ -56,16 +67,26 @@ export default function ThanksPage() {
         <p className="fp-thanksh">You're in.</p>
         <p className="fp-thankssub">
           {confirmed
-            ? "Full Access is active on your account. Time to get to work."
+            ? isBl
+              ? "Business & Law prep is active on your account. Time to get to work."
+              : "Full Access is active on your account. Time to get to work."
             : "Payment received - your access is activating now. If things still look locked in a minute, refresh this page."}
         </p>
         <div className="fp-authrow">
-          <Link className="fp-authbtn" href="/foremanprep/practice">
-            Start practicing
-          </Link>
-          <Link className="fp-authbtn exam" href="/foremanprep/exam">
-            Take a full exam
-          </Link>
+          {isBl ? (
+            <Link className="fp-authbtn" href="/foremanprep/bl">
+              Start Business & Law practice
+            </Link>
+          ) : (
+            <>
+              <Link className="fp-authbtn" href="/foremanprep/practice">
+                Start practicing
+              </Link>
+              <Link className="fp-authbtn exam" href="/foremanprep/exam">
+                Take a full exam
+              </Link>
+            </>
+          )}
         </div>
         <p className="fp-buynote">
           A receipt is on its way to your email. Study from any device - just
@@ -77,8 +98,8 @@ export default function ThanksPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/thanks/page.tsx (v3 - purchase
-// conversion ping)
+// END OF FILE - app/foremanprep/thanks/page.tsx (v4 - product-
+// aware: B&L purchases confirm, track, and route to /bl)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
