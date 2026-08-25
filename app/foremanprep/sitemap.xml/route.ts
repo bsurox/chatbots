@@ -2,21 +2,22 @@
 import { GUIDES } from "@/lib/foremanprep/guides";
 import { STATES } from "@/lib/foremanprep/states";
 
-// ForemanPrep sitemap (v3). Served at /foremanprep/sitemap.xml,
+// ForemanPrep sitemap (v4). Served at /foremanprep/sitemap.xml,
 // which on foremanprep.com is the address you submit to Google
 // Search Console (the root /sitemap.xml path is excluded from the
 // proxy by the app-wide matcher, so the island carries its own).
 // Lists the CLEAN public URLs that proxy.ts v11 rewrites onto the
 // island - the same addresses the guide and state pages declare
 // as their canonicals. v2 added the 17 state guides plus /states;
-// v3 adds /bl, the Business & Law practice room.
+// v3 added /bl, the Business & Law practice room; v4 adds
+// /bl-prep, the Business & Law landing page.
 
 const BASE = "https://foremanprep.com";
 const GUIDES_UPDATED = "2026-08-21";
 const STATES_UPDATED = "2026-08-22";
 
 export function GET(): Response {
-  const staticPaths = ["/", "/guides", "/states", "/practice", "/exam", "/audio", "/buy", "/bl"];
+  const staticPaths = ["/", "/guides", "/states", "/practice", "/exam", "/audio", "/buy", "/bl", "/bl-prep"];
   const urls: Array<{ loc: string; lastmod?: string }> = [
     ...staticPaths.map((p) => ({ loc: BASE + (p === "/" ? "" : p) })),
     ...GUIDES.map((g) => ({
@@ -52,8 +53,8 @@ export function GET(): Response {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/sitemap.xml/route.ts (v3 -
-// /bl added to the clean URLs)
+// END OF FILE - app/foremanprep/sitemap.xml/route.ts (v4 -
+// /bl-prep added)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
