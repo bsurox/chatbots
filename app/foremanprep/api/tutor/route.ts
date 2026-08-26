@@ -4,16 +4,25 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { auth } from "@/app/(auth)/auth";
 import { guestRegex } from "@/lib/constants";
-import { hasForemanAccess } from "@/lib/db/foreman";
+import { hasBlAccess, hasForemanAccess } from "@/lib/db/foreman";
+import { getBlQuestion } from "@/lib/foremanprep/blquestions";
 import { getQuestion } from "@/lib/foremanprep/questions";
 
 // ForemanPrep tutor v2 (paywall). A question-scoped tutor: the
 // client sends a question id plus the short back-and-forth so far,
 // and the model answers as a plain-spoken exam coach who always
 // points at the book and section. Haiku keeps the cost to fractions
-// of a cent per message. Tiers: Full Access owners get 25 messages
-// a day keyed to their account; everyone else gets 3 a day per IP -
+// of a cent per message. Tiers: paid owners get 25 messages a day
+// keyed to their account; everyone else gets 3 a day per IP -
 // enough to taste the tutor, not enough to live off it.
+// v3: Business & Law questions. Ids starting bl- resolve against
+// the B&L bank, the coach persona switches to the Business & Law
+// exam (state rules vary - it teaches the principle and flags
+// state-specific numbers instead of universalizing one state's),
+// and the paid tier keys on the RIGHT product: B&L owners get the
+// full allowance on B&L questions even without Full Access, and
+// vice versa. The 25/day pool is shared across both products -
+// one tutor, one allowance.
 
 const MODEL_ID = "claude-haiku-4-5";
 const MAX_TURNS = 12;
@@ -46,14 +55,30 @@ type Turn = { role: "user" | "assistant"; content: string };
 
 export async function POST(request: Request) {
   try {
-    // Tier check: Full Access owners are capped per account, everyone
-    // else per IP. Guests count as free - a throwaway guest row never
-    // owns a purchase.
+    // Which question? Parsed first because the paid tier depends on
+    // WHICH product the question belongs to.
+    const body = await request.json();
+    const qid = typeof body?.questionId === "string" ? body.questionId : "";
+    const isBl = qid.startsWith("bl-");
+    const q = isBl ? getBlQuestion(qid) : getQuestion(qid);
+    if (!q) {
+      return Response.json({ error: "Unknown question." }, { status: 400 });
+    }
+
+    // Tier check: paid owners are capped per account, everyone else
+    // per IP. Guests count as free - a throwaway guest row never
+    // owns a purchase. B&L questions check B&L ownership; GC
+    // questions check Full Access.
     const session = await auth();
     const userId = session?.user?.id;
     const email = session?.user?.email ?? "";
     const realUser = Boolean(userId) && !guestRegex.test(email);
-    const paid = realUser && userId ? await hasForemanAccess(userId) : false;
+    const paid =
+      realUser && userId
+        ? isBl
+          ? await hasBlAccess(userId)
+          : await hasForemanAccess(userId)
+        : false;
 
     if (paid && userId) {
       if (isCapped(`u:${userId}`, PAID_DAILY_CAP)) {
@@ -67,18 +92,13 @@ export async function POST(request: Request) {
       if (isCapped(`ip:${ip}`, FREE_DAILY_CAP)) {
         return Response.json(
           {
-            error:
-              "That's the free tutor limit for today. Full Access includes 25 tutor messages a day.",
+            error: isBl
+              ? "That's the free tutor limit for today. Business & Law prep includes 25 tutor messages a day."
+              : "That's the free tutor limit for today. Full Access includes 25 tutor messages a day.",
           },
           { status: 429 }
         );
       }
-    }
-
-    const body = await request.json();
-    const q = getQuestion(typeof body?.questionId === "string" ? body.questionId : "");
-    if (!q) {
-      return Response.json({ error: "Unknown question." }, { status: 400 });
     }
 
     const raw: Turn[] = Array.isArray(body?.messages) ? body.messages : [];
@@ -95,15 +115,21 @@ export async function POST(request: Request) {
       return Response.json({ error: "Ask a question first." }, { status: 400 });
     }
 
+    const intro = isBl
+      ? "You are the ForemanPrep Business & Law tutor: a plain-spoken coach helping a working contractor pass their state's Business & Law contractor exam."
+      : "You are the ForemanPrep tutor: a plain-spoken coach helping a working tradesman pass the NASCLA Commercial General Building Contractor exam.";
+    const rules = isBl
+      ? "Rules: Explain like a good foreman would - short sentences, no jargon without unpacking it, no talking down. Anchor answers to the cited reference so the student learns WHERE it lives. IMPORTANT: state rules vary - lien deadlines, license thresholds, and retainage caps differ by state. Teach the general principle, and when a number is state-specific say so plainly instead of presenting one state's rule as universal. Stay on this question and closely related Business & Law topics. If asked about anything unrelated to contractor-exam prep, say you're only here for exam questions and steer back. Keep replies under 150 words unless walking through a calculation."
+      : "Rules: Explain like a good foreman would - short sentences, no jargon without unpacking it, no talking down. Always anchor answers to the reference book and section so the student learns WHERE to find it (the exam is open book - finding it fast is the skill). Stay on this question and closely related exam topics. If asked about anything unrelated to contractor-exam prep, say you're only here for exam questions and steer back. Keep replies under 150 words unless walking through a calculation.";
     const system = [
-      "You are the ForemanPrep tutor: a plain-spoken coach helping a working tradesman pass the NASCLA Commercial General Building Contractor exam.",
+      intro,
       "The student is looking at this practice question:",
       `QUESTION: ${q.q}`,
       `CHOICES: ${q.choices.map((c, i) => `${"ABCD"[i]}) ${c}`).join(" | ")}`,
       `CORRECT ANSWER: ${"ABCD"[q.answer]}) ${q.choices[q.answer]}`,
       `EXPLANATION: ${q.explain}`,
       `REFERENCE: ${q.cite}`,
-      "Rules: Explain like a good foreman would - short sentences, no jargon without unpacking it, no talking down. Always anchor answers to the reference book and section so the student learns WHERE to find it (the exam is open book - finding it fast is the skill). Stay on this question and closely related exam topics. If asked about anything unrelated to contractor-exam prep, say you're only here for exam questions and steer back. Keep replies under 150 words unless walking through a calculation.",
+      rules,
     ].join("\n");
 
     const result = await generateText({
@@ -125,7 +151,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/api/tutor/route.ts (v2 - paid and
-// free tiers)
+// END OF FILE - app/foremanprep/api/tutor/route.ts (v3 - B&L
+// questions, product-aware paid tier)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
