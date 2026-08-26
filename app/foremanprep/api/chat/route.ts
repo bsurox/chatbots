@@ -4,29 +4,37 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db/queries";
+import { GUIDES } from "@/lib/foremanprep/guides";
+import { STATES } from "@/lib/foremanprep/states";
 
-// ForemanPrep live chat (v1). The presales/support assistant behind
-// the floating chat button: answers questions about ForemanPrep,
-// Business & Law prep, the bundle, states, and the exams - for
-// ANYONE, signed in or not, because the people with buying
-// questions are exactly the ones without accounts yet. Same Haiku
-// + in-memory daily-cap machinery as the tutor, but a SEPARATE
-// counter with its own allowance: 10 messages a day per IP for
-// everyone. When a visitor runs dry the widget hands them the
-// support form (name + email -> support@askevo.ai via the existing
-// /api/support pipe). Facts in the system prompt state prices from
-// the same PRICE_FLIP_MS clock as checkout, so the assistant
-// quotes $99 today and $149 after Sept 7 without an edit.
-// v2 (his abuse catch: a phone REFRESH reset the limit): the daily
-// cap now lives in Postgres, not in this process's memory. Vercel
-// spins serverless instances up and down constantly, so an
-// in-memory counter quietly restarts - the same weakness his
-// refresh exposed. The route creates its own tiny counter table
-// on first use (CREATE TABLE IF NOT EXISTS - no setup step), one
-// upsert per message, week-old rows swept opportunistically. If
-// the database ever hiccups, the old in-memory counter still
-// stands guard as the fallback rather than failing open with no
-// limit at all.
+// ForemanPrep live chat (v3). Two changes this round (his specs):
+// 1. PLAIN SPEECH: the assistant kept decorating replies with
+//    markdown asterisks, which render as literal * characters in
+//    the widget and make replies hard to read. The system prompt
+//    now bans markdown outright, and as a hard guarantee every
+//    reply is scrubbed of asterisk characters server-side before
+//    it leaves this route - even a disobedient reply arrives clean.
+// 2. STATE KNOWLEDGE: the chat is now trained on the state
+//    library. At module load it compiles every state's verified
+//    fact box from lib/foremanprep/states.ts (licensing agency,
+//    what NASCLA counts for there, what the state still requires,
+//    score windows, board site - verified Aug 2026) plus the five
+//    guide article titles from lib/foremanprep/guides.ts into the
+//    system prompt. Visitors get real per-state answers on the
+//    spot instead of being told to go dig through the guides; the
+//    guide and state URLs are offered for the deep detail. One
+//    source of truth: edit states.ts and the chat learns it on the
+//    next deploy, no edit here.
+// v2 notes: the daily cap lives in Postgres (self-creating
+// foreman_chat_hits table, upsert per message, 7-day sweep,
+// in-memory fallback if the DB hiccups) because Vercel instances
+// restart constantly and a refresh was resetting an in-memory
+// counter. v1 notes: presales/support assistant behind the
+// floating chat button, for ANYONE signed in or not; Haiku; 10
+// messages/day per IP; at the cap the widget hands the visitor
+// the support form (-> support@askevo.ai). Prices quoted from the
+// same PRICE_FLIP_MS clock as checkout: $99 today, $149 after
+// Sept 7, no edit needed.
 
 const MODEL_ID = "claude-haiku-4-5";
 const MAX_TURNS = 12;
@@ -40,6 +48,22 @@ const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 const hits = new Map<string, number[]>();
+
+// Compiled once at module load. One line per state: the verified
+// fact box the state pages render, flattened for the model.
+const STATE_KNOWLEDGE = STATES.map(
+  (s) =>
+    "- " +
+    s.name.toUpperCase() +
+    " (full guide: /states/" +
+    s.slug +
+    "): " +
+    s.facts.map((f) => f.l + ": " + f.v).join("; ")
+).join("\n");
+
+const GUIDE_LIST = GUIDES.map((g) => "- " + g.h1 + " -> /guides/" + g.slug).join(
+  "\n"
+);
 
 function isCapped(key: string, cap: number): boolean {
   const now = Date.now();
@@ -100,6 +124,11 @@ function buildSystem(): string {
   return [
     "You are the ForemanPrep helper - a friendly, plain-spoken assistant answering visitor questions about ForemanPrep's exam prep products. Talk like a helpful person at a supply counter, not a marketer.",
     "",
+    "HOW YOU WRITE - NON-NEGOTIABLE:",
+    "- Plain conversational sentences only, like a text message from a knowledgeable friend.",
+    "- NEVER use markdown or any formatting symbols: no asterisks, no bold, no italics, no bullet points, no numbered lists, no headers, no tables.",
+    "- When you need to list things, write them into a sentence separated by commas.",
+    "",
     "THE PRODUCTS:",
     `1. ForemanPrep Full Access - ${gcPrice}, one-time, no subscription. Prep for the NASCLA Commercial General Building Contractor exam: 156 practice questions across the real 12-subject outline, a full 115-question exam simulator on the true 5.5-hour clock, an AI tutor (25 messages/day), audio study (every question voiced, 12 drive-time lessons, hands-free drill), book-and-page citations. Pass guarantee: complete the course and fail the real exam, full refund (conditions on the Terms page). Buy at /buy.`,
     "2. Business & Law Prep - $79 flat, one-time. Prep for the separate Business & Law exam most NASCLA states also require: 120 practice questions across 10 domains (licensing and business organization, estimating and bidding, contracts, project management, insurance and bonding, labor law, financial management, taxes, lien law, jobsite safety). It teaches the state-neutral core those exams share; state-specific layers are rolling out. Free 10-question sample at /bl. The pass guarantee applies to the Full Access course, not this one.",
@@ -108,8 +137,16 @@ function buildSystem(): string {
     "",
     "EXAM FACTS you may state:",
     "- NASCLA Commercial General Building Contractor exam: 115 questions, 5.5 hours, open book (about two dozen approved reference books), roughly 70% to pass (81 of 115). Administered by PSI.",
-    "- It is accepted for commercial general building licensing in 17 states: Alabama, Arizona, Arkansas, California, Florida, Georgia, Louisiana, Mississippi, Nevada, New Mexico, North Carolina, Oregon, South Carolina, Tennessee, Utah, Virginia, and West Virginia. Rules differ by state - our site has a guide page per state at /states.",
-    "- Business & Law exams are separate STATE exams; format varies by state (for example Tennessee: 50 questions, 140 minutes, open book on the NASCLA Contractors Guide; Georgia: 60 questions, 180 minutes). When unsure about a state's specifics, say formats vary and point to /states.",
+    "- It is accepted for commercial general building licensing in 17 states: Alabama, Arizona, Arkansas, California, Florida, Georgia, Louisiana, Mississippi, Nevada, New Mexico, North Carolina, Oregon, South Carolina, Tennessee, Utah, Virginia, and West Virginia.",
+    "- After a pass, the score lands in NASCLA's National Examination Database within about 48 hours; the candidate then requests an electronic transcript to any participating state board they apply to. One exam, seventeen states.",
+    "- Business & Law exams are separate STATE exams; format varies by state (for example Tennessee: 50 questions, 140 minutes, open book on the NASCLA Contractors Guide; Georgia: 60 questions, 180 minutes).",
+    "",
+    "STATE-BY-STATE FACTS (verified August 2026 - answer state questions directly from these):",
+    STATE_KNOWLEDGE,
+    "Each state has a full guide at the /states/ URL shown - offer it for the deep detail, and /states is the index. Anything not covered by these facts is the state board's call: say so and point at the board site listed.",
+    "",
+    "FREE GUIDE ARTICLES you can point people to:",
+    GUIDE_LIST,
     "",
     "RULES:",
     "- Keep replies under 120 words. Short sentences. No jargon without unpacking it.",
@@ -157,7 +194,9 @@ export async function POST(request: Request) {
       maxOutputTokens: MAX_OUTPUT_TOKENS,
     });
 
-    const reply = result.text?.trim();
+    // Hard plain-text guarantee: markdown asterisks render as
+    // literal stars in the widget, so none may leave this route.
+    const reply = (result.text ?? "").replace(/\*/g, "").trim();
     if (!reply) {
       return Response.json({ error: "Came up empty - try again." }, { status: 502 });
     }
@@ -169,7 +208,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/api/chat/route.ts (v2 - the
-// daily cap lives in Postgres and survives refreshes)
+// END OF FILE - app/foremanprep/api/chat/route.ts (v3 - plain
+// speech, no asterisks ever, trained on the state library)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
