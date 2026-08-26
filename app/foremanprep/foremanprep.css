@@ -1,5 +1,6 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v14. The floating remind-me rail
+/* ForemanPrep brand surface v15. Blue-border catches for the B&L
+   practice room (see the v15 block at the bottom). v14 notes: The floating remind-me rail
    moves to the LEFT side (his call: the chat button and panel own
    the bottom-right, and the two were fighting over the corner).
    v13 notes: adds the bundle card's two-brand
@@ -219,8 +220,16 @@
 .fp-bundlebtn { background: linear-gradient(90deg, #f97316, #38bdf8); color: #000; }
 .fp-bundlebtn:disabled { background: #1c1c1c; color: #555; }
 
+/* v15: the B&L practice room goes fully blue. practice.css and
+   the gate card are almost entirely var(--fp)-driven, so the
+   room's .fp-blzone wrapper recolors them by itself - these three
+   rules catch the only hardcoded orange borders left. */
+.fp-blzone .fq-chip { border-color: rgba(56, 189, 248, 0.4); }
+.fp-blzone .fq-msg.me { border-color: rgba(56, 189, 248, 0.4); }
+.fp-blzone .fp-gate { border-color: rgba(56, 189, 248, 0.45); }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v14 - remind-me
-   rail moves to the left, clear of the chat)
+   END OF FILE - app/foremanprep/foremanprep.css (v15 - the B&L
+   practice room's blue borders)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
