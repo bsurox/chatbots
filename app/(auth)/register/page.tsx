@@ -1,3 +1,4 @@
+// FILE: app/(auth)/register/page.tsx
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +8,28 @@ import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
 import { type RegisterActionState, register } from "../actions";
+
+// v6: brand-aware landing after signup - the register half of the
+// login v3 fix. A new account created on foremanprep.com now lands
+// on the page its brand says: B&L signups (?brand=bl, or the
+// sessionStorage value the auth layout keeps alive across the
+// login/register hop) land on /bl-prep, plain ForemanPrep signups
+// land on "/" (the orange landing). The AdReel promo branch keeps
+// first claim on the redirect, exactly as before, and on every
+// other host (AskEvo, Spotmint) the helper returns null and the
+// original refresh flow runs untouched.
+function foremanDestination(): string | null {
+  if (!window.location.hostname.includes("foremanprep.com")) return null;
+  let bl = new URLSearchParams(window.location.search).get("brand") === "bl";
+  if (!bl) {
+    try {
+      bl = window.sessionStorage.getItem("fp-auth-brand") === "bl";
+    } catch {
+      // Storage blocked - fall through to the plain landing.
+    }
+  }
+  return bl ? "/bl-prep" : "/";
+}
 
 function RegisterContent() {
   const router = useRouter();
@@ -45,7 +68,12 @@ function RegisterContent() {
         }
         window.location.href = "/video?tier=premium&duration=5";
       } else {
-        router.refresh();
+        const dest = foremanDestination();
+        if (dest) {
+          router.push(dest);
+        } else {
+          router.refresh();
+        }
       }
     }
   }, [state.status]);
@@ -138,7 +166,8 @@ export default function Page() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/register/page.tsx (v5 - confirm password)
+// END OF FILE - app/(auth)/register/page.tsx (v6 - brand-aware
+// landing: B&L signups go to /bl-prep, ForemanPrep to "/")
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
