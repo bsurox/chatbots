@@ -13,9 +13,16 @@ import {
   type BlQuestion,
 } from "@/lib/foremanprep/blquestions";
 
-// Business & Law practice room (v2 - the gate's buy button now
-// links /foremanprep/buy?product=bl so the store opens B&L-first
-// and blue; nothing else changed). Original v1 notes below. The second exam most NASCLA
+// Business & Law practice room (v3): the WHOLE room now wears
+// .fp-blzone, so every screen - picker, quiz, score - runs blue:
+// selection highlights, chips, buttons, the citation line, and
+// the purchase gate included (css v15 catches the few hardcoded
+// borders). Also his UI spec: on the free tier, tapping a locked
+// length (25/Full) now DESELECTS the highlight entirely while the
+// gate shows - nothing looks selected until they tap 10 again.
+// v2 notes: the gate's buy button links
+// /foremanprep/buy?product=bl so the store opens B&L-first and
+// blue. Original v1 notes below. The second exam most NASCLA
 // states require gets the same player the trade exam has: pick a
 // domain or the whole mix, letter-chip choices, instant reveal
 // with the why and the citation, recap and score at the end,
@@ -87,10 +94,11 @@ export default function BlPracticePage() {
 
   function pickLen(l: Len) {
     if (l !== 10 && !access?.bl) {
-      // Free tier: a locked length can never LOOK selected. Tapping
-      // 25/Full snaps the highlight back to 10 (the only legal
-      // choice) and shows the gate.
-      setRoundLen(10);
+      // Free tier: tapping a locked length DESELECTS everything
+      // while the gate shows (his spec) - the tap visibly landed,
+      // nothing paid ever looks selected, and they tap 10 to get
+      // the legal round back.
+      setRoundLen(null);
       setShowGate(true);
       return;
     }
@@ -231,7 +239,7 @@ export default function BlPracticePage() {
 
   if (phase === "pick") {
     return (
-      <div className="fq-wrap">
+      <div className="fq-wrap fp-blzone">
         <div className="fq-head">
           <button
             className="fq-back"
@@ -324,7 +332,7 @@ export default function BlPracticePage() {
 
   if (!qs) {
     return (
-      <div className="fq-wrap">
+      <div className="fq-wrap fp-blzone">
         <p className="fq-load">Loading your questions...</p>
       </div>
     );
@@ -334,7 +342,7 @@ export default function BlPracticePage() {
     const pct = Math.round((correct / qs.length) * 100);
     const passed = pct >= 75;
     return (
-      <div className="fq-wrap">
+      <div className="fq-wrap fp-blzone">
         <div className="fq-done">
           <p className="fq-score">
             {correct}
@@ -383,7 +391,7 @@ export default function BlPracticePage() {
   }
 
   return (
-    <div className="fq-wrap">
+    <div className="fq-wrap fp-blzone">
       <div className="fq-head">
         <button className="fq-back" onClick={backToPicker} type="button">
           Domains
@@ -476,7 +484,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v2 - gate buy
-// button uses the B&L door)
+// END OF FILE - app/foremanprep/bl/page.tsx (v3 - all-blue
+// room, locked lengths deselect)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
