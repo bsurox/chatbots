@@ -1,5 +1,6 @@
 /* FILE: app/foremanprep/chat.css */
-/* ForemanPrep live chat widget (v1). fc- prefix. A floating round
+/* ForemanPrep live chat widget (v2 - blue on B&L pages; v1 notes
+   below). fc- prefix. A floating round
    launcher pinned bottom-right (the slot the account badge used to
    hold), opening a dark panel that matches the fp- dress: thread
    bubbles, input row, a quiet message counter, and the support
@@ -44,7 +45,17 @@
 .fc-fsend:disabled { opacity: 0.5; cursor: default; }
 .fc-fok { font-size: 13px; color: #4ade80; margin: 0; line-height: 1.5; }
 
+/* v2: on Business & Law pages the widget wears the B&L blue -
+   the .bl modifier lands on the fab and panel from the widget's
+   own path check, recoloring every orange accent. */
+.fc-fab.bl { color: #38bdf8; }
+.fc-panel.bl .fc-title span { color: #38bdf8; }
+.fc-panel.bl .fc-msg.me { background: rgba(56, 189, 248, 0.16); border-color: rgba(56, 189, 248, 0.4); }
+.fc-panel.bl .fc-in:focus { border-color: rgba(56, 189, 248, 0.55); }
+.fc-panel.bl .fc-send, .fc-panel.bl .fc-fsend { background: #38bdf8; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/chat.css (v1 - live chat widget)
+   END OF FILE - app/foremanprep/chat.css (v2 - blue dress on
+   Business & Law pages)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
