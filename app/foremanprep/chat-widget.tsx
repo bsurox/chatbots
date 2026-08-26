@@ -4,7 +4,11 @@ import "./chat.css";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-// ForemanPrep live chat widget (v1). The floating button in the
+// ForemanPrep live chat widget (v2 - brand-aware: on the B&L
+// pages (/bl and /bl-prep, island paths included) the fab and
+// panel wear the .bl modifier and chat.css v2 turns every orange
+// accent sky blue, matching the page they sit on. v1 notes
+// below). The floating button in the
 // bottom-right corner - the slot the account badge used to hold -
 // on the two landing pages and the two practice rooms ONLY. It is
 // mounted once in layout.tsx and decides for itself where to
@@ -25,6 +29,13 @@ const ALLOWED_PATHS = new Set([
   "/foremanprep",
   "/practice",
   "/foremanprep/practice",
+  "/bl",
+  "/foremanprep/bl",
+  "/bl-prep",
+  "/foremanprep/bl-prep",
+]);
+
+const BL_PATHS = new Set([
   "/bl",
   "/foremanprep/bl",
   "/bl-prep",
@@ -74,6 +85,8 @@ export default function ChatWidget() {
   }, [thread, busy, capped]);
 
   if (!ALLOWED_PATHS.has(pathname)) return null;
+
+  const isBl = BL_PATHS.has(pathname);
 
   async function send() {
     const text = input.trim();
@@ -143,7 +156,7 @@ export default function ChatWidget() {
   return (
     <>
       {open ? (
-        <div className="fc-panel">
+        <div className={isBl ? "fc-panel bl" : "fc-panel"}>
           <div className="fc-head">
             <p className="fc-title">
               Foreman<span>Prep</span> help
@@ -263,7 +276,7 @@ export default function ChatWidget() {
       ) : null}
       <button
         aria-label={open ? "Close live chat" : "Open live chat"}
-        className="fc-fab"
+        className={isBl ? "fc-fab bl" : "fc-fab"}
         onClick={() => setOpen((o) => !o)}
         type="button"
       >
@@ -274,7 +287,7 @@ export default function ChatWidget() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/chat-widget.tsx (v1 - floating
-// AI chat on landings + practice rooms, support hand-off form)
+// END OF FILE - app/foremanprep/chat-widget.tsx (v2 - blue
+// dress on the B&L pages)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
