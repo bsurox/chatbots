@@ -4,7 +4,12 @@ import "./chat.css";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-// ForemanPrep live chat widget (v2 - brand-aware: on the B&L
+// ForemanPrep live chat widget (v3): the message count now
+// survives refreshes - it rides localStorage under a per-day key,
+// so reloading the page keeps the "X of 10 left" honest and a
+// maxed-out visitor stays on the support form. The server's
+// Postgres counter (chat api v2) is the real wall; this is the UI
+// staying truthful. v2 notes: brand-aware: on the B&L
 // pages (/bl and /bl-prep, island paths included) the fab and
 // panel wear the .bl modifier and chat.css v2 turns every orange
 // accent sky blue, matching the page they sit on. v1 notes
@@ -44,6 +49,37 @@ const BL_PATHS = new Set([
 
 const CLIENT_CAP = 10;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const STORE_KEY = "fp-chat-used";
+
+function todayStamp(): string {
+  const d = new Date();
+  return d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1) + "-" + d.getUTCDate();
+}
+
+function loadUsedToday(): number {
+  try {
+    const raw = window.localStorage.getItem(STORE_KEY);
+    if (!raw) return 0;
+    const data = JSON.parse(raw);
+    if (data?.day === todayStamp() && typeof data?.count === "number") {
+      return Math.max(0, Math.min(data.count, CLIENT_CAP));
+    }
+  } catch {
+    // Storage unavailable - the server cap still stands.
+  }
+  return 0;
+}
+
+function saveUsedToday(count: number): void {
+  try {
+    window.localStorage.setItem(
+      STORE_KEY,
+      JSON.stringify({ day: todayStamp(), count })
+    );
+  } catch {
+    // Storage unavailable - the server cap still stands.
+  }
+}
 
 const CHAT_ICON = (
   <svg
@@ -78,6 +114,13 @@ export default function ChatWidget() {
 
   const threadRef = useRef<HTMLDivElement | null>(null);
 
+  // Restore today's count so a refresh cannot reset the meter.
+  useEffect(() => {
+    const used = loadUsedToday();
+    if (used > 0) setSent(used);
+    if (used >= CLIENT_CAP) setCapped(true);
+  }, []);
+
   useEffect(() => {
     if (threadRef.current) {
       threadRef.current.scrollTop = threadRef.current.scrollHeight;
@@ -107,9 +150,11 @@ export default function ChatWidget() {
         setThread((t) => [...t, { role: "assistant", content: data.reply }]);
         const used = sent + 1;
         setSent(used);
+        saveUsedToday(used);
         if (used >= CLIENT_CAP) setCapped(true);
       } else if (res.status === 429) {
         setCapped(true);
+        saveUsedToday(CLIENT_CAP);
       } else {
         setErrMsg(data?.error ?? "Something went wrong - try again.");
       }
@@ -287,7 +332,7 @@ export default function ChatWidget() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/chat-widget.tsx (v2 - blue
-// dress on the B&L pages)
+// END OF FILE - app/foremanprep/chat-widget.tsx (v3 - the
+// message meter survives refreshes)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
