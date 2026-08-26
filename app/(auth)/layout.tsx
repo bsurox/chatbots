@@ -29,8 +29,22 @@ export default function AuthLayout({
   // isForeman, the icon links are rewritten client-side to
   // /fp-icon.png, same after-mount pattern as the rest of this
   // file. AskEvo and Spotmint faces are untouched.
+  // v10: B&L blue face. A login reached from a Business & Law
+  // page carries ?brand=bl (the bl-prep header button sends it),
+  // and the ForemanPrep auth screens then wear B&L sky blue -
+  // wordmark accent, buttons, focus ring - instead of safety
+  // orange. The choice survives the login <-> register <->
+  // forgot-password hops even though those links carry no param:
+  // when the param is present it is remembered in sessionStorage,
+  // an arrival FROM another auth door reads the remembered value,
+  // and any fresh paramless arrival from elsewhere clears it - so
+  // a later plain ForemanPrep login is orange again, never stale
+  // blue. Storage failures (private mode) just mean the param
+  // alone decides. Spotmint, AskEvo, and the favicon logic are
+  // untouched.
   const [isSpotmint, setIsSpotmint] = useState(false);
   const [isForeman, setIsForeman] = useState(false);
+  const [isBl, setIsBl] = useState(false);
   useEffect(() => {
     if (
       window.location.hostname.includes("spotmint.store") ||
@@ -41,6 +55,24 @@ export default function AuthLayout({
     if (window.location.hostname.includes("foremanprep.com")) {
       setIsForeman(true);
     }
+    const blParam =
+      new URLSearchParams(window.location.search).get("brand") === "bl";
+    const fromAuthDoor = /\/(login|register|forgot-password|reset-password)/.test(
+      document.referrer
+    );
+    let bl = blParam;
+    try {
+      if (blParam) {
+        window.sessionStorage.setItem("fp-auth-brand", "bl");
+      } else if (fromAuthDoor) {
+        bl = window.sessionStorage.getItem("fp-auth-brand") === "bl";
+      } else {
+        window.sessionStorage.removeItem("fp-auth-brand");
+      }
+    } catch {
+      // Storage blocked - the param alone still decides.
+    }
+    setIsBl(bl);
   }, []);
 
   useEffect(() => {
@@ -62,13 +94,16 @@ export default function AuthLayout({
   const branded = isSpotmint || isForeman;
   // ForemanPrep theme: override the design tokens the auth forms
   // are built on. Inline custom properties cascade to every child,
-  // so bg-background renders black and bg-primary renders orange.
+  // so bg-background renders black and bg-primary renders the
+  // brand accent - safety orange normally, B&L sky blue when the
+  // visitor came from a Business & Law page.
+  const fpAccent = isBl ? "#38bdf8" : "#f97316";
   const foremanTheme = {
     "--background": "#0a0a0a",
     "--sidebar": "#0a0a0a",
-    "--primary": "#f97316",
+    "--primary": fpAccent,
     "--primary-foreground": "#000000",
-    "--ring": "#f97316",
+    "--ring": fpAccent,
   } as React.CSSProperties;
   return (
     <div className="flex h-dvh w-screen bg-sidebar" style={isForeman ? foremanTheme : undefined}>
@@ -88,7 +123,7 @@ export default function AuthLayout({
               </div>
             ) : isForeman ? (
               <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
-                Foreman<span style={{ color: "#f97316" }}>Prep</span>
+                Foreman<span style={{ color: fpAccent }}>Prep</span>
               </div>
             ) : (
               <div
@@ -119,8 +154,8 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v9 - brand favicon on the
-// ForemanPrep auth doors)
+// END OF FILE - app/(auth)/layout.tsx (v10 - B&L blue face via
+// ?brand=bl, orange stays the ForemanPrep default)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
