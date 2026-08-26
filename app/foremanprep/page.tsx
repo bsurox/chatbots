@@ -4,7 +4,14 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v25. The strip's buy button now links
+// ForemanPrep landing page v26. The footer's "Business & Law"
+// link now goes to the B&L LANDING page (/foremanprep/bl-prep)
+// instead of dropping visitors straight into the /bl practice
+// room - the footer should sell before it drills. The hero-area
+// "Try Business & Law practice" button still points at /bl on
+// purpose: that one is explicitly the free sample. Only the one
+// footer href changed.
+// v25 notes: The strip's buy button now links
 // /foremanprep/buy?product=bl - the B&L door - so the buy page
 // opens with the B&L card first and in blue. v24 notes: Business & Law gets its BLUE
 // identity + more visibility (his calls): (1) the B&L strip wears
@@ -511,7 +518,7 @@ export default function ForemanPrepPage() {
 
       <div className="fp-foot">
         <div className="fp-links">
-          <Link className="fp-link" href="/foremanprep/bl">
+          <Link className="fp-link" href="/foremanprep/bl-prep">
             Business &amp; Law
           </Link>
           <Link className="fp-link" href="/foremanprep/guides">
@@ -539,7 +546,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v25 - strip buy button
-// enters through the B&L door)
+// END OF FILE - app/foremanprep/page.tsx (v26 - footer B&L link
+// goes to the B&L landing page)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
