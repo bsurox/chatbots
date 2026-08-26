@@ -1,8 +1,16 @@
 // FILE: app/foremanprep/bl-prep/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import BlAuthButton from "../bl-auth-button";
 
-// Business & Law landing page (v2 - both buy buttons now link
+// Business & Law landing page (v3 - the header top row now
+// mounts <BlAuthButton />, the Log in / Log out pill from
+// app/foremanprep/bl-auth-button.tsx, next to the trade-prep
+// back pill. The button is a client island, so this page stays a
+// pure server component with real metadata - nothing else about
+// the page changed. Log in from here carries ?brand=bl so the
+// auth screens go B&L blue; Log out lands back on this page.)
+// v2 notes: (both buy buttons now link
 // /foremanprep/buy?product=bl so the buy page opens B&L-first and
 // blue; nothing else changed). Original v1 notes below. - the blue sibling of the
 // ForemanPrep front door. Same skeleton as the main landing (hero,
@@ -72,9 +80,12 @@ export default function BlPrepLandingPage() {
           <div className="fp-brand">
             Foreman<span>Prep</span>
           </div>
-          <Link className="fp-backpill" href="/foremanprep">
-            NASCLA trade exam prep
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <Link className="fp-backpill" href="/foremanprep">
+              NASCLA trade exam prep
+            </Link>
+            <BlAuthButton />
+          </div>
         </div>
 
         <div className="fp-hero">
@@ -197,7 +208,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v2 - buy
-// buttons use the B&L door)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v3 - Log in /
+// Log out pill in the header)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
