@@ -2,6 +2,8 @@
 import "server-only";
 import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
+import { sql } from "drizzle-orm";
+import { db } from "@/lib/db/queries";
 
 // ForemanPrep live chat (v1). The presales/support assistant behind
 // the floating chat button: answers questions about ForemanPrep,
@@ -15,6 +17,16 @@ import { generateText } from "ai";
 // /api/support pipe). Facts in the system prompt state prices from
 // the same PRICE_FLIP_MS clock as checkout, so the assistant
 // quotes $99 today and $149 after Sept 7 without an edit.
+// v2 (his abuse catch: a phone REFRESH reset the limit): the daily
+// cap now lives in Postgres, not in this process's memory. Vercel
+// spins serverless instances up and down constantly, so an
+// in-memory counter quietly restarts - the same weakness his
+// refresh exposed. The route creates its own tiny counter table
+// on first use (CREATE TABLE IF NOT EXISTS - no setup step), one
+// upsert per message, week-old rows swept opportunistically. If
+// the database ever hiccups, the old in-memory counter still
+// stands guard as the fallback rather than failing open with no
+// limit at all.
 
 const MODEL_ID = "claude-haiku-4-5";
 const MAX_TURNS = 12;
@@ -44,6 +56,39 @@ function isCapped(key: string, cap: number): boolean {
   recent.push(now);
   hits.set(key, recent);
   return false;
+}
+
+let tableReady = false;
+
+async function ensureTable(): Promise<void> {
+  if (tableReady) return;
+  await db.execute(
+    sql`CREATE TABLE IF NOT EXISTS foreman_chat_hits (key text NOT NULL, day date NOT NULL DEFAULT current_date, count integer NOT NULL DEFAULT 0, PRIMARY KEY (key, day))`
+  );
+  tableReady = true;
+}
+
+// Durable daily counter: one upsert returns this visitor's count
+// for today; over the cap means capped. Any storage failure falls
+// back to the in-memory counter - degraded, never wide open.
+async function bumpAndCheck(key: string, cap: number): Promise<boolean> {
+  try {
+    await ensureTable();
+    const res = await db.execute(
+      sql`INSERT INTO foreman_chat_hits (key, day, count) VALUES (${key}, current_date, 1) ON CONFLICT (key, day) DO UPDATE SET count = foreman_chat_hits.count + 1 RETURNING count`
+    );
+    const rows = Array.isArray(res) ? res : (res as { rows: unknown[] }).rows;
+    const count = Number((rows[0] as { count?: unknown })?.count ?? 0);
+    if (count === 1) {
+      // A visitor's first message today is a cheap moment to sweep
+      // rows nobody will ever read again.
+      await db.execute(sql`DELETE FROM foreman_chat_hits WHERE day < current_date - 7`);
+    }
+    return count > cap;
+  } catch (err) {
+    console.error("ForemanPrep chat cap store error, memory fallback:", err);
+    return isCapped(key, cap);
+  }
 }
 
 type Turn = { role: "user" | "assistant"; content: string };
@@ -79,7 +124,7 @@ function buildSystem(): string {
 export async function POST(request: Request) {
   try {
     const ip = (request.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
-    if (isCapped(`c:${ip}`, DAILY_CAP)) {
+    if (await bumpAndCheck(`c:${ip}`, DAILY_CAP)) {
       return Response.json(
         {
           error:
@@ -124,7 +169,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/api/chat/route.ts (v1 - live
-// chat: 10 messages/day per visitor, Haiku, honest facts only)
+// END OF FILE - app/foremanprep/api/chat/route.ts (v2 - the
+// daily cap lives in Postgres and survives refreshes)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
