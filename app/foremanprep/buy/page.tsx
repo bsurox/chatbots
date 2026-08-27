@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v14 - context-aware BACK button
+// The ForemanPrep storefront v15 - the B&L card claims the 1:1
+// State Exam Simulator (all 16 B&L states, real formats).
+// v14 notes: context-aware BACK button
 // (his call): arriving through a B&L door (?product=bl) the
 // header pill reads "Back to Business & Law" and returns to the
 // blue landing at /bl-prep; plain and GC arrivals keep the
@@ -67,7 +69,7 @@ const FEATURES = [
 const BL_FEATURES = [
   "120 practice questions across all 10 Business & Law domains",
   "AI tutor on every question - plain answers anchored to the cited reference",
-  "State-pace exam timer - every question on a 2:48 clock, the tightest common state pace",
+  "1:1 State Exam Simulator - pick your state, sit its exam on the real count, clock, and pass bar (all 16 B&L states)",
   "Contracts, lien law, payroll and taxes, insurance and bonding, estimating math, OSHA - the core every state's B&L exam draws from",
   "State packs for Tennessee, Georgia, and South Carolina - statute-verified state numbers, more states rolling out",
   "Instant explanations with citations, unlimited rounds, progress saved to your account",
@@ -469,8 +471,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v14 - the back
-// button knows which door you came through)
+// END OF FILE - app/foremanprep/buy/page.tsx (v15 - B&L card
+// claims the 1:1 state exam simulator)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
