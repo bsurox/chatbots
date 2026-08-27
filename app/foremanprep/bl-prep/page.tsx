@@ -1,18 +1,13 @@
 // FILE: app/foremanprep/bl-prep/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
-import BlAuthButton from "../bl-auth-button";
 
-// Business & Law landing page (v3 - the header top row now
-// mounts <BlAuthButton />, the Log in / Log out pill from
-// app/foremanprep/bl-auth-button.tsx, next to the trade-prep
-// back pill. The button is a client island, so this page stays a
-// pure server component with real metadata - nothing else about
-// the page changed. Log in from here carries ?brand=bl so the
-// auth screens go B&L blue; Log out lands back on this page.)
-// v2 notes: (both buy buttons now link
-// /foremanprep/buy?product=bl so the buy page opens B&L-first and
-// blue; nothing else changed). Original v1 notes below. - the blue sibling of the
+// Business & Law landing page (v3 - phase 2 features join the
+// grid: the AI tutor on every question and the 2:48 state-pace
+// exam timer are live in the practice room, so the page may now
+// honestly claim them; audio gets its line once the batch is
+// voiced). v2 notes: both buy buttons link
+// /foremanprep/buy?product=bl. Original v1 notes below. - the blue sibling of the
 // ForemanPrep front door. Same skeleton as the main landing (hero,
 // stats, open-book strip, features grid, price table, footer) but
 // everything is about the state Business & Law exam, and the whole
@@ -42,8 +37,16 @@ const STATS = [
 
 const FEATURES = [
   {
+    n: "AI tutor, on call 24/7",
+    d: "Miss a question and ask why. The tutor coaches in plain language, anchored to the cited reference - and it knows state rules vary, so it teaches the principle instead of guessing your state's numbers.",
+  },
+  {
     n: "Every answer explained",
     d: "Miss one and the why appears instantly - plus a citation pointing at the guide chapter or regulation it lives in.",
+  },
+  {
+    n: "The state-pace exam timer",
+    d: "Put every question on a 2:48 clock - the tightest common state pace (Tennessee's 50 questions in 140 minutes). Train under pressure; sit the real thing with margin.",
   },
   {
     n: "All 10 domains",
@@ -54,8 +57,8 @@ const FEATURES = [
     d: "Markup versus margin, labor burden, overhead recovery, break-even, pay applications with retainage - the calculations B&L exams love, with the arithmetic walked through.",
   },
   {
-    n: "The shared core, honestly",
-    d: "State B&L exams are all built on the same body of business, law, and project management material. We teach that core straight - state-specific layers like lien deadlines are rolling out state by state.",
+    n: "State packs - your state's numbers",
+    d: "Tennessee, Georgia, and South Carolina packs are live: lien deadlines, license thresholds, retainage caps - statute-verified, drilled as their own rounds. More states rolling out.",
   },
   {
     n: "Built for the job site",
@@ -80,12 +83,9 @@ export default function BlPrepLandingPage() {
           <div className="fp-brand">
             Foreman<span>Prep</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            <Link className="fp-backpill" href="/foremanprep">
-              NASCLA trade exam prep
-            </Link>
-            <BlAuthButton />
-          </div>
+          <Link className="fp-backpill" href="/foremanprep">
+            NASCLA trade exam prep
+          </Link>
         </div>
 
         <div className="fp-hero">
@@ -208,7 +208,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v3 - Log in /
-// Log out pill in the header)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v3 - tutor
+// and timer join the feature grid)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
