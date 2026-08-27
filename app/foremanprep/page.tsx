@@ -4,7 +4,16 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v26. The footer's "Business & Law"
+// ForemanPrep landing page v27. B&L OWNERS GET A PERMANENT DOOR:
+// his find - once an account owns Business & Law, the marketing
+// strip and the hero badge both hide (correct: never pitch what's
+// bought), which left an owner with NO visible way back into B&L
+// from this page except the small footer link. The hero badge
+// slot now flips instead of vanishing: owners see a blue
+// "Open your Business & Law prep" pill in the same spot, linking
+// /bl-prep. The strip stays owner-hidden as before - it's a
+// pitch; the badge is now a door.
+// v26 notes: The footer's "Business & Law"
 // link now goes to the B&L LANDING page (/foremanprep/bl-prep)
 // instead of dropping visitors straight into the /bl practice
 // room - the footer should sell before it drills. The hero-area
@@ -338,7 +347,15 @@ export default function ForemanPrepPage() {
         {paid ? null : (
           <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
         )}
-        {blOwned ? null : (
+        {blOwned ? (
+          <Link
+            className="fp-blbadge"
+            href="/foremanprep/bl-prep"
+            style={{ marginTop: "14px" }}
+          >
+            Open your Business &amp; Law prep
+          </Link>
+        ) : (
           <Link
             className="fp-blbadge"
             href="/foremanprep/bl-prep"
@@ -546,7 +563,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v26 - footer B&L link
-// goes to the B&L landing page)
+// END OF FILE - app/foremanprep/page.tsx (v27 - B&L owners keep
+// a permanent blue door to /bl-prep in the hero)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
