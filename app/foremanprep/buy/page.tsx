@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v12 - context-aware order + themes
+// The ForemanPrep storefront v13 - the B&L card's feature list
+// catches up with phase 2: the AI tutor and the state-pace exam
+// timer are live in the B&L room, so the card now claims them.
+// v12 notes: context-aware order + themes
 // (his calls): (1) arriving with ?product=bl in the URL - every
 // B&L buy button now links that way - puts the B&L card FIRST;
 // plain arrivals keep Full Access first. (2) The B&L card wears
@@ -57,11 +60,12 @@ const FEATURES = [
 
 const BL_FEATURES = [
   "120 practice questions across all 10 Business & Law domains",
+  "AI tutor on every question - plain answers anchored to the cited reference",
+  "State-pace exam timer - every question on a 2:48 clock, the tightest common state pace",
   "Contracts, lien law, payroll and taxes, insurance and bonding, estimating math, OSHA - the core every state's B&L exam draws from",
-  "Instant explanations with citations on every question",
-  "Unlimited rounds, fresh shuffles, progress saved to your account",
-  "One-time $79 - no subscription, yours for good",
-  "Already have the NASCLA GC course? This stacks onto the same account.",
+  "State packs for Tennessee, Georgia, and South Carolina - statute-verified state numbers, more states rolling out",
+  "Instant explanations with citations, unlimited rounds, progress saved to your account",
+  "One-time $79 - no subscription. Already have the NASCLA GC course? It stacks onto the same account.",
 ];
 
 export default function BuyPage() {
@@ -450,8 +454,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v12 - B&L doors
-// land B&L-first, blue B&L card, two-brand bundle card)
+// END OF FILE - app/foremanprep/buy/page.tsx (v13 - B&L card
+// claims the tutor and the state-pace timer)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
