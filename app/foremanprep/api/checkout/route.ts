@@ -21,6 +21,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 // a flat $79 (no early-bird clock); anything else - including the
 // bodiless POST every existing button sends - buys Full Access
 // exactly as before.
+// v8: canceling a B&L checkout on Stripe's page now returns to
+// /buy?product=bl, so the storefront reopens B&L-first with the
+// B&L back button - the whole path stays in the blue lane. GC and
+// bundle cancels keep the plain buy page.
 // v7: the bundle. {"product":"bundle"} buys BOTH in one checkout -
 // two line items on one Stripe session (Full Access at the clock
 // price, B&L at $79), so the receipt itemizes both and the total
@@ -83,7 +87,10 @@ export async function POST(request: Request) {
     product === "gc"
       ? `${reqUrl.origin}/foremanprep/thanks?paid=1&session_id={CHECKOUT_SESSION_ID}`
       : `${reqUrl.origin}/foremanprep/thanks?paid=1&product=${product}&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${reqUrl.origin}/foremanprep/buy`;
+  const cancelUrl =
+    product === "bl"
+      ? `${reqUrl.origin}/foremanprep/buy?product=bl`
+      : `${reqUrl.origin}/foremanprep/buy`;
 
   const gcItem = {
     price_data: {
@@ -133,8 +140,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/checkout/route.ts (v7 -
-// bundle: both products, two line items, one checkout)
+// END OF FILE - app/foremanprep/api/checkout/route.ts (v8 -
+// B&L cancels return through the B&L door)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
