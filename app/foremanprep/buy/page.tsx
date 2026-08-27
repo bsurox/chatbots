@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v15 - the B&L card claims the 1:1
-// State Exam Simulator (all 16 B&L states, real formats).
+// The ForemanPrep storefront v16 - the B&L card claims AUDIO:
+// the 240-file batch is voiced and live, so "every question
+// voiced" is now true and sellable.
+// v15 notes: the B&L card claims the 1:1 State Exam Simulator
+// (all 16 B&L states, real formats).
 // v14 notes: context-aware BACK button
 // (his call): arriving through a B&L door (?product=bl) the
 // header pill reads "Back to Business & Law" and returns to the
@@ -70,6 +73,7 @@ const BL_FEATURES = [
   "120 practice questions across all 10 Business & Law domains",
   "AI tutor on every question - plain answers anchored to the cited reference",
   "1:1 State Exam Simulator - pick your state, sit its exam on the real count, clock, and pass bar (all 16 B&L states)",
+  "Every question voiced - tap Listen and study hands-free on the drive",
   "Contracts, lien law, payroll and taxes, insurance and bonding, estimating math, OSHA - the core every state's B&L exam draws from",
   "State packs for Tennessee, Georgia, and South Carolina - statute-verified state numbers, more states rolling out",
   "Instant explanations with citations, unlimited rounds, progress saved to your account",
@@ -471,8 +475,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v15 - B&L card
-// claims the 1:1 state exam simulator)
+// END OF FILE - app/foremanprep/buy/page.tsx (v16 - B&L card
+// claims the audio)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
