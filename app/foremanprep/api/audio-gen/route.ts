@@ -1,8 +1,9 @@
 // FILE: app/foremanprep/api/audio-gen/route.ts
 import "server-only";
 import { put } from "@vercel/blob";
-import { getQuestion } from "@/lib/foremanprep/questions";
+import { getBlQuestion } from "@/lib/foremanprep/blquestions";
 import { getLesson } from "@/lib/foremanprep/lessons";
+import { getQuestion } from "@/lib/foremanprep/questions";
 
 export const maxDuration = 300;
 
@@ -26,12 +27,20 @@ export const maxDuration = 300;
 // request ceiling and the mp3 buffers concatenated - same-codec
 // MPEG frames chain cleanly. maxDuration raised for the longer
 // lesson generations.
+// v4: Business & Law. Question ids starting bl- resolve against
+// the B&L bank, so the same factory voices the 120 B&L questions
+// to the same blob paths (q-bl-li-001.mp3 and so on) with zero
+// other changes.
 
 const DEFAULT_VOICE = "pNInz6obpgDQGcFmaJgB";
 const LETTERS = ["A", "B", "C", "D"];
 
+function findQuestion(id: string) {
+  return id.startsWith("bl-") ? getBlQuestion(id) : getQuestion(id);
+}
+
 function questionText(id: string): string | null {
-  const q = getQuestion(id);
+  const q = findQuestion(id);
   if (!q) return null;
   const choices = q.choices
     .map((c, i) => `Option ${LETTERS[i]}: ${c}.`)
@@ -40,7 +49,7 @@ function questionText(id: string): string | null {
 }
 
 function explainText(id: string): string | null {
-  const q = getQuestion(id);
+  const q = findQuestion(id);
   if (!q) return null;
   const letter = LETTERS[q.answer] ?? "";
   return `The correct answer is ${letter}: ${q.choices[q.answer]}. ${q.explain} Reference: ${q.cite}.`;
@@ -162,8 +171,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v3 -
-// lesson kind + chunked long scripts)
+// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v4 -
+// bl- ids voice the Business & Law bank)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
