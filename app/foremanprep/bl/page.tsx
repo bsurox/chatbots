@@ -13,9 +13,29 @@ import {
   type BlDomainKey,
   type BlQuestion,
 } from "@/lib/foremanprep/blquestions";
-import { BL_PACKS_LIVE, type BlStatePack } from "@/lib/foremanprep/blstates";
+import {
+  BL_PACKS_LIVE,
+  BL_STATE_PACKS,
+  type BlStatePack,
+} from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v6): the STATE EXAM SIMULATOR
+// Business & Law practice room (v7): the exam timer learns your
+// state, and the back button leads home to Business & Law.
+// 1. STATE-PACE SELECT - when the timer is on, a dropdown picks
+//    which state's clock to train: every timed state from
+//    blstates (its bulletin-verified minutes divided across its
+//    real question count - Tennessee 2:48, Georgia 3:00, Florida
+//    3:15, California 1:50...). Untimed Louisiana and course-based
+//    Arizona have no pace and stay off the list. The pick sticks
+//    in localStorage (fp-bl-pace, read after mount only), the
+//    timer note and the out-of-time line name the chosen state,
+//    and Tennessee stays the default.
+// 2. BACK BUTTON - the top-left pill now reads Business & Law and
+//    leads to /bl-prep (the B&L landing), not the orange
+//    ForemanPrep landing. His rule: anything B&L backs out to the
+//    B&L landing page; /bl-prep carries the door onward to
+//    ForemanPrep proper.
+// v6 notes: the STATE EXAM SIMULATOR
 // door joins the picker - a big blue button above the state packs
 // linking /foremanprep/bl-exam, where all 16 B&L states sit 1:1
 // sims on their real formats (blstates v2). The pack section now
@@ -60,10 +80,23 @@ type Sel = BlDomainKey | "all";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
-// B&L pace: Tennessee's 50 questions in 140 minutes = 168 seconds
-// a question - the tightest common state clock. Georgia's 60 in
-// 180 gives 3:00; training at 2:48 leaves margin almost anywhere.
-const QUESTION_SECONDS = Math.round((140 * 60) / 50);
+// Fallback pace if the state list ever comes up empty: Tennessee's
+// 50 questions in 140 minutes = 168 seconds a question.
+const FALLBACK_SECONDS = Math.round((140 * 60) / 50);
+
+// Every timed state is a pace option: its real bulletin clock
+// divided across its real question count (blstates v2, verified
+// Aug 2026). Untimed Louisiana and course-based Arizona have no
+// pace to train and stay off the list.
+const PACE_STATES = BL_STATE_PACKS.filter(
+  (p) => p.sim === "timed" && p.minutes !== null && p.simQuestions !== null
+);
+
+function paceSecondsFor(key: string): number {
+  const p = PACE_STATES.find((s) => s.key === key);
+  if (!p || p.minutes === null || p.simQuestions === null) return FALLBACK_SECONDS;
+  return Math.max(30, Math.round((p.minutes * 60) / p.simQuestions));
+}
 
 function fmtClock(total: number): string {
   const h = Math.floor(total / 3600);
@@ -126,6 +159,19 @@ export default function BlPracticePage() {
   const [gateSrc, setGateSrc] = useState<"len" | "timer" | "state">("len");
   const [timerOn, setTimerOn] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [paceKey, setPaceKey] = useState("tn");
+
+  // The chosen pace state survives visits - read after mount only,
+  // never during render (the Date.now doctrine applies to storage
+  // reads too: hydration must match the server HTML).
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("fp-bl-pace");
+      if (stored && PACE_STATES.some((s) => s.key === stored)) setPaceKey(stored);
+    } catch {
+      // Storage can be blocked - the Tennessee default is fine.
+    }
+  }, []);
 
   useEffect(() => {
     fetch("/foremanprep/api/access")
@@ -170,6 +216,17 @@ export default function BlPracticePage() {
     }
     setTimerOn((t) => !t);
   }
+
+  function pickPace(key: string) {
+    setPaceKey(key);
+    try {
+      window.localStorage.setItem("fp-bl-pace", key);
+    } catch {
+      // Best effort - the in-session pick still applies.
+    }
+  }
+
+  const pacePack = PACE_STATES.find((s) => s.key === paceKey) ?? null;
 
   const [qs, setQs] = useState<BlQuestion[] | null>(null);
   const [roundTag, setRoundTag] = useState("bl");
@@ -348,7 +405,7 @@ export default function BlPracticePage() {
     setQs(set);
     setRoundTag(tag);
     setActivePack(pack);
-    setTimeLeft(timerOn && access?.bl ? QUESTION_SECONDS : null);
+    setTimeLeft(timerOn && access?.bl ? paceSecondsFor(paceKey) : null);
     setIdx(0);
     setPicked(null);
     setCorrect(0);
@@ -434,7 +491,7 @@ export default function BlPracticePage() {
     }
     setIdx(idx + 1);
     setPicked(null);
-    if (timeLeft !== null) setTimeLeft(QUESTION_SECONDS);
+    if (timeLeft !== null) setTimeLeft(paceSecondsFor(paceKey));
     resetTutor();
     resetReport();
     stopAudio();
@@ -446,11 +503,11 @@ export default function BlPracticePage() {
         <div className="fq-head">
           <button
             className="fq-back"
-            onClick={() => router.push("/foremanprep")}
+            onClick={() => router.push("/foremanprep/bl-prep")}
             type="button"
           >
             <span className="fp-wordmark">
-              Foreman<span>Prep</span>
+              Business &amp; <span>Law</span>
             </span>
           </button>
         </div>
@@ -499,12 +556,35 @@ export default function BlPracticePage() {
               {timerOn && access?.bl ? "On" : "Off"}
             </button>
           </div>
+          {access?.bl && timerOn ? (
+            <div className="fq-pacerow">
+              <select
+                aria-label="Pick the state whose exam pace to train"
+                className="fq-paceselect"
+                onChange={(e) => pickPace(e.target.value)}
+                value={paceKey}
+              >
+                {PACE_STATES.map((s) => (
+                  <option key={s.key} value={s.key}>
+                    {s.name + " - " + fmtClock(paceSecondsFor(s.key)) + " per question"}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
           <p className="fq-timernote">
             {access !== null && !access.bl
-              ? "Comes with Business & Law prep - a per-question clock at the tightest common state pace."
+              ? "Comes with Business & Law prep - a per-question clock at your state's real exam pace."
               : timerOn
-                ? "2 min 48 sec per question - Tennessee's pace (50 questions in 140 minutes), the tightest common state clock. Most states allow more. Stops while you read explanations."
-                : "Put every question on a state exam clock - 2 min 48 sec each, the tightest common pace. Stops while you read explanations."}
+                ? (pacePack ? pacePack.name : "Tennessee") +
+                  "'s pace - " +
+                  String(pacePack && pacePack.simQuestions !== null ? pacePack.simQuestions : 50) +
+                  " questions in " +
+                  String(pacePack && pacePack.minutes !== null ? pacePack.minutes : 140) +
+                  " minutes, " +
+                  fmtClock(paceSecondsFor(paceKey)) +
+                  " a question. Stops while you read explanations."
+                : "Put every question on your state's exam clock - pick the state, train its real pace. Stops while you read explanations."}
           </p>
           {access !== null && !access.bl ? (
             <p className="fp-tryhint">
@@ -724,7 +804,11 @@ export default function BlPracticePage() {
       {revealed ? (
         <div className="fq-reveal">
           {picked === -1 ? (
-            <p className="fq-timeout">Out of time on this one - 2:48 is the tightest state pace. Read the why, then keep rolling.</p>
+            <p className="fq-timeout">
+              {"Out of time on this one - that was " +
+                (pacePack ? pacePack.name : "your state") +
+                "'s exam pace. Read the why, then keep rolling."}
+            </p>
           ) : null}
           <p className="fq-explain">{question.explain}</p>
           <p className="fq-cite">Where it lives: {question.cite}</p>
@@ -836,7 +920,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v6 - the State
-// Exam Simulator door)
+// END OF FILE - app/foremanprep/bl/page.tsx (v7 - state-pace
+// timer select + back button leads home to Business & Law)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
