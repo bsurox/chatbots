@@ -13,9 +13,15 @@ import {
   type BlDomainKey,
   type BlQuestion,
 } from "@/lib/foremanprep/blquestions";
-import { BL_STATE_PACKS, type BlStatePack } from "@/lib/foremanprep/blstates";
+import { BL_PACKS_LIVE, type BlStatePack } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v5 - STATE PACKS join phase 2).
+// Business & Law practice room (v6): the STATE EXAM SIMULATOR
+// door joins the picker - a big blue button above the state packs
+// linking /foremanprep/bl-exam, where all 16 B&L states sit 1:1
+// sims on their real formats (blstates v2). The pack section now
+// renders BL_PACKS_LIVE (states with statute questions - TN/GA/SC
+// so far) so format-only states never show an empty round.
+// v5 notes: STATE PACKS joined phase 2.
 // Below the domain grid sits the state-pack section: Tennessee,
 // Georgia, and South Carolina rounds of 8 statute-verified
 // questions each - lien deadlines, license thresholds, retainage
@@ -546,6 +552,17 @@ export default function BlPracticePage() {
             </button>
           ))}
         </div>
+        <Link
+          className="fq-all"
+          href="/foremanprep/bl-exam"
+          style={{ display: "block", marginTop: "28px", textDecoration: "none", boxSizing: "border-box", width: "100%" }}
+        >
+          <span className="fq-sn">State Exam Simulator - 1:1</span>
+          <span className="fq-sw">
+            Pick your state, sit its exam: real question count, real
+            clock, real pass bar. All 16 B&amp;L states.
+          </span>
+        </Link>
         <div style={{ marginTop: "28px" }}>
           <span className="fq-lenlabel">State packs</span>
           <p className="fq-hint" style={{ marginTop: "6px" }}>
@@ -556,7 +573,7 @@ export default function BlPracticePage() {
             </span>
           </p>
           <div className="fq-pick">
-            {BL_STATE_PACKS.map((p) => (
+            {BL_PACKS_LIVE.map((p) => (
               <button
                 className="fq-sub"
                 key={p.key}
@@ -565,7 +582,7 @@ export default function BlPracticePage() {
               >
                 <span className="fq-sn">{p.name}</span>
                 <span className="fq-sw">
-                  {p.questions.length} state questions - {p.examLine}
+                  {p.questions.length} statute questions - {p.examLine}
                 </span>
               </button>
             ))}
@@ -819,7 +836,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v5 - phase 2
-// complete: tutor, Listen pills, timer, and TN/GA/SC state packs)
+// END OF FILE - app/foremanprep/bl/page.tsx (v6 - the State
+// Exam Simulator door)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
