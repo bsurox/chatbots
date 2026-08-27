@@ -1,10 +1,15 @@
 // FILE: app/foremanprep/admin-audio/page.tsx
 "use client";
 import { useRef, useState } from "react";
-import { QUESTIONS } from "@/lib/foremanprep/questions";
+import { BL_QUESTIONS } from "@/lib/foremanprep/blquestions";
 import { LESSONS } from "@/lib/foremanprep/lessons";
+import { QUESTIONS } from "@/lib/foremanprep/questions";
 
-// ForemanPrep audio admin (v2) - Chase's one-button factory floor.
+// ForemanPrep audio admin (v3) - Chase's one-button factory floor.
+// v3 adds Step 4: Generate the Business & Law bank - all 120 B&L
+// questions through the same route (their bl- ids resolve against
+// the B&L bank since audio-gen v4), with its own start-at box and
+// progress line so the GC files are never redone.
 // v2 adds Step 3: Generate lessons - voices the 12 drive-time
 // lesson scripts through the same route (kind "lesson").
 // Paste the FOREMAN_AUDIO_KEY, test one question to hear the voice,
@@ -22,7 +27,9 @@ const LETTERS = ["A", "B", "C", "D"];
 type Job = { id: string; kind: "q" | "e" | "lesson" };
 
 function jobText(job: Job): string {
-  const q = QUESTIONS.find((x) => x.id === job.id);
+  const q =
+    QUESTIONS.find((x) => x.id === job.id) ??
+    BL_QUESTIONS.find((x) => x.id === job.id);
   if (!q) return "";
   if (job.kind === "q") {
     const choices = q.choices.map((c, i) => `Option ${LETTERS[i]}: ${c}.`).join(" ");
@@ -37,7 +44,13 @@ const ALL_JOBS: Job[] = QUESTIONS.flatMap((q) => [
   { id: q.id, kind: "e" as const },
 ]);
 
+const BL_JOBS: Job[] = BL_QUESTIONS.flatMap((q) => [
+  { id: q.id, kind: "q" as const },
+  { id: q.id, kind: "e" as const },
+]);
+
 const TOTAL_CHARS = ALL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
+const BL_CHARS = BL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
 const LESSON_CHARS = LESSONS.reduce((sum, l) => sum + l.script.length, 0);
 
 const box = {
@@ -87,6 +100,10 @@ export default function AdminAudioPage() {
   const [lessonBusy, setLessonBusy] = useState(false);
   const [lessonDone, setLessonDone] = useState(0);
   const [lessonNow, setLessonNow] = useState("");
+  const [blRunning, setBlRunning] = useState(false);
+  const [blDone, setBlDone] = useState(0);
+  const [blCurrent, setBlCurrent] = useState("");
+  const [blStartAt, setBlStartAt] = useState("1");
   const abortRef = useRef(false);
 
   async function runLessons() {
@@ -149,6 +166,32 @@ export default function AdminAudioPage() {
     setTestUrls(urls);
     setNote(`Test complete for ${QUESTIONS[0].id} - listen below, then run the full batch.`);
     setTestBusy(false);
+  }
+
+  async function runBl() {
+    if (!key.trim() || blRunning || running || testBusy || lessonBusy) return;
+    const from = Math.max(1, Number.parseInt(blStartAt, 10) || 1) - 1;
+    setBlRunning(true);
+    abortRef.current = false;
+    setNote("");
+    for (let i = from; i < BL_JOBS.length; i++) {
+      if (abortRef.current) {
+        setNote(`Stopped at B&L job ${i + 1}. Enter ${i + 1} in the B&L start box to resume.`);
+        break;
+      }
+      const job = BL_JOBS[i];
+      setBlCurrent(`${job.id} (${job.kind === "q" ? "question" : "explanation"})`);
+      const r = await generate(job);
+      if (r.ok && r.url) {
+        recordBase(r.url);
+      } else {
+        setFailures((f) => [...f, `${job.id}/${job.kind}: ${r.error}`]);
+      }
+      setBlDone(i + 1);
+    }
+    if (!abortRef.current) setNote("B&L batch complete.");
+    setBlCurrent("");
+    setBlRunning(false);
   }
 
   async function runAll() {
@@ -273,6 +316,50 @@ export default function AdminAudioPage() {
         </p>
       </div>
 
+      <div style={box}>
+        <p style={{ fontSize: "13px", fontWeight: 700, color: "#38bdf8", margin: "0 0 8px" }}>
+          Step 4 - generate the Business & Law bank
+        </p>
+        <p style={{ fontSize: "12.5px", color: "#999", margin: "0 0 10px" }}>
+          {BL_QUESTIONS.length} questions, {BL_JOBS.length} audio files, about{" "}
+          {Math.round(BL_CHARS / 1000)}k characters. Runs separately so the
+          GC files are never touched.
+        </p>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "10px" }}>
+          <span style={{ fontSize: "13px", color: "#999" }}>Start at job</span>
+          <input
+            inputMode="numeric"
+            onChange={(e) => setBlStartAt(e.target.value)}
+            style={{ ...input, width: "90px" }}
+            value={blStartAt}
+          />
+          <span style={{ fontSize: "13px", color: "#999" }}>of {BL_JOBS.length}</span>
+        </div>
+        {blRunning ? (
+          <button
+            onClick={() => {
+              abortRef.current = true;
+            }}
+            style={{ ...btn, background: "#ef4444", color: "#fff" }}
+            type="button"
+          >
+            Stop after current file
+          </button>
+        ) : (
+          <button
+            disabled={testBusy || running || lessonBusy}
+            onClick={runBl}
+            style={{ ...btn, background: "#38bdf8" }}
+            type="button"
+          >
+            Generate B&L bank
+          </button>
+        )}
+        <p style={{ fontSize: "13.5px", color: "#ccc", margin: "12px 0 0", fontVariantNumeric: "tabular-nums" }}>
+          {blDone} / {BL_JOBS.length} done{blCurrent ? ` - working on ${blCurrent}` : ""}
+        </p>
+      </div>
+
       {note ? (
         <p style={{ fontSize: "13.5px", color: "#4ade80", margin: "0 0 12px" }}>{note}</p>
       ) : null}
@@ -301,8 +388,8 @@ export default function AdminAudioPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/admin-audio/page.tsx (v2 -
-// lesson generation)
+// END OF FILE - app/foremanprep/admin-audio/page.tsx (v3 - the
+// B&L bank gets its own generation step)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
