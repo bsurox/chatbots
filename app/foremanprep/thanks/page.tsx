@@ -9,6 +9,13 @@ import { fpTrackPurchase } from "../analytics";
 // access API a few times so the status line flips to confirmed
 // without the buyer doing anything. If Stripe's webhook is having
 // a slow minute, the copy says so instead of looking broken.
+// v6: the B&L doors wear B&L blue (his screenshot - the Start
+// Business & Law practice button was white). Both blue buttons
+// carry .fp-blzone directly on the element, which re-points
+// var(--fp) to sky blue for the .exam dress: the B&L purchase's
+// single button goes solid blue, and the bundle's Business & Law
+// room button trades its orange for blue too - anything B&L is
+// blue, per the brand doctrine. GC buttons untouched.
 // v3 notes: reports the purchase to Google Ads + Meta exactly once,
 // only on a real Stripe redirect (paid=1), guarded by
 // sessionStorage against refreshes, with the Stripe session id as
@@ -90,7 +97,7 @@ export default function ThanksPage() {
         </p>
         <div className="fp-authrow">
           {product === "bl" ? (
-            <Link className="fp-authbtn" href="/foremanprep/bl">
+            <Link className="fp-authbtn exam fp-blzone" href="/foremanprep/bl">
               Start Business & Law practice
             </Link>
           ) : product === "bundle" ? (
@@ -98,7 +105,7 @@ export default function ThanksPage() {
               <Link className="fp-authbtn" href="/foremanprep/practice">
                 Start practicing
               </Link>
-              <Link className="fp-authbtn exam" href="/foremanprep/bl">
+              <Link className="fp-authbtn exam fp-blzone" href="/foremanprep/bl">
                 Business & Law room
               </Link>
             </>
@@ -123,8 +130,8 @@ export default function ThanksPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/thanks/page.tsx (v5 - bundle
-// purchases confirm both products and open both doors)
+// END OF FILE - app/foremanprep/thanks/page.tsx (v6 - the B&L
+// doors wear B&L blue)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
