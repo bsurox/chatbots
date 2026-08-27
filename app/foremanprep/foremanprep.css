@@ -1,5 +1,13 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v16. Finishes the B&L blue sweep and
+/* ForemanPrep brand surface v17. Two B&L sim polish fixes (his
+   screenshots): (1) the Next button no longer touches the last
+   answer choice - a scoped adjacent-sibling rule gives the sim's
+   layout (choices directly followed by the next button, a shape
+   no other room has) a 16px gap; (2) the review grid's flagged
+   marker is now the SAME little flag glyph, size, and position as
+   the GC exam simulator's (the \2691 flag at top 5 / right 6,
+   brand color) instead of the dot.
+   v16 notes: Finishes the B&L blue sweep and
    dresses the B&L exam simulator v2 (see the v16 block at the
    bottom): the Listen pills and the exam-timer toggle carried
    hardcoded orange inside the blzone (his screenshots); the
@@ -271,7 +279,7 @@
 .fx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; margin: 16px 0 20px; }
 .fx-cell { position: relative; padding: 12px 0; border-radius: 10px; background: #111; border: 1px solid #333; color: #aaa; font-size: 13px; font-weight: 800; cursor: pointer; text-align: center; font-variant-numeric: tabular-nums; font-family: inherit; }
 .fx-cell.done { background: var(--fp-soft); border-color: var(--fp); color: var(--fp); }
-.fx-cell.flag::after { content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--fp); }
+.fx-cell.flag::after { content: "\2691"; position: absolute; top: 5px; right: 6px; font-size: 13px; line-height: 1; color: var(--fp); }
 .fx-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); display: flex; align-items: center; justify-content: center; z-index: 80; padding: 24px; }
 .fx-modal { width: 100%; max-width: 380px; background: #111; border: 1px solid #333; border-radius: 16px; padding: 20px 18px; animation: fp-fade 0.2s ease; }
 .fx-mh { font-size: 18px; font-weight: 800; color: #fff; margin: 0 0 8px; }
@@ -279,8 +287,14 @@
 .fx-keep { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 800; font-size: 15px; border: none; cursor: pointer; background: var(--fp); color: #000; margin-bottom: 9px; font-family: inherit; }
 .fx-leave { width: 100%; padding: 12px 0; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; background: transparent; color: #f87171; border: 1px solid #7f1d1d; font-family: inherit; }
 
+/* v17: breathing room for the sim's Next button. Only the B&L
+   sim renders the next button directly after the choices (the
+   practice rooms tuck theirs inside the reveal card), so the
+   adjacent-sibling selector cannot touch any other room. */
+.fq-choices + .fq-next { margin-top: 16px; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v16 - B&L blue
-   sweep finished + the exam simulator v2 wardrobe)
+   END OF FILE - app/foremanprep/foremanprep.css (v17 - sim Next
+   button spacing + the GC-style flag glyph on the review grid)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
