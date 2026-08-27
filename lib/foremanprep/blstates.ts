@@ -1,7 +1,21 @@
 // FILE: lib/foremanprep/blstates.ts
 
-// ForemanPrep B&L STATE PACKS (v1 - Tennessee, Georgia, South
-// Carolina; 8 questions each). This is the state-specific layer
+// ForemanPrep B&L STATE DATA (v2 - ALL 16 Business & Law states).
+// Two layers live here now:
+// 1. EXAM FORMATS for every NASCLA state with a B&L-type exam -
+//    question count, clock, pass bar, book policy, reference,
+//    administrator - each verified Aug 2026 against the PSI/Prov
+//    candidate bulletin or the state board itself. The honesty
+//    notes carry the oddballs: CA is CLOSED book and reports only
+//    pass/fail; AZ's SRE is an online course with no published
+//    format (sim: "none"); LA runs untimed in the board's portal;
+//    VA is a 3-part exam (we sim the 50-question General part);
+//    WV renamed its exam in 2024 and dropped the NASCLA guide.
+//    North Carolina is EXCLUDED on purpose: no separate B&L exam.
+// 2. STATE QUESTION PACKS (statute-verified) - TN, GA, SC so far,
+//    8 questions each; more states land as batches. States without
+//    a pack yet carry an empty questions array.
+// v1 notes: TN/GA/SC packs, 8 questions each. This is the state-specific layer
 // the core bank deliberately leaves out: lien deadlines, license
 // thresholds, retainage caps - the numbers that differ state to
 // state. Every fact verified against primary sources Aug 2026:
@@ -16,6 +30,15 @@ import type { BlQuestion } from "./blbank";
 export type BlStatePack = {
   key: string;
   name: string;
+  blName: string;
+  admin: string;
+  simQuestions: number | null;
+  minutes: number | null;
+  passPct: number | null;
+  book: "open" | "closed" | "course";
+  reference: string;
+  note: string;
+  sim: "timed" | "untimed" | "none";
   examLine: string;
   verified: string;
   questions: BlQuestion[];
@@ -25,8 +48,17 @@ export const BL_STATE_PACKS: BlStatePack[] = [
   {
     key: "tn",
     name: "Tennessee",
-    examLine: "50 questions, 140 minutes, 73% to pass - open book",
-    verified: "facts verified Aug 2026",
+    blName: "Business and Law Management Examination",
+    admin: "PSI",
+    simQuestions: 50,
+    minutes: 140,
+    passPct: 73,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Tennessee edition",
+    note: "Open book on the NASCLA Tennessee guide. 37 of 50 to pass.",
+    sim: "timed",
+    examLine: "50 questions - 140 min - 73% - open book",
+    verified: "verified Aug 2026",
     questions: [
       {
         id: "bl-tn-001",
@@ -143,8 +175,17 @@ export const BL_STATE_PACKS: BlStatePack[] = [
   {
     key: "ga",
     name: "Georgia",
-    examLine: "60 questions, 180 minutes, 70% to pass",
-    verified: "facts verified Aug 2026",
+    blName: "Georgia Business and Law Examination",
+    admin: "PSI",
+    simQuestions: 60,
+    minutes: 180,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Georgia edition",
+    note: "A full 3:00 per question - roomier than most states.",
+    sim: "timed",
+    examLine: "60 questions - 180 min - 70% - open book",
+    verified: "verified Aug 2026",
     questions: [
       {
         id: "bl-ga-001",
@@ -261,8 +302,17 @@ export const BL_STATE_PACKS: BlStatePack[] = [
   {
     key: "sc",
     name: "South Carolina",
-    examLine: "Business Management & Law exam via PSI - open book",
-    verified: "facts verified Aug 2026",
+    blName: "Business Management and Law Examination",
+    admin: "PSI",
+    simQuestions: 50,
+    minutes: 120,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Contractors Guide, South Carolina edition",
+    note: "35 of 50 to pass, open book on the NASCLA SC guide.",
+    sim: "timed",
+    examLine: "50 questions - 120 min - 70% - open book",
+    verified: "verified Aug 2026",
     questions: [
       {
         id: "bl-sc-001",
@@ -376,6 +426,214 @@ export const BL_STATE_PACKS: BlStatePack[] = [
       },
     ],
   },
+  {
+    key: "al",
+    name: "Alabama",
+    blName: "Business and Law Examination",
+    admin: "PSI",
+    simQuestions: 50,
+    minutes: 120,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Alabama General edition",
+    note: "35 of 50 to pass, open book on the NASCLA Alabama guide.",
+    sim: "timed",
+    examLine: "50 questions - 120 min - 70% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "az",
+    name: "Arizona",
+    blName: "Statutes and Rules Exam (SRE)",
+    admin: "AZ Registrar of Contractors (online, GMetrix)",
+    simQuestions: null,
+    minutes: null,
+    passPct: 70,
+    book: "course",
+    reference: "The ROC's own online Statutes & Rules training course",
+    note: "Arizona's SRE is an ONLINE course with a built-in exam run by the Registrar - no published question count or clock, so there is no 1:1 sim to build. Drill the core bank here, then take the ROC's course.",
+    sim: "none",
+    examLine: "Online course + exam via the ROC - 70% to pass",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "ar",
+    name: "Arkansas",
+    blName: "Business and Law Examination",
+    admin: "PSI",
+    simQuestions: 50,
+    minutes: 120,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Arkansas edition",
+    note: "35 of 50 to pass, open book on the NASCLA Arkansas guide.",
+    sim: "timed",
+    examLine: "50 questions - 120 min - 70% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "ca",
+    name: "California",
+    blName: "CSLB Law and Business Examination",
+    admin: "PSI for the CSLB",
+    simQuestions: 115,
+    minutes: 210,
+    passPct: null,
+    book: "closed",
+    reference: "The CSLB's free Law and Business Study Guide",
+    note: "The only CLOSED-book B&L exam in the NASCLA states - no references allowed on the real thing. The CSLB reports pass/fail only (about 115 questions in 3.5 hours is the widely reported format); this sim grades at a 70% training bar.",
+    sim: "timed",
+    examLine: "~115 questions - 210 min - CLOSED book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "fl",
+    name: "Florida",
+    blName: "Business and Finance Examination",
+    admin: "Pearson VUE / Professional Testing for the DBPR",
+    simQuestions: 120,
+    minutes: 390,
+    passPct: 70,
+    book: "open",
+    reference: "Florida's approved reference list (Contractors Manual, AIA forms, FS 455)",
+    note: "The marathon: 120 questions in one 6.5-hour sitting - the longest B&L-type exam anywhere. Open book from Florida's own reference list (not the NASCLA guide).",
+    sim: "timed",
+    examLine: "120 questions - 390 min - 70% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "la",
+    name: "Louisiana",
+    blName: "Louisiana Business and Law Exam",
+    admin: "LSLBC (online, in the board's portal)",
+    simQuestions: 50,
+    minutes: null,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Louisiana edition (the board's own course is the official prep)",
+    note: "Taken ONLINE in the LSLBC licensing portal with no hard time limit - the board says most finish in 30-45 minutes. We run this sim untimed, like the real thing.",
+    sim: "untimed",
+    examLine: "50 questions - untimed (online) - 70%",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "ms",
+    name: "Mississippi",
+    blName: "Law and Business Management Examination",
+    admin: "PSI",
+    simQuestions: 50,
+    minutes: 120,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Mississippi 6th edition",
+    note: "Open book on the NASCLA Mississippi guide (6th edition only since Oct 2023).",
+    sim: "timed",
+    examLine: "50 questions - 120 min - 70% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "nv",
+    name: "Nevada",
+    blName: "Contractor Management Survey (CMS) Examination",
+    admin: "PSI",
+    simQuestions: 60,
+    minutes: 120,
+    passPct: 75,
+    book: "open",
+    reference: "Construction Business and Law Manual for Nevada (PSI)",
+    note: "Nevada calls it the CMS exam and sets the bar at 75% (45 of 60) - higher than most states.",
+    sim: "timed",
+    examLine: "60 questions - 120 min - 75% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "nm",
+    name: "New Mexico",
+    blName: "Business and Law Exam",
+    admin: "PSI",
+    simQuestions: 50,
+    minutes: 130,
+    passPct: 75,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Basic 14th edition",
+    note: "75% to pass (38 of 50) - and New Mexico uses the NASCLA BASIC edition, not a state edition.",
+    sim: "timed",
+    examLine: "50 questions - 130 min - 75% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "or",
+    name: "Oregon",
+    blName: "Oregon CCB License Examination",
+    admin: "PSI",
+    simQuestions: 80,
+    minutes: 180,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Oregon Construction Contractors edition",
+    note: "Oregon's CCB exam IS the business/law exam - 80 scored questions on business practice and Oregon law, taken after the 16-hour pre-license training.",
+    sim: "timed",
+    examLine: "80 questions - 180 min - 70% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "ut",
+    name: "Utah",
+    blName: "Utah Business and Law Examination",
+    admin: "Prov",
+    simQuestions: 60,
+    minutes: 120,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Utah edition or the Utah Contractor Education Book",
+    note: "Utah also requires the 25-hour pre-license course (plus a 5-hour business & law course for general classifications) - the exam is only part of the door.",
+    sim: "timed",
+    examLine: "60 questions - 120 min - 70% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "va",
+    name: "Virginia",
+    blName: "Virginia Contractor Business Exam (3 parts)",
+    admin: "PSI for DPOR",
+    simQuestions: 50,
+    minutes: 100,
+    passPct: 70,
+    book: "open",
+    reference: "NASCLA Contractors Guide, Virginia edition + the Virginia USBC",
+    note: "Virginia's exam is THREE parts in one sitting for Class A - Virginia (24q/48min/75%), General (50q/100min/70%), and Advanced (24q/60min) - each passed separately, all open book. This sim runs the 50-question General part, the business & law heart.",
+    sim: "timed",
+    examLine: "3 parts, 98 questions total - sim runs the 50-q General part",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
+  {
+    key: "wv",
+    name: "West Virginia",
+    blName: "Contractor Licensing Act Examination",
+    admin: "Prov",
+    simQuestions: 90,
+    minutes: 180,
+    passPct: 70,
+    book: "open",
+    reference: "West Virginia Contractor Licensing Act Study Guide (Prov)",
+    note: "West Virginia RENAMED this exam in late 2024 (it was 'Business & Law', now 90 questions as the 'Contractor Licensing Act' exam) and its official study guide is WV's own book, NOT the NASCLA guide. Our core bank drills the shared fundamentals; get the WV guide for the statute layer.",
+    sim: "timed",
+    examLine: "90 questions - 180 min - 70% - open book",
+    verified: "verified Aug 2026",
+    questions: [],
+  },
 ];
 
 export function getBlStatePack(key: string): BlStatePack | null {
@@ -390,9 +648,15 @@ export function getBlStateQuestion(id: string): BlQuestion | null {
   return null;
 }
 
+// The states with statute question packs so far. The bl practice
+// page's pack section filters on this.
+export const BL_PACKS_LIVE: BlStatePack[] = BL_STATE_PACKS.filter(
+  (p) => p.questions.length > 0
+);
+
 // -----------------------------------------------------------
-// END OF FILE - lib/foremanprep/blstates.ts (v1 - TN, GA, SC
-// state packs: 24 verified state-specific questions)
+// END OF FILE - lib/foremanprep/blstates.ts (v2 - all 16 B&L
+// states with verified exam formats; TN/GA/SC question packs)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
