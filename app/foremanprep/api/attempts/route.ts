@@ -8,6 +8,7 @@ import {
   startForemanAttempt,
 } from "@/lib/db/foreman";
 import { getBlQuestion } from "@/lib/foremanprep/blquestions";
+import { getBlStateQuestion } from "@/lib/foremanprep/blstates";
 import { getQuestion } from "@/lib/foremanprep/questions";
 
 // Records a finished practice round (and later, mock exams) for
@@ -21,6 +22,9 @@ import { getQuestion } from "@/lib/foremanprep/questions";
 // bl- prefixed domain ("bl-li", "bl-fm", ...) so B&L accuracy
 // never mixes into the GC exam's readiness stats - the GC domain
 // keys stay exactly the set the practice page has always read.
+// v3: state packs. bl- ids not found in the core bank fall
+// through to the state packs (bl-tn-001 and friends), graded and
+// recorded exactly the same way.
 
 type RawAnswer = { questionId?: unknown; picked?: unknown };
 
@@ -57,7 +61,9 @@ export async function POST(request: Request) {
       }
       if (seen.has(a.questionId)) continue;
       const isBl = a.questionId.startsWith("bl-");
-      const q = isBl ? getBlQuestion(a.questionId) : getQuestion(a.questionId);
+      const q = isBl
+        ? getBlQuestion(a.questionId) ?? getBlStateQuestion(a.questionId)
+        : getQuestion(a.questionId);
       if (!q) continue;
       const picked = Math.trunc(a.picked);
       if (picked < 0 || picked >= q.choices.length) continue;
@@ -93,7 +99,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/api/attempts/route.ts (v2 -
-// bl- ids grade against the B&L bank, stats stay separated)
+// END OF FILE - app/foremanprep/api/attempts/route.ts (v3 -
+// state-pack ids grade too)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
