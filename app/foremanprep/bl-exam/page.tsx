@@ -2,7 +2,7 @@
 "use client";
 import "../practice/practice.css";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BL_QUESTIONS,
@@ -14,10 +14,30 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// B&L STATE EXAM SIMULATOR (v1) - pick your state, sit its exam.
-// Every state's format comes from blstates v2 (verified Aug 2026
-// against PSI/Prov bulletins and the boards): the sim runs the
-// state's real question count on the state's real clock and grades
+// B&L STATE EXAM SIMULATOR (v2) - real testing-center flow.
+// v1's one-pass rule is gone: real PSI/Prov computer exams let you
+// skip, change answers, flag questions, and review the whole form
+// before you submit - so the sim does too (his call).
+// 1. FREE NAVIGATION - Previous / Next move anywhere; tapping a
+//    choice records it (tap another to change it); Next without
+//    answering just skips. Nothing grades until submit.
+// 2. FLAG FOR REVIEW - a pill on every question, blue when set.
+// 3. REVIEW SCREEN - a numbered grid of the whole form: filled =
+//    answered, dot = flagged, tap a number to jump back. Submit
+//    lives here and on the last question's Next; submitting with
+//    unanswered questions asks first (they count wrong).
+// 4. LEAVE DOOR - a back pill during the exam opens the same kind
+//    of confirm the GC sim uses: leaving resets the clock and
+//    every answer. The picker's own back pill now leads to
+//    /bl-prep, the B&L landing (his back rule).
+// The clock is unchanged: one full-form countdown, auto-submits
+// at zero with whatever is answered. Grading, the state pass bar,
+// the attempts pipe (mode "exam", domain "bl-exam-<state>"), the
+// deep link, and the $79 gate all carry over from v1.
+// v1 notes: pick your state, sit its exam 1:1. Every state's
+// format comes from blstates v2 (verified Aug 2026 against
+// PSI/Prov bulletins and the boards): the sim runs the state's
+// real question count on the state's real clock and grades
 // against the state's real pass bar. The oddballs are handled
 // honestly: Louisiana runs untimed (its portal exam has no clock),
 // California shows its closed-book warning and grades at a 70%
@@ -27,12 +47,8 @@ import {
 // published format) - the picker says so and points at practice.
 // Forms draw from the 120-question core bank, with the state's
 // statute pack (TN/GA/SC so far) guaranteed into the mix when one
-// exists. Exam flow: linear, no going back, answers hidden until
-// the end - then the score against the state bar and a full review
-// of every miss with the explanation and citation. Rounds save via
-// the attempts pipe as mode "exam", domain "bl-exam-<state>".
-// Paid-only: the free tier sees the picker and gets the $79 gate
-// on start. Whole page wears the B&L blue. Deep-linkable:
+// exists. Paid-only: the free tier sees the picker and gets the
+// $79 gate on start. Whole page wears the B&L blue. Deep-linkable:
 // /bl-exam?state=tn preselects a state. Clean URL via proxy v15.
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
@@ -64,21 +80,28 @@ function buildStateForm(pack: BlStatePack): BlQuestion[] {
   return shuffleQs([...pack.questions, ...fromCore]).slice(0, target);
 }
 
-type Picked = { questionId: string; picked: number };
-
 export default function BlExamPage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"pick" | "brief" | "exam" | "done">("pick");
+  const [view, setView] = useState<"q" | "review">("q");
   const [access, setAccess] = useState<{ loggedIn: boolean; bl: boolean } | null>(null);
   const [showGate, setShowGate] = useState(false);
   const [state, setState] = useState<BlStatePack | null>(null);
   const [qs, setQs] = useState<BlQuestion[]>([]);
   const [idx, setIdx] = useState(0);
-  const [sel, setSel] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<Picked[]>([]);
+  const [answerMap, setAnswerMap] = useState<Record<string, number>>({});
+  const [flags, setFlags] = useState<Record<string, boolean>>({});
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [outOfTime, setOutOfTime] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Ref mirrors of the answer map and the submitted latch: the
+  // timer's auto-submit fires from a timeout closure, and the ref
+  // guarantees it grades the very latest answers exactly once.
+  const answersRef = useRef<Record<string, number>>({});
+  const submittedRef = useRef(false);
 
   useEffect(() => {
     fetch("/foremanprep/api/access")
@@ -114,7 +137,7 @@ export default function BlExamPage() {
     if (phase !== "exam" || timeLeft === null) return;
     if (timeLeft <= 0) {
       setOutOfTime(true);
-      finishExam(answers);
+      finishExam();
       return;
     }
     const t = setTimeout(() => {
@@ -140,17 +163,29 @@ export default function BlExamPage() {
     const form = buildStateForm(state);
     setQs(form);
     setIdx(0);
-    setSel(null);
-    setAnswers([]);
+    setView("q");
+    setAnswerMap({});
+    setFlags({});
+    setConfirmLeave(false);
+    setConfirmSubmit(false);
     setSaved(false);
     setOutOfTime(false);
+    answersRef.current = {};
+    submittedRef.current = false;
     setTimeLeft(state.sim === "timed" && state.minutes ? state.minutes * 60 : null);
     setPhase("exam");
   }
 
-  function finishExam(finalAnswers: Picked[]) {
+  function finishExam() {
+    if (submittedRef.current) return;
+    submittedRef.current = true;
+    setConfirmSubmit(false);
+    setConfirmLeave(false);
     setPhase("done");
     setTimeLeft(null);
+    const finalAnswers = qs
+      .filter((q) => answersRef.current[q.id] !== undefined)
+      .map((q) => ({ questionId: q.id, picked: answersRef.current[q.id] }));
     if (state && finalAnswers.length > 0) {
       fetch("/foremanprep/api/attempts", {
         method: "POST",
@@ -169,24 +204,64 @@ export default function BlExamPage() {
     }
   }
 
-  function next() {
-    if (sel === null || qs.length === 0) return;
-    const nextAnswers = [...answers, { questionId: qs[idx].id, picked: sel }];
-    setAnswers(nextAnswers);
-    setSel(null);
+  function pickChoice(i: number) {
+    if (qs.length === 0) return;
+    const q = qs[idx];
+    answersRef.current = { ...answersRef.current, [q.id]: i };
+    setAnswerMap(answersRef.current);
+  }
+
+  function toggleFlag() {
+    if (qs.length === 0) return;
+    const q = qs[idx];
+    setFlags((f) => ({ ...f, [q.id]: !f[q.id] }));
+  }
+
+  function prevQ() {
+    if (idx > 0) setIdx(idx - 1);
+  }
+
+  function nextQ() {
     if (idx + 1 >= qs.length) {
-      finishExam(nextAnswers);
+      setView("review");
       return;
     }
     setIdx(idx + 1);
   }
 
+  function jumpTo(i: number) {
+    setIdx(i);
+    setView("q");
+  }
+
+  function requestSubmit() {
+    const unanswered = qs.filter((q) => answerMap[q.id] === undefined).length;
+    if (unanswered > 0) {
+      setConfirmSubmit(true);
+      return;
+    }
+    finishExam();
+  }
+
   function backToPicker() {
     setPhase("pick");
+    setView("q");
     setState(null);
     setQs([]);
+    setIdx(0);
+    setAnswerMap({});
+    setFlags({});
+    setConfirmLeave(false);
+    setConfirmSubmit(false);
     setTimeLeft(null);
     setShowGate(false);
+    answersRef.current = {};
+    submittedRef.current = false;
+  }
+
+  function leaveExam() {
+    setConfirmLeave(false);
+    backToPicker();
   }
 
   // ---- PICKER ----
@@ -196,11 +271,11 @@ export default function BlExamPage() {
         <div className="fq-head">
           <button
             className="fq-back"
-            onClick={() => router.push("/foremanprep/bl")}
+            onClick={() => router.push("/foremanprep/bl-prep")}
             type="button"
           >
             <span className="fp-wordmark">
-              Foreman<span>Prep</span>
+              Business &amp; <span>Law</span>
             </span>
           </button>
         </div>
@@ -272,8 +347,10 @@ export default function BlExamPage() {
         <p className="fq-hint">{state.note}</p>
         <p className="fq-hint">
           <span className="fq-hint-hl">
-            How the sim works: one pass, no going back - answers and
-            explanations wait until the end, exactly like test day.
+            How the sim works: move freely - skip questions, change
+            answers, flag any for review, and check the review screen
+            before you submit. Answers and explanations wait until the
+            end, exactly like test day.
           </span>{" "}
           Reference: {state.reference}. {state.verified}.
         </p>
@@ -308,16 +385,11 @@ export default function BlExamPage() {
   // ---- DONE ----
   if (phase === "done" && state) {
     const total = qs.length;
-    const key = new Map(qs.map((q) => [q.id, q]));
-    const correct = answers.filter((a) => key.get(a.questionId)?.answer === a.picked).length;
+    const correct = qs.filter((q) => answerMap[q.id] === q.answer).length;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
     const bar = state.passPct ?? 70;
     const passed = pct >= bar;
-    const answeredIds = new Set(answers.map((a) => a.questionId));
-    const misses = qs.filter((q) => {
-      const a = answers.find((x) => x.questionId === q.id);
-      return !a || a.picked !== q.answer;
-    });
+    const misses = qs.filter((q) => answerMap[q.id] !== q.answer);
     return (
       <div className="fq-wrap fp-blzone">
         <div className="fq-done">
@@ -342,7 +414,7 @@ export default function BlExamPage() {
                 <p className="fq-rq" style={{ fontWeight: 700 }}>{q.q}</p>
                 <p className="fq-rq">
                   Correct: {LETTERS[q.answer]}) {q.choices[q.answer]}
-                  {!answeredIds.has(q.id) ? " (you ran out of time here)" : ""}
+                  {answerMap[q.id] === undefined ? " (left unanswered)" : ""}
                 </p>
                 <p className="fq-explain">{q.explain}</p>
                 <p className="fq-cite">Where it lives: {q.cite}</p>
@@ -363,48 +435,166 @@ export default function BlExamPage() {
     );
   }
 
-  // ---- EXAM ----
+  // ---- EXAM (question view + review view + confirm modals) ----
   if (phase === "exam" && qs.length > 0) {
     const question = qs[idx];
+    const answeredCount = qs.filter((q) => answerMap[q.id] !== undefined).length;
+    const flaggedCount = qs.filter((q) => flags[q.id]).length;
+    const unanswered = qs.length - answeredCount;
     return (
       <div className="fq-wrap fp-blzone">
         <div className="fq-head">
+          <button
+            className="fq-back"
+            onClick={() => setConfirmLeave(true)}
+            type="button"
+          >
+            Leave
+          </button>
           <span className="fq-prog">
             {timeLeft !== null ? (
               <span className={timeLeft <= 300 ? "fq-clock low" : "fq-clock"}>
                 {fmtClock(timeLeft)}
               </span>
             ) : null}
-            Question {idx + 1} / {qs.length}
+            {view === "review" ? "Review" : `Question ${idx + 1} / ${qs.length}`}
           </span>
         </div>
-        <span className="fq-chip">{state?.name} - {state?.blName}</span>
-        <p className="fq-q">{question.q}</p>
-        <div className="fq-choices">
-          {question.choices.map((c, i) => (
-            <button
-              className={sel === i ? "fq-choice on-right" : "fq-choice"}
-              key={c}
-              onClick={() => setSel(i)}
-              type="button"
-            >
-              <span className="fq-letter">{LETTERS[i]}</span>
-              <span className="fq-ct">{c}</span>
+
+        {view === "q" ? (
+          <>
+            <div className="fx-row">
+              <span className="fq-chip">{state?.name} - {state?.blName}</span>
+              <button
+                className={flags[question.id] ? "fx-flag on" : "fx-flag"}
+                onClick={toggleFlag}
+                type="button"
+              >
+                {flags[question.id] ? "Flagged" : "Flag for review"}
+              </button>
+            </div>
+            <p className="fq-q">{question.q}</p>
+            <div className="fq-choices">
+              {question.choices.map((c, i) => (
+                <button
+                  className={answerMap[question.id] === i ? "fq-choice sel" : "fq-choice"}
+                  key={c}
+                  onClick={() => pickChoice(i)}
+                  type="button"
+                >
+                  <span className="fq-letter">{LETTERS[i]}</span>
+                  <span className="fq-ct">{c}</span>
+                </button>
+              ))}
+            </div>
+            <button className="fq-next" onClick={nextQ} type="button">
+              {idx + 1 >= qs.length ? "Review and submit" : "Next question"}
             </button>
-          ))}
-        </div>
-        <button
-          className="fq-next"
-          disabled={sel === null}
-          onClick={next}
-          style={sel === null ? { opacity: 0.5, cursor: "default" } : undefined}
-          type="button"
-        >
-          {idx + 1 >= qs.length ? "Finish and grade" : "Lock it in - next"}
-        </button>
-        <p className="fq-hint" style={{ marginTop: "10px" }}>
-          One pass, no going back. Answers and explanations come at the end.
-        </p>
+            <div className="fx-navrow">
+              <button
+                className="fx-navbtn"
+                disabled={idx === 0}
+                onClick={prevQ}
+                type="button"
+              >
+                Previous
+              </button>
+              <button
+                className="fx-navbtn"
+                onClick={() => setView("review")}
+                type="button"
+              >
+                Review all questions
+              </button>
+            </div>
+            <p className="fq-hint" style={{ marginTop: "10px" }}>
+              Move freely - skip, change answers, flag for review. Answers
+              and explanations come after you submit.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="fq-title">Review</p>
+            <p className="fq-hint">
+              {answeredCount} of {qs.length} answered
+              {flaggedCount > 0 ? ` - ${flaggedCount} flagged` : ""}.
+              {unanswered > 0
+                ? " Unanswered questions count wrong, same as test day."
+                : " Everything answered."}
+            </p>
+            <p className="fx-legend">
+              Filled = answered. Dot = flagged. Tap a number to jump back.
+            </p>
+            <div className="fx-grid">
+              {qs.map((q, i) => (
+                <button
+                  className={
+                    "fx-cell" +
+                    (answerMap[q.id] !== undefined ? " done" : "") +
+                    (flags[q.id] ? " flag" : "")
+                  }
+                  key={q.id}
+                  onClick={() => jumpTo(i)}
+                  type="button"
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button className="fq-next" onClick={requestSubmit} type="button">
+              Submit and grade
+            </button>
+            <div className="fx-navrow">
+              <button
+                className="fx-navbtn"
+                onClick={() => setView("q")}
+                type="button"
+              >
+                Back to the exam
+              </button>
+            </div>
+          </>
+        )}
+
+        {confirmLeave ? (
+          <div className="fx-overlay">
+            <div className="fx-modal">
+              <p className="fx-mh">Leave the exam?</p>
+              <p className="fx-md">
+                This attempt ends here - the clock and every answer reset,
+                and nothing gets saved.
+              </p>
+              <button className="fx-keep" onClick={() => setConfirmLeave(false)} type="button">
+                Keep taking the exam
+              </button>
+              <button className="fx-leave" onClick={leaveExam} type="button">
+                Leave and reset
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {confirmSubmit ? (
+          <div className="fx-overlay">
+            <div className="fx-modal">
+              <p className="fx-mh">
+                {unanswered === 1
+                  ? "Submit with 1 unanswered question?"
+                  : `Submit with ${unanswered} unanswered questions?`}
+              </p>
+              <p className="fx-md">
+                Unanswered counts wrong, same as test day. You still have
+                time on the clock.
+              </p>
+              <button className="fx-keep" onClick={() => setConfirmSubmit(false)} type="button">
+                Keep working
+              </button>
+              <button className="fx-leave" onClick={finishExam} type="button">
+                Submit anyway
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -417,7 +607,7 @@ export default function BlExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-exam/page.tsx (v1 - pick
-// your state, sit its B&L exam 1:1)
+// END OF FILE - app/foremanprep/bl-exam/page.tsx (v2 - flag,
+// skip, free navigation, review screen, leave confirm)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
