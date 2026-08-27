@@ -1,6 +1,16 @@
 /* FILE: app/foremanprep/foremanprep.css */
-/* ForemanPrep brand surface v15. Blue-border catches for the B&L
-   practice room (see the v15 block at the bottom). v14 notes: The floating remind-me rail
+/* ForemanPrep brand surface v16. Finishes the B&L blue sweep and
+   dresses the B&L exam simulator v2 (see the v16 block at the
+   bottom): the Listen pills and the exam-timer toggle carried
+   hardcoded orange inside the blzone (his screenshots); the
+   practice timer's new state-pace select gets its dress
+   (.fq-pacerow / .fq-paceselect); the simulator gets a selected-
+   answer look (.fq-choice.sel), flag pill, prev/review nav row,
+   review grid, and the leave/submit confirm modal - the fx-
+   family. Everything rides var(--fp), orange in GC rooms and
+   blue inside a blzone.
+   v15 notes: Blue-border catches for the B&L
+   practice room (the v15 block). v14 notes: The floating remind-me rail
    moves to the LEFT side (his call: the chat button and panel own
    the bottom-right, and the two were fighting over the corner).
    v13 notes: adds the bundle card's two-brand
@@ -228,8 +238,49 @@
 .fp-blzone .fq-msg.me { border-color: rgba(56, 189, 248, 0.4); }
 .fp-blzone .fp-gate { border-color: rgba(56, 189, 248, 0.45); }
 
+/* v16 part 1: the last two hardcoded oranges inside the blzone -
+   the Listen pills and the exam-timer toggle (his screenshots).
+   GC rooms keep their orange; only a blzone goes blue. */
+.fp-blzone .fq-listen { border-color: rgba(56, 189, 248, 0.45); }
+.fp-blzone .fq-listen.playing { background: rgba(56, 189, 248, 0.12); }
+.fp-blzone .fq-listen:hover { background: rgba(56, 189, 248, 0.08); }
+.fp-blzone .fq-timertoggle.on { border-color: rgba(56, 189, 248, 0.5); }
+.fp-blzone .fq-timertoggle.on .fq-knob { background: rgba(56, 189, 248, 0.35); }
+
+/* v16 part 2: the practice timer's state-pace select (bl v7).
+   Same dark-input language as every other field. */
+.fq-pacerow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0 0; }
+.fq-paceselect { background: #111; color: #fff; border: 1px solid #333; border-radius: 9px; padding: 9px 12px; font-size: 13.5px; font-weight: 600; font-family: inherit; max-width: 100%; }
+.fq-paceselect:focus { outline: none; border-color: var(--fp); }
+
+/* v16 part 3: the B&L exam simulator v2 wardrobe (fx- family).
+   A picked-but-not-graded choice (.sel - the sim must never wear
+   the green/red reveal colors mid-exam), the flag pill, the
+   prev/review nav row, the review grid (filled = answered, dot =
+   flagged), and the confirm modal used for both leaving the exam
+   and submitting with unanswered questions. */
+.fq-choice.sel { background: var(--fp-soft); border: 2px solid var(--fp); color: #fff; }
+.fq-choice.sel .fq-letter { background: var(--fp); color: #000; }
+.fx-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 12px; flex-wrap: wrap; }
+.fx-flag { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid #333; border-radius: 999px; color: #999; font-size: 12.5px; font-weight: 700; padding: 6px 13px; cursor: pointer; font-family: inherit; }
+.fx-flag.on { color: var(--fp); border-color: var(--fp); background: var(--fp-soft); }
+.fx-navrow { display: flex; gap: 9px; margin-top: 10px; }
+.fx-navbtn { flex: 1; padding: 12px 0; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; background: transparent; color: #bbb; border: 1px solid #333; font-family: inherit; }
+.fx-navbtn:disabled { opacity: 0.4; cursor: default; }
+.fx-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: #888; margin: 0 0 6px; }
+.fx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; margin: 16px 0 20px; }
+.fx-cell { position: relative; padding: 12px 0; border-radius: 10px; background: #111; border: 1px solid #333; color: #aaa; font-size: 13px; font-weight: 800; cursor: pointer; text-align: center; font-variant-numeric: tabular-nums; font-family: inherit; }
+.fx-cell.done { background: var(--fp-soft); border-color: var(--fp); color: var(--fp); }
+.fx-cell.flag::after { content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--fp); }
+.fx-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); display: flex; align-items: center; justify-content: center; z-index: 80; padding: 24px; }
+.fx-modal { width: 100%; max-width: 380px; background: #111; border: 1px solid #333; border-radius: 16px; padding: 20px 18px; animation: fp-fade 0.2s ease; }
+.fx-mh { font-size: 18px; font-weight: 800; color: #fff; margin: 0 0 8px; }
+.fx-md { font-size: 13.5px; color: #aaa; line-height: 1.55; margin: 0 0 16px; }
+.fx-keep { width: 100%; padding: 13px 0; border-radius: 10px; font-weight: 800; font-size: 15px; border: none; cursor: pointer; background: var(--fp); color: #000; margin-bottom: 9px; font-family: inherit; }
+.fx-leave { width: 100%; padding: 12px 0; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; background: transparent; color: #f87171; border: 1px solid #7f1d1d; font-family: inherit; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/foremanprep.css (v15 - the B&L
-   practice room's blue borders)
+   END OF FILE - app/foremanprep/foremanprep.css (v16 - B&L blue
+   sweep finished + the exam simulator v2 wardrobe)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
