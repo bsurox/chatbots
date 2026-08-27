@@ -2,8 +2,9 @@
 "use client";
 import "../practice/practice.css";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 import {
   BL_DOMAINS,
   buildBlDemoSet,
@@ -12,36 +13,80 @@ import {
   type BlDomainKey,
   type BlQuestion,
 } from "@/lib/foremanprep/blquestions";
+import { BL_STATE_PACKS, type BlStatePack } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v3): the WHOLE room now wears
-// .fp-blzone, so every screen - picker, quiz, score - runs blue:
-// selection highlights, chips, buttons, the citation line, and
-// the purchase gate included (css v15 catches the few hardcoded
-// borders). Also his UI spec: on the free tier, tapping a locked
-// length (25/Full) now DESELECTS the highlight entirely while the
-// gate shows - nothing looks selected until they tap 10 again.
-// v2 notes: the gate's buy button links
-// /foremanprep/buy?product=bl so the store opens B&L-first and
-// blue. Original v1 notes below. The second exam most NASCLA
-// states require gets the same player the trade exam has: pick a
-// domain or the whole mix, letter-chip choices, instant reveal
-// with the why and the citation, recap and score at the end,
-// rounds saved to the account. Free tier = one fixed 10-question
-// sample (same leak-proof doctrine as the GC demo set); the $79
-// product unlocks all 120 with fresh shuffles. Wears
-// practice.css wholesale - same fq-/fp- dress, zero new styles.
-// DELIBERATELY absent in v1 (phase 2, after launch): the exam
-// timer (B&L paces vary by state), the Listen pills (no B&L
-// audio recorded yet), and the AI tutor (its API resolves GC ids
-// only). The Report door stays - the support pipe is generic.
-// Gating rides the access API's new bl flag: Full Access owners
-// WITHOUT B&L see the sample and the $79 gate exactly like free
-// users - that is the upsell working as designed.
+// Business & Law practice room (v5 - STATE PACKS join phase 2).
+// Below the domain grid sits the state-pack section: Tennessee,
+// Georgia, and South Carolina rounds of 8 statute-verified
+// questions each - lien deadlines, license thresholds, retainage
+// caps, the numbers the core bank deliberately hedges. Packs are
+// paid-only (a free tap opens the gate), run whole and shuffled,
+// and grade/save through the same attempts pipe (route v3
+// resolves their ids). During a state round the question chip
+// reads "Tennessee - Liens & Payment" so nobody mistakes a state
+// number for a universal one.
+// v4 notes (phase 2 wave 1) - three features, all paid-gated:
+// 1. THE TUTOR - "Ask the tutor why" on every reveal. The tutor
+//    API (v3) resolves bl- ids and coaches in Business & Law
+//    voice; B&L owners get the full 25/day allowance.
+// 2. LISTEN PILLS - every question and explanation can speak.
+//    Files come from the same blob store (audio-gen v4 voices
+//    bl- ids); until Chase runs the B&L batch on admin-audio the
+//    pills self-hide on their first failed load, so shipping this
+//    before the audio exists costs nothing.
+// 3. EXAM-PACE TIMER - per-question countdown at 2:48 (168s), the
+//    tightest common state pace (Tennessee's 50 questions in 140
+//    minutes; Georgia allows 3:00). Same mechanics as the GC
+//    timer: paid-only, default OFF, clock freezes on answer,
+//    resets on next, zero auto-reveals unanswered.
+// v3 notes: the whole room wears .fp-blzone (css v15 catches the
+// hardcoded borders) and a free tap on a locked length DESELECTS
+// the highlight entirely while the gate shows - his spec, and the
+// opposite of GC practice v20's snap-back on purpose.
+// v2 notes: the gate's buy button links /foremanprep/buy?product=bl.
+// v1 notes: same player as the trade exam - pick a domain or the
+// whole mix, letter chips, instant reveal with the why and the
+// citation, recap and score, rounds saved. Free tier = one fixed
+// 10-question sample; $79 unlocks all 120 with fresh shuffles.
 
 type Len = 10 | 25 | "all";
 type Sel = BlDomainKey | "all";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+// B&L pace: Tennessee's 50 questions in 140 minutes = 168 seconds
+// a question - the tightest common state clock. Georgia's 60 in
+// 180 gives 3:00; training at 2:48 leaves margin almost anywhere.
+const QUESTION_SECONDS = Math.round((140 * 60) / 50);
+
+function fmtClock(total: number): string {
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const sec = total % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(sec).padStart(2, "0");
+  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
+}
+
+// Small headphone glyph for the Listen pills - inherits the pill
+// color, so it wears the room's blue without any css changes.
+const LISTEN_ICON = (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    height="14"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+    width="14"
+  >
+    <path d="M4 14a8 8 0 0 1 16 0" />
+    <rect height="6" rx="2" width="4" x="3" y="14" />
+    <rect height="6" rx="2" width="4" x="17" y="14" />
+  </svg>
+);
 
 type RecapRow = { id: string; q: string; ok: boolean };
 type PickedAnswer = { questionId: string; picked: number };
@@ -72,6 +117,9 @@ export default function BlPracticePage() {
   const [lenErr, setLenErr] = useState(false);
   const [access, setAccess] = useState<{ loggedIn: boolean; bl: boolean } | null>(null);
   const [showGate, setShowGate] = useState(false);
+  const [gateSrc, setGateSrc] = useState<"len" | "timer" | "state">("len");
+  const [timerOn, setTimerOn] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/foremanprep/api/access")
@@ -99,6 +147,7 @@ export default function BlPracticePage() {
       // nothing paid ever looks selected, and they tap 10 to get
       // the legal round back.
       setRoundLen(null);
+      setGateSrc("len");
       setShowGate(true);
       return;
     }
@@ -107,7 +156,18 @@ export default function BlPracticePage() {
     setShowGate(false);
   }
 
+  function toggleTimer() {
+    if (!access?.bl) {
+      setGateSrc("timer");
+      setShowGate(true);
+      return;
+    }
+    setTimerOn((t) => !t);
+  }
+
   const [qs, setQs] = useState<BlQuestion[] | null>(null);
+  const [roundTag, setRoundTag] = useState("bl");
+  const [activePack, setActivePack] = useState<BlStatePack | null>(null);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
@@ -115,6 +175,76 @@ export default function BlPracticePage() {
   const [answers, setAnswers] = useState<PickedAnswer[]>([]);
   const [done, setDone] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [thread, setThread] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [tutorInput, setTutorInput] = useState("");
+  const [tutorBusy, setTutorBusy] = useState(false);
+  const [tutorErr, setTutorErr] = useState("");
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playingKind, setPlayingKind] = useState<"q" | "e" | null>(null);
+  const [audioDead, setAudioDead] = useState<Record<string, boolean>>({});
+
+  function stopAudio() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setPlayingKind(null);
+  }
+
+  // Never let audio outlive the page.
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) audioRef.current.pause();
+    };
+  }, []);
+
+  // Exam timer heartbeat: ticks only while a question is open in
+  // an active round. Pauses during the reveal (explanations are
+  // study time, not exam time) and never runs on pick/results.
+  useEffect(() => {
+    if (phase !== "quiz" || done || timeLeft === null) return;
+    if (picked !== null || timeLeft <= 0) return;
+    const t = setTimeout(() => {
+      setTimeLeft((sLeft) => (sLeft === null ? null : sLeft - 1));
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [phase, done, timeLeft, picked]);
+
+  // Zero on the clock: the question auto-reveals unanswered -
+  // recap marks it wrong, nothing is posted as a pick, and the
+  // student reads the explanation like any other reveal.
+  useEffect(() => {
+    if (phase !== "quiz" || done || timeLeft !== 0) return;
+    if (!qs || picked !== null) return;
+    const question = qs[idx];
+    setPicked(-1);
+    setRecap((r) => [...r, { id: question.id, q: question.q, ok: false }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, done, timeLeft, picked]);
+
+  function playAudio(kind: "q" | "e", questionId: string) {
+    if (!AUDIO_BASE) return;
+    if (playingKind === kind) {
+      stopAudio();
+      return;
+    }
+    stopAudio();
+    const key = `${kind}-${questionId}`;
+    const a = new Audio(audioUrl(kind, questionId));
+    a.onended = () => setPlayingKind(null);
+    a.onerror = () => {
+      setAudioDead((d) => ({ ...d, [key]: true }));
+      setPlayingKind(null);
+    };
+    audioRef.current = a;
+    a.play().catch(() => {
+      setAudioDead((d) => ({ ...d, [key]: true }));
+      setPlayingKind(null);
+    });
+    setPlayingKind(kind);
+  }
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportText, setReportText] = useState("");
@@ -164,6 +294,77 @@ export default function BlPracticePage() {
     }
   }
 
+  function resetTutor() {
+    setTutorOpen(false);
+    setThread([]);
+    setTutorInput("");
+    setTutorBusy(false);
+    setTutorErr("");
+  }
+
+  async function askTutor(questionId: string) {
+    const text = tutorInput.trim();
+    if (!text || tutorBusy) return;
+    const nextThread = [...thread, { role: "user" as const, content: text }];
+    setThread(nextThread);
+    setTutorInput("");
+    setTutorErr("");
+    setTutorBusy(true);
+    try {
+      const res = await fetch("/foremanprep/api/tutor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId, messages: nextThread }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.reply) {
+        setThread((t) => [...t, { role: "assistant", content: data.reply }]);
+      } else {
+        setTutorErr(data?.error ?? "The tutor is unavailable - try again.");
+      }
+    } catch {
+      setTutorErr("The tutor is unavailable - try again.");
+    } finally {
+      setTutorBusy(false);
+    }
+  }
+
+  function shufflePack(items: BlQuestion[]): BlQuestion[] {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function beginRound(set: BlQuestion[], tag: string, pack: BlStatePack | null) {
+    setQs(set);
+    setRoundTag(tag);
+    setActivePack(pack);
+    setTimeLeft(timerOn && access?.bl ? QUESTION_SECONDS : null);
+    setIdx(0);
+    setPicked(null);
+    setCorrect(0);
+    setRecap([]);
+    setAnswers([]);
+    setDone(false);
+    setSaved(false);
+    resetTutor();
+    resetReport();
+    stopAudio();
+    setPhase("quiz");
+  }
+
+  function startStateRound(pack: BlStatePack) {
+    if (!access?.bl) {
+      setGateSrc("state");
+      setShowGate(true);
+      return;
+    }
+    beginRound(shufflePack(pack.questions), "bl-st-" + pack.key, pack);
+  }
+
   function startRound(key: Sel) {
     if (roundLen === null) {
       setLenErr(true);
@@ -180,22 +381,15 @@ export default function BlPracticePage() {
       const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
       set = buildBlPracticeSet(key === "all" ? "all" : key, count);
     }
-    setQs(set);
-    setIdx(0);
-    setPicked(null);
-    setCorrect(0);
-    setRecap([]);
-    setAnswers([]);
-    setDone(false);
-    setSaved(false);
-    resetReport();
-    setPhase("quiz");
+    beginRound(set, key === "all" ? "bl" : "bl-" + key, null);
   }
 
   function backToPicker() {
+    stopAudio();
     setPhase("pick");
     setQs(null);
     setDone(false);
+    setTimeLeft(null);
   }
 
   function pick(i: number) {
@@ -214,7 +408,7 @@ export default function BlPracticePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         mode: "practice",
-        domain: sel === "all" ? "bl" : "bl-" + sel,
+        domain: roundTag,
         answers: finalAnswers,
       }),
     })
@@ -234,7 +428,10 @@ export default function BlPracticePage() {
     }
     setIdx(idx + 1);
     setPicked(null);
+    if (timeLeft !== null) setTimeLeft(QUESTION_SECONDS);
+    resetTutor();
     resetReport();
+    stopAudio();
   }
 
   if (phase === "pick") {
@@ -285,6 +482,24 @@ export default function BlPracticePage() {
             </button>
           </div>
           {lenErr ? <p className="fq-lenerr">Select a round length first.</p> : null}
+          <div className="fq-timerrow">
+            <span className="fq-lenlabel">Exam timer</span>
+            <button
+              className={timerOn && access?.bl ? "fq-timertoggle on" : "fq-timertoggle"}
+              onClick={toggleTimer}
+              type="button"
+            >
+              <span className="fq-knob" />
+              {timerOn && access?.bl ? "On" : "Off"}
+            </button>
+          </div>
+          <p className="fq-timernote">
+            {access !== null && !access.bl
+              ? "Comes with Business & Law prep - a per-question clock at the tightest common state pace."
+              : timerOn
+                ? "2 min 48 sec per question - Tennessee's pace (50 questions in 140 minutes), the tightest common state clock. Most states allow more. Stops while you read explanations."
+                : "Put every question on a state exam clock - 2 min 48 sec each, the tightest common pace. Stops while you read explanations."}
+          </p>
           {access !== null && !access.bl ? (
             <p className="fp-tryhint">
               The free round is a fixed 10-question sample. Business &amp;
@@ -294,14 +509,19 @@ export default function BlPracticePage() {
           ) : null}
           {showGate ? (
             <div className="fp-gate">
-              <p className="fp-gateh">Longer rounds come with Business &amp; Law prep.</p>
+              <p className="fp-gateh">
+                {gateSrc === "timer"
+                  ? "The exam timer comes with Business & Law prep."
+                  : gateSrc === "state"
+                    ? "State packs come with Business & Law prep."
+                    : "Longer rounds come with Business & Law prep."}
+              </p>
               <p className="fp-gated">
-                Unlock all 120 questions across 10 domains - contracts,
-                liens, payroll, insurance, estimating math, and the rest
-                of the Business &amp; Law body - with fresh shuffles every
-                round. One payment, no subscription. Full Access owners:
-                this is a separate add-on, and it stacks onto your
-                account.
+                Unlock all 120 questions across 10 domains, fresh shuffles
+                every round, the AI tutor on every question, and the
+                state-pace exam timer. One payment, no subscription.
+                Full Access owners: this is a separate add-on, and it
+                stacks onto your account.
               </p>
               <Link className="fp-gatebtn" href="/foremanprep/buy?product=bl">
                 Get Business &amp; Law prep - $79
@@ -325,6 +545,31 @@ export default function BlPracticePage() {
               <span className="fq-sw">12 in the core bank</span>
             </button>
           ))}
+        </div>
+        <div style={{ marginTop: "28px" }}>
+          <span className="fq-lenlabel">State packs</span>
+          <p className="fq-hint" style={{ marginTop: "6px" }}>
+            Your state's own numbers - lien deadlines, license
+            thresholds, retainage caps.{" "}
+            <span className="fq-hint-hl">
+              Statute-verified Aug 2026. More states on the way.
+            </span>
+          </p>
+          <div className="fq-pick">
+            {BL_STATE_PACKS.map((p) => (
+              <button
+                className="fq-sub"
+                key={p.key}
+                onClick={() => startStateRound(p)}
+                type="button"
+              >
+                <span className="fq-sn">{p.name}</span>
+                <span className="fq-sw">
+                  {p.questions.length} state questions - {p.examLine}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -368,7 +613,11 @@ export default function BlPracticePage() {
               </div>
             ))}
           </div>
-          <button className="fq-again" onClick={() => startRound(sel)} type="button">
+          <button
+            className="fq-again"
+            onClick={() => (activePack ? startStateRound(activePack) : startRound(sel))}
+            type="button"
+          >
             {access?.bl ? "Go again - fresh shuffle" : "Run the sample again"}
           </button>
           <button className="fq-home" onClick={backToPicker} type="button">
@@ -397,12 +646,45 @@ export default function BlPracticePage() {
           Domains
         </button>
         <span className="fq-prog">
+          {timeLeft !== null ? (
+            <span className={timeLeft <= 30 ? "fq-clock low" : "fq-clock"}>
+              {fmtClock(timeLeft)}
+            </span>
+          ) : null}
           Question {idx + 1} / {qs.length}
         </span>
       </div>
 
-      <span className="fq-chip">{getBlDomain(question.domain)?.name ?? question.domain}</span>
+      <span className="fq-chip">
+        {(activePack ? activePack.name + " - " : "") +
+          (getBlDomain(question.domain)?.name ?? question.domain)}
+      </span>
       <p className="fq-q">{question.q}</p>
+
+      {AUDIO_BASE ? (
+        <div className="fq-listenrow">
+          {!audioDead[`q-${question.id}`] ? (
+            <button
+              className={playingKind === "q" ? "fq-listen playing" : "fq-listen"}
+              onClick={() => playAudio("q", question.id)}
+              type="button"
+            >
+              {LISTEN_ICON}
+              {playingKind === "q" ? "Stop" : "Listen"}
+            </button>
+          ) : null}
+          {picked !== null && !audioDead[`e-${question.id}`] ? (
+            <button
+              className={playingKind === "e" ? "fq-listen playing" : "fq-listen"}
+              onClick={() => playAudio("e", question.id)}
+              type="button"
+            >
+              {LISTEN_ICON}
+              {playingKind === "e" ? "Stop" : "Hear the explanation"}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="fq-choices">
         {question.choices.map((c, i) => (
@@ -424,8 +706,61 @@ export default function BlPracticePage() {
 
       {revealed ? (
         <div className="fq-reveal">
+          {picked === -1 ? (
+            <p className="fq-timeout">Out of time on this one - 2:48 is the tightest state pace. Read the why, then keep rolling.</p>
+          ) : null}
           <p className="fq-explain">{question.explain}</p>
           <p className="fq-cite">Where it lives: {question.cite}</p>
+          {tutorOpen ? (
+            <div className="fq-tutor">
+              <div className="fq-thread">
+                {thread.length === 0 && !tutorBusy ? (
+                  <div className="fq-msg tut">
+                    Ask me anything about this one - why the answer is right,
+                    what a term means, or how it plays out on a real job.
+                  </div>
+                ) : null}
+                {thread.map((m, i) => (
+                  <div
+                    className={m.role === "user" ? "fq-msg me" : "fq-msg tut"}
+                    key={`${m.role}-${i}`}
+                  >
+                    {m.content}
+                  </div>
+                ))}
+                {tutorBusy ? <div className="fq-msg tut thinking">Thinking...</div> : null}
+              </div>
+              {tutorErr ? <p className="fq-terr">{tutorErr}</p> : null}
+              <div className="fq-ask">
+                <input
+                  className="fq-askin"
+                  disabled={tutorBusy}
+                  onChange={(e) => setTutorInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") askTutor(question.id);
+                  }}
+                  placeholder="Ask the tutor..."
+                  value={tutorInput}
+                />
+                <button
+                  className="fq-asksend"
+                  disabled={tutorBusy || tutorInput.trim().length === 0}
+                  onClick={() => askTutor(question.id)}
+                  type="button"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              className="fq-asktut"
+              onClick={() => setTutorOpen(true)}
+              type="button"
+            >
+              Ask the tutor why
+            </button>
+          )}
           <button className="fq-next" onClick={next} type="button">
             {idx + 1 >= qs.length ? "See my score" : "Next question"}
           </button>
@@ -484,7 +819,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v3 - all-blue
-// room, locked lengths deselect)
+// END OF FILE - app/foremanprep/bl/page.tsx (v5 - phase 2
+// complete: tutor, Listen pills, timer, and TN/GA/SC state packs)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
