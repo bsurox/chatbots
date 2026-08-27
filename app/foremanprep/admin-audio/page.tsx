@@ -2,10 +2,18 @@
 "use client";
 import { useRef, useState } from "react";
 import { BL_QUESTIONS } from "@/lib/foremanprep/blquestions";
+import { BL_PACKS_LIVE } from "@/lib/foremanprep/blstates";
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { QUESTIONS } from "@/lib/foremanprep/questions";
 
-// ForemanPrep audio admin (v3) - Chase's one-button factory floor.
+// ForemanPrep audio admin (v4) - Chase's one-button factory floor.
+// v4 adds Step 5: Generate the state packs - every statute-pack
+// question from blstates (TN/GA/SC today; the list grows itself
+// as pack states land) through the same route. audio-gen v5 now
+// resolves pack ids AND skips files already in the blob store, so
+// this step - and any re-run of any step - only pays ElevenLabs
+// for what is missing. The Step 1 test button passes force: true
+// so a voice audition always generates fresh.
 // v3 adds Step 4: Generate the Business & Law bank - all 120 B&L
 // questions through the same route (their bl- ids resolve against
 // the B&L bank since audio-gen v4), with its own start-at box and
@@ -24,12 +32,16 @@ import { QUESTIONS } from "@/lib/foremanprep/questions";
 
 const LETTERS = ["A", "B", "C", "D"];
 
+// Every statute-pack question across the live pack states.
+const PACK_QUESTIONS = BL_PACKS_LIVE.flatMap((p) => p.questions);
+
 type Job = { id: string; kind: "q" | "e" | "lesson" };
 
 function jobText(job: Job): string {
   const q =
     QUESTIONS.find((x) => x.id === job.id) ??
-    BL_QUESTIONS.find((x) => x.id === job.id);
+    BL_QUESTIONS.find((x) => x.id === job.id) ??
+    PACK_QUESTIONS.find((x) => x.id === job.id);
   if (!q) return "";
   if (job.kind === "q") {
     const choices = q.choices.map((c, i) => `Option ${LETTERS[i]}: ${c}.`).join(" ");
@@ -49,8 +61,14 @@ const BL_JOBS: Job[] = BL_QUESTIONS.flatMap((q) => [
   { id: q.id, kind: "e" as const },
 ]);
 
+const ST_JOBS: Job[] = PACK_QUESTIONS.flatMap((q) => [
+  { id: q.id, kind: "q" as const },
+  { id: q.id, kind: "e" as const },
+]);
+
 const TOTAL_CHARS = ALL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
 const BL_CHARS = BL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
+const ST_CHARS = ST_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
 const LESSON_CHARS = LESSONS.reduce((sum, l) => sum + l.script.length, 0);
 
 const box = {
@@ -104,6 +122,11 @@ export default function AdminAudioPage() {
   const [blDone, setBlDone] = useState(0);
   const [blCurrent, setBlCurrent] = useState("");
   const [blStartAt, setBlStartAt] = useState("1");
+  const [stRunning, setStRunning] = useState(false);
+  const [stDone, setStDone] = useState(0);
+  const [stSkipped, setStSkipped] = useState(0);
+  const [stCurrent, setStCurrent] = useState("");
+  const [stStartAt, setStStartAt] = useState("1");
   const abortRef = useRef(false);
 
   async function runLessons() {
@@ -126,15 +149,15 @@ export default function AdminAudioPage() {
     setLessonBusy(false);
   }
 
-  async function generate(job: Job): Promise<{ ok: boolean; url?: string; chars?: number; error?: string }> {
+  async function generate(job: Job, force?: boolean): Promise<{ ok: boolean; url?: string; chars?: number; skipped?: boolean; error?: string }> {
     try {
       const res = await fetch("/foremanprep/api/audio-gen", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key, kind: job.kind, id: job.id }),
+        body: JSON.stringify({ key, kind: job.kind, id: job.id, force: force === true }),
       });
       const data = await res.json().catch(() => null);
-      if (res.ok && data?.ok) return { ok: true, url: data.url, chars: data.chars };
+      if (res.ok && data?.ok) return { ok: true, url: data.url, chars: data.chars, skipped: data.skipped === true };
       return { ok: false, error: data?.error ?? `HTTP ${res.status}` };
     } catch {
       return { ok: false, error: "network error" };
@@ -153,7 +176,9 @@ export default function AdminAudioPage() {
     setTestUrls([]);
     const urls: string[] = [];
     for (const kind of ["q", "e"] as const) {
-      const r = await generate({ id: QUESTIONS[0].id, kind });
+      // force: true - a voice audition must generate fresh, never
+      // return the store's existing file.
+      const r = await generate({ id: QUESTIONS[0].id, kind }, true);
       if (r.ok && r.url) {
         urls.push(r.url);
         recordBase(r.url);
@@ -192,6 +217,34 @@ export default function AdminAudioPage() {
     if (!abortRef.current) setNote("B&L batch complete.");
     setBlCurrent("");
     setBlRunning(false);
+  }
+
+  async function runSt() {
+    if (!key.trim() || stRunning || blRunning || running || testBusy || lessonBusy) return;
+    const from = Math.max(1, Number.parseInt(stStartAt, 10) || 1) - 1;
+    setStRunning(true);
+    abortRef.current = false;
+    setNote("");
+    setStSkipped(0);
+    for (let i = from; i < ST_JOBS.length; i++) {
+      if (abortRef.current) {
+        setNote(`Stopped at state-pack job ${i + 1}. Enter ${i + 1} in the state-pack start box to resume.`);
+        break;
+      }
+      const job = ST_JOBS[i];
+      setStCurrent(`${job.id} (${job.kind === "q" ? "question" : "explanation"})`);
+      const r = await generate(job);
+      if (r.ok && r.url) {
+        recordBase(r.url);
+        if (r.skipped) setStSkipped((s) => s + 1);
+      } else {
+        setFailures((f) => [...f, `${job.id}/${job.kind}: ${r.error}`]);
+      }
+      setStDone(i + 1);
+    }
+    if (!abortRef.current) setNote("State-pack batch complete.");
+    setStCurrent("");
+    setStRunning(false);
   }
 
   async function runAll() {
@@ -360,6 +413,53 @@ export default function AdminAudioPage() {
         </p>
       </div>
 
+      <div style={box}>
+        <p style={{ fontSize: "13px", fontWeight: 700, color: "#38bdf8", margin: "0 0 8px" }}>
+          Step 5 - generate the state packs
+        </p>
+        <p style={{ fontSize: "12.5px", color: "#999", margin: "0 0 10px" }}>
+          {PACK_QUESTIONS.length} statute questions across the live pack
+          states, {ST_JOBS.length} audio files, about{" "}
+          {Math.round(ST_CHARS / 1000)}k characters. Files that already
+          exist are skipped automatically, so re-running after new pack
+          states land only pays for the new ones.
+        </p>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "10px" }}>
+          <span style={{ fontSize: "13px", color: "#999" }}>Start at job</span>
+          <input
+            inputMode="numeric"
+            onChange={(e) => setStStartAt(e.target.value)}
+            style={{ ...input, width: "90px" }}
+            value={stStartAt}
+          />
+          <span style={{ fontSize: "13px", color: "#999" }}>of {ST_JOBS.length}</span>
+        </div>
+        {stRunning ? (
+          <button
+            onClick={() => {
+              abortRef.current = true;
+            }}
+            style={{ ...btn, background: "#ef4444", color: "#fff" }}
+            type="button"
+          >
+            Stop after current file
+          </button>
+        ) : (
+          <button
+            disabled={testBusy || running || lessonBusy || blRunning}
+            onClick={runSt}
+            style={{ ...btn, background: "#38bdf8" }}
+            type="button"
+          >
+            Generate state packs
+          </button>
+        )}
+        <p style={{ fontSize: "13.5px", color: "#ccc", margin: "12px 0 0", fontVariantNumeric: "tabular-nums" }}>
+          {stDone} / {ST_JOBS.length} done ({stSkipped} already existed)
+          {stCurrent ? ` - working on ${stCurrent}` : ""}
+        </p>
+      </div>
+
       {note ? (
         <p style={{ fontSize: "13.5px", color: "#4ade80", margin: "0 0 12px" }}>{note}</p>
       ) : null}
@@ -388,8 +488,8 @@ export default function AdminAudioPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/admin-audio/page.tsx (v3 - the
-// B&L bank gets its own generation step)
+// END OF FILE - app/foremanprep/admin-audio/page.tsx (v4 -
+// Step 5 voices the state packs; test button forces fresh)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
