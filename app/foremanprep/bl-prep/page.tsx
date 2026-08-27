@@ -3,9 +3,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
 
-// Business & Law landing page (v5): the 1:1 State Exam Simulator
-// joins the feature grid and the hero try-row links it - all 16
-// B&L states, real formats, verified Aug 2026.
+// Business & Law landing page (v6): AUDIO is real - Chase ran the
+// 240-file ElevenLabs batch - so the "Study with your ears" card
+// joins the grid. Claims ship only after the thing exists; it
+// exists.
+// v5 notes: the 1:1 State Exam Simulator joined the feature grid
+// and the hero try-row links it - all 16 B&L states, real
+// formats, verified Aug 2026.
 // v4 notes (MERGE FIX). An Aug 26 session
 // shipped its own v3 of this page mounting BlAuthButton (the
 // Log in / Log out pill, blue auth flow); tonight's phase-2 v3
@@ -64,6 +68,10 @@ const FEATURES = [
   {
     n: "The math, drilled",
     d: "Markup versus margin, labor burden, overhead recovery, break-even, pay applications with retainage - the calculations B&L exams love, with the arithmetic walked through.",
+  },
+  {
+    n: "Study with your ears",
+    d: "Every question and every explanation voiced - tap Listen and drill hands-free on the drive between jobs.",
   },
   {
     n: "The 1:1 State Exam Simulator",
@@ -224,7 +232,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v5 - the 1:1
-// State Exam Simulator joins the pitch)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v6 - audio is
+// real, the ears card ships)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
