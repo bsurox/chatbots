@@ -14,7 +14,12 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// B&L STATE EXAM SIMULATOR (v2) - real testing-center flow.
+// B&L STATE EXAM SIMULATOR (v3) - review-legend wording follows
+// css v17: the flagged marker on the grid is now the same \2691
+// flag glyph as the GC sim (was a dot), so the legend says Flag.
+// The Next-button spacing fix rode in css v17 alone - no code
+// change here beyond this one string.
+// v2 notes: real testing-center flow.
 // v1's one-pass rule is gone: real PSI/Prov computer exams let you
 // skip, change answers, flag questions, and review the whole form
 // before you submit - so the sim does too (his call).
@@ -523,7 +528,7 @@ export default function BlExamPage() {
                 : " Everything answered."}
             </p>
             <p className="fx-legend">
-              Filled = answered. Dot = flagged. Tap a number to jump back.
+              Filled = answered. Flag = flagged. Tap a number to jump back.
             </p>
             <div className="fx-grid">
               {qs.map((q, i) => (
@@ -607,7 +612,7 @@ export default function BlExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-exam/page.tsx (v2 - flag,
-// skip, free navigation, review screen, leave confirm)
+// END OF FILE - app/foremanprep/bl-exam/page.tsx (v3 - review
+// legend names the flag glyph)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
