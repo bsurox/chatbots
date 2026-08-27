@@ -1,13 +1,19 @@
 // FILE: app/foremanprep/bl-prep/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import BlAuthButton from "../bl-auth-button";
 
-// Business & Law landing page (v3 - phase 2 features join the
-// grid: the AI tutor on every question and the 2:48 state-pace
-// exam timer are live in the practice room, so the page may now
-// honestly claim them; audio gets its line once the batch is
-// voiced). v2 notes: both buy buttons link
-// /foremanprep/buy?product=bl. Original v1 notes below. - the blue sibling of the
+// Business & Law landing page (v4 - MERGE FIX). An Aug 26 session
+// shipped its own v3 of this page mounting BlAuthButton (the
+// Log in / Log out pill, blue auth flow); tonight's phase-2 v3
+// was built from an older baseline and overwrote it, knocking the
+// pill off the page. v4 restores the BlAuthButton mount AND keeps
+// phase 2's feature grid (tutor, state-pace timer, TN/GA/SC state
+// packs). Nothing else changed from either lineage.
+// v3 notes (phase 2): the AI tutor and the 2:48 state-pace exam
+// timer went live in the practice room, so the page claims them;
+// audio gets its line once the batch is voiced. v2 notes: both
+// buy buttons link /foremanprep/buy?product=bl. v1 notes below. - the blue sibling of the
 // ForemanPrep front door. Same skeleton as the main landing (hero,
 // stats, open-book strip, features grid, price table, footer) but
 // everything is about the state Business & Law exam, and the whole
@@ -83,9 +89,12 @@ export default function BlPrepLandingPage() {
           <div className="fp-brand">
             Foreman<span>Prep</span>
           </div>
-          <Link className="fp-backpill" href="/foremanprep">
-            NASCLA trade exam prep
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <Link className="fp-backpill" href="/foremanprep">
+              NASCLA trade exam prep
+            </Link>
+            <BlAuthButton />
+          </div>
         </div>
 
         <div className="fp-hero">
@@ -208,7 +217,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v3 - tutor
-// and timer join the feature grid)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v4 - auth
+// pill restored + phase-2 feature grid, merged)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
