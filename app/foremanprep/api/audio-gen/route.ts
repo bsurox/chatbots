@@ -1,7 +1,9 @@
 // FILE: app/foremanprep/api/audio-gen/route.ts
 import "server-only";
-import { put } from "@vercel/blob";
+import { head, put } from "@vercel/blob";
+import { AUDIO_BASE } from "@/lib/foremanprep/audio-config";
 import { getBlQuestion } from "@/lib/foremanprep/blquestions";
+import { getBlStateQuestion } from "@/lib/foremanprep/blstates";
 import { getLesson } from "@/lib/foremanprep/lessons";
 import { getQuestion } from "@/lib/foremanprep/questions";
 
@@ -31,12 +33,26 @@ export const maxDuration = 300;
 // the B&L bank, so the same factory voices the 120 B&L questions
 // to the same blob paths (q-bl-li-001.mp3 and so on) with zero
 // other changes.
+// v5: two fixes. (1) STATE PACK IDS RESOLVE - bl- ids not found
+// in the core bank fall through to the statute packs in blstates
+// (bl-tn-001 and friends), which v4 reported as unknown; that is
+// why the pack Listen pills had no files to load. (2) SKIP WHAT
+// EXISTS - before spending ElevenLabs characters, the route asks
+// the blob store (head) whether this exact file is already up
+// there; if so it returns ok with skipped: true and chars: 0.
+// Re-running any batch now only pays for missing files. Pass
+// force: true to regenerate anyway (the admin page's Step 1 test
+// button does, so voice changes stay auditionable).
 
 const DEFAULT_VOICE = "pNInz6obpgDQGcFmaJgB";
 const LETTERS = ["A", "B", "C", "D"];
 
 function findQuestion(id: string) {
-  return id.startsWith("bl-") ? getBlQuestion(id) : getQuestion(id);
+  if (id.startsWith("bl-")) {
+    // Core B&L bank first, then the state statute packs.
+    return getBlQuestion(id) ?? getBlStateQuestion(id);
+  }
+  return getQuestion(id);
 }
 
 function questionText(id: string): string | null {
@@ -77,7 +93,7 @@ function chunkScript(script: string): string[] {
 }
 
 export async function POST(request: Request) {
-  let body: { key?: unknown; kind?: unknown; id?: unknown; voiceId?: unknown };
+  let body: { key?: unknown; kind?: unknown; id?: unknown; voiceId?: unknown; force?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -118,6 +134,24 @@ export async function POST(request: Request) {
       { error: "Storage not configured - FPMEDIA_READ_WRITE_TOKEN is missing." },
       { status: 500 }
     );
+  }
+
+  // Skip files that already exist (unless force: true) - a re-run
+  // of any batch only pays ElevenLabs for what is missing. A head
+  // failure just means "not there yet": fall through and generate.
+  const force = body.force === true;
+  if (!force && AUDIO_BASE) {
+    try {
+      const existing = await head(
+        `${AUDIO_BASE}/foremanprep-audio/${kind}-${id}.mp3`,
+        { token: blobToken }
+      );
+      if (existing?.url) {
+        return Response.json({ ok: true, url: existing.url, chars: 0, skipped: true });
+      }
+    } catch {
+      // Not in the store - generate it below.
+    }
   }
 
   try {
@@ -171,8 +205,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v4 -
-// bl- ids voice the Business & Law bank)
+// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v5 -
+// state pack ids resolve + existing files are skipped)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
