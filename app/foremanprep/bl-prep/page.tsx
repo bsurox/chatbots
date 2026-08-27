@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
 
-// Business & Law landing page (v4 - MERGE FIX). An Aug 26 session
+// Business & Law landing page (v5): the 1:1 State Exam Simulator
+// joins the feature grid and the hero try-row links it - all 16
+// B&L states, real formats, verified Aug 2026.
+// v4 notes (MERGE FIX). An Aug 26 session
 // shipped its own v3 of this page mounting BlAuthButton (the
 // Log in / Log out pill, blue auth flow); tonight's phase-2 v3
 // was built from an older baseline and overwrote it, knocking the
@@ -61,6 +64,10 @@ const FEATURES = [
   {
     n: "The math, drilled",
     d: "Markup versus margin, labor burden, overhead recovery, break-even, pay applications with retainage - the calculations B&L exams love, with the arithmetic walked through.",
+  },
+  {
+    n: "The 1:1 State Exam Simulator",
+    d: "Pick your state and sit its Business & Law exam for real: the exact question count, the exact clock, the exact pass bar - all 16 B&L states, every format verified against the testing bulletins.",
   },
   {
     n: "State packs - your state's numbers",
@@ -123,8 +130,8 @@ export default function BlPrepLandingPage() {
             <Link className="fp-try-btn" href="/foremanprep/bl">
               Try 10 free questions
             </Link>
-            <Link className="fp-try-btn ghost" href="/foremanprep/states">
-              Check your state's rules
+            <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
+              See your state's exam
             </Link>
           </div>
           <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
@@ -217,7 +224,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v4 - auth
-// pill restored + phase-2 feature grid, merged)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v5 - the 1:1
+// State Exam Simulator joins the pitch)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
