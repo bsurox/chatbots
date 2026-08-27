@@ -4,9 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fpTrackBeginCheckout } from "../analytics";
 
-// The ForemanPrep storefront v13 - the B&L card's feature list
-// catches up with phase 2: the AI tutor and the state-pace exam
-// timer are live in the B&L room, so the card now claims them.
+// The ForemanPrep storefront v14 - context-aware BACK button
+// (his call): arriving through a B&L door (?product=bl) the
+// header pill reads "Back to Business & Law" and returns to the
+// blue landing at /bl-prep; plain and GC arrivals keep the
+// "Back to ForemanPrep" pill to the orange landing. Same blFocus
+// flag that already orders the cards.
+// v13 notes: the B&L card's feature list caught up with phase 2 -
+// the AI tutor and the state-pace exam timer went live in the B&L
+// room, so the card claims them.
 // v12 notes: context-aware order + themes
 // (his calls): (1) arriving with ?product=bl in the URL - every
 // B&L buy button now links that way - puts the B&L card FIRST;
@@ -413,12 +419,21 @@ export default function BuyPage() {
   return (
     <div className="fp-wrap">
       <div className="fp-top">
-        <Link className="fp-backpill" href="/foremanprep">
-          Back to{" "}
-          <span className="fp-wordmark">
-            Foreman<span>Prep</span>
-          </span>
-        </Link>
+        {blFocus ? (
+          <Link className="fp-backpill" href="/foremanprep/bl-prep">
+            Back to{" "}
+            <span style={{ color: "#38bdf8", fontWeight: 700 }}>
+              Business &amp; Law
+            </span>
+          </Link>
+        ) : (
+          <Link className="fp-backpill" href="/foremanprep">
+            Back to{" "}
+            <span className="fp-wordmark">
+              Foreman<span>Prep</span>
+            </span>
+          </Link>
+        )}
         {earlyBird ? <div className="fp-chip">Early bird ends Sept 7</div> : null}
       </div>
 
@@ -454,8 +469,8 @@ export default function BuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/buy/page.tsx (v13 - B&L card
-// claims the tutor and the state-pace timer)
+// END OF FILE - app/foremanprep/buy/page.tsx (v14 - the back
+// button knows which door you came through)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
