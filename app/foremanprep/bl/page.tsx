@@ -19,7 +19,11 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v7): the exam timer learns your
+// Business & Law practice room (v8): the state-pack section now
+// carries id="packs", so the B&L landing's owner "State packs"
+// button (/bl#packs, bl-prep v7) lands the browser right on it.
+// One attribute - nothing else changed from v7.
+// v7 notes: the exam timer learns your
 // state, and the back button leads home to Business & Law.
 // 1. STATE-PACE SELECT - when the timer is on, a dropdown picks
 //    which state's clock to train: every timed state from
@@ -643,7 +647,7 @@ export default function BlPracticePage() {
             clock, real pass bar. All 16 B&amp;L states.
           </span>
         </Link>
-        <div style={{ marginTop: "28px" }}>
+        <div id="packs" style={{ marginTop: "28px" }}>
           <span className="fq-lenlabel">State packs</span>
           <p className="fq-hint" style={{ marginTop: "6px" }}>
             Your state's own numbers - lien deadlines, license
@@ -920,7 +924,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v7 - state-pace
-// timer select + back button leads home to Business & Law)
+// END OF FILE - app/foremanprep/bl/page.tsx (v8 - the packs
+// section carries the #packs anchor for the landing's owner door)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
