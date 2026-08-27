@@ -2,8 +2,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
+import BlOwnerSwap from "../bl-owner-swap";
 
-// Business & Law landing page (v6): AUDIO is real - Chase ran the
+// Business & Law landing page (v7): OWNERS STOP GETTING PITCHED
+// (his report - a B&L owner still saw every $79 buy button). The
+// page stays a server component; the sell furniture now sits
+// inside BlOwnerSwap islands (bl-owner-swap v1), which render the
+// sell variant into the server HTML (crawlers and visitors see it
+// unchanged) and swap after one shared access check:
+// - hero "Get Business & Law Prep - $79" button + price note:
+//   GONE for owners;
+// - try-row: visitors keep [Try 10 free questions / Exam
+//   simulator]; owners get THREE doors - [Start practice / Exam
+//   simulator / State packs] (packs deep-links /bl#packs, anchor
+//   added in bl v8);
+// - "Free to try right now" line: GONE for owners;
+// - the whole "What B&L prep costs today" window: GONE for
+//   owners.
+// Also (his call): the sim button label is now "Exam simulator"
+// for everyone - "See your state's exam" wasn't clear.
+// v6 notes: AUDIO is real - Chase ran the
 // 240-file ElevenLabs batch - so the "Study with your ears" card
 // joins the grid. Claims ship only after the thing exists; it
 // exists.
@@ -123,26 +141,51 @@ export default function BlPrepLandingPage() {
             it: contracts, liens, payroll, insurance, and the money math,
             explained in plain language.
           </p>
-          <Link
-            className="fp-cta"
-            href="/foremanprep/buy?product=bl"
-            style={{ textDecoration: "none" }}
-          >
-            Get Business &amp; Law Prep - $79
-          </Link>
-          <p className="fp-note">
-            <b>One-time $79.</b> No subscription. B&amp;L courses charge $195
-            to $295 for less.
-          </p>
-          <div className="fp-try">
-            <Link className="fp-try-btn" href="/foremanprep/bl">
-              Try 10 free questions
-            </Link>
-            <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
-              See your state's exam
-            </Link>
-          </div>
-          <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
+          <BlOwnerSwap
+            sell={
+              <>
+                <Link
+                  className="fp-cta"
+                  href="/foremanprep/buy?product=bl"
+                  style={{ textDecoration: "none" }}
+                >
+                  Get Business &amp; Law Prep - $79
+                </Link>
+                <p className="fp-note">
+                  <b>One-time $79.</b> No subscription. B&amp;L courses charge $195
+                  to $295 for less.
+                </p>
+              </>
+            }
+          />
+          <BlOwnerSwap
+            sell={
+              <div className="fp-try">
+                <Link className="fp-try-btn" href="/foremanprep/bl">
+                  Try 10 free questions
+                </Link>
+                <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
+                  Exam simulator
+                </Link>
+              </div>
+            }
+            owned={
+              <div className="fp-try">
+                <Link className="fp-try-btn" href="/foremanprep/bl">
+                  Start practice
+                </Link>
+                <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
+                  Exam simulator
+                </Link>
+                <Link className="fp-try-btn ghost" href="/foremanprep/bl#packs">
+                  State packs
+                </Link>
+              </div>
+            }
+          />
+          <BlOwnerSwap
+            sell={<p className="fp-tryhint">Free to try right now - no sign-up needed.</p>}
+          />
         </div>
 
         <div className="fp-stats">
@@ -180,26 +223,32 @@ export default function BlPrepLandingPage() {
           ))}
         </div>
 
-        <h2 className="fp-h2">What B&amp;L prep costs today</h2>
-        <div className="fp-price">
-          {PRICES.map((p) => (
-            <div className="fp-prow" key={p.l}>
-              <div className="fp-pl">{p.l}</div>
-              <div className="fp-pv">{p.v}</div>
-            </div>
-          ))}
-          <div className="fp-prow fp-ours">
-            <div className="fp-pl">ForemanPrep B&amp;L - full bank, never expires</div>
-            <div className="fp-pv">$79</div>
-          </div>
-          <Link
-            className="fp-cta"
-            href="/foremanprep/buy?product=bl"
-            style={{ display: "block", marginTop: "14px", textAlign: "center", textDecoration: "none" }}
-          >
-            Get Business &amp; Law Prep
-          </Link>
-        </div>
+        <BlOwnerSwap
+          sell={
+            <>
+              <h2 className="fp-h2">What B&amp;L prep costs today</h2>
+              <div className="fp-price">
+                {PRICES.map((p) => (
+                  <div className="fp-prow" key={p.l}>
+                    <div className="fp-pl">{p.l}</div>
+                    <div className="fp-pv">{p.v}</div>
+                  </div>
+                ))}
+                <div className="fp-prow fp-ours">
+                  <div className="fp-pl">ForemanPrep B&amp;L - full bank, never expires</div>
+                  <div className="fp-pv">$79</div>
+                </div>
+                <Link
+                  className="fp-cta"
+                  href="/foremanprep/buy?product=bl"
+                  style={{ display: "block", marginTop: "14px", textAlign: "center", textDecoration: "none" }}
+                >
+                  Get Business &amp; Law Prep
+                </Link>
+              </div>
+            </>
+          }
+        />
 
         <div className="fp-foot">
           <div className="fp-links">
@@ -232,7 +281,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v6 - audio is
-// real, the ears card ships)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v7 - owners
+// stop getting pitched; three owner doors; Exam simulator label)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
