@@ -14,11 +14,21 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// B&L STATE EXAM SIMULATOR (v3) - review-legend wording follows
+// B&L STATE EXAM SIMULATOR (v4) - no state click ever leaves the
+// simulator. His find: Arizona (second cell in the grid) was a
+// silent Link to the practice room - tap it and you were dumped
+// out of the sim, which reads as "selecting a state took me to
+// the practice page". Arizona has no exam to mirror (its SRE is
+// an online course with no published format), but now it opens
+// a briefing INSIDE the simulator like every other state: the
+// explanation, a "Drill the material instead" door to practice,
+// and Pick a different state. The deep link ?state=az lands on
+// the same briefing. Real states are unchanged: click -> their
+// briefing -> Start (the clock starts on Start, on purpose -
+// never on the state click).
+// v3 notes: review-legend wording follows
 // css v17: the flagged marker on the grid is now the same \2691
 // flag glyph as the GC sim (was a dot), so the legend says Flag.
-// The Next-button spacing fix rode in css v17 alone - no code
-// change here beyond this one string.
 // v2 notes: real testing-center flow.
 // v1's one-pass rule is gone: real PSI/Prov computer exams let you
 // skip, change answers, flag questions, and review the whole form
@@ -125,7 +135,7 @@ export default function BlExamPage() {
       const key = params.get("state");
       if (key) {
         const pack = getBlStatePack(key);
-        if (pack && pack.sim !== "none") {
+        if (pack) {
           setState(pack);
           setPhase("brief");
         }
@@ -153,14 +163,13 @@ export default function BlExamPage() {
   }, [phase, timeLeft]);
 
   function chooseState(pack: BlStatePack) {
-    if (pack.sim === "none") return;
     setState(pack);
     setPhase("brief");
     setShowGate(false);
   }
 
   function startExam() {
-    if (!state) return;
+    if (!state || state.sim === "none") return;
     if (!access?.bl) {
       setShowGate(true);
       return;
@@ -293,24 +302,19 @@ export default function BlExamPage() {
           </span>
         </p>
         <div className="fq-pick">
-          {BL_STATE_PACKS.map((p) =>
-            p.sim === "none" ? (
-              <Link className="fq-sub" href="/foremanprep/bl" key={p.key}>
-                <span className="fq-sn">{p.name}</span>
-                <span className="fq-sw">{p.examLine} - no 1:1 sim, drill practice instead</span>
-              </Link>
-            ) : (
-              <button
-                className="fq-sub"
-                key={p.key}
-                onClick={() => chooseState(p)}
-                type="button"
-              >
-                <span className="fq-sn">{p.name}</span>
-                <span className="fq-sw">{p.examLine}</span>
-              </button>
-            )
-          )}
+          {BL_STATE_PACKS.map((p) => (
+            <button
+              className="fq-sub"
+              key={p.key}
+              onClick={() => chooseState(p)}
+              type="button"
+            >
+              <span className="fq-sn">{p.name}</span>
+              <span className="fq-sw">
+                {p.sim === "none" ? p.examLine + " - no exam to simulate" : p.examLine}
+              </span>
+            </button>
+          ))}
         </div>
         <p className="fq-hint" style={{ marginTop: "16px" }}>
           North Carolina has no separate Business &amp; Law exam - the
@@ -332,6 +336,34 @@ export default function BlExamPage() {
         </div>
         <p className="fq-title">{state.name}</p>
         <span className="fq-chip">{state.blName}</span>
+        {state.sim === "none" ? (
+          <>
+            <p className="fq-hint" style={{ marginTop: "10px" }}>{state.note}</p>
+            <p className="fq-hint">
+              <span className="fq-hint-hl">
+                No exam to simulate: {state.name}'s requirement is
+                course-based, so there is no published question count,
+                clock, or pass bar to mirror 1:1.
+              </span>{" "}
+              Reference: {state.reference}. {state.verified}.
+            </p>
+            <Link
+              className="fq-all"
+              href="/foremanprep/bl"
+              style={{ display: "block", textDecoration: "none", boxSizing: "border-box", width: "100%" }}
+            >
+              <span className="fq-sn">Drill the material instead</span>
+              <span className="fq-sw">
+                The practice room covers the same Business &amp; Law core
+                the {state.name} course teaches.
+              </span>
+            </Link>
+            <button className="fq-home" onClick={backToPicker} type="button">
+              Pick a different state
+            </button>
+          </>
+        ) : (
+        <>
         <p className="fq-hint" style={{ marginTop: "10px" }}>
           {state.simQuestions ?? "?"} questions
           {state.sim === "timed" && state.minutes
@@ -383,6 +415,8 @@ export default function BlExamPage() {
         <button className="fq-home" onClick={backToPicker} type="button">
           Pick a different state
         </button>
+        </>
+        )}
       </div>
     );
   }
@@ -612,7 +646,7 @@ export default function BlExamPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-exam/page.tsx (v3 - review
-// legend names the flag glyph)
+// END OF FILE - app/foremanprep/bl-exam/page.tsx (v4 - every
+// state click stays inside the simulator; Arizona explains)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
