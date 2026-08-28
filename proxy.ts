@@ -85,6 +85,7 @@ export async function proxy(request: NextRequest) {
     if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
       return NextResponse.rewrite(new URL("/foremanprep/privacy", request.url));
     }
+    // v16: /bl-packs - the state packs' own page.
     // v15: /bl-exam - the B&L state exam simulator.
     // v14: /bl-prep joins too - the Business & Law landing page.
     // v13: /bl joined the clean URLs - foremanprep.com/bl is the
@@ -100,6 +101,7 @@ export async function proxy(request: NextRequest) {
       "/bl",
       "/bl-prep",
       "/bl-exam",
+      "/bl-packs",
       "/practice",
       "/exam",
       "/audio",
@@ -220,7 +222,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v15 - /bl-exam clean URL added)
+// END OF FILE - proxy.ts (v16 - /bl-packs clean URL added)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
