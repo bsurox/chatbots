@@ -19,10 +19,18 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v8): the state-pack section now
-// carries id="packs", so the B&L landing's owner "State packs"
-// button (/bl#packs, bl-prep v7) lands the browser right on it.
-// One attribute - nothing else changed from v7.
+// Business & Law practice room (v9): PACK DEEP LINKS. The new
+// /bl-packs page (its own page for the packs, his call) links
+// each state as /bl?pack=<key>; this room reads the param after
+// mount and, once the access check lands, starts that state's
+// statute round directly - paid users drop straight into the
+// questions, free users get the pick screen with the state gate
+// open. An unknown or packless key just shows the picker. The
+// param is consumed once per page load.
+// v8 notes: the state-pack section carries id="packs" so the
+// landing's packs button could anchor-jump to it (superseded as
+// the main path by /bl-packs, but the anchor stays - it still
+// works for any deep link).
 // v7 notes: the exam timer learns your
 // state, and the back button leads home to Business & Law.
 // 1. STATE-PACE SELECT - when the timer is on, a dropdown picks
@@ -164,6 +172,18 @@ export default function BlPracticePage() {
   const [timerOn, setTimerOn] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [paceKey, setPaceKey] = useState("tn");
+  const [pendingPack, setPendingPack] = useState<string | null>(null);
+
+  // Deep link from /bl-packs: ?pack=tn queues that state's round.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const key = params.get("pack");
+      if (key) setPendingPack(key);
+    } catch {
+      // A bad URL never breaks the picker.
+    }
+  }, []);
 
   // The chosen pace state survives visits - read after mount only,
   // never during render (the Date.now doctrine applies to storage
@@ -431,6 +451,17 @@ export default function BlPracticePage() {
     }
     beginRound(shufflePack(pack.questions), "bl-st-" + pack.key, pack);
   }
+
+  // Fire the queued ?pack= round once the access check has landed
+  // (startStateRound needs to know paid vs free to pick round or
+  // gate). Runs at most once per page load.
+  useEffect(() => {
+    if (access === null || pendingPack === null) return;
+    const pack = BL_PACKS_LIVE.find((p) => p.key === pendingPack) ?? null;
+    setPendingPack(null);
+    if (pack && pack.questions.length > 0) startStateRound(pack);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [access, pendingPack]);
 
   function startRound(key: Sel) {
     if (roundLen === null) {
@@ -924,7 +955,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v8 - the packs
-// section carries the #packs anchor for the landing's owner door)
+// END OF FILE - app/foremanprep/bl/page.tsx (v9 - ?pack= deep
+// links from /bl-packs start the state's round directly)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
