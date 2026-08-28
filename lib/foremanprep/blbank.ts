@@ -1,7 +1,16 @@
 // FILE: lib/foremanprep/blbank.ts
 
-// ForemanPrep Business & Law question bank (v1 - core bank: 120
-// questions, 10 domains x 12). All original items teaching the
+// ForemanPrep Business & Law question bank (v2 - core bank: 120
+// questions, 10 domains x 12). v2 = the Aug 2026 accuracy audit:
+// every question was fact-checked against primary sources by
+// research agents; 116 of 120 passed clean. Four fixes landed:
+// bl-ib-011's Miller Act threshold corrected $100,000 -> $150,000
+// (the 2010 inflation adjustment - FAR 28.102-1); bl-lb-009's
+// "unlimited hours at 16" distractor replaced (it is literally
+// true under the FLSA, an ambiguity defect); bl-ib-003 and
+// bl-tx-003 explanations gained accuracy softeners (Texas comp is
+// elective; AK/NJ/PA collect a small employee unemployment share).
+// v1 notes: All original items teaching the
 // state-neutral core that every state Business & Law exam draws
 // from - the material of the NASCLA Contractors Guide to Business,
 // Law and Project Management. State-specific layers (lien
@@ -772,7 +781,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 2,
     explain:
-      "The comp bargain trades fault for certainty: medical care and wage benefits flow regardless of blame, and the employer gains protection from injury lawsuits in most circumstances. Coverage is required for most construction employers in every state, with state-specific thresholds.",
+      "The comp bargain trades fault for certainty: medical care and wage benefits flow regardless of blame, and the employer gains protection from injury lawsuits in most circumstances. Coverage is required for most construction employers in nearly every state (Texas is the notable exception - private-employer coverage there is elective), with state-specific thresholds.",
     cite: "NASCLA Guide - Workers' Compensation",
   },
   {
@@ -884,10 +893,10 @@ export const BL_BANK: BlQuestion[] = [
     id: "bl-ib-011",
     domain: "ib",
     q: "On federal construction projects, the Miller Act requires performance and payment bonds on contracts exceeding:",
-    choices: ["$10,000", "$50,000", "$100,000", "$1,000,000"],
+    choices: ["$10,000", "$50,000", "$150,000", "$1,000,000"],
     answer: 2,
     explain:
-      "The Miller Act sets the federal rule at contracts over $100,000: a performance bond protects the government, and a payment bond protects subs and suppliers - who cannot lien federal property. States mirror this for public work with their own \"Little Miller Acts\".",
+      "The Miller Act's operative line is $150,000 - the statute's original $100,000 was inflation-adjusted upward in 2010 and has sat at $150,000 since. Above it, a performance bond protects the government and a payment bond protects subs and suppliers - who cannot lien federal property. States mirror this for public work with their own \"Little Miller Acts\".",
     cite: "Miller Act; NASCLA Guide - Bonds",
   },
   {
@@ -1034,7 +1043,7 @@ export const BL_BANK: BlQuestion[] = [
     choices: [
       "May not perform occupations declared hazardous, such as roofing, excavation, and operating power-driven saws",
       "May do any work if a parent signs a waiver",
-      "May work unlimited hours once they turn 16",
+      "May perform hazardous occupations such as roofing once they turn 16",
       "Are banned from jobsites entirely",
     ],
     answer: 0,
@@ -1298,7 +1307,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 1,
     explain:
-      "Unemployment taxes are employer-paid levies on a wage base, funding state benefit systems (with FUTA backing them federally). A stable claims history keeps the state rate down; workers' comp is a separate insurance system entirely.",
+      "Unemployment taxes are employer-paid levies on a wage base in nearly all states (a few - Alaska, New Jersey, Pennsylvania - also collect a small employee share), funding state benefit systems (with FUTA backing them federally). A stable claims history keeps the state rate down; workers' comp is a separate insurance system entirely.",
     cite: "IRS Pub 15 (Circular E)",
   },
   {
@@ -1798,8 +1807,8 @@ export const BL_BANK: BlQuestion[] = [
 ];
 
 // -----------------------------------------------------------
-// END OF FILE - lib/foremanprep/blbank.ts (v1 - core bank: 120
-// questions, 10 domains x 12)
+// END OF FILE - lib/foremanprep/blbank.ts (v2 - core bank
+// audited: Miller Act fix + three accuracy polish edits)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
