@@ -4,7 +4,12 @@ import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
 import BlOwnerSwap from "../bl-owner-swap";
 
-// Business & Law landing page (v7): OWNERS STOP GETTING PITCHED
+// Business & Law landing page (v8): the owner row's State packs
+// button now leads to /bl-packs - the packs' own dedicated page
+// (his call) - instead of anchor-jumping into the practice page.
+// And with blstates v3 live, the packs feature card claims the
+// truth: statute packs for ALL 16 B&L states, not just TN/GA/SC.
+// v7 notes: OWNERS STOP GETTING PITCHED
 // (his report - a B&L owner still saw every $79 buy button). The
 // page stays a server component; the sell furniture now sits
 // inside BlOwnerSwap islands (bl-owner-swap v1), which render the
@@ -97,7 +102,7 @@ const FEATURES = [
   },
   {
     n: "State packs - your state's numbers",
-    d: "Tennessee, Georgia, and South Carolina packs are live: lien deadlines, license thresholds, retainage caps - statute-verified, drilled as their own rounds. More states rolling out.",
+    d: "Every one of the 16 B&L states has its own pack: lien deadlines, license thresholds, retainage caps - verified against your state's actual code and drilled as their own rounds.",
   },
   {
     n: "Built for the job site",
@@ -177,7 +182,7 @@ export default function BlPrepLandingPage() {
                 <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
                   Exam simulator
                 </Link>
-                <Link className="fp-try-btn ghost" href="/foremanprep/bl#packs">
+                <Link className="fp-try-btn ghost" href="/foremanprep/bl-packs">
                   State packs
                 </Link>
               </div>
@@ -281,7 +286,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v7 - owners
-// stop getting pitched; three owner doors; Exam simulator label)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v8 - State
+// packs button leads to /bl-packs; all-16-states pack claim)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
