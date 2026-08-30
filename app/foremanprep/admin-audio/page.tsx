@@ -7,7 +7,15 @@ import { BL_PACKS_LIVE } from "@/lib/foremanprep/blstates";
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { QUESTIONS } from "@/lib/foremanprep/questions";
 
-// ForemanPrep audio admin (v5) - Chase's one-button factory floor.
+// ForemanPrep audio admin (v6) - Chase's one-button factory floor.
+// v6 adds Step 7: Refresh the updated files - the 14 audio files
+// whose TEXT changed after their original batches were voiced
+// (the blbank v2 audit fixes + v3 book-audit enrichments). The
+// skip-existing guard would skip them forever, so this button
+// regenerates exactly these ids with force: true. Two of them
+// (bl-ib-011's Miller Act $150,000 correction and bl-lb-009's
+// replaced distractor) changed an answer choice, so their
+// question audio refreshes along with the explanation.
 // v5 adds Step 6: Generate the B&L lessons - the ten Business &
 // Law drive-time scripts from bllessons v1, voiced through the
 // same route (audio-gen v6 resolves their li/eb/... keys). Files
@@ -71,6 +79,29 @@ const ST_JOBS: Job[] = PACK_QUESTIONS.flatMap((q) => [
   { id: q.id, kind: "q" as const },
   { id: q.id, kind: "e" as const },
 ]);
+
+// Step 7's list: files whose text changed after the original
+// batches ran. ib-011 and lb-009 changed a CHOICE, so both their
+// question and explanation audio are stale; the rest changed
+// explanation text only.
+const REFRESH_JOBS: Job[] = [
+  { id: "bl-ib-011", kind: "q" as const },
+  { id: "bl-ib-011", kind: "e" as const },
+  { id: "bl-lb-009", kind: "q" as const },
+  { id: "bl-lb-009", kind: "e" as const },
+  ...[
+    "bl-ib-003",
+    "bl-ib-008",
+    "bl-ib-010",
+    "bl-eb-008",
+    "bl-eb-012",
+    "bl-ct-005",
+    "bl-tx-003",
+    "bl-tx-006",
+    "bl-tx-011",
+    "bl-sf-007",
+  ].map((id) => ({ id, kind: "e" as const })),
+];
 
 const TOTAL_CHARS = ALL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
 const BL_CHARS = BL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
@@ -137,10 +168,35 @@ export default function AdminAudioPage() {
   const [blLessonBusy, setBlLessonBusy] = useState(false);
   const [blLessonDone, setBlLessonDone] = useState(0);
   const [blLessonNow, setBlLessonNow] = useState("");
+  const [refreshBusy, setRefreshBusy] = useState(false);
+  const [refreshDone, setRefreshDone] = useState(0);
+  const [refreshNow, setRefreshNow] = useState("");
   const abortRef = useRef(false);
 
+  async function runRefresh() {
+    if (!key.trim() || refreshBusy || blLessonBusy || lessonBusy || running || testBusy || blRunning || stRunning) return;
+    setRefreshBusy(true);
+    setRefreshDone(0);
+    setNote("");
+    for (const job of REFRESH_JOBS) {
+      setRefreshNow(`${job.id} (${job.kind === "q" ? "question" : "explanation"})`);
+      // force: true - these files exist in the store with the OLD
+      // text; the whole point is to overwrite them.
+      const r = await generate(job, true);
+      if (r.ok && r.url) {
+        recordBase(r.url);
+      } else {
+        setFailures((f) => [...f, `refresh ${job.id}/${job.kind}: ${r.error}`]);
+      }
+      setRefreshDone((d) => d + 1);
+    }
+    setRefreshNow("");
+    setNote("Refresh complete - the updated files are live.");
+    setRefreshBusy(false);
+  }
+
   async function runLessons() {
-    if (!key.trim() || lessonBusy || running || testBusy) return;
+    if (!key.trim() || lessonBusy || running || testBusy || refreshBusy) return;
     setLessonBusy(true);
     setLessonDone(0);
     setNote("");
@@ -180,7 +236,7 @@ export default function AdminAudioPage() {
   }
 
   async function testOne() {
-    if (!key.trim() || testBusy || running) return;
+    if (!key.trim() || testBusy || running || refreshBusy) return;
     setTestBusy(true);
     setNote("");
     setTestUrls([]);
@@ -204,7 +260,7 @@ export default function AdminAudioPage() {
   }
 
   async function runBl() {
-    if (!key.trim() || blRunning || running || testBusy || lessonBusy) return;
+    if (!key.trim() || blRunning || running || testBusy || lessonBusy || refreshBusy) return;
     const from = Math.max(1, Number.parseInt(blStartAt, 10) || 1) - 1;
     setBlRunning(true);
     abortRef.current = false;
@@ -230,7 +286,7 @@ export default function AdminAudioPage() {
   }
 
   async function runSt() {
-    if (!key.trim() || stRunning || blRunning || running || testBusy || lessonBusy) return;
+    if (!key.trim() || stRunning || blRunning || running || testBusy || lessonBusy || refreshBusy) return;
     const from = Math.max(1, Number.parseInt(stStartAt, 10) || 1) - 1;
     setStRunning(true);
     abortRef.current = false;
@@ -258,7 +314,7 @@ export default function AdminAudioPage() {
   }
 
   async function runBlLessons() {
-    if (!key.trim() || blLessonBusy || lessonBusy || running || testBusy || blRunning || stRunning) return;
+    if (!key.trim() || blLessonBusy || lessonBusy || running || testBusy || blRunning || stRunning || refreshBusy) return;
     setBlLessonBusy(true);
     setBlLessonDone(0);
     setNote("");
@@ -278,7 +334,7 @@ export default function AdminAudioPage() {
   }
 
   async function runAll() {
-    if (!key.trim() || running || testBusy) return;
+    if (!key.trim() || running || testBusy || refreshBusy) return;
     const from = Math.max(1, Number.parseInt(startAt, 10) || 1) - 1;
     setRunning(true);
     abortRef.current = false;
@@ -513,6 +569,31 @@ export default function AdminAudioPage() {
         </p>
       </div>
 
+      <div style={box}>
+        <p style={{ fontSize: "13px", fontWeight: 700, color: "#38bdf8", margin: "0 0 8px" }}>
+          Step 7 - refresh the updated files
+        </p>
+        <p style={{ fontSize: "12.5px", color: "#999", margin: "0 0 10px" }}>
+          {REFRESH_JOBS.length} B&L files whose wording was corrected or
+          enriched after the original batch was voiced. This button
+          FORCES regeneration (the skip guard would skip them forever),
+          overwriting the old audio in place. Cheap - a couple minutes,
+          a few thousand characters.
+        </p>
+        <button
+          disabled={refreshBusy || blLessonBusy || lessonBusy || running || testBusy || blRunning || stRunning}
+          onClick={runRefresh}
+          style={{ ...btn, background: "#38bdf8" }}
+          type="button"
+        >
+          {refreshBusy ? "Refreshing..." : "Refresh the updated files"}
+        </button>
+        <p style={{ fontSize: "13.5px", color: "#ccc", margin: "12px 0 0", fontVariantNumeric: "tabular-nums" }}>
+          {refreshDone} / {REFRESH_JOBS.length} refreshed
+          {refreshNow ? ` - working on ${refreshNow}` : ""}
+        </p>
+      </div>
+
       {note ? (
         <p style={{ fontSize: "13.5px", color: "#4ade80", margin: "0 0 12px" }}>{note}</p>
       ) : null}
@@ -541,8 +622,8 @@ export default function AdminAudioPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/admin-audio/page.tsx (v5 -
-// Step 6 voices the ten B&L drive-time lessons)
+// END OF FILE - app/foremanprep/admin-audio/page.tsx (v6 -
+// Step 7 force-refreshes the 14 updated B&L files)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
