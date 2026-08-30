@@ -14,11 +14,21 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v20: free users open the picker with 10
-// questions pre-selected - it is their only legal round length,
-// so the "Select a round length first" dance is gone for them.
-// Bouncing off a locked length re-selects 10 instead of clearing.
-// Paid users keep the deliberate blank picker and choose freely.
+// Practice player v21: the DELIBERATE PICKER (his call, and the
+// same change ships in the B&L room). Nothing is selected when
+// the page opens - no round length, no subject, free tier
+// included (v20's free 10-question pre-select is gone on his
+// spec: "nothing selected by default"). Tapping a subject now
+// SELECTS it - the tile lights up (.fq-sub.sel / the All button
+// sheds its .off) instead of dropping you straight into a round -
+// and the new full-width Start practice button under the grid is
+// the only way in. Starting with a missing pick shows the red
+// "Select a round length first." / "Select a subject first."
+// lines. A free tap on a locked length now DESELECTS the length
+// entirely while the gate shows (matching the B&L room), since
+// nothing arrives pre-selected anymore. Styles: practice.css v14.
+// v20 notes: free users opened the picker with 10 pre-selected
+// (superseded above).
 // v19 notes: the gate card now names what got tapped.
 // A free user tapping the exam timer sees "The exam timer is a
 // Full Access feature."; tapping 25/Full subject keeps "Longer
@@ -140,9 +150,10 @@ function XMark() {
 export default function PracticePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"pick" | "quiz">("pick");
-  const [sel, setSel] = useState<Sel>("all");
+  const [sel, setSel] = useState<Sel | null>(null);
   const [roundLen, setRoundLen] = useState<Len | null>(null);
   const [lenErr, setLenErr] = useState(false);
+  const [domErr, setDomErr] = useState(false);
   const [access, setAccess] = useState<{ loggedIn: boolean; paid: boolean } | null>(null);
   const [showGate, setShowGate] = useState(false);
   const [timerOn, setTimerOn] = useState(false);
@@ -164,21 +175,12 @@ export default function PracticePage() {
       .catch(() => setAccess({ loggedIn: false, paid: false }));
   }, []);
 
-  // Free tier: 10 questions is the only round length there is, so
-  // it arrives pre-selected. Paid users start blank and pick.
-  useEffect(() => {
-    if (access !== null && !access.paid) {
-      setRoundLen(10);
-      setLenErr(false);
-    }
-  }, [access]);
-
   function pickLen(l: Len) {
     if (l !== 10 && !access?.paid) {
-      // Free tier: a locked length can never LOOK selected. Tapping
-      // 25/Full snaps the highlight back to 10 (the only legal
-      // choice) and shows the gate.
-      setRoundLen(10);
+      // Free tier: a locked length can never LOOK selected. The
+      // tap deselects everything while the gate shows; 10 is the
+      // only length that will take a highlight.
+      setRoundLen(null);
       setGateSrc("len");
       setShowGate(true);
       return;
@@ -358,21 +360,28 @@ export default function PracticePage() {
     }
   }
 
-  function startRound(key: Sel) {
-    if (roundLen === null) {
-      setLenErr(true);
+  // Tapping a subject SELECTS it (the tile highlights); only the
+  // Start practice button actually begins a round.
+  function pickDomain(key: Sel) {
+    setSel(key);
+    setDomErr(false);
+  }
+
+  function startRound() {
+    if (roundLen === null || sel === null) {
+      setLenErr(roundLen === null);
+      setDomErr(sel === null);
       return;
     }
-    setSel(key);
     let set: ForemanQuestion[];
     if (!access?.paid) {
       // Free tier: always the same fixed sample round, whatever
-      // subject was tapped. Rotating draws would leak the whole
+      // subject was selected. Rotating draws would leak the whole
       // bank ten questions at a time.
       set = buildDemoSet();
     } else {
       const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
-      set = buildPracticeSet(key === "all" ? "all" : key, count);
+      set = buildPracticeSet(sel === "all" ? "all" : sel, count);
     }
     setQs(set);
     setTimeLeft(timerOn && access?.paid ? QUESTION_SECONDS : null);
@@ -413,7 +422,7 @@ export default function PracticePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         mode: "practice",
-        domain: sel === "all" ? null : sel,
+        domain: sel === "all" || sel === null ? null : sel,
         answers: finalAnswers,
       }),
     })
@@ -529,16 +538,20 @@ export default function PracticePage() {
             </div>
           ) : null}
         </div>
-        <button className="fq-all" onClick={() => startRound("all")} type="button">
+        <button
+          className={sel === "all" ? "fq-all" : "fq-all off"}
+          onClick={() => pickDomain("all")}
+          type="button"
+        >
           <span className="fq-sn">All subjects</span>
           <span className="fq-sw">A mixed round, the way the exam feels</span>
         </button>
         <div className="fq-pick">
           {DOMAINS.map((d) => (
             <button
-              className="fq-sub"
+              className={sel === d.key ? "fq-sub sel" : "fq-sub"}
               key={d.key}
-              onClick={() => startRound(d.key)}
+              onClick={() => pickDomain(d.key)}
               type="button"
             >
               <span className="fq-sn">{d.name}</span>
@@ -546,6 +559,10 @@ export default function PracticePage() {
             </button>
           ))}
         </div>
+        {domErr ? <p className="fq-lenerr">Select a subject first.</p> : null}
+        <button className="fq-startbtn" onClick={startRound} type="button">
+          Start practice
+        </button>
       </div>
     );
   }
@@ -587,7 +604,7 @@ export default function PracticePage() {
               </div>
             ))}
           </div>
-          <button className="fq-again" onClick={() => startRound(sel)} type="button">
+          <button className="fq-again" onClick={startRound} type="button">
             {access?.paid ? "Go again - fresh shuffle" : "Run the sample again"}
           </button>
           <button className="fq-home" onClick={backToPicker} type="button">
@@ -786,7 +803,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v20 - free
-// tier defaults to the 10-question round)
+// END OF FILE - app/foremanprep/practice/page.tsx (v21 - the
+// deliberate picker: select, highlight, Start practice)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
