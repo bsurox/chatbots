@@ -19,7 +19,14 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v9): PACK DEEP LINKS. The new
+// Business & Law practice room (v10): the pack GRID leaves the
+// picker (his call: "I don't want it listed on the practice page
+// anymore") - replaced by a State packs DOOR button linking the
+// dedicated /bl-packs page, plus a new Audio study door to the
+// B&L audio room (/bl-audio). The ?pack= deep-link machinery
+// STAYS: /bl-packs still starts rounds here through it. The
+// #packs id rides on the door so old anchor links land sensibly.
+// v9 notes: PACK DEEP LINKS. The new
 // /bl-packs page (its own page for the packs, his call) links
 // each state as /bl?pack=<key>; this room reads the param after
 // mount and, once the access check lands, starts that state's
@@ -678,31 +685,30 @@ export default function BlPracticePage() {
             clock, real pass bar. All 16 B&amp;L states.
           </span>
         </Link>
-        <div id="packs" style={{ marginTop: "28px" }}>
-          <span className="fq-lenlabel">State packs</span>
-          <p className="fq-hint" style={{ marginTop: "6px" }}>
+        <Link
+          className="fq-all"
+          href="/foremanprep/bl-audio"
+          style={{ display: "block", marginTop: "10px", textDecoration: "none", boxSizing: "border-box", width: "100%" }}
+        >
+          <span className="fq-sn">Audio study</span>
+          <span className="fq-sw">
+            Drive-time lessons plus a hands-free drill - pick a domain
+            or your state's pack and study with your ears.
+          </span>
+        </Link>
+        <Link
+          className="fq-all"
+          href="/foremanprep/bl-packs"
+          id="packs"
+          style={{ display: "block", marginTop: "10px", textDecoration: "none", boxSizing: "border-box", width: "100%" }}
+        >
+          <span className="fq-sn">State packs</span>
+          <span className="fq-sw">
             Your state's own numbers - lien deadlines, license
-            thresholds, retainage caps.{" "}
-            <span className="fq-hint-hl">
-              Statute-verified Aug 2026. More states on the way.
-            </span>
-          </p>
-          <div className="fq-pick">
-            {BL_PACKS_LIVE.map((p) => (
-              <button
-                className="fq-sub"
-                key={p.key}
-                onClick={() => startStateRound(p)}
-                type="button"
-              >
-                <span className="fq-sn">{p.name}</span>
-                <span className="fq-sw">
-                  {p.questions.length} statute questions - {p.examLine}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+            thresholds, retainage caps - statute-verified rounds for
+            all 16 states.
+          </span>
+        </Link>
       </div>
     );
   }
@@ -955,7 +961,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v9 - ?pack= deep
-// links from /bl-packs start the state's round directly)
+// END OF FILE - app/foremanprep/bl/page.tsx (v10 - pack grid
+// replaced by State packs + Audio study doors)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
