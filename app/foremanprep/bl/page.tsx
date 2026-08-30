@@ -19,7 +19,25 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v10): the pack GRID leaves the
+// Business & Law practice room (v11): two changes, his call.
+// 1. THE DELIBERATE PICKER (ships in GC practice v21 too):
+//    nothing is selected when the page opens - no round length,
+//    no domain, free tier included (the free 10-question
+//    pre-select is gone: "nothing selected by default"). Tapping
+//    a domain SELECTS it - the tile lights up instead of starting
+//    a round - and the new full-width Start practice button under
+//    the grid is the only way in. Missing picks show the red
+//    "Select a round length first." / "Select a domain first."
+//    lines. Styles: practice.css v14.
+// 2. WHITE DOOR BUTTONS - the three big blue fq-all doors at the
+//    bottom (Exam simulator / State packs / Audio study) read as
+//    highlighted content, which he didn't like. They are now a
+//    row of three white fp-try-btn buttons, same dress as the
+//    landing page's owner row. The #packs id rides on the row so
+//    old anchor links still land.
+// The ?pack= deep-link machinery is untouched - /bl-packs still
+// starts state rounds here directly, no picker required.
+// v10 notes: the pack GRID left the
 // picker (his call: "I don't want it listed on the practice page
 // anymore") - replaced by a State packs DOOR button linking the
 // dedicated /bl-packs page, plus a new Audio study door to the
@@ -170,9 +188,10 @@ function XMark() {
 export default function BlPracticePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"pick" | "quiz">("pick");
-  const [sel, setSel] = useState<Sel>("all");
+  const [sel, setSel] = useState<Sel | null>(null);
   const [roundLen, setRoundLen] = useState<Len | null>(null);
   const [lenErr, setLenErr] = useState(false);
+  const [domErr, setDomErr] = useState(false);
   const [access, setAccess] = useState<{ loggedIn: boolean; bl: boolean } | null>(null);
   const [showGate, setShowGate] = useState(false);
   const [gateSrc, setGateSrc] = useState<"len" | "timer" | "state">("len");
@@ -213,15 +232,6 @@ export default function BlPracticePage() {
       })
       .catch(() => setAccess({ loggedIn: false, bl: false }));
   }, []);
-
-  // Free tier: 10 questions is the only round length there is, so
-  // it arrives pre-selected. B&L owners start blank and pick.
-  useEffect(() => {
-    if (access !== null && !access.bl) {
-      setRoundLen(10);
-      setLenErr(false);
-    }
-  }, [access]);
 
   function pickLen(l: Len) {
     if (l !== 10 && !access?.bl) {
@@ -470,23 +480,30 @@ export default function BlPracticePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access, pendingPack]);
 
-  function startRound(key: Sel) {
-    if (roundLen === null) {
-      setLenErr(true);
+  // Tapping a domain SELECTS it (the tile highlights); only the
+  // Start practice button actually begins a round.
+  function pickDomain(key: Sel) {
+    setSel(key);
+    setDomErr(false);
+  }
+
+  function startRound() {
+    if (roundLen === null || sel === null) {
+      setLenErr(roundLen === null);
+      setDomErr(sel === null);
       return;
     }
-    setSel(key);
     let set: BlQuestion[];
     if (!access?.bl) {
       // Free tier: always the same fixed sample round, whatever
-      // domain was tapped. Rotating draws would leak the whole
+      // domain was selected. Rotating draws would leak the whole
       // bank ten questions at a time.
       set = buildBlDemoSet();
     } else {
       const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
-      set = buildBlPracticeSet(key === "all" ? "all" : key, count);
+      set = buildBlPracticeSet(sel === "all" ? "all" : sel, count);
     }
-    beginRound(set, key === "all" ? "bl" : "bl-" + key, null);
+    beginRound(set, sel === "all" ? "bl" : "bl-" + sel, null);
   }
 
   function backToPicker() {
@@ -657,16 +674,20 @@ export default function BlPracticePage() {
             </div>
           ) : null}
         </div>
-        <button className="fq-all" onClick={() => startRound("all")} type="button">
+        <button
+          className={sel === "all" ? "fq-all" : "fq-all off"}
+          onClick={() => pickDomain("all")}
+          type="button"
+        >
           <span className="fq-sn">All domains</span>
           <span className="fq-sw">A mixed round, the way the exam feels</span>
         </button>
         <div className="fq-pick">
           {BL_DOMAINS.map((d) => (
             <button
-              className="fq-sub"
+              className={sel === d.key ? "fq-sub sel" : "fq-sub"}
               key={d.key}
-              onClick={() => startRound(d.key)}
+              onClick={() => pickDomain(d.key)}
               type="button"
             >
               <span className="fq-sn">{d.name}</span>
@@ -674,41 +695,33 @@ export default function BlPracticePage() {
             </button>
           ))}
         </div>
-        <Link
-          className="fq-all"
-          href="/foremanprep/bl-exam"
-          style={{ display: "block", marginTop: "28px", textDecoration: "none", boxSizing: "border-box", width: "100%" }}
-        >
-          <span className="fq-sn">State Exam Simulator - 1:1</span>
-          <span className="fq-sw">
-            Pick your state, sit its exam: real question count, real
-            clock, real pass bar. All 16 B&amp;L states.
-          </span>
-        </Link>
-        <Link
-          className="fq-all"
-          href="/foremanprep/bl-audio"
-          style={{ display: "block", marginTop: "10px", textDecoration: "none", boxSizing: "border-box", width: "100%" }}
-        >
-          <span className="fq-sn">Audio study</span>
-          <span className="fq-sw">
-            Drive-time lessons plus a hands-free drill - pick a domain
-            or your state's pack and study with your ears.
-          </span>
-        </Link>
-        <Link
-          className="fq-all"
-          href="/foremanprep/bl-packs"
-          id="packs"
-          style={{ display: "block", marginTop: "10px", textDecoration: "none", boxSizing: "border-box", width: "100%" }}
-        >
-          <span className="fq-sn">State packs</span>
-          <span className="fq-sw">
-            Your state's own numbers - lien deadlines, license
-            thresholds, retainage caps - statute-verified rounds for
-            all 16 states.
-          </span>
-        </Link>
+        {domErr ? <p className="fq-lenerr">Select a domain first.</p> : null}
+        <button className="fq-startbtn" onClick={startRound} type="button">
+          Start practice
+        </button>
+        <div className="fp-try" id="packs" style={{ marginTop: "28px" }}>
+          <Link
+            className="fp-try-btn ghost"
+            href="/foremanprep/bl-exam"
+            style={{ minWidth: "96px" }}
+          >
+            Exam simulator
+          </Link>
+          <Link
+            className="fp-try-btn ghost"
+            href="/foremanprep/bl-packs"
+            style={{ minWidth: "96px" }}
+          >
+            State packs
+          </Link>
+          <Link
+            className="fp-try-btn ghost"
+            href="/foremanprep/bl-audio"
+            style={{ minWidth: "96px" }}
+          >
+            Audio study
+          </Link>
+        </div>
       </div>
     );
   }
@@ -753,7 +766,7 @@ export default function BlPracticePage() {
           </div>
           <button
             className="fq-again"
-            onClick={() => (activePack ? startStateRound(activePack) : startRound(sel))}
+            onClick={() => (activePack ? startStateRound(activePack) : startRound())}
             type="button"
           >
             {access?.bl ? "Go again - fresh shuffle" : "Run the sample again"}
@@ -961,7 +974,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v10 - pack grid
-// replaced by State packs + Audio study doors)
+// END OF FILE - app/foremanprep/bl/page.tsx (v11 - deliberate
+// picker + white door buttons)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
