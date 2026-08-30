@@ -2,7 +2,7 @@
 import { GUIDES } from "@/lib/foremanprep/guides";
 import { STATES } from "@/lib/foremanprep/states";
 
-// ForemanPrep sitemap (v6). Served at /foremanprep/sitemap.xml,
+// ForemanPrep sitemap (v7). Served at /foremanprep/sitemap.xml,
 // which on foremanprep.com is the address you submit to Google
 // Search Console (the root /sitemap.xml path is excluded from the
 // proxy by the app-wide matcher, so the island carries its own).
@@ -12,14 +12,14 @@ import { STATES } from "@/lib/foremanprep/states";
 // v3 added /bl, the Business & Law practice room; v4 adds
 // /bl-prep, the Business & Law landing page; v5 adds /bl-exam,
 // the state exam simulator; v6 adds /bl-packs, the state packs'
-// own page.
+// own page; v7 adds /bl-audio, the B&L audio study room.
 
 const BASE = "https://foremanprep.com";
 const GUIDES_UPDATED = "2026-08-21";
 const STATES_UPDATED = "2026-08-22";
 
 export function GET(): Response {
-  const staticPaths = ["/", "/guides", "/states", "/practice", "/exam", "/audio", "/buy", "/bl", "/bl-prep", "/bl-exam", "/bl-packs"];
+  const staticPaths = ["/", "/guides", "/states", "/practice", "/exam", "/audio", "/buy", "/bl", "/bl-prep", "/bl-exam", "/bl-packs", "/bl-audio"];
   const urls: Array<{ loc: string; lastmod?: string }> = [
     ...staticPaths.map((p) => ({ loc: BASE + (p === "/" ? "" : p) })),
     ...GUIDES.map((g) => ({
@@ -55,8 +55,8 @@ export function GET(): Response {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/sitemap.xml/route.ts (v6 -
-// /bl-packs added)
+// END OF FILE - app/foremanprep/sitemap.xml/route.ts (v7 -
+// /bl-audio added)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
