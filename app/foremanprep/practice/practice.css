@@ -1,5 +1,11 @@
 /* FILE: app/foremanprep/practice/practice.css */
-/* Practice player styles v13. Exam timer dress: the pick screen's
+/* Practice player styles v14. The DELIBERATE PICKER (his call):
+   domain buttons now SELECT instead of starting - .fq-sub.sel and
+   the .fq-all.off neutral state dress the highlight, and the new
+   full-width .fq-startbtn launches the round. All colors ride the
+   --fp variables, so the same rules turn sky blue inside
+   .fp-blzone with zero extra catches.
+   v13 notes: Exam timer dress: the pick screen's
    Off/On toggle pill with its sliding knob (.fq-timertoggle,
    .fq-knob), the descriptor line under it (.fq-timernote), the
    countdown clock beside the question counter (.fq-clock, red
@@ -139,8 +145,19 @@
 .fq-clock.low { color: #f87171; }
 .fq-timeout { font-size: 13.5px; color: #f87171; font-weight: 700; margin: 0 0 14px; }
 
+/* The deliberate picker (v14). The All button starts NEUTRAL
+   (.off strips its highlight down to the fq-sub look) and lights
+   up only when chosen; a chosen subject tile wears .sel. The
+   Start practice button is the only door into a round. */
+.fq-all.off { background: #111; border-color: #333; }
+.fq-all.off .fq-sn { color: #fff; }
+.fq-sub.sel { background: var(--fp-soft); border-color: var(--fp); }
+.fq-sub.sel .fq-sn { color: var(--fp); }
+.fq-startbtn { width: 100%; padding: 15px 0; border-radius: 12px; font-weight: 800; font-size: 16px; border: none; cursor: pointer; background: var(--fp); color: #000; margin-top: 16px; font-family: inherit; }
+.fq-startbtn:active { transform: translateY(1px); }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/practice/practice.css (v13 -
-   exam timer toggle and clock)
+   END OF FILE - app/foremanprep/practice/practice.css (v14 -
+   deliberate picker: select highlights + Start practice)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
