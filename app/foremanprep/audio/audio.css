@@ -1,5 +1,11 @@
 /* FILE: app/foremanprep/audio/audio.css */
-/* ForemanPrep Audio study page (v2). fa- prefix, rides the fp-
+/* ForemanPrep Audio study page (v3). fa- prefix, rides the fp-
+   canvas. v3: blue catches for the B&L audio room - the room
+   wears .fp-blzone and almost everything here is var(--fp)-
+   driven already; these three rules recolor the only hardcoded
+   oranges (the free hint, the lesson pill border, the playing
+   fill) when inside a blzone. GC audio room unchanged.
+   v2 notes: rides the fp-
    canvas. v2 adds the leave-confirmation modal (fa-overlay
    family, same look as the exam simulator's) shown when the back
    button is tapped mid-listen. Two rooms: the drive-time lesson list (one row per
@@ -41,6 +47,11 @@
 .fa-ctl.stop { color: #f87171; border-color: rgba(239, 68, 68, 0.5); }
 .fa-done { text-align: center; font-size: 15px; color: #4ade80; font-weight: 700; padding: 10px 0; }
 
+/* v3: the B&L room's blue dress for the hardcoded oranges. */
+.fp-blzone .fa-hint { color: #38bdf8; }
+.fp-blzone .fa-lbtn { border-color: rgba(56, 189, 248, 0.45); }
+.fp-blzone .fa-lbtn.playing { background: rgba(56, 189, 248, 0.12); }
+
 /* Leave-confirmation modal - mirrors the exam simulator's. */
 .fa-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.72); display: flex; align-items: center; justify-content: center; padding: 24px; }
 .fa-modal { max-width: 380px; width: 100%; background: #141414; border: 1px solid #333; border-radius: 16px; padding: 22px; }
@@ -51,7 +62,7 @@
 .fa-myes { flex: 1; padding: 13px 0; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; background: #ef4444; border: none; color: #fff; }
 
 /* ============================================================
-   END OF FILE - app/foremanprep/audio/audio.css (v2 - leave
-   confirmation modal)
+   END OF FILE - app/foremanprep/audio/audio.css (v3 - blue
+   catches for the B&L audio room)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
