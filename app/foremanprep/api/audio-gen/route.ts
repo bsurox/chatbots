@@ -2,6 +2,7 @@
 import "server-only";
 import { head, put } from "@vercel/blob";
 import { AUDIO_BASE } from "@/lib/foremanprep/audio-config";
+import { getBlLesson } from "@/lib/foremanprep/bllessons";
 import { getBlQuestion } from "@/lib/foremanprep/blquestions";
 import { getBlStateQuestion } from "@/lib/foremanprep/blstates";
 import { getLesson } from "@/lib/foremanprep/lessons";
@@ -33,6 +34,12 @@ export const maxDuration = 300;
 // the B&L bank, so the same factory voices the 120 B&L questions
 // to the same blob paths (q-bl-li-001.mp3 and so on) with zero
 // other changes.
+// v6: B&L drive-time lessons. Lesson ids not found in the GC
+// lesson list fall through to the ten B&L lessons in bllessons
+// (their keys are the B&L domain keys - li, eb, ct... - which
+// never collide with the GC lesson keys), producing files like
+// lesson-li.mp3 in the same store. Skip-existing applies to them
+// like everything else.
 // v5: two fixes. (1) STATE PACK IDS RESOLVE - bl- ids not found
 // in the core bank fall through to the statute packs in blstates
 // (bl-tn-001 and friends), which v4 reported as unknown; that is
@@ -118,7 +125,7 @@ export async function POST(request: Request) {
       ? questionText(id)
       : kind === "e"
         ? explainText(id)
-        : getLesson(id)?.script ?? null;
+        : getLesson(id)?.script ?? getBlLesson(id)?.script ?? null;
   if (!text) {
     return Response.json({ error: `Unknown ${kind === "lesson" ? "lesson" : "question"} id: ${id}` }, { status: 404 });
   }
@@ -205,8 +212,8 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v5 -
-// state pack ids resolve + existing files are skipped)
+// END OF FILE - app/foremanprep/api/audio-gen/route.ts (v6 -
+// B&L lesson ids resolve via bllessons)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
