@@ -1,12 +1,18 @@
 // FILE: app/foremanprep/admin-audio/page.tsx
 "use client";
 import { useRef, useState } from "react";
+import { BL_LESSONS } from "@/lib/foremanprep/bllessons";
 import { BL_QUESTIONS } from "@/lib/foremanprep/blquestions";
 import { BL_PACKS_LIVE } from "@/lib/foremanprep/blstates";
 import { LESSONS } from "@/lib/foremanprep/lessons";
 import { QUESTIONS } from "@/lib/foremanprep/questions";
 
-// ForemanPrep audio admin (v4) - Chase's one-button factory floor.
+// ForemanPrep audio admin (v5) - Chase's one-button factory floor.
+// v5 adds Step 6: Generate the B&L lessons - the ten Business &
+// Law drive-time scripts from bllessons v1, voiced through the
+// same route (audio-gen v6 resolves their li/eb/... keys). Files
+// that already exist are skipped server-side like everything
+// else, so re-runs are safe.
 // v4 adds Step 5: Generate the state packs - every statute-pack
 // question from blstates (TN/GA/SC today; the list grows itself
 // as pack states land) through the same route. audio-gen v5 now
@@ -70,6 +76,7 @@ const TOTAL_CHARS = ALL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
 const BL_CHARS = BL_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
 const ST_CHARS = ST_JOBS.reduce((sum, j) => sum + jobText(j).length, 0);
 const LESSON_CHARS = LESSONS.reduce((sum, l) => sum + l.script.length, 0);
+const BL_LESSON_CHARS = BL_LESSONS.reduce((sum, l) => sum + l.script.length, 0);
 
 const box = {
   background: "#111",
@@ -127,6 +134,9 @@ export default function AdminAudioPage() {
   const [stSkipped, setStSkipped] = useState(0);
   const [stCurrent, setStCurrent] = useState("");
   const [stStartAt, setStStartAt] = useState("1");
+  const [blLessonBusy, setBlLessonBusy] = useState(false);
+  const [blLessonDone, setBlLessonDone] = useState(0);
+  const [blLessonNow, setBlLessonNow] = useState("");
   const abortRef = useRef(false);
 
   async function runLessons() {
@@ -245,6 +255,26 @@ export default function AdminAudioPage() {
     if (!abortRef.current) setNote("State-pack batch complete.");
     setStCurrent("");
     setStRunning(false);
+  }
+
+  async function runBlLessons() {
+    if (!key.trim() || blLessonBusy || lessonBusy || running || testBusy || blRunning || stRunning) return;
+    setBlLessonBusy(true);
+    setBlLessonDone(0);
+    setNote("");
+    for (const l of BL_LESSONS) {
+      setBlLessonNow(l.title);
+      const r = await generate({ id: l.key, kind: "lesson" });
+      if (r.ok && r.url) {
+        recordBase(r.url);
+      } else {
+        setFailures((f) => [...f, `bl-lesson/${l.key}: ${r.error}`]);
+      }
+      setBlLessonDone((d) => d + 1);
+    }
+    setBlLessonNow("");
+    setNote("B&L lesson batch complete.");
+    setBlLessonBusy(false);
   }
 
   async function runAll() {
@@ -460,6 +490,29 @@ export default function AdminAudioPage() {
         </p>
       </div>
 
+      <div style={box}>
+        <p style={{ fontSize: "13px", fontWeight: 700, color: "#38bdf8", margin: "0 0 8px" }}>
+          Step 6 - generate the B&L drive-time lessons
+        </p>
+        <p style={{ fontSize: "12.5px", color: "#999", margin: "0 0 10px" }}>
+          {BL_LESSONS.length} lessons, about {Math.round(BL_LESSON_CHARS / 1000)}k characters.
+          Each one takes a minute or two - the long scripts generate in
+          pieces, and files that already exist are skipped.
+        </p>
+        <button
+          disabled={blLessonBusy || lessonBusy || running || testBusy || blRunning || stRunning}
+          onClick={runBlLessons}
+          style={{ ...btn, background: "#38bdf8" }}
+          type="button"
+        >
+          {blLessonBusy ? "Generating B&L lessons..." : "Generate B&L lessons"}
+        </button>
+        <p style={{ fontSize: "13.5px", color: "#ccc", margin: "12px 0 0", fontVariantNumeric: "tabular-nums" }}>
+          {blLessonDone} / {BL_LESSONS.length} lessons done
+          {blLessonNow ? ` - working on ${blLessonNow}` : ""}
+        </p>
+      </div>
+
       {note ? (
         <p style={{ fontSize: "13.5px", color: "#4ade80", margin: "0 0 12px" }}>{note}</p>
       ) : null}
@@ -488,8 +541,8 @@ export default function AdminAudioPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/foremanprep/admin-audio/page.tsx (v4 -
-// Step 5 voices the state packs; test button forces fresh)
+// END OF FILE - app/foremanprep/admin-audio/page.tsx (v5 -
+// Step 6 voices the ten B&L drive-time lessons)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
