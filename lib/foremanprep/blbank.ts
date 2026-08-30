@@ -1,7 +1,19 @@
 // FILE: lib/foremanprep/blbank.ts
 
-// ForemanPrep Business & Law question bank (v2 - core bank: 120
-// questions, 10 domains x 12). v2 = the Aug 2026 accuracy audit:
+// ForemanPrep Business & Law question bank (v3 - core bank: 120
+// questions, 10 domains x 12). v3 = the BOOK PASS: Chase scanned
+// his physical NASCLA Contractors Guide 14th edition cover to
+// cover (153 pages) and every question was read against it. ZERO
+// answer keys conflicted. Eight explanations gained a sentence so
+// students who study the guide feel at home: umbrella/excess
+// framing (ib-008), bid-security percentage source (ib-010),
+// revenue-based overhead variant (eb-008), the guide's mirror
+// definition of bid shopping (eb-012), oral-change nuance
+// (ct-005), the $100k next-day deposit clock (tx-011), and notes
+// that the book still teaches pre-2020 1099-MISC (tx-006) and
+// pre-2015 OSHA reporting (sf-007) where OUR content is current.
+// No answers, choices, or ids changed.
+// v2 notes: the Aug 2026 accuracy audit:
 // every question was fact-checked against primary sources by
 // research agents; 116 of 120 passed clean. Four fixes landed:
 // bl-ib-011's Miller Act threshold corrected $100,000 -> $150,000
@@ -315,7 +327,7 @@ export const BL_BANK: BlQuestion[] = [
     choices: ["10%", "15%", "20%", "25%"],
     answer: 1,
     explain:
-      "Overhead recovery rate = overhead / direct cost base: 150,000 / 1,000,000 = 15%. Each job then carries its share - a $100,000-cost job absorbs $15,000 of overhead before profit is added. Jobs priced without overhead recovery are quietly sold at a loss.",
+      "Overhead recovery rate = overhead / direct cost base: 150,000 / 1,000,000 = 15%. Each job then carries its share - a $100,000-cost job absorbs $15,000 of overhead before profit is added. Jobs priced without overhead recovery are quietly sold at a loss. Some contractors recover overhead as a percentage of total revenue instead of direct costs - the arithmetic differs, but every estimate must carry its share either way.",
     cite: "NASCLA Guide - Estimating and Bidding",
   },
   {
@@ -375,7 +387,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 0,
     explain:
-      "Bid shopping trades on a sub's confidential number to squeeze the market, before or after award. It is widely considered unethical, poisons sub relationships, and some public work and industry codes prohibit it outright.",
+      "Bid shopping trades on a sub's confidential number to squeeze the market, before or after award. It is widely considered unethical, poisons sub relationships, and some public work and industry codes prohibit it outright. The guide defines the same practice from the other side: approaching subs OTHER than those who bid, hunting a number lower than the original quotes.",
     cite: "NASCLA Guide - Estimating and Bidding",
   },
 
@@ -452,7 +464,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 3,
     explain:
-      "A signed change order amends the contract itself - scope, dollars, and schedule - before the money is spent. Verbal changes are where contractors go to lose money: proof problems, disputed scope, and waived rights.",
+      "A signed change order amends the contract itself - scope, dollars, and schedule - before the money is spent. Verbal changes are where contractors go to lose money: proof problems, disputed scope, and waived rights. Oral change agreements can sometimes bind the parties anyway - which is exactly why disputes over them get ugly; the writing is protection, not formality.",
     cite: "NASCLA Guide - Contracts",
   },
   {
@@ -856,7 +868,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 0,
     explain:
-      "The umbrella sits on top: when a large claim burns through the primary CGL or auto limits, the umbrella's limits take over. It is how contractors meet the higher liability limits many owners and primes require without re-buying primary coverage.",
+      "The umbrella sits on top: when a large claim burns through the primary CGL or auto limits, the umbrella's limits take over. It is how contractors meet the higher liability limits many owners and primes require without re-buying primary coverage. The guide treats umbrella and excess liability together: extra limits above your underlying policies, never a replacement for them.",
     cite: "NASCLA Guide - Insurance",
   },
   {
@@ -886,7 +898,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 2,
     explain:
-      "Bid security is sized to the bid - typically 5% or 10% as the solicitation specifies. It compensates the owner if the winning bidder refuses to sign or cannot deliver the required performance and payment bonds.",
+      "Bid security is sized to the bid - typically 5% or 10% as the solicitation specifies. It compensates the owner if the winning bidder refuses to sign or cannot deliver the required performance and payment bonds. The solicitation states the exact figure, so read the invitation - the percentage is the owner's call, not a universal law.",
     cite: "NASCLA Guide - Bonds",
   },
   {
@@ -1352,7 +1364,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 2,
     explain:
-      "Nonemployee compensation goes on the 1099-NEC filed with the IRS and copied to the sub; W-2s are for employees. Collect a Form W-9 from each sub up front so the TIN is on file before the year-end scramble.",
+      "Nonemployee compensation goes on the 1099-NEC filed with the IRS and copied to the sub; W-2s are for employees. Collect a Form W-9 from each sub up front so the TIN is on file before the year-end scramble. Older references - the NASCLA guide included - still cite Form 1099-MISC, which carried nonemployee compensation before the IRS revived the 1099-NEC in 2020.",
     cite: "IRS - Form 1099-NEC",
   },
   {
@@ -1427,7 +1439,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 1,
     explain:
-      "The IRS assigns each employer a deposit schedule based on past liability; deposits are made electronically on that clock, and late deposits draw escalating penalties. Payday is not the deadline - the deposit date is its own obligation.",
+      "The IRS assigns each employer a deposit schedule based on past liability; deposits are made electronically on that clock, and late deposits draw escalating penalties. Payday is not the deadline - the deposit date is its own obligation. One more clock: accumulate $100,000 or more of liability and that deposit is due the next business day, whatever your assigned schedule.",
     cite: "IRS Pub 15 (Circular E)",
   },
   {
@@ -1726,7 +1738,7 @@ export const BL_BANK: BlQuestion[] = [
     ],
     answer: 2,
     explain:
-      "The two reporting clocks are 8 hours for a fatality and 24 hours for in-patient hospitalization, amputation, or eye loss - by phone or OSHA's online portal. These reports are separate from, and faster than, ordinary recordkeeping.",
+      "The two reporting clocks are 8 hours for a fatality and 24 hours for in-patient hospitalization, amputation, or eye loss - by phone or OSHA's online portal. These reports are separate from, and faster than, ordinary recordkeeping. Watch for older study materials teaching a pre-2015 rule (reporting only multi-employee hospitalizations) - the current standard is the one here.",
     cite: "29 CFR 1904.39",
   },
   {
@@ -1807,8 +1819,9 @@ export const BL_BANK: BlQuestion[] = [
 ];
 
 // -----------------------------------------------------------
-// END OF FILE - lib/foremanprep/blbank.ts (v2 - core bank
-// audited: Miller Act fix + three accuracy polish edits)
+// END OF FILE - lib/foremanprep/blbank.ts (v3 - book-pass
+// verified against the NASCLA guide 14th ed; 8 explanations
+// enriched, zero answers changed)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
