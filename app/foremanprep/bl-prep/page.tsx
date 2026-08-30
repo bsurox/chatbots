@@ -4,7 +4,14 @@ import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
 import BlOwnerSwap from "../bl-owner-swap";
 
-// Business & Law landing page (v8): the owner row's State packs
+// Business & Law landing page (v9): the owner try-row gains its
+// fourth door - Audio study, linking the new B&L audio room at
+// /bl-audio (ten drive-time lessons + the hands-free drill with
+// the state-pack selector). Visitors' sell row is unchanged: the
+// audio room is paid, so it is not pitched as a free try button;
+// the feature grid's "Study with your ears" card already carries
+// the ears claim.
+// v8 notes: the owner row's State packs
 // button now leads to /bl-packs - the packs' own dedicated page
 // (his call) - instead of anchor-jumping into the practice page.
 // And with blstates v3 live, the packs feature card claims the
@@ -185,6 +192,9 @@ export default function BlPrepLandingPage() {
                 <Link className="fp-try-btn ghost" href="/foremanprep/bl-packs">
                   State packs
                 </Link>
+                <Link className="fp-try-btn ghost" href="/foremanprep/bl-audio">
+                  Audio study
+                </Link>
               </div>
             }
           />
@@ -286,7 +296,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v8 - State
-// packs button leads to /bl-packs; all-16-states pack claim)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v9 - owner
+// row gains the Audio study door)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
