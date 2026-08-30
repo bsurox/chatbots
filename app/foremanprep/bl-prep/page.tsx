@@ -4,7 +4,15 @@ import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
 import BlOwnerSwap from "../bl-owner-swap";
 
-// Business & Law landing page (v9): the owner try-row gains its
+// Business & Law landing page (v10): owner button layout rework
+// (his call). The four owner doors now read: a row of three -
+// Start practice / State packs / Audio study - with the Exam
+// simulator as the single large full-width button underneath.
+// The three top buttons get a smaller inline min-width so they
+// sit three-across on phones instead of wrapping; the simulator
+// row is its own .fp-try div, so its lone button stretches the
+// full width by flexbox.
+// v9 notes: the owner try-row gained its
 // fourth door - Audio study, linking the new B&L audio room at
 // /bl-audio (ten drive-time lessons + the hands-free drill with
 // the state-pack selector). Visitors' sell row is unchanged: the
@@ -182,20 +190,36 @@ export default function BlPrepLandingPage() {
               </div>
             }
             owned={
-              <div className="fp-try">
-                <Link className="fp-try-btn" href="/foremanprep/bl">
-                  Start practice
-                </Link>
-                <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
-                  Exam simulator
-                </Link>
-                <Link className="fp-try-btn ghost" href="/foremanprep/bl-packs">
-                  State packs
-                </Link>
-                <Link className="fp-try-btn ghost" href="/foremanprep/bl-audio">
-                  Audio study
-                </Link>
-              </div>
+              <>
+                <div className="fp-try">
+                  <Link
+                    className="fp-try-btn"
+                    href="/foremanprep/bl"
+                    style={{ minWidth: "96px" }}
+                  >
+                    Start practice
+                  </Link>
+                  <Link
+                    className="fp-try-btn ghost"
+                    href="/foremanprep/bl-packs"
+                    style={{ minWidth: "96px" }}
+                  >
+                    State packs
+                  </Link>
+                  <Link
+                    className="fp-try-btn ghost"
+                    href="/foremanprep/bl-audio"
+                    style={{ minWidth: "96px" }}
+                  >
+                    Audio study
+                  </Link>
+                </div>
+                <div className="fp-try" style={{ margin: "10px 0 8px" }}>
+                  <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
+                    Exam simulator
+                  </Link>
+                </div>
+              </>
             }
           />
           <BlOwnerSwap
@@ -296,7 +320,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v9 - owner
-// row gains the Audio study door)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v10 - owner
+// doors: three across, Exam simulator full-width underneath)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
