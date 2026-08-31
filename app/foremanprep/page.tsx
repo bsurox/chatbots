@@ -4,7 +4,20 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v27. B&L OWNERS GET A PERMANENT DOOR:
+// ForemanPrep landing page v29. TWO CHANGES (his call):
+// 1. A B&L owner's door is now a FULL-WIDTH button directly under
+//    the three try-buttons: "Open your Business & Law prep",
+//    wearing an orange-to-blue gradient (#f97316 -> #38bdf8, same
+//    pair as the FP icon) - it bridges the orange GC brand and the
+//    blue B&L identity without repainting the page. The old blue
+//    hero badge is GONE for owners (the button replaces it).
+//    Non-owners keep the mid-hero "We prep the Business & Law exam
+//    too" badge exactly as it was - focus stays on the GC product.
+// 2. The middle try-button label reads "Exam simulator" (was "Try
+//    the exam simulator").
+// (A v28 that put the owner door in the header was delivered but
+// never committed - superseded by this, numbering skips it.)
+// v27 notes: B&L OWNERS GET A PERMANENT DOOR:
 // his find - once an account owns Business & Law, the marketing
 // strip and the hero badge both hide (correct: never pitch what's
 // bought), which left an owner with NO visible way back into B&L
@@ -338,24 +351,37 @@ export default function ForemanPrepPage() {
             {paid ? "Start practice" : "Start free practice"}
           </Link>
           <Link className="fp-try-btn ghost" href="/foremanprep/exam">
-            Try the exam simulator
+            Exam simulator
           </Link>
           <Link className="fp-try-btn ghost" href="/foremanprep/audio">
             Audio study
           </Link>
         </div>
-        {paid ? null : (
-          <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
-        )}
         {blOwned ? (
           <Link
-            className="fp-blbadge"
             href="/foremanprep/bl-prep"
-            style={{ marginTop: "14px" }}
+            style={{
+              display: "block",
+              width: "100%",
+              boxSizing: "border-box",
+              textAlign: "center",
+              padding: "14px 16px",
+              borderRadius: "10px",
+              fontWeight: 700,
+              fontSize: "16px",
+              color: "#000",
+              background: "linear-gradient(90deg, #f97316, #38bdf8)",
+              textDecoration: "none",
+              marginTop: "2px",
+            }}
           >
             Open your Business &amp; Law prep
           </Link>
-        ) : (
+        ) : null}
+        {paid ? null : (
+          <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
+        )}
+        {blOwned ? null : (
           <Link
             className="fp-blbadge"
             href="/foremanprep/bl-prep"
@@ -563,7 +589,8 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v27 - B&L owners keep
-// a permanent blue door to /bl-prep in the hero)
+// END OF FILE - app/foremanprep/page.tsx (v29 - owner's B&L door
+// is a full-width orange-to-blue gradient button under the
+// try-buttons; "Exam simulator" label)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
