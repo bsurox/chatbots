@@ -19,7 +19,9 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v11): two changes, his call.
+// Business & Law practice room (v12): "All domains" button now
+// reads "All subjects" (matches GC practice wording). v11 notes:
+// two changes, his call.
 // 1. THE DELIBERATE PICKER (ships in GC practice v21 too):
 //    nothing is selected when the page opens - no round length,
 //    no domain, free tier included (the free 10-question
@@ -679,7 +681,7 @@ export default function BlPracticePage() {
           onClick={() => pickDomain("all")}
           type="button"
         >
-          <span className="fq-sn">All domains</span>
+          <span className="fq-sn">All subjects</span>
           <span className="fq-sw">A mixed round, the way the exam feels</span>
         </button>
         <div className="fq-pick">
@@ -974,7 +976,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v11 - deliberate
-// picker + white door buttons)
+// END OF FILE - app/foremanprep/bl/page.tsx (v12 - All subjects
+// label; deliberate picker + white door buttons)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
