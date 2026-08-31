@@ -15,7 +15,12 @@ import { BL_PACKS_LIVE } from "@/lib/foremanprep/blstates";
 import { BL_LESSONS } from "@/lib/foremanprep/bllessons";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Business & Law AUDIO STUDY (v1) - the blue sibling of the GC
+// Business & Law AUDIO STUDY (v2) - visitor-facing wording now
+// says "subject" instead of "domain" everywhere (matches the
+// practice pages' "All subjects"): the drill dropdown's all-mix
+// option, its "One subject" group label, and the two section
+// blurbs. Internal code keeps domain naming (BL_DOMAINS, keys) -
+// only copy changed. v1 notes: the blue sibling of the GC
 // audio room, built on the same proven machinery (GC audio v8):
 // persistent gesture-blessed audio elements so mobile never
 // blocks the auto-chain, a sentinel history entry so the browser
@@ -416,7 +421,7 @@ export default function BlAudioStudyPage() {
         ) : null}
       </div>
       <p className="fa-secsub">
-        Ten spoken recaps, one per Business &amp; Law domain - every fact
+        Ten spoken recaps, one per Business &amp; Law subject - every fact
         pulled straight from the audited question bank.
       </p>
       {access !== null && !access.bl ? (
@@ -465,7 +470,7 @@ export default function BlAudioStudyPage() {
       <p className="fa-sec">Audio drill</p>
       <p className="fa-secsub">
         Hands-free quiz: hear the question, answer in your head during the
-        silence, then hear the answer and why. Pick a domain - or pick YOUR
+        silence, then hear the answer and why. Pick a subject - or pick YOUR
         state to drill its statute pack.
       </p>
       <div className="fa-drillbox">
@@ -507,8 +512,8 @@ export default function BlAudioStudyPage() {
               onChange={(e) => setSource(e.target.value)}
               value={source}
             >
-              <option value="all">All domains - the way the exam mixes them</option>
-              <optgroup label="One domain">
+              <option value="all">All subjects - the way the exam mixes them</option>
+              <optgroup label="One subject">
                 {BL_DOMAINS.map((d) => (
                   <option key={d.key} value={d.key}>
                     {d.name}
@@ -554,7 +559,7 @@ export default function BlAudioStudyPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-audio/page.tsx (v1 - B&L
-// audio study: ten lessons + hands-free drill w/ state packs)
+// END OF FILE - app/foremanprep/bl-audio/page.tsx (v2 - "subject"
+// wording; ten lessons + hands-free drill w/ state packs)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
