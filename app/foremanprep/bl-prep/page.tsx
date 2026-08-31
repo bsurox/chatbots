@@ -4,7 +4,11 @@ import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
 import BlOwnerSwap from "../bl-owner-swap";
 
-// Business & Law landing page (v10): owner button layout rework
+// Business & Law landing page (v11): the Exam simulator button
+// goes BLUE (#38bdf8, black text) - both places it appears: the
+// visitor two-door row and the owner full-width door. The GC
+// landing page's white Exam simulator button is deliberately
+// untouched. v10 notes: owner button layout rework
 // (his call). The four owner doors now read: a row of three -
 // Start practice / State packs / Audio study - with the Exam
 // simulator as the single large full-width button underneath.
@@ -184,7 +188,11 @@ export default function BlPrepLandingPage() {
                 <Link className="fp-try-btn" href="/foremanprep/bl">
                   Try 10 free questions
                 </Link>
-                <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
+                <Link
+                  className="fp-try-btn"
+                  href="/foremanprep/bl-exam"
+                  style={{ background: "#38bdf8", border: "1px solid #38bdf8" }}
+                >
                   Exam simulator
                 </Link>
               </div>
@@ -215,7 +223,11 @@ export default function BlPrepLandingPage() {
                   </Link>
                 </div>
                 <div className="fp-try" style={{ margin: "10px 0 8px" }}>
-                  <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
+                  <Link
+                    className="fp-try-btn"
+                    href="/foremanprep/bl-exam"
+                    style={{ background: "#38bdf8", border: "1px solid #38bdf8" }}
+                  >
                     Exam simulator
                   </Link>
                 </div>
@@ -320,7 +332,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v10 - owner
-// doors: three across, Exam simulator full-width underneath)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v11 - blue Exam
+// simulator buttons; owner doors three across, sim full-width)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
