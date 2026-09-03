@@ -1,0 +1,42 @@
+/* FILE: app/wiremanprep/wiremanprep.css */
+
+/* WiremanPrep wardrobe (v1). The electric-yellow sister of
+   ForemanPrep's .fp-blzone: WiremanPrep pages import the shared
+   app/foremanprep/foremanprep.css (and practice.css where
+   needed) and wrap themselves in .wm-zone, which swaps the brand
+   variables to electric yellow (#facc15) so every var(--fp)
+   component - fp- furniture, fq- practice room - recolors by
+   itself. Below the variable swap sit the same explicit catch
+   rules the blzone needed for components that hardcode their
+   color at fixed alphas (strips, chips, gate cards, listen pills,
+   the timer toggle), translated to yellow. Black-on-yellow stays
+   readable, and fp-cta already paints its text #000, so the CTAs
+   need no extra rules.
+   ForemanPrep and B&L pages never wear .wm-zone - nothing on the
+   existing sites changes. */
+
+.wm-zone { --fp: #facc15; --fp-soft: rgba(250, 204, 21, 0.12); }
+
+/* Strip family - the blzone needed these borders and gradient
+   backgrounds recolored explicitly; same catches in yellow. */
+.wm-zone.fp-strip, .wm-zone .fp-strip { border-color: rgba(250, 204, 21, 0.35); background: linear-gradient(180deg, rgba(250, 204, 21, 0.09), rgba(250, 204, 21, 0.03)); }
+.wm-zone .fp-chip { border-color: rgba(250, 204, 21, 0.45); }
+.wm-zone .fp-deadline { border-color: rgba(250, 204, 21, 0.55); }
+
+/* Practice-room catches (the fq- rules that hardcode orange at
+   fixed alphas in the shared css). */
+.wm-zone .fq-chip { border-color: rgba(250, 204, 21, 0.4); }
+.wm-zone .fq-msg.me { border-color: rgba(250, 204, 21, 0.4); }
+.wm-zone .fp-gate { border-color: rgba(250, 204, 21, 0.45); }
+.wm-zone .fq-listen { border-color: rgba(250, 204, 21, 0.45); }
+.wm-zone .fq-listen.playing { background: rgba(250, 204, 21, 0.12); }
+.wm-zone .fq-listen:hover { background: rgba(250, 204, 21, 0.08); }
+.wm-zone .fq-timertoggle.on { border-color: rgba(250, 204, 21, 0.5); }
+.wm-zone .fq-timertoggle.on .fq-knob { background: rgba(250, 204, 21, 0.35); }
+
+/* -----------------------------------------------------------
+   END OF FILE - app/wiremanprep/wiremanprep.css (v1 - .wm-zone
+   electric-yellow variable swap + blzone-mirrored catch rules)
+   If you can see these lines after pasting, the whole file
+   made it. Safe to commit.
+   ----------------------------------------------------------- */
