@@ -29,6 +29,11 @@ export default function AuthLayout({
   // isForeman, the icon links are rewritten client-side to
   // /fp-icon.png, same after-mount pattern as the rest of this
   // file. AskEvo and Spotmint faces are untouched.
+  // v11: WiremanPrep VOLT face. Same host treatment as
+  // ForemanPrep: on wiremanprep.com the auth screens wear the
+  // volt accent (#ceff00), the WiremanPrep wordmark, and the
+  // /wm-icon.png favicon. Host-detected after mount like the
+  // rest; Spotmint, AskEvo, ForemanPrep, and B&L faces untouched.
   // v10: B&L blue face. A login reached from a Business & Law
   // page carries ?brand=bl (the bl-prep header button sends it),
   // and the ForemanPrep auth screens then wear B&L sky blue -
@@ -45,6 +50,7 @@ export default function AuthLayout({
   const [isSpotmint, setIsSpotmint] = useState(false);
   const [isForeman, setIsForeman] = useState(false);
   const [isBl, setIsBl] = useState(false);
+  const [isWireman, setIsWireman] = useState(false);
   useEffect(() => {
     if (
       window.location.hostname.includes("spotmint.store") ||
@@ -54,6 +60,9 @@ export default function AuthLayout({
     }
     if (window.location.hostname.includes("foremanprep.com")) {
       setIsForeman(true);
+    }
+    if (window.location.hostname.includes("wiremanprep.com")) {
+      setIsWireman(true);
     }
     const blParam =
       new URLSearchParams(window.location.search).get("brand") === "bl";
@@ -76,28 +85,29 @@ export default function AuthLayout({
   }, []);
 
   useEffect(() => {
-    if (!isForeman) return;
+    if (!isForeman && !isWireman) return;
+    const iconHref = isWireman ? "/wm-icon.png" : "/fp-icon.png";
     const links = document.querySelectorAll(
       'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
     );
     for (const link of Array.from(links)) {
-      (link as HTMLLinkElement).href = "/fp-icon.png";
+      (link as HTMLLinkElement).href = iconHref;
     }
     if (links.length === 0) {
       const link = document.createElement("link");
       link.rel = "icon";
       link.type = "image/png";
-      link.href = "/fp-icon.png";
+      link.href = iconHref;
       document.head.appendChild(link);
     }
-  }, [isForeman]);
-  const branded = isSpotmint || isForeman;
+  }, [isForeman, isWireman]);
+  const branded = isSpotmint || isForeman || isWireman;
   // ForemanPrep theme: override the design tokens the auth forms
   // are built on. Inline custom properties cascade to every child,
   // so bg-background renders black and bg-primary renders the
   // brand accent - safety orange normally, B&L sky blue when the
   // visitor came from a Business & Law page.
-  const fpAccent = isBl ? "#38bdf8" : "#f97316";
+  const fpAccent = isWireman ? "#ceff00" : isBl ? "#38bdf8" : "#f97316";
   const foremanTheme = {
     "--background": "#0a0a0a",
     "--sidebar": "#0a0a0a",
@@ -106,7 +116,7 @@ export default function AuthLayout({
     "--ring": fpAccent,
   } as React.CSSProperties;
   return (
-    <div className="flex h-dvh w-screen bg-sidebar" style={isForeman ? foremanTheme : undefined}>
+    <div className="flex h-dvh w-screen bg-sidebar" style={isForeman || isWireman ? foremanTheme : undefined}>
       <div className={branded ? "flex w-full flex-col bg-background p-8 md:p-16" : "flex w-full flex-col bg-background p-8 xl:w-[600px] xl:shrink-0 xl:rounded-r-2xl xl:border-r xl:border-border/40 md:p-16"}>
         <Link
           className="flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
@@ -120,6 +130,10 @@ export default function AuthLayout({
             {isSpotmint ? (
               <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
                 Spot<span style={{ color: "var(--primary)" }}>mint</span>
+              </div>
+            ) : isWireman ? (
+              <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
+                Wireman<span style={{ color: fpAccent }}>Prep</span>
               </div>
             ) : isForeman ? (
               <div className="mb-2 font-extrabold text-white text-xl tracking-tight">
@@ -154,8 +168,8 @@ export default function AuthLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/(auth)/layout.tsx (v10 - B&L blue face via
-// ?brand=bl, orange stays the ForemanPrep default)
+// END OF FILE - app/(auth)/layout.tsx (v11 - WiremanPrep volt
+// face on the wiremanprep.com host, wm-icon favicon)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
