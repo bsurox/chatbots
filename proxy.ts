@@ -129,6 +129,40 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // WiremanPrep island (v18). wiremanprep.com serves the electrical
+  // sister site and nothing else - same shape as the ForemanPrep
+  // block above: "/" is a REWRITE so the address bar stays clean,
+  // /terms and /privacy land on WiremanPrep's own legal pages, the
+  // clean marketing URLs rewrite onto /wiremanprep/*, the auth
+  // doors are open on this host (buyers need accounts), and
+  // anything else bounces home.
+  if (hostname === "wiremanprep.com" || hostname.endsWith(".wiremanprep.com")) {
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/wiremanprep", request.url));
+    }
+    if (pathname === "/terms" || pathname.startsWith("/terms/")) {
+      return NextResponse.rewrite(new URL("/wiremanprep/terms", request.url));
+    }
+    if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
+      return NextResponse.rewrite(new URL("/wiremanprep/privacy", request.url));
+    }
+    const cleanWm = ["/buy", "/practice", "/exam", "/thanks"];
+    if (cleanWm.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+      return NextResponse.rewrite(
+        new URL("/wiremanprep" + pathname, request.url)
+      );
+    }
+    const wmAllowed =
+      pathname.startsWith("/wiremanprep") ||
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname.startsWith("/api/") ||
+      pathname.includes(".");
+    if (!wmAllowed) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -173,6 +207,13 @@ export async function proxy(request: NextRequest) {
   // needed, and no guest row should be created for every ad click.
   // Paid product pages will get their own gating when they arrive.
   if (pathname.startsWith("/foremanprep")) {
+    return NextResponse.next();
+  }
+
+  // v18: same doctrine for the WiremanPrep surface - public
+  // marketing, no guest row per ad click; the paid routes gate
+  // themselves server-side.
+  if (pathname.startsWith("/wiremanprep")) {
     return NextResponse.next();
   }
 
@@ -224,7 +265,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v17 - /bl-audio clean URL added)
+// END OF FILE - proxy.ts (v18 - wiremanprep.com host island)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
