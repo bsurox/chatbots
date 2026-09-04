@@ -30,6 +30,18 @@ import { db } from "./queries";
 // v3: product "bundle" - the buy-both-at-once purchase. It grants
 // the bundle plan directly (and merging is trivial: whatever you
 // held before, owning both is strictly more).
+// v4 - WIREMANPREP joins the same row, still no schema change:
+// ownership is now read as a SET decoded from the plan string.
+// "full" = {gc}, "bl" = {bl}, "bundle" = {gc,bl}, "wm" = {wm},
+// and a "+wm" suffix adds the electrical product to any of them
+// ("full+wm", "bl+wm", "bundle+wm"). Every existing row decodes
+// exactly as before, hasForemanAccess/hasBlAccess answer exactly
+// as before for every value that exists in the table today, and
+// unknown legacy values still count as GC access. The one
+// behavior REFINEMENT: a hypothetical wm-only row does not grant
+// GC access (the old plan !== "bl" test would have; no such rows
+// exist yet, so nothing changes for real users). grantForemanAccess
+// takes product "wm" and merges it into whatever is owned.
 
 export const foremanAccess = pgTable("foreman_access", {
   userId: uuid("user_id").primaryKey(),
@@ -83,25 +95,61 @@ async function getAccessRow(userId: string): Promise<ForemanAccess | null> {
   return row;
 }
 
-// GC exam product (Full Access). Any plan except a bl-only row
-// counts - "full", "bundle", and any legacy value all keep working.
+// ---- Ownership set encoding (v4) ---------------------------------
+// The plan column stays a single text value; these two functions
+// are the only places that know how to read and write it.
+
+type Owned = { gc: boolean; bl: boolean; wm: boolean };
+
+function decodePlan(plan: string): Owned {
+  const owned: Owned = { gc: false, bl: false, wm: false };
+  for (const part of plan.split("+")) {
+    if (part === "bl") owned.bl = true;
+    else if (part === "bundle") {
+      owned.gc = true;
+      owned.bl = true;
+    } else if (part === "wm") owned.wm = true;
+    else owned.gc = true; // "full" and any legacy value = GC access
+  }
+  return owned;
+}
+
+function encodePlan(owned: Owned): string {
+  let base: string;
+  if (owned.gc && owned.bl) base = "bundle";
+  else if (owned.bl) base = "bl";
+  else if (owned.gc) base = "full";
+  else base = "";
+  if (owned.wm) return base ? base + "+wm" : "wm";
+  return base || "full";
+}
+
+// GC exam product (Full Access). "full", "bundle", their +wm
+// forms, and any legacy value all count - a wm-only row does not.
 export async function hasForemanAccess(userId: string): Promise<boolean> {
   const row = await getAccessRow(userId);
   if (!row) return false;
-  return row.plan !== "bl";
+  return decodePlan(row.plan).gc;
 }
 
 // Business & Law product.
 export async function hasBlAccess(userId: string): Promise<boolean> {
   const row = await getAccessRow(userId);
   if (!row) return false;
-  return row.plan === "bl" || row.plan === "bundle";
+  return decodePlan(row.plan).bl;
+}
+
+// WiremanPrep electrical product.
+export async function hasWiremanAccess(userId: string): Promise<boolean> {
+  const row = await getAccessRow(userId);
+  if (!row) return false;
+  return decodePlan(row.plan).wm;
 }
 
 export async function grantForemanAccess(params: {
   userId: string;
   source?: string;
-  product?: "gc" | "bl" | "bundle";
+  product?: "gc" | "bl" | "bundle" | "wm";
   expiresAt?: Date | null;
 }) {
   const source = params.source ?? "stripe";
@@ -112,18 +160,20 @@ export async function grantForemanAccess(params: {
   // merge - it counts as owning nothing, so a new purchase cannot
   // resurrect a lapsed product for free.
   const existing = await getAccessRow(params.userId);
-  let plan: string;
+  const owned: Owned = existing
+    ? decodePlan(existing.plan)
+    : { gc: false, bl: false, wm: false };
   if (product === "bundle") {
-    plan = "bundle";
+    owned.gc = true;
+    owned.bl = true;
   } else if (product === "gc") {
-    plan =
-      existing && (existing.plan === "bl" || existing.plan === "bundle")
-        ? "bundle"
-        : "full";
+    owned.gc = true;
+  } else if (product === "bl") {
+    owned.bl = true;
   } else {
-    plan =
-      existing && existing.plan !== "bl" ? "bundle" : "bl";
+    owned.wm = true;
   }
+  const plan = encodePlan(owned);
 
   await db
     .insert(foremanAccess)
@@ -219,7 +269,7 @@ export async function getForemanDomainStats(userId: string): Promise<DomainStat[
 }
 
 // ============================================================
-// END OF FILE - lib/db/foreman.ts (v3 - bundle purchases grant
-// both products in one write)
+// END OF FILE - lib/db/foreman.ts (v4 - WiremanPrep ownership
+// joins the plan column as a decoded set; +wm suffix, no SQL)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
