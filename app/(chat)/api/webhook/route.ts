@@ -21,6 +21,11 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 // v5: bundle purchases (both products, one checkout). Metadata
 // foremanprep_bundle = "1" grants product "bundle" - both
 // entitlements in a single claim-guarded write.
+// v6: WiremanPrep purchases. Checkout marks them with metadata
+// wiremanprep = "1"; the grant runs through the same claim/release
+// discipline and lands as product "wm" (lib/db/foreman.ts v4
+// merges it into whatever the account already owns - "full+wm",
+// "bundle+wm", or plain "wm").
 
 async function claimSession(sessionId: string, userId: string, credits: number): Promise<boolean> {
   const res = await db.execute(sql`INSERT INTO stripe_events (session_id, user_id, credits) VALUES (${sessionId}, ${userId}, ${credits}) ON CONFLICT (session_id) DO NOTHING RETURNING session_id`);
@@ -50,9 +55,10 @@ export async function POST(request: Request) {
     const isForemanPrep = session.metadata?.foremanprep === "1";
     const isForemanBl = session.metadata?.foremanprep_bl === "1";
     const isBundle = session.metadata?.foremanprep_bundle === "1";
+    const isWireman = session.metadata?.wiremanprep === "1";
     const credits = Number(session.metadata?.credits ?? 0);
 
-    if (userId && (isForemanPrep || isForemanBl || isBundle) && session.payment_status === "paid") {
+    if (userId && (isForemanPrep || isForemanBl || isBundle || isWireman) && session.payment_status === "paid") {
       // ForemanPrep products - Full Access or Business & Law. Same
       // claim/release discipline as credits: claim first, grant
       // second, release and 500 on grant failure so Stripe retries
@@ -63,7 +69,13 @@ export async function POST(request: Request) {
           await grantForemanAccess({
             userId,
             source: "stripe",
-            product: isBundle ? "bundle" : isForemanBl ? "bl" : "gc",
+            product: isWireman
+              ? "wm"
+              : isBundle
+                ? "bundle"
+                : isForemanBl
+                  ? "bl"
+                  : "gc",
           });
         } catch (grantErr) {
           console.error("ForemanPrep access grant failed, releasing claim:", grantErr);
@@ -91,7 +103,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/webhook/route.ts (v5 - bundle
-// purchases grant both products in one claim)
+// END OF FILE - app/(chat)/api/webhook/route.ts (v6 - WiremanPrep
+// purchases grant product "wm" through the same claim discipline)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
