@@ -7,7 +7,13 @@ import { guestRegex } from "@/lib/constants";
 import { hasWiremanAccess } from "@/lib/db/foreman";
 import { getWmQuestion } from "@/lib/wiremanprep/questions";
 
-// WiremanPrep tutor (v1) - the electrical sibling of the
+// WiremanPrep tutor (v2 - PLAIN SPEECH: the model kept decorating
+// replies with markdown asterisks, which render as literal *
+// characters in the practice room and make replies hard to read.
+// The system prompt now bans markdown outright, and as a hard
+// guarantee every reply is scrubbed of asterisk characters
+// server-side before it leaves this route - same fix the chat
+// got.) v1 notes: the electrical sibling of the
 // ForemanPrep tutor. Question-scoped: the client sends a question
 // id plus the short back-and-forth so far, and the model answers
 // as a plain-spoken master-electrician coach who always points at
@@ -115,6 +121,7 @@ export async function POST(request: Request) {
       `CORRECT ANSWER: ${"ABCD"[q.answer]}) ${q.choices[q.answer]}`,
       `EXPLANATION: ${q.explain}`,
       `REFERENCE: ${q.cite}`,
+      "HOW YOU WRITE - NON-NEGOTIABLE: plain conversational sentences only. NEVER use markdown or any formatting symbols: no asterisks, no bold, no italics, no bullet points, no numbered lists, no headers. When you need to list things, write them into a sentence separated by commas.",
       "Rules: Explain like a good journeyman-turned-master would - short sentences, no jargon without unpacking it, no talking down. Always anchor answers to the exact NEC section or table (or OSHA/NFPA 70E reference) so the student learns WHERE to find it - the exam is open book and finding it fast is the skill. The exam allows either the 2020 or the 2023 NEC and this course only teaches material that reads the same in both, so cite sections without telling the student to buy a different edition. Walk calculations step by step and show the arithmetic. Stay on this question and closely related electrical-exam topics. If asked about anything unrelated to electrical-exam prep, say you're only here for exam questions and steer back. Keep replies under 150 words unless walking through a calculation.",
     ].join("\n");
 
@@ -125,7 +132,9 @@ export async function POST(request: Request) {
       maxOutputTokens: MAX_OUTPUT_TOKENS,
     });
 
-    const reply = result.text?.trim();
+    // Hard plain-text guarantee: markdown asterisks render as
+    // literal stars in the tutor thread, so none may leave here.
+    const reply = (result.text ?? "").replace(/\*/g, "").trim();
     if (!reply) {
       return Response.json({ error: "The tutor came up empty - try again." }, { status: 502 });
     }
@@ -137,7 +146,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/api/tutor/route.ts (v1 -
-// NEC-anchored coach, wm paid tier, 25/3 daily caps)
+// END OF FILE - app/wiremanprep/api/tutor/route.ts (v2 - plain
+// speech: markdown banned + asterisks scrubbed server-side)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
