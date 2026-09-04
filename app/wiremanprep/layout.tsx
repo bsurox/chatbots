@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import "../foremanprep/foremanprep.css";
 import "./wiremanprep.css";
+import WmChatWidget from "./chat-widget";
 
 // Server-side wrapper for the WiremanPrep surface (v1). Same job
 // as the ForemanPrep layout: owns the css imports and the
@@ -11,11 +12,12 @@ import "./wiremanprep.css";
 // swaps the brand variables to electric yellow for everything
 // underneath. The ForemanPrep island is untouched - it never
 // wears .wm-zone.
-// Lean v1 on purpose: no analytics tag and no chat widget yet -
-// those mount here in later versions once the pixels and the
-// widget's page rules exist for this brand. Favicon points at
-// /wm-icon.png (the yellow icon ships as its own file; until it
-// lands, tabs just show no icon - harmless).
+// v2: the LIVE CHAT arrives - WmChatWidget mounts here once and
+// decides for itself where to render (landing + practice only,
+// per its own allowlist), exactly like the ForemanPrep layout
+// mounts its widget. Still no analytics tag - that waits for the
+// pixels and ships together with the privacy disclosure.
+// v1 notes: lean on purpose; favicon points at /wm-icon.png.
 
 export const metadata: Metadata = {
   title: "WiremanPrep - Pass the NASCLA Electrical Exam",
@@ -31,11 +33,16 @@ export const metadata: Metadata = {
 export default function WiremanPrepLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return <div className="fp-page wm-zone">{children}</div>;
+  return (
+    <div className="fp-page wm-zone">
+      {children}
+      <WmChatWidget />
+    </div>
+  );
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/layout.tsx (v1 - yellow zone
-// wrapper, WiremanPrep metadata, lean: no chat/analytics yet)
+// END OF FILE - app/wiremanprep/layout.tsx (v2 - live chat
+// widget mounted; volt zone wrapper, WiremanPrep metadata)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
