@@ -1,5 +1,8 @@
 /* FILE: app/foremanprep/chat.css */
-/* ForemanPrep live chat widget (v2 - blue on B&L pages; v1 notes
+/* ForemanPrep live chat widget (v3 - volt dress for WiremanPrep:
+   the .wm modifier recolors every orange accent to volt #ceff00
+   for the widget the wiremanprep.com pages mount; orange and blue
+   faces untouched. v2 - blue on B&L pages; v1 notes
    below). fc- prefix. A floating round
    launcher pinned bottom-right (the slot the account badge used to
    hold), opening a dark panel that matches the fp- dress: thread
@@ -54,8 +57,17 @@
 .fc-panel.bl .fc-in:focus { border-color: rgba(56, 189, 248, 0.55); }
 .fc-panel.bl .fc-send, .fc-panel.bl .fc-fsend { background: #38bdf8; }
 
+/* v3: on WiremanPrep pages the widget wears volt - the .wm
+   modifier lands on the fab and panel from the WiremanPrep
+   widget, recoloring every orange accent. */
+.fc-fab.wm { color: #ceff00; }
+.fc-panel.wm .fc-title span { color: #ceff00; }
+.fc-panel.wm .fc-msg.me { background: rgba(206, 255, 0, 0.16); border-color: rgba(206, 255, 0, 0.4); }
+.fc-panel.wm .fc-in:focus { border-color: rgba(206, 255, 0, 0.55); }
+.fc-panel.wm .fc-send, .fc-panel.wm .fc-fsend { background: #ceff00; }
+
 /* ============================================================
-   END OF FILE - app/foremanprep/chat.css (v2 - blue dress on
-   Business & Law pages)
+   END OF FILE - app/foremanprep/chat.css (v3 - volt dress on
+   WiremanPrep pages)
    If you can see this comment, the paste was not truncated.
    ============================================================ */
