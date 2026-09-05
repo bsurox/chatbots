@@ -5,7 +5,17 @@ import { NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import { guestRegex, isDevelopmentEnvironment } from "@/lib/constants";
 
-// Cross-domain single sign-on bridge (v1). foremanprep.com and
+// Cross-domain single sign-on bridge (v2 - THE WWW FIX, found by
+// live redirect tracing: foremanprep.com 308s to
+// www.foremanprep.com at the Vercel level, so a pass minted for
+// audience "foremanprep.com" arrived at hostname
+// "www.foremanprep.com" and the audience check - correctly doing
+// its anti-replay job - refused it. That is exactly why WM -> FP
+// jumps landed logged out while FP -> WM worked: wiremanprep.com
+// is apex-canonical. Fix: hostnames are normalized (leading www.
+// stripped) on BOTH mint and check, so either canonicalization of
+// either domain passes while a cross-site replay still fails.)
+// v1 notes: foremanprep.com and
 // wiremanprep.com share one app, one database, and one auth
 // secret - but browsers wall cookies off per domain, so a login
 // on one domain is invisible to the other. This route is the
@@ -61,6 +71,10 @@ function sign(payloadB64: string, secret: string): string {
   return b64url(createHmac("sha256", secret).update(payloadB64).digest());
 }
 
+function normHost(h: string): string {
+  return h.startsWith("www.") ? h.slice(4) : h;
+}
+
 function cookieName(secure: boolean): string {
   return secure ? "__Secure-authjs.session-token" : "authjs.session-token";
 }
@@ -106,8 +120,9 @@ export async function GET(request: Request) {
       !claims.email ||
       claims.type !== "regular" ||
       typeof claims.exp !== "number" ||
+      typeof claims.aud !== "string" ||
       Date.now() > claims.exp ||
-      claims.aud !== url.hostname
+      normHost(claims.aud) !== normHost(url.hostname)
     ) {
       return fallthrough;
     }
@@ -156,7 +171,7 @@ export async function GET(request: Request) {
     id,
     type: "regular",
     email,
-    aud: new URL(dest.origin).hostname,
+    aud: normHost(new URL(dest.origin).hostname),
     exp: Date.now() + TOKEN_TTL_MS,
   };
   const payloadB64 = b64url(Buffer.from(JSON.stringify(payload), "utf8"));
@@ -169,8 +184,8 @@ export async function GET(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/sso/route.ts (v1 - cross-domain
-// silent login handoff between foremanprep.com and
-// wiremanprep.com)
+// END OF FILE - app/(chat)/api/sso/route.ts (v2 - www-vs-apex
+// hostname normalization so the audience check accepts either
+// canonicalization)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
