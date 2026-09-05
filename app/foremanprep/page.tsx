@@ -4,7 +4,15 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v31. SSO JUMP LINK: the WiremanPrep
+// ForemanPrep landing page v32. BADGE WORDING + CLUSTER DRESS,
+// his final calls: the volt pill reads "NASCLA Electrical prep"
+// instead of WiremanPrep (deliberately NO Master/Unlimited - more
+// electrical exams may join later); hovering any pill spells out
+// the full exam via a title tooltip. The "OTHER PREP COURSES WE
+// OFFER" label turns white and sits on its own line ABOVE the
+// pills, and the cluster is nudged up with breathing room below
+// so it clears the gray exam badge at the top of the hero.
+// v31 notes. SSO JUMP LINK: the WiremanPrep
 // badge pill now routes through /api/sso?to=wm instead of linking
 // wiremanprep.com directly - logged-in users land on WiremanPrep
 // already logged in; visitors get the same plain redirect as
@@ -332,11 +340,11 @@ export default function ForemanPrepPage() {
       <div
         style={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          flexWrap: "wrap",
-          gap: "8px",
-          marginTop: "8px",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: "6px",
+          marginTop: "4px",
+          marginBottom: "6px",
         }}
       >
         <span
@@ -345,45 +353,56 @@ export default function ForemanPrepPage() {
             fontWeight: 700,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: "#777",
+            color: "#fff",
             whiteSpace: "nowrap",
           }}
         >
           Other prep courses we offer
         </span>
-        <Link
-          href="/foremanprep/bl-prep"
+        <div
           style={{
-            fontSize: "12.5px",
-            fontWeight: 700,
-            color: "#38bdf8",
-            border: "1px solid rgba(56, 189, 248, 0.5)",
-            background: "rgba(56, 189, 248, 0.1)",
-            borderRadius: "999px",
-            padding: "5px 12px",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+            gap: "8px",
           }}
         >
-          Business &amp; Law
-        </Link>
-        <Link
-          href="/api/sso?to=wm"
-          prefetch={false}
-          style={{
-            fontSize: "12.5px",
-            fontWeight: 700,
-            color: "#ceff00",
-            border: "1px solid rgba(206, 255, 0, 0.5)",
-            background: "rgba(206, 255, 0, 0.1)",
-            borderRadius: "999px",
-            padding: "5px 12px",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-          }}
-        >
-          WiremanPrep
-        </Link>
+          <Link
+            href="/foremanprep/bl-prep"
+            title="State Business & Law contractor exam prep"
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#38bdf8",
+              border: "1px solid rgba(56, 189, 248, 0.5)",
+              background: "rgba(56, 189, 248, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Business &amp; Law
+          </Link>
+          <Link
+            href="/api/sso?to=wm"
+            prefetch={false}
+            title="WiremanPrep - NASCLA Master/Unlimited Electrical Contractor exam prep"
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#ceff00",
+              border: "1px solid rgba(206, 255, 0, 0.5)",
+              background: "rgba(206, 255, 0, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            NASCLA Electrical prep
+          </Link>
+        </div>
       </div>
 
       <div className="fp-hero">
@@ -654,7 +673,8 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v31 - WiremanPrep
-// badge routes through the /api/sso login handoff)
+// END OF FILE - app/foremanprep/page.tsx (v32 - NASCLA
+// Electrical prep wording, hover titles, white label above the
+// pills)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
