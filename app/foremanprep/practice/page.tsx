@@ -14,7 +14,13 @@ import {
 } from "@/lib/foremanprep/questions";
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
-// Practice player v22: THE TUTOR SEES YOUR PICK - the tutor call
+// Practice player v23:
+// PICKER LAYOUT (his spec): the Start practice button now sits
+// directly under the All subjects tile - no scrolling past the
+// grid to launch - and an "Individual subjects" header labels the
+// grid below it. The select-a-subject error line rides with the
+// button. Pure reorder, no logic changes.
+// v22 notes: THE TUTOR SEES YOUR PICK - the tutor call
 // now sends which choice was selected (or -1 for a timeout), so
 // with tutor route v5 a bare "why" gets a real answer about YOUR
 // answer instead of "which option do you mean?" (his catch, fixed
@@ -554,6 +560,13 @@ export default function PracticePage() {
           <span className="fq-sn">All subjects</span>
           <span className="fq-sw">A mixed round, the way the exam feels</span>
         </button>
+        {domErr ? <p className="fq-lenerr">Select a subject first.</p> : null}
+        <button className="fq-startbtn" onClick={startRound} type="button">
+          Start practice
+        </button>
+        <span className="fq-lenlabel" style={{ display: "block", margin: "18px 0 8px" }}>
+          Individual subjects
+        </span>
         <div className="fq-pick">
           {DOMAINS.map((d) => (
             <button
@@ -567,10 +580,6 @@ export default function PracticePage() {
             </button>
           ))}
         </div>
-        {domErr ? <p className="fq-lenerr">Select a subject first.</p> : null}
-        <button className="fq-startbtn" onClick={startRound} type="button">
-          Start practice
-        </button>
       </div>
     );
   }
@@ -811,8 +820,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v22 - the
-// tutor call carries the student's picked answer; recovered
-// base after the wireman-page overwrite)
+// END OF FILE - app/foremanprep/practice/page.tsx (v23 - Start
+// button above the subject grid + Individual subjects header)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
