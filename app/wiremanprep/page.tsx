@@ -4,7 +4,13 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// WiremanPrep landing page (v4 - BADGES MOVED UP TOP, his call:
+// WiremanPrep landing page (v5 - SSO JUMP LINKS: the two badge
+// pills now route through /api/sso?to=fp|bl instead of linking
+// the sister domain directly. Logged-in owners get silently
+// walked across and land already logged in; visitors and guests
+// get the exact same plain redirect as before. prefetch is off so
+// hovering a badge never mints a pass.)
+// v4 notes - BADGES MOVED UP TOP, his call:
 // the v3 hero-bottom badges are gone. In their place, a compact
 // cluster sits directly under the header row, right-aligned so it
 // hangs beneath the login button: a small gray "OTHER PREP COURSES
@@ -161,7 +167,8 @@ export default function WiremanPrepPage() {
           Other prep courses we offer
         </span>
         <Link
-          href="https://foremanprep.com"
+          href="/api/sso?to=fp"
+          prefetch={false}
           style={{
             fontSize: "12.5px",
             fontWeight: 700,
@@ -177,7 +184,8 @@ export default function WiremanPrepPage() {
           ForemanPrep
         </Link>
         <Link
-          href="https://foremanprep.com/bl-prep"
+          href="/api/sso?to=bl"
+          prefetch={false}
           style={{
             fontSize: "12.5px",
             fontWeight: 700,
@@ -309,7 +317,7 @@ export default function WiremanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/page.tsx (v4 - cross-brand
-// badge cluster moved up under the login button)
+// END OF FILE - app/wiremanprep/page.tsx (v5 - badge pills
+// route through the /api/sso login handoff)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
