@@ -4,7 +4,22 @@ import Link from "next/link";
 import BlAuthButton from "../bl-auth-button";
 import BlOwnerSwap from "../bl-owner-swap";
 
-// Business & Law landing page (v12): the VISITOR row's Exam
+// Business & Law landing page (v14): SSO JUMP LINK - the
+// WiremanPrep badge pill now routes through /api/sso?to=wm, so a
+// logged-in user lands on wiremanprep.com already logged in;
+// visitors get the same plain redirect as before. The ForemanPrep
+// pill stays a direct link (same domain, cookie already shared).
+// prefetch off so hovering never mints a pass.
+// v13 notes: CROSS-BRAND CLUSTER (his
+// call, same round on all three platforms) - a compact row sits
+// directly under the header, right-aligned beneath the login
+// button: a small gray "OTHER PREP COURSES WE OFFER" label plus
+// two pills carrying just the course names - "ForemanPrep" in its
+// orange (-> /foremanprep) and "WiremanPrep" in its volt #ceff00
+// (-> wiremanprep.com). Colors are inlined on purpose - the blue
+// blzone variable would repaint them otherwise. Nothing else
+// moved; the header backpill and BlAuthButton stay as they were.
+// v12 notes: the VISITOR row's Exam
 // simulator button goes back to white (his call - blue is for
 // owners only); the owner's full-width Exam simulator door stays
 // blue (#38bdf8, black text). v11 notes: sim button went blue in
@@ -152,6 +167,63 @@ export default function BlPrepLandingPage() {
             </Link>
             <BlAuthButton />
           </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            flexWrap: "wrap",
+            gap: "8px",
+            marginTop: "8px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#777",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Other prep courses we offer
+          </span>
+          <Link
+            href="/foremanprep"
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#f97316",
+              border: "1px solid rgba(249, 115, 22, 0.5)",
+              background: "rgba(249, 115, 22, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ForemanPrep
+          </Link>
+          <Link
+            href="/api/sso?to=wm"
+            prefetch={false}
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#ceff00",
+              border: "1px solid rgba(206, 255, 0, 0.5)",
+              background: "rgba(206, 255, 0, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            WiremanPrep
+          </Link>
         </div>
 
         <div className="fp-hero">
@@ -328,7 +400,7 @@ export default function BlPrepLandingPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl-prep/page.tsx (v12 - visitor
-// sim button white again, owner sim door stays blue)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v14 - the
+// WiremanPrep badge routes through the /api/sso login handoff)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
