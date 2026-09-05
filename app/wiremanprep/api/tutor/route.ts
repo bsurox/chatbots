@@ -7,7 +7,14 @@ import { guestRegex } from "@/lib/constants";
 import { hasWiremanAccess } from "@/lib/db/foreman";
 import { getWmQuestion } from "@/lib/wiremanprep/questions";
 
-// WiremanPrep tutor (v2 - PLAIN SPEECH: the model kept decorating
+// WiremanPrep tutor (v3 - THE TUTOR SEES YOUR PICK: the practice
+// page now sends which choice the student selected, and the
+// system prompt tells the model "the student answered B, which is
+// wrong" before it reads their message - so a bare "why" gets a
+// real answer instead of "which option do you mean?" (his catch).
+// picked is optional and backward compatible: -1 means the timer
+// ran out, absent means they have not answered yet.)
+// v2 - PLAIN SPEECH: the model kept decorating
 // replies with markdown asterisks, which render as literal *
 // characters in the practice room and make replies hard to read.
 // The system prompt now bans markdown outright, and as a hard
@@ -69,6 +76,15 @@ export async function POST(request: Request) {
     if (!q) {
       return Response.json({ error: "Unknown question." }, { status: 400 });
     }
+    const picked = typeof body?.picked === "number" ? Math.trunc(body.picked) : null;
+    const pickedLine =
+      picked !== null && picked >= 0 && picked < q.choices.length
+        ? picked === q.answer
+          ? `THE STUDENT'S ANSWER: they picked ${"ABCD"[picked]}) ${q.choices[picked]} - CORRECT. If they ask why, confirm their reasoning and reinforce where the answer lives in the reference.`
+          : `THE STUDENT'S ANSWER: they picked ${"ABCD"[picked]}) ${q.choices[picked]} - WRONG. If they ask why (even just the word "why"), explain why their pick is wrong and why the correct answer is right, without asking which option they mean.`
+        : picked === -1
+          ? "THE STUDENT'S ANSWER: they ran out of time on this question and it auto-revealed unanswered. If they ask why, walk through why the correct answer is right."
+          : "THE STUDENT'S ANSWER: not recorded - if they ask about 'my answer', ask which choice they mean.";
 
     // Tier check: paid owners are capped per account, everyone else
     // per IP. Guests count as free - a throwaway guest row never
@@ -121,6 +137,7 @@ export async function POST(request: Request) {
       `CORRECT ANSWER: ${"ABCD"[q.answer]}) ${q.choices[q.answer]}`,
       `EXPLANATION: ${q.explain}`,
       `REFERENCE: ${q.cite}`,
+      pickedLine,
       "HOW YOU WRITE - NON-NEGOTIABLE: plain conversational sentences only. NEVER use markdown or any formatting symbols: no asterisks, no bold, no italics, no bullet points, no numbered lists, no headers. When you need to list things, write them into a sentence separated by commas.",
       "Rules: Explain like a good journeyman-turned-master would - short sentences, no jargon without unpacking it, no talking down. Always anchor answers to the exact NEC section or table (or OSHA/NFPA 70E reference) so the student learns WHERE to find it - the exam is open book and finding it fast is the skill. The exam allows either the 2020 or the 2023 NEC and this course only teaches material that reads the same in both, so cite sections without telling the student to buy a different edition. Walk calculations step by step and show the arithmetic. Stay on this question and closely related electrical-exam topics. If asked about anything unrelated to electrical-exam prep, say you're only here for exam questions and steer back. Keep replies under 150 words unless walking through a calculation.",
     ].join("\n");
@@ -146,7 +163,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/api/tutor/route.ts (v2 - plain
-// speech: markdown banned + asterisks scrubbed server-side)
+// END OF FILE - app/wiremanprep/api/tutor/route.ts (v3 - the
+// tutor knows which choice the student picked)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
