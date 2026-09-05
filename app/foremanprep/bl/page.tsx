@@ -1,997 +1,399 @@
-// FILE: app/foremanprep/bl/page.tsx
-"use client";
-import "../practice/practice.css";
+// FILE: app/foremanprep/bl-prep/page.tsx
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
-import {
-  BL_DOMAINS,
-  buildBlDemoSet,
-  buildBlPracticeSet,
-  getBlDomain,
-  type BlDomainKey,
-  type BlQuestion,
-} from "@/lib/foremanprep/blquestions";
-import {
-  BL_PACKS_LIVE,
-  BL_STATE_PACKS,
-  type BlStatePack,
-} from "@/lib/foremanprep/blstates";
+import BlAuthButton from "../bl-auth-button";
+import BlOwnerSwap from "../bl-owner-swap";
 
-// Business & Law practice room (v14):
-// PICKER LAYOUT (his spec): the Start practice button now sits
-// directly under the All subjects tile - no scrolling past the
-// grid to launch - and an "Individual subjects" header labels the
-// grid below it. The select-a-subject error line rides with the
-// button (its wording also updated from "domain" to "subject" to
-// match the v12 All subjects rename). Pure reorder otherwise.
-// v13 notes: THE TUTOR SEES YOUR PICK -
-// the tutor call now sends which choice was selected (or -1 for a
-// timeout), so with tutor route v5 a bare "why" gets a real
-// answer about YOUR answer instead of "which option do you mean?"
-// (his catch, fixed on all three rooms).
-// v12 notes: "All domains" button now
-// reads "All subjects" (matches GC practice wording). v11 notes:
-// two changes, his call.
-// 1. THE DELIBERATE PICKER (ships in GC practice v21 too):
-//    nothing is selected when the page opens - no round length,
-//    no domain, free tier included (the free 10-question
-//    pre-select is gone: "nothing selected by default"). Tapping
-//    a domain SELECTS it - the tile lights up instead of starting
-//    a round - and the new full-width Start practice button under
-//    the grid is the only way in. Missing picks show the red
-//    "Select a round length first." / "Select a domain first."
-//    lines. Styles: practice.css v14.
-// 2. WHITE DOOR BUTTONS - the three big blue fq-all doors at the
-//    bottom (Exam simulator / State packs / Audio study) read as
-//    highlighted content, which he didn't like. They are now a
-//    row of three white fp-try-btn buttons, same dress as the
-//    landing page's owner row. The #packs id rides on the row so
-//    old anchor links still land.
-// The ?pack= deep-link machinery is untouched - /bl-packs still
-// starts state rounds here directly, no picker required.
-// v10 notes: the pack GRID left the
-// picker (his call: "I don't want it listed on the practice page
-// anymore") - replaced by a State packs DOOR button linking the
-// dedicated /bl-packs page, plus a new Audio study door to the
-// B&L audio room (/bl-audio). The ?pack= deep-link machinery
-// STAYS: /bl-packs still starts rounds here through it. The
-// #packs id rides on the door so old anchor links land sensibly.
-// v9 notes: PACK DEEP LINKS. The new
-// /bl-packs page (its own page for the packs, his call) links
-// each state as /bl?pack=<key>; this room reads the param after
-// mount and, once the access check lands, starts that state's
-// statute round directly - paid users drop straight into the
-// questions, free users get the pick screen with the state gate
-// open. An unknown or packless key just shows the picker. The
-// param is consumed once per page load.
-// v8 notes: the state-pack section carries id="packs" so the
-// landing's packs button could anchor-jump to it (superseded as
-// the main path by /bl-packs, but the anchor stays - it still
-// works for any deep link).
-// v7 notes: the exam timer learns your
-// state, and the back button leads home to Business & Law.
-// 1. STATE-PACE SELECT - when the timer is on, a dropdown picks
-//    which state's clock to train: every timed state from
-//    blstates (its bulletin-verified minutes divided across its
-//    real question count - Tennessee 2:48, Georgia 3:00, Florida
-//    3:15, California 1:50...). Untimed Louisiana and course-based
-//    Arizona have no pace and stay off the list. The pick sticks
-//    in localStorage (fp-bl-pace, read after mount only), the
-//    timer note and the out-of-time line name the chosen state,
-//    and Tennessee stays the default.
-// 2. BACK BUTTON - the top-left pill now reads Business & Law and
-//    leads to /bl-prep (the B&L landing), not the orange
-//    ForemanPrep landing. His rule: anything B&L backs out to the
-//    B&L landing page; /bl-prep carries the door onward to
-//    ForemanPrep proper.
-// v6 notes: the STATE EXAM SIMULATOR
-// door joins the picker - a big blue button above the state packs
-// linking /foremanprep/bl-exam, where all 16 B&L states sit 1:1
-// sims on their real formats (blstates v2). The pack section now
-// renders BL_PACKS_LIVE (states with statute questions - TN/GA/SC
-// so far) so format-only states never show an empty round.
-// v5 notes: STATE PACKS joined phase 2.
-// Below the domain grid sits the state-pack section: Tennessee,
-// Georgia, and South Carolina rounds of 8 statute-verified
-// questions each - lien deadlines, license thresholds, retainage
-// caps, the numbers the core bank deliberately hedges. Packs are
-// paid-only (a free tap opens the gate), run whole and shuffled,
-// and grade/save through the same attempts pipe (route v3
-// resolves their ids). During a state round the question chip
-// reads "Tennessee - Liens & Payment" so nobody mistakes a state
-// number for a universal one.
-// v4 notes (phase 2 wave 1) - three features, all paid-gated:
-// 1. THE TUTOR - "Ask the tutor why" on every reveal. The tutor
-//    API (v3) resolves bl- ids and coaches in Business & Law
-//    voice; B&L owners get the full 25/day allowance.
-// 2. LISTEN PILLS - every question and explanation can speak.
-//    Files come from the same blob store (audio-gen v4 voices
-//    bl- ids); until Chase runs the B&L batch on admin-audio the
-//    pills self-hide on their first failed load, so shipping this
-//    before the audio exists costs nothing.
-// 3. EXAM-PACE TIMER - per-question countdown at 2:48 (168s), the
-//    tightest common state pace (Tennessee's 50 questions in 140
-//    minutes; Georgia allows 3:00). Same mechanics as the GC
-//    timer: paid-only, default OFF, clock freezes on answer,
-//    resets on next, zero auto-reveals unanswered.
-// v3 notes: the whole room wears .fp-blzone (css v15 catches the
-// hardcoded borders) and a free tap on a locked length DESELECTS
-// the highlight entirely while the gate shows - his spec, and the
-// opposite of GC practice v20's snap-back on purpose.
-// v2 notes: the gate's buy button links /foremanprep/buy?product=bl.
-// v1 notes: same player as the trade exam - pick a domain or the
-// whole mix, letter chips, instant reveal with the why and the
-// citation, recap and score, rounds saved. Free tier = one fixed
-// 10-question sample; $79 unlocks all 120 with fresh shuffles.
+// Business & Law landing page (v13): CROSS-BRAND CLUSTER (his
+// call, same round on all three platforms) - a compact row sits
+// directly under the header, right-aligned beneath the login
+// button: a small gray "OTHER PREP COURSES WE OFFER" label plus
+// two pills carrying just the course names - "ForemanPrep" in its
+// orange (-> /foremanprep) and "WiremanPrep" in its volt #ceff00
+// (-> wiremanprep.com). Colors are inlined on purpose - the blue
+// blzone variable would repaint them otherwise. Nothing else
+// moved; the header backpill and BlAuthButton stay as they were.
+// v12 notes: the VISITOR row's Exam
+// simulator button goes back to white (his call - blue is for
+// owners only); the owner's full-width Exam simulator door stays
+// blue (#38bdf8, black text). v11 notes: sim button went blue in
+// both places. v10 notes: owner button layout rework
+// (his call). The four owner doors now read: a row of three -
+// Start practice / State packs / Audio study - with the Exam
+// simulator as the single large full-width button underneath.
+// The three top buttons get a smaller inline min-width so they
+// sit three-across on phones instead of wrapping; the simulator
+// row is its own .fp-try div, so its lone button stretches the
+// full width by flexbox.
+// v9 notes: the owner try-row gained its
+// fourth door - Audio study, linking the new B&L audio room at
+// /bl-audio (ten drive-time lessons + the hands-free drill with
+// the state-pack selector). Visitors' sell row is unchanged: the
+// audio room is paid, so it is not pitched as a free try button;
+// the feature grid's "Study with your ears" card already carries
+// the ears claim.
+// v8 notes: the owner row's State packs
+// button now leads to /bl-packs - the packs' own dedicated page
+// (his call) - instead of anchor-jumping into the practice page.
+// And with blstates v3 live, the packs feature card claims the
+// truth: statute packs for ALL 16 B&L states, not just TN/GA/SC.
+// v7 notes: OWNERS STOP GETTING PITCHED
+// (his report - a B&L owner still saw every $79 buy button). The
+// page stays a server component; the sell furniture now sits
+// inside BlOwnerSwap islands (bl-owner-swap v1), which render the
+// sell variant into the server HTML (crawlers and visitors see it
+// unchanged) and swap after one shared access check:
+// - hero "Get Business & Law Prep - $79" button + price note:
+//   GONE for owners;
+// - try-row: visitors keep [Try 10 free questions / Exam
+//   simulator]; owners get THREE doors - [Start practice / Exam
+//   simulator / State packs] (packs deep-links /bl#packs, anchor
+//   added in bl v8);
+// - "Free to try right now" line: GONE for owners;
+// - the whole "What B&L prep costs today" window: GONE for
+//   owners.
+// Also (his call): the sim button label is now "Exam simulator"
+// for everyone - "See your state's exam" wasn't clear.
+// v6 notes: AUDIO is real - Chase ran the
+// 240-file ElevenLabs batch - so the "Study with your ears" card
+// joins the grid. Claims ship only after the thing exists; it
+// exists.
+// v5 notes: the 1:1 State Exam Simulator joined the feature grid
+// and the hero try-row links it - all 16 B&L states, real
+// formats, verified Aug 2026.
+// v4 notes (MERGE FIX). An Aug 26 session
+// shipped its own v3 of this page mounting BlAuthButton (the
+// Log in / Log out pill, blue auth flow); tonight's phase-2 v3
+// was built from an older baseline and overwrote it, knocking the
+// pill off the page. v4 restores the BlAuthButton mount AND keeps
+// phase 2's feature grid (tutor, state-pace timer, TN/GA/SC state
+// packs). Nothing else changed from either lineage.
+// v3 notes (phase 2): the AI tutor and the 2:48 state-pace exam
+// timer went live in the practice room, so the page claims them;
+// audio gets its line once the batch is voiced. v2 notes: both
+// buy buttons link /foremanprep/buy?product=bl. v1 notes below. - the blue sibling of the
+// ForemanPrep front door. Same skeleton as the main landing (hero,
+// stats, open-book strip, features grid, price table, footer) but
+// everything is about the state Business & Law exam, and the whole
+// page sits inside .fp-blzone so every fp- component wears the
+// B&L sky blue instead of safety orange. DELIBERATELY absent (his
+// spec): the email remind-me box - there is no deadline deal on
+// B&L, so there is nothing to remind anyone about. A server
+// component on purpose: no clocks, no access checks, nothing
+// interactive beyond links - so it prerenders whole, carries real
+// metadata for Google, and can never trip the Date.now() rule.
+// The live chat widget appears here via layout.tsx v5's
+// allowlist. Served clean at foremanprep.com/bl-prep (proxy v14).
 
-type Len = 10 | 25 | "all";
-type Sel = BlDomainKey | "all";
+export const metadata: Metadata = {
+  title: "Business & Law Exam Prep - ForemanPrep",
+  description:
+    "Prep for the state Business & Law contractor exam - 120 practice questions across all 10 domains with instant explanations and citations. One-time $79, free 10-question sample.",
+  alternates: { canonical: "https://foremanprep.com/bl-prep" },
+};
 
-const LETTERS = ["A", "B", "C", "D", "E", "F"];
+const STATS = [
+  { n: "120", l: "questions in the bank" },
+  { n: "10", l: "domains covered" },
+  { n: "$79", l: "once - no subscription" },
+  { n: "2nd", l: "exam most states require" },
+];
 
-// Fallback pace if the state list ever comes up empty: Tennessee's
-// 50 questions in 140 minutes = 168 seconds a question.
-const FALLBACK_SECONDS = Math.round((140 * 60) / 50);
+const FEATURES = [
+  {
+    n: "AI tutor, on call 24/7",
+    d: "Miss a question and ask why. The tutor coaches in plain language, anchored to the cited reference - and it knows state rules vary, so it teaches the principle instead of guessing your state's numbers.",
+  },
+  {
+    n: "Every answer explained",
+    d: "Miss one and the why appears instantly - plus a citation pointing at the guide chapter or regulation it lives in.",
+  },
+  {
+    n: "The state-pace exam timer",
+    d: "Put every question on a 2:48 clock - the tightest common state pace (Tennessee's 50 questions in 140 minutes). Train under pressure; sit the real thing with margin.",
+  },
+  {
+    n: "All 10 domains",
+    d: "Licensing and business structures, estimating and bidding, contracts, project management, insurance and bonding, labor law, financial management, taxes, lien law, and jobsite safety.",
+  },
+  {
+    n: "The math, drilled",
+    d: "Markup versus margin, labor burden, overhead recovery, break-even, pay applications with retainage - the calculations B&L exams love, with the arithmetic walked through.",
+  },
+  {
+    n: "Study with your ears",
+    d: "Every question and every explanation voiced - tap Listen and drill hands-free on the drive between jobs.",
+  },
+  {
+    n: "The 1:1 State Exam Simulator",
+    d: "Pick your state and sit its Business & Law exam for real: the exact question count, the exact clock, the exact pass bar - all 16 B&L states, every format verified against the testing bulletins.",
+  },
+  {
+    n: "State packs - your state's numbers",
+    d: "Every one of the 16 B&L states has its own pack: lien deadlines, license thresholds, retainage caps - verified against your state's actual code and drilled as their own rounds.",
+  },
+  {
+    n: "Built for the job site",
+    d: "Runs on any phone. Drill a 10-question round in the truck at lunch - no desk, no classroom.",
+  },
+  {
+    n: "Stacks with the trade course",
+    d: "Same account as the NASCLA GC prep. Own both and everything lives behind one login - or grab the two together in one checkout on the buy page.",
+  },
+];
 
-// Every timed state is a pace option: its real bulletin clock
-// divided across its real question count (blstates v2, verified
-// Aug 2026). Untimed Louisiana and course-based Arizona have no
-// pace to train and stay off the list.
-const PACE_STATES = BL_STATE_PACKS.filter(
-  (p) => p.sim === "timed" && p.minutes !== null && p.simQuestions !== null
-);
+const PRICES = [
+  { l: "Live B&L prep courses", v: "$195 - $295" },
+  { l: "Question banks that expire in 3 months", v: "$79" },
+];
 
-function paceSecondsFor(key: string): number {
-  const p = PACE_STATES.find((s) => s.key === key);
-  if (!p || p.minutes === null || p.simQuestions === null) return FALLBACK_SECONDS;
-  return Math.max(30, Math.round((p.minutes * 60) / p.simQuestions));
-}
-
-function fmtClock(total: number): string {
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const sec = total % 60;
-  const mm = String(m).padStart(2, "0");
-  const ss = String(sec).padStart(2, "0");
-  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
-}
-
-// Small headphone glyph for the Listen pills - inherits the pill
-// color, so it wears the room's blue without any css changes.
-const LISTEN_ICON = (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    height="14"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    width="14"
-  >
-    <path d="M4 14a8 8 0 0 1 16 0" />
-    <rect height="6" rx="2" width="4" x="3" y="14" />
-    <rect height="6" rx="2" width="4" x="17" y="14" />
-  </svg>
-);
-
-type RecapRow = { id: string; q: string; ok: boolean };
-type PickedAnswer = { questionId: string; picked: number };
-
-function CheckMark() {
+export default function BlPrepLandingPage() {
   return (
-    <svg viewBox="0 0 100 100">
-      <circle className="draw c1" cx="50" cy="50" pathLength={100} r="42" />
-      <path className="draw c2" d="M30 52 L45 66 L72 36" pathLength={100} />
-    </svg>
-  );
-}
-
-function XMark() {
-  return (
-    <svg viewBox="0 0 100 100">
-      <path className="draw x1" d="M32 32 L68 68" pathLength={100} />
-      <path className="draw x2" d="M68 32 L32 68" pathLength={100} />
-    </svg>
-  );
-}
-
-export default function BlPracticePage() {
-  const router = useRouter();
-  const [phase, setPhase] = useState<"pick" | "quiz">("pick");
-  const [sel, setSel] = useState<Sel | null>(null);
-  const [roundLen, setRoundLen] = useState<Len | null>(null);
-  const [lenErr, setLenErr] = useState(false);
-  const [domErr, setDomErr] = useState(false);
-  const [access, setAccess] = useState<{ loggedIn: boolean; bl: boolean } | null>(null);
-  const [showGate, setShowGate] = useState(false);
-  const [gateSrc, setGateSrc] = useState<"len" | "timer" | "state">("len");
-  const [timerOn, setTimerOn] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [paceKey, setPaceKey] = useState("tn");
-  const [pendingPack, setPendingPack] = useState<string | null>(null);
-
-  // Deep link from /bl-packs: ?pack=tn queues that state's round.
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const key = params.get("pack");
-      if (key) setPendingPack(key);
-    } catch {
-      // A bad URL never breaks the picker.
-    }
-  }, []);
-
-  // The chosen pace state survives visits - read after mount only,
-  // never during render (the Date.now doctrine applies to storage
-  // reads too: hydration must match the server HTML).
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("fp-bl-pace");
-      if (stored && PACE_STATES.some((s) => s.key === stored)) setPaceKey(stored);
-    } catch {
-      // Storage can be blocked - the Tennessee default is fine.
-    }
-  }, []);
-
-  useEffect(() => {
-    fetch("/foremanprep/api/access")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) setAccess({ loggedIn: Boolean(data.loggedIn), bl: Boolean(data.bl) });
-        else setAccess({ loggedIn: false, bl: false });
-      })
-      .catch(() => setAccess({ loggedIn: false, bl: false }));
-  }, []);
-
-  function pickLen(l: Len) {
-    if (l !== 10 && !access?.bl) {
-      // Free tier: tapping a locked length DESELECTS everything
-      // while the gate shows (his spec) - the tap visibly landed,
-      // nothing paid ever looks selected, and they tap 10 to get
-      // the legal round back.
-      setRoundLen(null);
-      setGateSrc("len");
-      setShowGate(true);
-      return;
-    }
-    setRoundLen(l);
-    setLenErr(false);
-    setShowGate(false);
-  }
-
-  function toggleTimer() {
-    if (!access?.bl) {
-      setGateSrc("timer");
-      setShowGate(true);
-      return;
-    }
-    setTimerOn((t) => !t);
-  }
-
-  function pickPace(key: string) {
-    setPaceKey(key);
-    try {
-      window.localStorage.setItem("fp-bl-pace", key);
-    } catch {
-      // Best effort - the in-session pick still applies.
-    }
-  }
-
-  const pacePack = PACE_STATES.find((s) => s.key === paceKey) ?? null;
-
-  const [qs, setQs] = useState<BlQuestion[] | null>(null);
-  const [roundTag, setRoundTag] = useState("bl");
-  const [activePack, setActivePack] = useState<BlStatePack | null>(null);
-  const [idx, setIdx] = useState(0);
-  const [picked, setPicked] = useState<number | null>(null);
-  const [correct, setCorrect] = useState(0);
-  const [recap, setRecap] = useState<RecapRow[]>([]);
-  const [answers, setAnswers] = useState<PickedAnswer[]>([]);
-  const [done, setDone] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [tutorOpen, setTutorOpen] = useState(false);
-  const [thread, setThread] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
-  const [tutorInput, setTutorInput] = useState("");
-  const [tutorBusy, setTutorBusy] = useState(false);
-  const [tutorErr, setTutorErr] = useState("");
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playingKind, setPlayingKind] = useState<"q" | "e" | null>(null);
-  const [audioDead, setAudioDead] = useState<Record<string, boolean>>({});
-
-  function stopAudio() {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    setPlayingKind(null);
-  }
-
-  // Never let audio outlive the page.
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) audioRef.current.pause();
-    };
-  }, []);
-
-  // Exam timer heartbeat: ticks only while a question is open in
-  // an active round. Pauses during the reveal (explanations are
-  // study time, not exam time) and never runs on pick/results.
-  useEffect(() => {
-    if (phase !== "quiz" || done || timeLeft === null) return;
-    if (picked !== null || timeLeft <= 0) return;
-    const t = setTimeout(() => {
-      setTimeLeft((sLeft) => (sLeft === null ? null : sLeft - 1));
-    }, 1000);
-    return () => clearTimeout(t);
-  }, [phase, done, timeLeft, picked]);
-
-  // Zero on the clock: the question auto-reveals unanswered -
-  // recap marks it wrong, nothing is posted as a pick, and the
-  // student reads the explanation like any other reveal.
-  useEffect(() => {
-    if (phase !== "quiz" || done || timeLeft !== 0) return;
-    if (!qs || picked !== null) return;
-    const question = qs[idx];
-    setPicked(-1);
-    setRecap((r) => [...r, { id: question.id, q: question.q, ok: false }]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, done, timeLeft, picked]);
-
-  function playAudio(kind: "q" | "e", questionId: string) {
-    if (!AUDIO_BASE) return;
-    if (playingKind === kind) {
-      stopAudio();
-      return;
-    }
-    stopAudio();
-    const key = `${kind}-${questionId}`;
-    const a = new Audio(audioUrl(kind, questionId));
-    a.onended = () => setPlayingKind(null);
-    a.onerror = () => {
-      setAudioDead((d) => ({ ...d, [key]: true }));
-      setPlayingKind(null);
-    };
-    audioRef.current = a;
-    a.play().catch(() => {
-      setAudioDead((d) => ({ ...d, [key]: true }));
-      setPlayingKind(null);
-    });
-    setPlayingKind(kind);
-  }
-
-  const [reportOpen, setReportOpen] = useState(false);
-  const [reportText, setReportText] = useState("");
-  const [reportEmail, setReportEmail] = useState("");
-  const [reportPhase, setReportPhase] = useState<"idle" | "sending" | "done" | "error">("idle");
-  const [reportErr, setReportErr] = useState("");
-
-  function resetReport() {
-    setReportOpen(false);
-    setReportText("");
-    setReportPhase("idle");
-    setReportErr("");
-  }
-
-  async function sendReport() {
-    if (!qs || reportPhase === "sending") return;
-    const question = qs[idx];
-    const text = reportText.trim();
-    if (!text) return;
-    setReportPhase("sending");
-    setReportErr("");
-    try {
-      const res = await fetch("/api/support", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "ForemanPrep Question Report",
-          email: reportEmail.trim() || "reports@foremanprep.com",
-          comment:
-            "QUESTION REPORT - " + question.id + "\n\n" +
-            "Q: " + question.q + "\n\n" +
-            "Our answer key: " + question.choices[question.answer] + "\n" +
-            "Our citation: " + question.cite + "\n\n" +
-            "What the student says:\n" + text,
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      if (res.ok) {
-        setReportPhase("done");
-        return;
-      }
-      setReportPhase("error");
-      setReportErr(data?.error ?? "Could not send - please try again.");
-    } catch {
-      setReportPhase("error");
-      setReportErr("Could not send - please try again.");
-    }
-  }
-
-  function resetTutor() {
-    setTutorOpen(false);
-    setThread([]);
-    setTutorInput("");
-    setTutorBusy(false);
-    setTutorErr("");
-  }
-
-  async function askTutor(questionId: string) {
-    const text = tutorInput.trim();
-    if (!text || tutorBusy) return;
-    const nextThread = [...thread, { role: "user" as const, content: text }];
-    setThread(nextThread);
-    setTutorInput("");
-    setTutorErr("");
-    setTutorBusy(true);
-    try {
-      const res = await fetch("/foremanprep/api/tutor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionId, picked, messages: nextThread }),
-      });
-      const data = await res.json().catch(() => null);
-      if (res.ok && data?.reply) {
-        setThread((t) => [...t, { role: "assistant", content: data.reply }]);
-      } else {
-        setTutorErr(data?.error ?? "The tutor is unavailable - try again.");
-      }
-    } catch {
-      setTutorErr("The tutor is unavailable - try again.");
-    } finally {
-      setTutorBusy(false);
-    }
-  }
-
-  function shufflePack(items: BlQuestion[]): BlQuestion[] {
-    const copy = [...items];
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-  }
-
-  function beginRound(set: BlQuestion[], tag: string, pack: BlStatePack | null) {
-    setQs(set);
-    setRoundTag(tag);
-    setActivePack(pack);
-    setTimeLeft(timerOn && access?.bl ? paceSecondsFor(paceKey) : null);
-    setIdx(0);
-    setPicked(null);
-    setCorrect(0);
-    setRecap([]);
-    setAnswers([]);
-    setDone(false);
-    setSaved(false);
-    resetTutor();
-    resetReport();
-    stopAudio();
-    setPhase("quiz");
-  }
-
-  function startStateRound(pack: BlStatePack) {
-    if (!access?.bl) {
-      setGateSrc("state");
-      setShowGate(true);
-      return;
-    }
-    beginRound(shufflePack(pack.questions), "bl-st-" + pack.key, pack);
-  }
-
-  // Fire the queued ?pack= round once the access check has landed
-  // (startStateRound needs to know paid vs free to pick round or
-  // gate). Runs at most once per page load.
-  useEffect(() => {
-    if (access === null || pendingPack === null) return;
-    const pack = BL_PACKS_LIVE.find((p) => p.key === pendingPack) ?? null;
-    setPendingPack(null);
-    if (pack && pack.questions.length > 0) startStateRound(pack);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access, pendingPack]);
-
-  // Tapping a domain SELECTS it (the tile highlights); only the
-  // Start practice button actually begins a round.
-  function pickDomain(key: Sel) {
-    setSel(key);
-    setDomErr(false);
-  }
-
-  function startRound() {
-    if (roundLen === null || sel === null) {
-      setLenErr(roundLen === null);
-      setDomErr(sel === null);
-      return;
-    }
-    let set: BlQuestion[];
-    if (!access?.bl) {
-      // Free tier: always the same fixed sample round, whatever
-      // domain was selected. Rotating draws would leak the whole
-      // bank ten questions at a time.
-      set = buildBlDemoSet();
-    } else {
-      const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
-      set = buildBlPracticeSet(sel === "all" ? "all" : sel, count);
-    }
-    beginRound(set, sel === "all" ? "bl" : "bl-" + sel, null);
-  }
-
-  function backToPicker() {
-    stopAudio();
-    setPhase("pick");
-    setQs(null);
-    setDone(false);
-    setTimeLeft(null);
-  }
-
-  function pick(i: number) {
-    if (!qs || picked !== null) return;
-    const question = qs[idx];
-    const ok = i === question.answer;
-    setPicked(i);
-    if (ok) setCorrect((c) => c + 1);
-    setRecap((r) => [...r, { id: question.id, q: question.q, ok }]);
-    setAnswers((a) => [...a, { questionId: question.id, picked: i }]);
-  }
-
-  function postRound(finalAnswers: PickedAnswer[]) {
-    fetch("/foremanprep/api/attempts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mode: "practice",
-        domain: roundTag,
-        answers: finalAnswers,
-      }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.saved) setSaved(true);
-      })
-      .catch(() => {});
-  }
-
-  function next() {
-    if (!qs) return;
-    if (idx + 1 >= qs.length) {
-      postRound(answers);
-      setDone(true);
-      return;
-    }
-    setIdx(idx + 1);
-    setPicked(null);
-    if (timeLeft !== null) setTimeLeft(paceSecondsFor(paceKey));
-    resetTutor();
-    resetReport();
-    stopAudio();
-  }
-
-  if (phase === "pick") {
-    return (
-      <div className="fq-wrap fp-blzone">
-        <div className="fq-head">
-          <button
-            className="fq-back"
-            onClick={() => router.push("/foremanprep/bl-prep")}
-            type="button"
-          >
-            <span className="fp-wordmark">
-              Business &amp; <span>Law</span>
-            </span>
-          </button>
-        </div>
-        <p className="fq-title">Business &amp; Law</p>
-        <p className="fq-hint">
-          The SECOND exam most NASCLA states require - business
-          management, contracts, liens, payroll, and safety law.{" "}
-          <span className="fq-hint-hl">
-            This is the state-neutral core those exams are built on.
-          </span>
-        </p>
-        <div className="fq-lenrow">
-          <span className="fq-lenlabel">Round length</span>
-          <div className={lenErr ? "fq-lenseg err" : "fq-lenseg"}>
-            <button
-              className={roundLen === 10 ? "on" : ""}
-              onClick={() => pickLen(10)}
-              type="button"
-            >
-              10 questions
-            </button>
-            <button
-              className={roundLen === 25 ? "on" : ""}
-              onClick={() => pickLen(25)}
-              type="button"
-            >
-              25 questions
-            </button>
-            <button
-              className={roundLen === "all" ? "on" : ""}
-              onClick={() => pickLen("all")}
-              type="button"
-            >
-              Full domain
-            </button>
+    <div className="fp-blzone">
+      <div className="fp-wrap">
+        <div className="fp-top" style={{ flexWrap: "wrap", gap: "8px" }}>
+          <div className="fp-brand">
+            Foreman<span>Prep</span>
           </div>
-          {lenErr ? <p className="fq-lenerr">Select a round length first.</p> : null}
-          <div className="fq-timerrow">
-            <span className="fq-lenlabel">Exam timer</span>
-            <button
-              className={timerOn && access?.bl ? "fq-timertoggle on" : "fq-timertoggle"}
-              onClick={toggleTimer}
-              type="button"
-            >
-              <span className="fq-knob" />
-              {timerOn && access?.bl ? "On" : "Off"}
-            </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <Link className="fp-backpill" href="/foremanprep">
+              NASCLA trade exam prep
+            </Link>
+            <BlAuthButton />
           </div>
-          {access?.bl && timerOn ? (
-            <div className="fq-pacerow">
-              <select
-                aria-label="Pick the state whose exam pace to train"
-                className="fq-paceselect"
-                onChange={(e) => pickPace(e.target.value)}
-                value={paceKey}
-              >
-                {PACE_STATES.map((s) => (
-                  <option key={s.key} value={s.key}>
-                    {s.name + " - " + fmtClock(paceSecondsFor(s.key)) + " per question"}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : null}
-          <p className="fq-timernote">
-            {access !== null && !access.bl
-              ? "Comes with Business & Law prep - a per-question clock at your state's real exam pace."
-              : timerOn
-                ? (pacePack ? pacePack.name : "Tennessee") +
-                  "'s pace - " +
-                  String(pacePack && pacePack.simQuestions !== null ? pacePack.simQuestions : 50) +
-                  " questions in " +
-                  String(pacePack && pacePack.minutes !== null ? pacePack.minutes : 140) +
-                  " minutes, " +
-                  fmtClock(paceSecondsFor(paceKey)) +
-                  " a question. Stops while you read explanations."
-                : "Put every question on your state's exam clock - pick the state, train its real pace. Stops while you read explanations."}
-          </p>
-          {access !== null && !access.bl ? (
-            <p className="fp-tryhint">
-              The free round is a fixed 10-question sample. Business &amp;
-              Law prep unlocks all 120 questions with fresh shuffles -
-              $79 once, yours for good.
-            </p>
-          ) : null}
-          {showGate ? (
-            <div className="fp-gate">
-              <p className="fp-gateh">
-                {gateSrc === "timer"
-                  ? "The exam timer comes with Business & Law prep."
-                  : gateSrc === "state"
-                    ? "State packs come with Business & Law prep."
-                    : "Longer rounds come with Business & Law prep."}
-              </p>
-              <p className="fp-gated">
-                Unlock all 120 questions across 10 domains, fresh shuffles
-                every round, the AI tutor on every question, and the
-                state-pace exam timer. One payment, no subscription.
-                Full Access owners: this is a separate add-on, and it
-                stacks onto your account.
-              </p>
-              <Link className="fp-gatebtn" href="/foremanprep/buy?product=bl">
-                Get Business &amp; Law prep - $79
-              </Link>
-            </div>
-          ) : null}
         </div>
-        <button
-          className={sel === "all" ? "fq-all" : "fq-all off"}
-          onClick={() => pickDomain("all")}
-          type="button"
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            flexWrap: "wrap",
+            gap: "8px",
+            marginTop: "8px",
+          }}
         >
-          <span className="fq-sn">All subjects</span>
-          <span className="fq-sw">A mixed round, the way the exam feels</span>
-        </button>
-        {domErr ? <p className="fq-lenerr">Select a subject first.</p> : null}
-        <button className="fq-startbtn" onClick={startRound} type="button">
-          Start practice
-        </button>
-        <span className="fq-lenlabel" style={{ display: "block", margin: "18px 0 8px" }}>
-          Individual subjects
-        </span>
-        <div className="fq-pick">
-          {BL_DOMAINS.map((d) => (
-            <button
-              className={sel === d.key ? "fq-sub sel" : "fq-sub"}
-              key={d.key}
-              onClick={() => pickDomain(d.key)}
-              type="button"
-            >
-              <span className="fq-sn">{d.name}</span>
-              <span className="fq-sw">12 in the core bank</span>
-            </button>
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#777",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Other prep courses we offer
+          </span>
+          <Link
+            href="/foremanprep"
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#f97316",
+              border: "1px solid rgba(249, 115, 22, 0.5)",
+              background: "rgba(249, 115, 22, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ForemanPrep
+          </Link>
+          <Link
+            href="https://wiremanprep.com"
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#ceff00",
+              border: "1px solid rgba(206, 255, 0, 0.5)",
+              background: "rgba(206, 255, 0, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            WiremanPrep
+          </Link>
+        </div>
+
+        <div className="fp-hero">
+          <div className="fp-badge">State Business &amp; Law Contractor Exam</div>
+          <h1 className="fp-h1">
+            The trade exam was half. <span>Finish the license.</span>
+          </h1>
+          <p className="fp-sub">
+            Most NASCLA states make you pass a second exam - Business &amp;
+            Law - before the license is yours. This is the drill room for
+            it: contracts, liens, payroll, insurance, and the money math,
+            explained in plain language.
+          </p>
+          <BlOwnerSwap
+            sell={
+              <>
+                <Link
+                  className="fp-cta"
+                  href="/foremanprep/buy?product=bl"
+                  style={{ textDecoration: "none" }}
+                >
+                  Get Business &amp; Law Prep - $79
+                </Link>
+                <p className="fp-note">
+                  <b>One-time $79.</b> No subscription. B&amp;L courses charge $195
+                  to $295 for less.
+                </p>
+              </>
+            }
+          />
+          <BlOwnerSwap
+            sell={
+              <div className="fp-try">
+                <Link className="fp-try-btn" href="/foremanprep/bl">
+                  Try 10 free questions
+                </Link>
+                <Link className="fp-try-btn ghost" href="/foremanprep/bl-exam">
+                  Exam simulator
+                </Link>
+              </div>
+            }
+            owned={
+              <>
+                <div className="fp-try">
+                  <Link
+                    className="fp-try-btn"
+                    href="/foremanprep/bl"
+                    style={{ minWidth: "96px" }}
+                  >
+                    Start practice
+                  </Link>
+                  <Link
+                    className="fp-try-btn ghost"
+                    href="/foremanprep/bl-packs"
+                    style={{ minWidth: "96px" }}
+                  >
+                    State packs
+                  </Link>
+                  <Link
+                    className="fp-try-btn ghost"
+                    href="/foremanprep/bl-audio"
+                    style={{ minWidth: "96px" }}
+                  >
+                    Audio study
+                  </Link>
+                </div>
+                <div className="fp-try" style={{ margin: "10px 0 8px" }}>
+                  <Link
+                    className="fp-try-btn"
+                    href="/foremanprep/bl-exam"
+                    style={{ background: "#38bdf8", border: "1px solid #38bdf8" }}
+                  >
+                    Exam simulator
+                  </Link>
+                </div>
+              </>
+            }
+          />
+          <BlOwnerSwap
+            sell={<p className="fp-tryhint">Free to try right now - no sign-up needed.</p>}
+          />
+        </div>
+
+        <div className="fp-stats">
+          {STATS.map((s) => (
+            <div className="fp-stat" key={s.l}>
+              <div className="fp-sn">{s.n}</div>
+              <div className="fp-sl">{s.l}</div>
+            </div>
           ))}
         </div>
-        <div className="fp-try" id="packs" style={{ marginTop: "28px" }}>
-          <Link
-            className="fp-try-btn ghost"
-            href="/foremanprep/bl-exam"
-            style={{ minWidth: "96px" }}
-          >
-            Exam simulator
-          </Link>
-          <Link
-            className="fp-try-btn ghost"
-            href="/foremanprep/bl-packs"
-            style={{ minWidth: "96px" }}
-          >
-            State packs
-          </Link>
-          <Link
-            className="fp-try-btn ghost"
-            href="/foremanprep/bl-audio"
-            style={{ minWidth: "96px" }}
-          >
-            Audio study
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
-  if (!qs) {
-    return (
-      <div className="fq-wrap fp-blzone">
-        <p className="fq-load">Loading your questions...</p>
-      </div>
-    );
-  }
-
-  if (done) {
-    const pct = Math.round((correct / qs.length) * 100);
-    const passed = pct >= 75;
-    return (
-      <div className="fq-wrap fp-blzone">
-        <div className="fq-done">
-          <p className="fq-score">
-            {correct}
-            <span> / {qs.length}</span>
+        <div className="fp-strip">
+          <p className="fp-st">Passing the trade exam doesn't finish your license.</p>
+          <p className="fp-sd">
+            In most NASCLA states the board also wants a passing score on
+            its Business &amp; Law exam - a separate test on running the
+            business legally: contracts, mechanics liens, payroll taxes,
+            insurance, bonding, and estimating math. Formats vary by state
+            (Tennessee runs 50 questions in 140 minutes, Georgia 60 in
+            180), but they are all built from the same core body of
+            material. That core is exactly what this course drills.
           </p>
-          <p className="fq-msg">
-            {pct}% - most states set the Business &amp; Law bar between
-            70% and 75%.{" "}
-            {passed ? (
-              <b>You would have cleared the toughest of them today.</b>
-            ) : (
-              <b>Keep drilling - closing that gap is the whole job.</b>
-            )}
-          </p>
-          {saved ? <p className="fq-saved">Saved to your account.</p> : null}
-          <div className="fq-list">
-            {recap.map((r) => (
-              <div className="fq-row" key={r.id}>
-                <span className="fq-icon">
-                  {r.ok ? <CheckMark /> : <XMark />}
-                </span>
-                <p className="fq-rq">{r.q}</p>
-              </div>
-            ))}
-          </div>
-          <button
-            className="fq-again"
-            onClick={() => (activePack ? startStateRound(activePack) : startRound())}
-            type="button"
-          >
-            {access?.bl ? "Go again - fresh shuffle" : "Run the sample again"}
-          </button>
-          <button className="fq-home" onClick={backToPicker} type="button">
-            Pick another domain
-          </button>
         </div>
-      </div>
-    );
-  }
 
-  const question = qs[idx];
-  const revealed = picked !== null;
-  const gotIt = revealed && picked === question.answer;
-
-  function choiceClass(i: number): string {
-    if (!revealed) return "fq-choice";
-    if (i === question.answer) return "fq-choice on-right";
-    if (i === picked) return "fq-choice on-wrong";
-    return "fq-choice dim";
-  }
-
-  return (
-    <div className="fq-wrap fp-blzone">
-      <div className="fq-head">
-        <button className="fq-back" onClick={backToPicker} type="button">
-          Domains
-        </button>
-        <span className="fq-prog">
-          {timeLeft !== null ? (
-            <span className={timeLeft <= 30 ? "fq-clock low" : "fq-clock"}>
-              {fmtClock(timeLeft)}
-            </span>
-          ) : null}
-          Question {idx + 1} / {qs.length}
-        </span>
-      </div>
-
-      <span className="fq-chip">
-        {(activePack ? activePack.name + " - " : "") +
-          (getBlDomain(question.domain)?.name ?? question.domain)}
-      </span>
-      <p className="fq-q">{question.q}</p>
-
-      {AUDIO_BASE ? (
-        <div className="fq-listenrow">
-          {!audioDead[`q-${question.id}`] ? (
-            <button
-              className={playingKind === "q" ? "fq-listen playing" : "fq-listen"}
-              onClick={() => playAudio("q", question.id)}
-              type="button"
-            >
-              {LISTEN_ICON}
-              {playingKind === "q" ? "Stop" : "Listen"}
-            </button>
-          ) : null}
-          {picked !== null && !audioDead[`e-${question.id}`] ? (
-            <button
-              className={playingKind === "e" ? "fq-listen playing" : "fq-listen"}
-              onClick={() => playAudio("e", question.id)}
-              type="button"
-            >
-              {LISTEN_ICON}
-              {playingKind === "e" ? "Stop" : "Hear the explanation"}
-            </button>
-          ) : null}
+        <h2 className="fp-h2">What you get</h2>
+        <div className="fp-grid">
+          {FEATURES.map((f) => (
+            <div className="fp-card" key={f.n}>
+              <p className="fp-cn">
+                <span>+</span>
+                {f.n}
+              </p>
+              <p className="fp-cd">{f.d}</p>
+            </div>
+          ))}
         </div>
-      ) : null}
 
-      <div className="fq-choices">
-        {question.choices.map((c, i) => (
-          <button
-            className={choiceClass(i)}
-            disabled={revealed}
-            key={c}
-            onClick={() => pick(i)}
-            type="button"
-          >
-            <span className="fq-letter">{LETTERS[i]}</span>
-            <span className="fq-ct">{c}</span>
-            {revealed && i === picked ? (
-              <span className="fq-icon">{gotIt ? <CheckMark /> : <XMark />}</span>
-            ) : null}
-          </button>
-        ))}
-      </div>
-
-      {revealed ? (
-        <div className="fq-reveal">
-          {picked === -1 ? (
-            <p className="fq-timeout">
-              {"Out of time on this one - that was " +
-                (pacePack ? pacePack.name : "your state") +
-                "'s exam pace. Read the why, then keep rolling."}
-            </p>
-          ) : null}
-          <p className="fq-explain">{question.explain}</p>
-          <p className="fq-cite">Where it lives: {question.cite}</p>
-          {tutorOpen ? (
-            <div className="fq-tutor">
-              <div className="fq-thread">
-                {thread.length === 0 && !tutorBusy ? (
-                  <div className="fq-msg tut">
-                    Ask me anything about this one - why the answer is right,
-                    what a term means, or how it plays out on a real job.
-                  </div>
-                ) : null}
-                {thread.map((m, i) => (
-                  <div
-                    className={m.role === "user" ? "fq-msg me" : "fq-msg tut"}
-                    key={`${m.role}-${i}`}
-                  >
-                    {m.content}
+        <BlOwnerSwap
+          sell={
+            <>
+              <h2 className="fp-h2">What B&amp;L prep costs today</h2>
+              <div className="fp-price">
+                {PRICES.map((p) => (
+                  <div className="fp-prow" key={p.l}>
+                    <div className="fp-pl">{p.l}</div>
+                    <div className="fp-pv">{p.v}</div>
                   </div>
                 ))}
-                {tutorBusy ? <div className="fq-msg tut thinking">Thinking...</div> : null}
-              </div>
-              {tutorErr ? <p className="fq-terr">{tutorErr}</p> : null}
-              <div className="fq-ask">
-                <input
-                  className="fq-askin"
-                  disabled={tutorBusy}
-                  onChange={(e) => setTutorInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") askTutor(question.id);
-                  }}
-                  placeholder="Ask the tutor..."
-                  value={tutorInput}
-                />
-                <button
-                  className="fq-asksend"
-                  disabled={tutorBusy || tutorInput.trim().length === 0}
-                  onClick={() => askTutor(question.id)}
-                  type="button"
+                <div className="fp-prow fp-ours">
+                  <div className="fp-pl">ForemanPrep B&amp;L - full bank, never expires</div>
+                  <div className="fp-pv">$79</div>
+                </div>
+                <Link
+                  className="fp-cta"
+                  href="/foremanprep/buy?product=bl"
+                  style={{ display: "block", marginTop: "14px", textAlign: "center", textDecoration: "none" }}
                 >
-                  Send
-                </button>
+                  Get Business &amp; Law Prep
+                </Link>
               </div>
-            </div>
-          ) : (
-            <button
-              className="fq-asktut"
-              onClick={() => setTutorOpen(true)}
-              type="button"
-            >
-              Ask the tutor why
-            </button>
-          )}
-          <button className="fq-next" onClick={next} type="button">
-            {idx + 1 >= qs.length ? "See my score" : "Next question"}
-          </button>
-          {reportPhase === "done" ? (
-            <p className="fq-repok">Thanks - your report went straight to our review desk.</p>
-          ) : reportOpen ? (
-            <div className="fq-repbox">
-              <p className="fq-reph">What looks wrong with this question?</p>
-              <textarea
-                className="fq-repta"
-                disabled={reportPhase === "sending"}
-                maxLength={1200}
-                onChange={(e) => setReportText(e.target.value)}
-                placeholder="Tell us what's off. A book and page number that contradicts us is gold."
-                value={reportText}
-              />
-              <input
-                className="fq-repin"
-                disabled={reportPhase === "sending"}
-                inputMode="email"
-                maxLength={200}
-                onChange={(e) => setReportEmail(e.target.value)}
-                placeholder="Your email (optional - only if you want a reply)"
-                type="email"
-                value={reportEmail}
-              />
-              {reportPhase === "error" ? <p className="fq-reperr">{reportErr}</p> : null}
-              <div className="fq-repacts">
-                <button
-                  className="fq-repsend"
-                  disabled={reportPhase === "sending" || reportText.trim().length === 0}
-                  onClick={sendReport}
-                  type="button"
-                >
-                  {reportPhase === "sending" ? "Sending..." : "Send report"}
-                </button>
-                <button
-                  className="fq-repcancel"
-                  disabled={reportPhase === "sending"}
-                  onClick={() => setReportOpen(false)}
-                  type="button"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button className="fq-repbtn" onClick={() => setReportOpen(true)} type="button">
-              Report this question
-            </button>
-          )}
+            </>
+          }
+        />
+
+        <div className="fp-foot">
+          <div className="fp-links">
+            <Link className="fp-link" href="/foremanprep/bl">
+              Free B&amp;L sample
+            </Link>
+            <Link className="fp-link" href="/foremanprep">
+              NASCLA trade prep
+            </Link>
+            <Link className="fp-link" href="/foremanprep/states">
+              State guides
+            </Link>
+            <Link className="fp-link" href="/foremanprep/terms">
+              Terms
+            </Link>
+            <Link className="fp-link" href="/foremanprep/privacy">
+              Privacy
+            </Link>
+          </div>
+          <p className="fp-legal">
+            ForemanPrep is a product of AskEvo LLC, Boise, Idaho. Not
+            affiliated with or endorsed by NASCLA or PSI. NASCLA is a
+            registered trademark of the National Association of State
+            Contractors Licensing Agencies. Questions: support@askevo.ai
+          </p>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v14 - Start button
-// above the subject grid + Individual subjects header)
+// END OF FILE - app/foremanprep/bl-prep/page.tsx (v13 -
+// cross-brand badge cluster under the login button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
