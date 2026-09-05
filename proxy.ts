@@ -173,6 +173,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // v20: the cross-domain SSO bridge is public plumbing. Its arrive
+  // door runs precisely when the visitor has NO cookie on this
+  // domain yet - bouncing it through the guest-auth dance below
+  // would strip the pass and mint a pointless guest row. The route
+  // does its own signature/expiry checks.
+  if (pathname.startsWith("/api/sso")) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/adreel")) {
     if (!ADREEL_ENABLED) {
       return NextResponse.rewrite(new URL("/adreel-disabled", request.url));
@@ -267,7 +276,8 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v19 - wiremanprep /guides + /states)
+// END OF FILE - proxy.ts (v20 - /api/sso early pass for the
+// cross-domain login handoff)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
