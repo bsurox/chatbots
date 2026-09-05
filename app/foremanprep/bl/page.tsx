@@ -19,7 +19,12 @@ import {
   type BlStatePack,
 } from "@/lib/foremanprep/blstates";
 
-// Business & Law practice room (v12): "All domains" button now
+// Business & Law practice room (v13): THE TUTOR SEES YOUR PICK -
+// the tutor call now sends which choice was selected (or -1 for a
+// timeout), so with tutor route v5 a bare "why" gets a real
+// answer about YOUR answer instead of "which option do you mean?"
+// (his catch, fixed on all three rooms).
+// v12 notes: "All domains" button now
 // reads "All subjects" (matches GC practice wording). v11 notes:
 // two changes, his call.
 // 1. THE DELIBERATE PICKER (ships in GC practice v21 too):
@@ -420,7 +425,7 @@ export default function BlPracticePage() {
       const res = await fetch("/foremanprep/api/tutor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionId, messages: nextThread }),
+        body: JSON.stringify({ questionId, picked, messages: nextThread }),
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.reply) {
@@ -976,7 +981,7 @@ export default function BlPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/bl/page.tsx (v12 - All subjects
-// label; deliberate picker + white door buttons)
+// END OF FILE - app/foremanprep/bl/page.tsx (v13 - the tutor
+// call carries the student's picked answer)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
