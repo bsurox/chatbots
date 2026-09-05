@@ -4,7 +4,21 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v29. TWO CHANGES (his call):
+// ForemanPrep landing page v30. CROSS-BRAND CLUSTER (his call,
+// same round on all three platforms): the mid-hero "We prep the
+// Business & Law exam too" badge is GONE. In its place a compact
+// row sits directly under the header, right-aligned beneath the
+// login button: a small gray "OTHER PREP COURSES WE OFFER" label
+// plus two pills carrying just the course names - "Business & Law"
+// in its sky blue (-> /foremanprep/bl-prep) and "WiremanPrep" in
+// its volt #ceff00 (-> wiremanprep.com). Everyone sees the
+// cluster, owners included; the B&L owner's full-width gradient
+// door under the try-buttons stays exactly as v29 built it.
+// Colors are inlined on purpose - each pill wears its own brand.
+// ALSO GONE (his call, same round): the "Early bird pricing ends
+// Sept 7" chip in the header. The earlyBird state itself stays -
+// it still drives the $99 price copy and the reminder box below.
+// v29 notes. TWO CHANGES (his call):
 // 1. A B&L owner's door is now a FULL-WIDTH button directly under
 //    the three try-buttons: "Open your Business & Law prep",
 //    wearing an orange-to-blue gradient (#f97316 -> #38bdf8, same
@@ -265,9 +279,6 @@ export default function ForemanPrepPage() {
           Foreman<span>Prep</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {paid || !earlyBird ? null : (
-            <div className="fp-chip">Early bird pricing ends Sept 7</div>
-          )}
           {loggedIn ? (
             <button
               disabled={signingOut}
@@ -310,6 +321,62 @@ export default function ForemanPrepPage() {
             </Link>
           )}
         </div>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          flexWrap: "wrap",
+          gap: "8px",
+          marginTop: "8px",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#777",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Other prep courses we offer
+        </span>
+        <Link
+          href="/foremanprep/bl-prep"
+          style={{
+            fontSize: "12.5px",
+            fontWeight: 700,
+            color: "#38bdf8",
+            border: "1px solid rgba(56, 189, 248, 0.5)",
+            background: "rgba(56, 189, 248, 0.1)",
+            borderRadius: "999px",
+            padding: "5px 12px",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Business &amp; Law
+        </Link>
+        <Link
+          href="https://wiremanprep.com"
+          style={{
+            fontSize: "12.5px",
+            fontWeight: 700,
+            color: "#ceff00",
+            border: "1px solid rgba(206, 255, 0, 0.5)",
+            background: "rgba(206, 255, 0, 0.1)",
+            borderRadius: "999px",
+            padding: "5px 12px",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          WiremanPrep
+        </Link>
       </div>
 
       <div className="fp-hero">
@@ -380,15 +447,6 @@ export default function ForemanPrepPage() {
         ) : null}
         {paid ? null : (
           <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
-        )}
-        {blOwned ? null : (
-          <Link
-            className="fp-blbadge"
-            href="/foremanprep/bl-prep"
-            style={{ marginTop: "14px" }}
-          >
-            We prep the Business &amp; Law exam too
-          </Link>
         )}
       </div>
 
@@ -589,8 +647,8 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v29 - owner's B&L door
-// is a full-width orange-to-blue gradient button under the
-// try-buttons; "Exam simulator" label)
+// END OF FILE - app/foremanprep/page.tsx (v30 - cross-brand
+// badge cluster under the login button; mid-hero B&L badge and
+// header early-bird chip removed; owner gradient door unchanged)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
