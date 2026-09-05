@@ -4,7 +4,13 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// ForemanPrep landing page v30. CROSS-BRAND CLUSTER (his call,
+// ForemanPrep landing page v31. SSO JUMP LINK: the WiremanPrep
+// badge pill now routes through /api/sso?to=wm instead of linking
+// wiremanprep.com directly - logged-in users land on WiremanPrep
+// already logged in; visitors get the same plain redirect as
+// before. The B&L pill stays a direct link (same domain, cookie
+// already shared). prefetch off so hovering never mints a pass.
+// v30 notes. CROSS-BRAND CLUSTER (his call,
 // same round on all three platforms): the mid-hero "We prep the
 // Business & Law exam too" badge is GONE. In its place a compact
 // row sits directly under the header, right-aligned beneath the
@@ -362,7 +368,8 @@ export default function ForemanPrepPage() {
           Business &amp; Law
         </Link>
         <Link
-          href="https://wiremanprep.com"
+          href="/api/sso?to=wm"
+          prefetch={false}
           style={{
             fontSize: "12.5px",
             fontWeight: 700,
@@ -647,8 +654,7 @@ export default function ForemanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/page.tsx (v30 - cross-brand
-// badge cluster under the login button; mid-hero B&L badge and
-// header early-bird chip removed; owner gradient door unchanged)
+// END OF FILE - app/foremanprep/page.tsx (v31 - WiremanPrep
+// badge routes through the /api/sso login handoff)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
