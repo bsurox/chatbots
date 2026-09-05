@@ -1,99 +1,47 @@
-// FILE: app/foremanprep/practice/page.tsx
+// FILE: app/wiremanprep/practice/page.tsx
 "use client";
-import "./practice.css";
+import "../../foremanprep/practice/practice.css";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  buildDemoSet,
-  buildPracticeSet,
-  DOMAINS,
-  getDomain,
-  type DomainKey,
-  type ForemanQuestion,
-} from "@/lib/foremanprep/questions";
-import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
+  buildWmDemoSet,
+  buildWmPracticeSet,
+  getWmDomain,
+  WM_DOMAINS,
+  type WmDomainKey,
+  type WmQuestion,
+} from "@/lib/wiremanprep/questions";
 
-// Practice player v21: the DELIBERATE PICKER (his call, and the
-// same change ships in the B&L room). Nothing is selected when
-// the page opens - no round length, no subject, free tier
-// included (v20's free 10-question pre-select is gone on his
-// spec: "nothing selected by default"). Tapping a subject now
-// SELECTS it - the tile lights up (.fq-sub.sel / the All button
-// sheds its .off) instead of dropping you straight into a round -
-// and the new full-width Start practice button under the grid is
-// the only way in. Starting with a missing pick shows the red
-// "Select a round length first." / "Select a subject first."
-// lines. A free tap on a locked length now DESELECTS the length
-// entirely while the gate shows (matching the B&L room), since
-// nothing arrives pre-selected anymore. Styles: practice.css v14.
-// v20 notes: free users opened the picker with 10 pre-selected
-// (superseded above).
-// v19 notes: the gate card now names what got tapped.
-// A free user tapping the exam timer sees "The exam timer is a
-// Full Access feature."; tapping 25/Full subject keeps "Longer
-// rounds are a Full Access feature." - one gateSrc state set by
-// whichever door was knocked, and the gate body now lists the
-// timer among the perks.
-// v18 notes: the EXAM TIMER, per question. A pick-
-// screen toggle (default OFF, paid-only - free taps open the
-// gate card) puts each question on the real exam's pace: 330
-// minutes / 115 questions = 2 min 52 sec. The clock starts when
-// a question appears, STOPS the moment an answer is clicked (so
-// explanations and the tutor cost nothing), and resets fresh on
-// Next. If it hits zero the question auto-reveals unanswered -
-// marked wrong in the recap, not posted as a pick - and the
-// student reads the why like any other reveal. Styles:
-// practice.css v13. Also: the gate card's buy button now reads
-// the clock like landing v16, so it stops saying $99 after the
-// Sept 7 flip (clock read in an effect - Next 16 prerender rule).
-// v17 notes: leaving a round for the subjects list now
-// kills the audio instantly - backToPicker() stops any playing
-// Listen / explanation clip before switching screens (his catch:
-// audio kept talking over the picker). Next-question and unmount
-// already stopped it; the picker door was the one leak.
-// v16 notes: every answer choice wears an A/B/C/D
-// letter chip, same look as the exam simulator - the chip rides
-// at the left of the choice and tints green/red with the reveal
-// (styles in practice.css v12). Nicer and more authentic.
-// v15: the Listen pills wear a small headphone
-// glyph (inline SVG, inherits the pill's orange) so the audio
-// door is obvious at a glance - his ask for an ear/listen symbol
-// in the badge. v14: Listen pills. Every question can speak -
-// one pill reads the question and choices, and after the reveal a
-// second reads the answer and explanation (pre-generated
-// ElevenLabs audio from blob storage; see audio-config). Buttons
-// self-hide if AUDIO_BASE is unset or a file is missing, audio
-// stops on next question / new round / leaving the page.
-// v13: every revealed question grows a quiet
-// "Report this question" door at the bottom of the card - a
-// student who has contradicting book info can send it (plus an
-// optional reply email) straight to support through the existing
-// /api/support mail pipe, with the question id, our answer key,
-// and our citation attached automatically for the review desk.
-// v12: on the free tier, tapping a locked length
-// (25/Full) now DESELECTS the 10-question highlight while the gate
-// card shows - nothing paid can ever appear selected; tapping 10
-// re-highlights it. v11: the ForemanPrep back button wears the
-// two-tone wordmark (.fp-wordmark - Foreman white, Prep orange).
-// v10 notes (paywall): the free tier serves ONE fixed
-// 10-question sample round (buildDemoSet) - same questions every
-// time, so the free door never leaks the bank. Paid rounds draw
-// shuffled sets from all 156. 25 and Full subject are Full Access
-// perks; tapping them unpaid opens the gate card with the $99 button.
-// v8 notes: the round-length picker starts
-// UNSELECTED - picking a subject before a length blocks with a red
-// "Select a round length first." error, the same pattern as the
-// Spotmint format picker. Labels read "10 questions / 25 questions /
-// Full subject", and the exam-weight text wears ForemanPrep orange.
+// WiremanPrep practice room (v2 - THE TUTOR SEES YOUR PICK: the
+// tutor call now sends which choice was selected (or -1 for a
+// timeout), so with tutor route v3 a bare "why" gets a real
+// answer about YOUR answer - his catch.)
+// v1 notes: the yellow sibling of the GC
+// practice player (v21 lineage), sharing practice.css; the
+// layout's .wm-zone recolors every fq- component by itself.
+// Carried over: the deliberate picker (nothing selected on open,
+// taps highlight, Start practice launches, red error lines on a
+// missing pick), free tier = ONE fixed 10-question sample
+// (buildWmDemoSet - a rotating draw would leak the bank), paid
+// rounds shuffle from all 153, A-D letter chips, the per-question
+// exam timer, the tutor thread, and the report-question door.
+// Sized for THIS exam: the timer runs 2 min 42 sec per question
+// (270 minutes / 100 questions), the pass bar reads 75%, and the
+// subject tiles show each domain's real weight out of 100.
+// Deliberately absent in v1: audio (no Listen pills - no voiced
+// bank yet). The tutor and attempts endpoints
+// (/wiremanprep/api/tutor, /wiremanprep/api/attempts) ship later
+// in the chain; until they exist the tutor shows its normal
+// "unavailable" line and rounds simply don't record - both safe.
+// Gate card is $149 FLAT - no clock, no early-bird machinery.
+// No Date.now()/Math.random() in render (Next 16 prerender rule).
 
 type Len = 10 | 25 | "all";
 
-// Real exam pace: 115 scored questions in 330 minutes = 172
-// seconds a question, rounded.
-const QUESTION_SECONDS = Math.round((330 * 60) / 115);
-// Sept 7, 2026, 11:59 PM MDT (UTC-6) = Sept 8, 05:59 UTC.
-const PRICE_FLIP_MS = Date.UTC(2026, 8, 8, 5, 59, 0);
+// Real exam pace: 100 scored questions in 270 minutes = 162
+// seconds a question.
+const QUESTION_SECONDS = Math.round((270 * 60) / 100);
 
 function fmtClock(total: number): string {
   const h = Math.floor(total / 3600);
@@ -103,29 +51,10 @@ function fmtClock(total: number): string {
   const ss = String(sec).padStart(2, "0");
   return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
 }
-type Sel = DomainKey | "all";
+type Sel = WmDomainKey | "all";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
-// Small headphone glyph for the Listen pills - inherits the pill
-// color, so it stays brand-orange without any css changes.
-const LISTEN_ICON = (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    height="14"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    width="14"
-  >
-    <path d="M4 14a8 8 0 0 1 16 0" />
-    <rect height="6" rx="2" width="4" x="3" y="14" />
-    <rect height="6" rx="2" width="4" x="17" y="14" />
-  </svg>
-);
 type RecapRow = { id: string; q: string; ok: boolean };
 type PickedAnswer = { questionId: string; picked: number };
 
@@ -147,7 +76,7 @@ function XMark() {
   );
 }
 
-export default function PracticePage() {
+export default function WiremanPracticePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"pick" | "quiz">("pick");
   const [sel, setSel] = useState<Sel | null>(null);
@@ -159,14 +88,9 @@ export default function PracticePage() {
   const [timerOn, setTimerOn] = useState(false);
   const [gateSrc, setGateSrc] = useState<"len" | "timer">("len");
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [earlyBird, setEarlyBird] = useState(true);
 
   useEffect(() => {
-    if (Date.now() >= PRICE_FLIP_MS) setEarlyBird(false);
-  }, []);
-
-  useEffect(() => {
-    fetch("/foremanprep/api/access")
+    fetch("/wiremanprep/api/access")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) setAccess({ loggedIn: Boolean(data.loggedIn), paid: Boolean(data.paid) });
@@ -198,7 +122,7 @@ export default function PracticePage() {
     }
     setTimerOn((t) => !t);
   }
-  const [qs, setQs] = useState<ForemanQuestion[] | null>(null);
+  const [qs, setQs] = useState<WmQuestion[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
@@ -211,25 +135,6 @@ export default function PracticePage() {
   const [tutorInput, setTutorInput] = useState("");
   const [tutorBusy, setTutorBusy] = useState(false);
   const [tutorErr, setTutorErr] = useState("");
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playingKind, setPlayingKind] = useState<"q" | "e" | null>(null);
-  const [audioDead, setAudioDead] = useState<Record<string, boolean>>({});
-
-  function stopAudio() {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    setPlayingKind(null);
-  }
-
-  // Never let audio outlive the page.
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) audioRef.current.pause();
-    };
-  }, []);
 
   // Exam timer heartbeat: ticks only while a question is open in
   // an active round. Pauses during the reveal (explanations are
@@ -254,28 +159,6 @@ export default function PracticePage() {
     setRecap((r) => [...r, { id: question.id, q: question.q, ok: false }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, done, timeLeft, picked]);
-
-  function playAudio(kind: "q" | "e", questionId: string) {
-    if (!AUDIO_BASE) return;
-    if (playingKind === kind) {
-      stopAudio();
-      return;
-    }
-    stopAudio();
-    const key = `${kind}-${questionId}`;
-    const a = new Audio(audioUrl(kind, questionId));
-    a.onended = () => setPlayingKind(null);
-    a.onerror = () => {
-      setAudioDead((d) => ({ ...d, [key]: true }));
-      setPlayingKind(null);
-    };
-    audioRef.current = a;
-    a.play().catch(() => {
-      setAudioDead((d) => ({ ...d, [key]: true }));
-      setPlayingKind(null);
-    });
-    setPlayingKind(kind);
-  }
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportText, setReportText] = useState("");
@@ -302,8 +185,8 @@ export default function PracticePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: "ForemanPrep Question Report",
-          email: reportEmail.trim() || "reports@foremanprep.com",
+          name: "WiremanPrep Question Report",
+          email: reportEmail.trim() || "reports@wiremanprep.com",
           comment:
             "QUESTION REPORT - " + question.id + "\n\n" +
             "Q: " + question.q + "\n\n" +
@@ -342,10 +225,10 @@ export default function PracticePage() {
     setTutorErr("");
     setTutorBusy(true);
     try {
-      const res = await fetch("/foremanprep/api/tutor", {
+      const res = await fetch("/wiremanprep/api/tutor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionId, messages: nextThread }),
+        body: JSON.stringify({ questionId, picked, messages: nextThread }),
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.reply) {
@@ -373,15 +256,15 @@ export default function PracticePage() {
       setDomErr(sel === null);
       return;
     }
-    let set: ForemanQuestion[];
+    let set: WmQuestion[];
     if (!access?.paid) {
       // Free tier: always the same fixed sample round, whatever
       // subject was selected. Rotating draws would leak the whole
       // bank ten questions at a time.
-      set = buildDemoSet();
+      set = buildWmDemoSet();
     } else {
       const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
-      set = buildPracticeSet(sel === "all" ? "all" : sel, count);
+      set = buildWmPracticeSet(sel === "all" ? "all" : sel, count);
     }
     setQs(set);
     setTimeLeft(timerOn && access?.paid ? QUESTION_SECONDS : null);
@@ -394,12 +277,10 @@ export default function PracticePage() {
     setSaved(false);
     resetTutor();
     resetReport();
-    stopAudio();
     setPhase("quiz");
   }
 
   function backToPicker() {
-    stopAudio();
     setPhase("pick");
     setQs(null);
     setDone(false);
@@ -417,7 +298,7 @@ export default function PracticePage() {
   }
 
   function postRound(finalAnswers: PickedAnswer[]) {
-    fetch("/foremanprep/api/attempts", {
+    fetch("/wiremanprep/api/attempts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -445,7 +326,6 @@ export default function PracticePage() {
     if (timeLeft !== null) setTimeLeft(QUESTION_SECONDS);
     resetTutor();
     resetReport();
-    stopAudio();
   }
 
   if (phase === "pick") {
@@ -454,11 +334,11 @@ export default function PracticePage() {
         <div className="fq-head">
           <button
             className="fq-back"
-            onClick={() => router.push("/foremanprep")}
+            onClick={() => router.push("/wiremanprep")}
             type="button"
           >
             <span className="fp-wordmark">
-              Foreman<span>Prep</span>
+              Wireman<span>Prep</span>
             </span>
           </button>
         </div>
@@ -466,7 +346,7 @@ export default function PracticePage() {
         <p className="fq-hint">
           Drill one subject or run the whole mix.{" "}
           <span className="fq-hint-hl">
-            The counts are each subject's real weight on the 115-question
+            The counts are each subject's real weight on the 100-question
             exam.
           </span>
         </p>
@@ -511,13 +391,13 @@ export default function PracticePage() {
             {access !== null && !access.paid
               ? "Full Access feature - the 1:1 exam-pace clock comes with the full course."
               : timerOn
-                ? "Scaled 1:1 to the real exam - 2 min 52 sec per question, the same pace as 115 questions in 5.5 hours. The clock stops when you answer and resets fresh on every question."
-                : "Put every question on the real exam clock - 2 min 52 sec each, scaled 1:1 to the actual test. Stops while you read explanations."}
+                ? "Scaled 1:1 to the real exam - 2 min 42 sec per question, the same pace as 100 questions in 4.5 hours. The clock stops when you answer and resets fresh on every question."
+                : "Put every question on the real exam clock - 2 min 42 sec each, scaled 1:1 to the actual test. Stops while you read explanations."}
           </p>
           {access !== null && !access.paid ? (
             <p className="fp-tryhint">
               The free round is a fixed 10-question sample. Full Access
-              unlocks all 156 questions with fresh shuffles every round.
+              unlocks all 153 questions with fresh shuffles every round.
             </p>
           ) : null}
           {showGate ? (
@@ -529,11 +409,11 @@ export default function PracticePage() {
               </p>
               <p className="fp-gated">
                 Unlock the 1:1 exam-pace timer, 25-question rounds,
-                full-subject runs, and the complete 115-question exam
+                full-subject runs, and the complete 100-question exam
                 simulator - one payment, no subscription.
               </p>
-              <Link className="fp-gatebtn" href="/foremanprep/buy">
-                {earlyBird ? "Get Full Access - $99 early bird" : "Get Full Access - $149"}
+              <Link className="fp-gatebtn" href="/wiremanprep/buy">
+                Get Full Access - $149
               </Link>
             </div>
           ) : null}
@@ -547,7 +427,7 @@ export default function PracticePage() {
           <span className="fq-sw">A mixed round, the way the exam feels</span>
         </button>
         <div className="fq-pick">
-          {DOMAINS.map((d) => (
+          {WM_DOMAINS.map((d) => (
             <button
               className={sel === d.key ? "fq-sub sel" : "fq-sub"}
               key={d.key}
@@ -555,7 +435,7 @@ export default function PracticePage() {
               type="button"
             >
               <span className="fq-sn">{d.name}</span>
-              <span className="fq-sw">{d.examCount} of 115 on the exam</span>
+              <span className="fq-sw">{d.examCount} of 100 on the exam</span>
             </button>
           ))}
         </div>
@@ -577,7 +457,7 @@ export default function PracticePage() {
 
   if (done) {
     const pct = Math.round((correct / qs.length) * 100);
-    const passed = pct >= 70;
+    const passed = pct >= 75;
     return (
       <div className="fq-wrap">
         <div className="fq-done">
@@ -586,7 +466,7 @@ export default function PracticePage() {
             <span> / {qs.length}</span>
           </p>
           <p className="fq-msg">
-            {pct}% - the real exam bar is 70%.{" "}
+            {pct}% - the real exam bar is 75%.{" "}
             {passed ? (
               <b>You would have cleared it today.</b>
             ) : (
@@ -642,33 +522,8 @@ export default function PracticePage() {
         </span>
       </div>
 
-      <span className="fq-chip">{getDomain(question.domain)?.name ?? question.domain}</span>
+      <span className="fq-chip">{getWmDomain(question.domain)?.name ?? question.domain}</span>
       <p className="fq-q">{question.q}</p>
-
-      {AUDIO_BASE ? (
-        <div className="fq-listenrow">
-          {!audioDead[`q-${question.id}`] ? (
-            <button
-              className={playingKind === "q" ? "fq-listen playing" : "fq-listen"}
-              onClick={() => playAudio("q", question.id)}
-              type="button"
-            >
-              {LISTEN_ICON}
-              {playingKind === "q" ? "Stop" : "Listen"}
-            </button>
-          ) : null}
-          {picked !== null && !audioDead[`e-${question.id}`] ? (
-            <button
-              className={playingKind === "e" ? "fq-listen playing" : "fq-listen"}
-              onClick={() => playAudio("e", question.id)}
-              type="button"
-            >
-              {LISTEN_ICON}
-              {playingKind === "e" ? "Stop" : "Hear the explanation"}
-            </button>
-          ) : null}
-        </div>
-      ) : null}
 
       <div className="fq-choices">
         {question.choices.map((c, i) => (
@@ -691,7 +546,7 @@ export default function PracticePage() {
       {revealed ? (
         <div className="fq-reveal">
           {picked === -1 ? (
-            <p className="fq-timeout">Out of time on this one - 2:52 is the real pace. Read the why, then keep rolling.</p>
+            <p className="fq-timeout">Out of time on this one - 2:42 is the real pace. Read the why, then keep rolling.</p>
           ) : null}
           <p className="fq-explain">{question.explain}</p>
           <p className="fq-cite">Where it lives: {question.cite}</p>
@@ -701,7 +556,7 @@ export default function PracticePage() {
                 {thread.length === 0 && !tutorBusy ? (
                   <div className="fq-msg tut">
                     Ask me anything about this one - why the answer is right, what a
-                    term means, or where to find it in the books.
+                    term means, or where to find it in the Code.
                   </div>
                 ) : null}
                 {thread.map((m, i) => (
@@ -758,7 +613,7 @@ export default function PracticePage() {
                 disabled={reportPhase === "sending"}
                 maxLength={1200}
                 onChange={(e) => setReportText(e.target.value)}
-                placeholder="Tell us what's off. A book and page number that contradicts us is gold."
+                placeholder="Tell us what's off. A Code section that contradicts us is gold."
                 value={reportText}
               />
               <input
@@ -803,7 +658,7 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v21 - the
-// deliberate picker: select, highlight, Start practice)
+// END OF FILE - app/wiremanprep/practice/page.tsx (v2 - the
+// tutor call carries the student's picked answer)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
