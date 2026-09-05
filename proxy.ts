@@ -146,7 +146,9 @@ export async function proxy(request: NextRequest) {
     if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
       return NextResponse.rewrite(new URL("/wiremanprep/privacy", request.url));
     }
-    const cleanWm = ["/buy", "/practice", "/exam", "/thanks"];
+    // v19: /guides and /states join the clean URLs - the SEO
+    // library and the 17 board pages.
+    const cleanWm = ["/buy", "/practice", "/exam", "/thanks", "/guides", "/states"];
     if (cleanWm.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       return NextResponse.rewrite(
         new URL("/wiremanprep" + pathname, request.url)
@@ -265,7 +267,7 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v18 - wiremanprep.com host island)
+// END OF FILE - proxy.ts (v19 - wiremanprep /guides + /states)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
