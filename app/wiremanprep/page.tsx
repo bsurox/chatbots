@@ -4,18 +4,19 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// WiremanPrep landing page (v3) - two changes in one (the v2
-// footer-links chip was never committed, so this carries both):
-// 1. CROSS-BRAND BADGES (his ask, placement my call): two small
-//    pill badges at the bottom of the hero - the proven spot the
-//    ForemanPrep landing uses for its own cross-sell badge. One
-//    wears ForemanPrep orange and links foremanprep.com, one
-//    wears B&L sky blue and links the B&L landing page. Colors
-//    are inlined because the volt zone would otherwise repaint
-//    them - each badge wears its own brand on purpose.
-// 2. FOOTER SEO LINKS (from the uncommitted v2): "Exam guides"
-//    and "State guides" join the footer - Google's crawl doors
-//    from the front page into the 24-page SEO library.
+// WiremanPrep landing page (v4 - BADGES MOVED UP TOP, his call:
+// the v3 hero-bottom badges are gone. In their place, a compact
+// cluster sits directly under the header row, right-aligned so it
+// hangs beneath the login button: a small gray "OTHER PREP COURSES
+// WE OFFER" label plus two pill badges carrying just the course
+// names - "ForemanPrep" in its orange, "Business & Law" in its sky
+// blue. Same cluster ships on the ForemanPrep and B&L landings
+// this round so every platform matches. Colors are inlined on
+// purpose - the volt zone variable would repaint them otherwise.)
+// v3 notes: hero-bottom cross-brand badges (superseded) + FOOTER
+// SEO LINKS: "Exam guides" and "State guides" in the footer -
+// Google's crawl doors from the front page into the 24-page SEO
+// library (those stay).
 // v1 notes: the front door of
 // wiremanprep.com, modeled on the ForemanPrep landing but with
 // the differences the products earned:
@@ -137,6 +138,62 @@ export default function WiremanPrepPage() {
         </div>
       </div>
 
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          flexWrap: "wrap",
+          gap: "8px",
+          marginTop: "8px",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#777",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Other prep courses we offer
+        </span>
+        <Link
+          href="https://foremanprep.com"
+          style={{
+            fontSize: "12.5px",
+            fontWeight: 700,
+            color: "#f97316",
+            border: "1px solid rgba(249, 115, 22, 0.5)",
+            background: "rgba(249, 115, 22, 0.1)",
+            borderRadius: "999px",
+            padding: "5px 12px",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          ForemanPrep
+        </Link>
+        <Link
+          href="https://foremanprep.com/bl-prep"
+          style={{
+            fontSize: "12.5px",
+            fontWeight: 700,
+            color: "#38bdf8",
+            border: "1px solid rgba(56, 189, 248, 0.5)",
+            background: "rgba(56, 189, 248, 0.1)",
+            borderRadius: "999px",
+            padding: "5px 12px",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Business &amp; Law
+        </Link>
+      </div>
+
       <div className="fp-hero">
         <div className="fp-badge">NASCLA Electrical Contractor Exam - Master/Unlimited</div>
         <h1 className="fp-h1">
@@ -173,40 +230,6 @@ export default function WiremanPrepPage() {
         {paid ? null : (
           <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
         )}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "14px" }}>
-          <Link
-            href="https://foremanprep.com"
-            style={{
-              display: "inline-block",
-              fontSize: "12.5px",
-              fontWeight: 700,
-              color: "#f97316",
-              border: "1px solid rgba(249, 115, 22, 0.5)",
-              background: "rgba(249, 115, 22, 0.1)",
-              borderRadius: "999px",
-              padding: "6px 13px",
-              textDecoration: "none",
-            }}
-          >
-            We prep the NASCLA GC exam too
-          </Link>
-          <Link
-            href="https://foremanprep.com/bl-prep"
-            style={{
-              display: "inline-block",
-              fontSize: "12.5px",
-              fontWeight: 700,
-              color: "#38bdf8",
-              border: "1px solid rgba(56, 189, 248, 0.5)",
-              background: "rgba(56, 189, 248, 0.1)",
-              borderRadius: "999px",
-              padding: "6px 13px",
-              textDecoration: "none",
-            }}
-          >
-            Business &amp; Law prep too
-          </Link>
-        </div>
       </div>
 
       <div className="fp-stats">
@@ -286,7 +309,7 @@ export default function WiremanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/page.tsx (v3 - cross-brand
-// badges to ForemanPrep + B&L, footer SEO links)
+// END OF FILE - app/wiremanprep/page.tsx (v4 - cross-brand
+// badge cluster moved up under the login button)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
