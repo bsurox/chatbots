@@ -13,7 +13,11 @@ import {
   type WmQuestion,
 } from "@/lib/wiremanprep/questions";
 
-// WiremanPrep practice room (v1) - the yellow sibling of the GC
+// WiremanPrep practice room (v2 - THE TUTOR SEES YOUR PICK: the
+// tutor call now sends which choice was selected (or -1 for a
+// timeout), so with tutor route v3 a bare "why" gets a real
+// answer about YOUR answer - his catch.)
+// v1 notes: the yellow sibling of the GC
 // practice player (v21 lineage), sharing practice.css; the
 // layout's .wm-zone recolors every fq- component by itself.
 // Carried over: the deliberate picker (nothing selected on open,
@@ -224,7 +228,7 @@ export default function WiremanPracticePage() {
       const res = await fetch("/wiremanprep/api/tutor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionId, messages: nextThread }),
+        body: JSON.stringify({ questionId, picked, messages: nextThread }),
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.reply) {
@@ -654,8 +658,7 @@ export default function WiremanPracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/practice/page.tsx (v1 - yellow
-// practice room: deliberate picker, 2:42 exam timer, tutor,
-// report door; no audio yet)
+// END OF FILE - app/wiremanprep/practice/page.tsx (v2 - the
+// tutor call carries the student's picked answer)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
