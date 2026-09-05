@@ -4,7 +4,15 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// WiremanPrep landing page (v5 - SSO JUMP LINKS: the two badge
+// WiremanPrep landing page (v6 - BADGE WORDING + CLUSTER DRESS,
+// his final calls: the orange pill reads "NASCLA GC prep" instead
+// of ForemanPrep - short but obvious to someone who has never
+// heard the brand name; hovering any pill spells out the full
+// exam via a title tooltip. The "OTHER PREP COURSES WE OFFER"
+// label turns white and sits on its own line ABOVE the pills, and
+// the whole cluster is nudged up with breathing room below so it
+// no longer touches the gray exam badge at the top of the hero.)
+// v5 notes - SSO JUMP LINKS: the two badge
 // pills now route through /api/sso?to=fp|bl instead of linking
 // the sister domain directly. Logged-in owners get silently
 // walked across and land already logged in; visitors and guests
@@ -147,11 +155,11 @@ export default function WiremanPrepPage() {
       <div
         style={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          flexWrap: "wrap",
-          gap: "8px",
-          marginTop: "8px",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: "6px",
+          marginTop: "4px",
+          marginBottom: "6px",
         }}
       >
         <span
@@ -160,46 +168,57 @@ export default function WiremanPrepPage() {
             fontWeight: 700,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: "#777",
+            color: "#fff",
             whiteSpace: "nowrap",
           }}
         >
           Other prep courses we offer
         </span>
-        <Link
-          href="/api/sso?to=fp"
-          prefetch={false}
+        <div
           style={{
-            fontSize: "12.5px",
-            fontWeight: 700,
-            color: "#f97316",
-            border: "1px solid rgba(249, 115, 22, 0.5)",
-            background: "rgba(249, 115, 22, 0.1)",
-            borderRadius: "999px",
-            padding: "5px 12px",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+            gap: "8px",
           }}
         >
-          ForemanPrep
-        </Link>
-        <Link
-          href="/api/sso?to=bl"
-          prefetch={false}
-          style={{
-            fontSize: "12.5px",
-            fontWeight: 700,
-            color: "#38bdf8",
-            border: "1px solid rgba(56, 189, 248, 0.5)",
-            background: "rgba(56, 189, 248, 0.1)",
-            borderRadius: "999px",
-            padding: "5px 12px",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Business &amp; Law
-        </Link>
+          <Link
+            href="/api/sso?to=fp"
+            prefetch={false}
+            title="ForemanPrep - NASCLA Commercial General Building Contractor exam prep"
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#f97316",
+              border: "1px solid rgba(249, 115, 22, 0.5)",
+              background: "rgba(249, 115, 22, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            NASCLA GC prep
+          </Link>
+          <Link
+            href="/api/sso?to=bl"
+            prefetch={false}
+            title="State Business & Law contractor exam prep"
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              color: "#38bdf8",
+              border: "1px solid rgba(56, 189, 248, 0.5)",
+              background: "rgba(56, 189, 248, 0.1)",
+              borderRadius: "999px",
+              padding: "5px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Business &amp; Law
+          </Link>
+        </div>
       </div>
 
       <div className="fp-hero">
@@ -317,7 +336,7 @@ export default function WiremanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/page.tsx (v5 - badge pills
-// route through the /api/sso login handoff)
+// END OF FILE - app/wiremanprep/page.tsx (v6 - NASCLA GC prep
+// wording, hover titles, white label above the pills)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
