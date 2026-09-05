@@ -4,7 +4,13 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// WiremanPrep landing page (v1) - the front door of
+// WiremanPrep landing page (v2): the footer gains the "Exam
+// guides" and "State guides" links - the crawl doors from the
+// front page into the SEO library (/guides hub + 5 articles,
+// /states hub + 17 board pages). Same doctrine as the ForemanPrep
+// footer: Google and visitors both need a path in from the home
+// page. Nothing else changed.
+// v1 notes: the front door of
 // wiremanprep.com, modeled on the ForemanPrep landing but with
 // the differences the products earned:
 // - PRICE IS $149 FLAT. No early-bird mechanics, no clock, no
@@ -213,6 +219,12 @@ export default function WiremanPrepPage() {
 
       <div className="fp-foot">
         <div className="fp-links">
+          <Link className="fp-link" href="/wiremanprep/guides">
+            Exam guides
+          </Link>
+          <Link className="fp-link" href="/wiremanprep/states">
+            State guides
+          </Link>
           <Link className="fp-link" href="/wiremanprep/terms">
             Terms
           </Link>
@@ -234,7 +246,7 @@ export default function WiremanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/page.tsx (v1 - landing: $149
-// flat, verified 17-board claim, no guarantee claimed yet)
+// END OF FILE - app/wiremanprep/page.tsx (v2 - footer links to
+// the guides and state SEO libraries)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
