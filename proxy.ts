@@ -148,7 +148,19 @@ export async function proxy(request: NextRequest) {
     }
     // v19: /guides and /states join the clean URLs - the SEO
     // library and the 17 board pages.
-    const cleanWm = ["/buy", "/practice", "/exam", "/thanks", "/guides", "/states"];
+    // v21: the Journeyman and Residential rooms get clean doors.
+    const cleanWm = [
+      "/buy",
+      "/practice",
+      "/exam",
+      "/thanks",
+      "/guides",
+      "/states",
+      "/journeyman",
+      "/journeyman-exam",
+      "/residential",
+      "/residential-exam",
+    ];
     if (cleanWm.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       return NextResponse.rewrite(
         new URL("/wiremanprep" + pathname, request.url)
@@ -276,8 +288,8 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v20 - /api/sso early pass for the
-// cross-domain login handoff)
+// END OF FILE - proxy.ts (v21 - clean URLs for the Journeyman
+// and Residential rooms on wiremanprep.com)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
