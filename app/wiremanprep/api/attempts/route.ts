@@ -7,9 +7,18 @@ import {
   recordForemanAnswer,
   startForemanAttempt,
 } from "@/lib/db/foreman";
+import { getWjQuestion } from "@/lib/wiremanprep/jquestions";
 import { getWmQuestion } from "@/lib/wiremanprep/questions";
+import { getWrQuestion } from "@/lib/wiremanprep/rquestions";
 
-// WiremanPrep round recording (v1) - the electrical sibling of the
+// WiremanPrep round recording (v2 - ALL THREE BANKS: wm-, wj-
+// and wr- ids each re-grade against their own bank, and every
+// stored domain wears its family prefix ("wm-gc", "wj-wp",
+// "wr-gb", ...), so Master, Journeyman and Residential readiness
+// stats stay fully separate from each other AND from GC/B&L. The
+// round's family is derived server-side from the graded ids -
+// the client cannot mislabel a round.)
+// (v1) - the electrical sibling of the
 // ForemanPrep attempts route, riding the SAME database tables
 // (foreman_attempts / foreman_answers, zero SQL changes). Records
 // a finished practice round or exam for signed-in, non-guest
@@ -18,13 +27,14 @@ import { getWmQuestion } from "@/lib/wiremanprep/questions";
 // polluted by a buggy or dishonest client. Anonymous visitors get
 // {saved: false} and lose nothing - practice stays public,
 // progress-saving is the account perk.
-// Separation doctrine (same as B&L's bl- prefix): only wm- ids
-// grade here, and every stored domain wears a wm- prefix
-// ("wm-gc", "wm-th", ...), so electrical accuracy never mixes
-// into the GC or B&L readiness stats and theirs never mix into
-// ours.
-
 type RawAnswer = { questionId?: unknown; picked?: unknown };
+
+function resolveWmFamily(id: string) {
+  if (id.startsWith("wm-")) return { prefix: "wm", q: getWmQuestion(id) };
+  if (id.startsWith("wj-")) return { prefix: "wj", q: getWjQuestion(id) };
+  if (id.startsWith("wr-")) return { prefix: "wr", q: getWrQuestion(id) };
+  return null;
+}
 
 export async function POST(request: Request) {
   try {
@@ -38,7 +48,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const mode = body?.mode === "exam" ? "exam" : "practice";
     const rawDomain = typeof body?.domain === "string" ? body.domain : null;
-    const domain = rawDomain ? "wm-" + rawDomain : null;
     const raw: RawAnswer[] = Array.isArray(body?.answers) ? body.answers : [];
     if (raw.length === 0 || raw.length > 130) {
       return Response.json({ error: "Bad round." }, { status: 400 });
@@ -58,16 +67,16 @@ export async function POST(request: Request) {
       if (typeof a?.questionId !== "string" || typeof a?.picked !== "number") {
         continue;
       }
-      if (!a.questionId.startsWith("wm-")) continue;
       if (seen.has(a.questionId)) continue;
-      const q = getWmQuestion(a.questionId);
-      if (!q) continue;
+      const fam = resolveWmFamily(a.questionId);
+      if (!fam || !fam.q) continue;
+      const q = fam.q;
       const picked = Math.trunc(a.picked);
       if (picked < 0 || picked >= q.choices.length) continue;
       seen.add(a.questionId);
       verified.push({
         questionId: q.id,
-        domain: "wm-" + q.domain,
+        domain: fam.prefix + "-" + q.domain,
         picked,
         isCorrect: picked === q.answer,
       });
@@ -75,6 +84,11 @@ export async function POST(request: Request) {
     if (verified.length === 0) {
       return Response.json({ error: "Bad round." }, { status: 400 });
     }
+
+    // The round's family comes from what actually graded, never
+    // from anything the client claims.
+    const roundPrefix = verified[0].domain.slice(0, 2);
+    const domain = rawDomain ? roundPrefix + "-" + rawDomain : null;
 
     const correct = verified.filter((v) => v.isCorrect).length;
     const attemptId = await startForemanAttempt({ userId, mode, domain });
@@ -96,7 +110,8 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/api/attempts/route.ts (v1 -
-// wm- ids re-graded server-side, wm- prefixed stat domains)
+// END OF FILE - app/wiremanprep/api/attempts/route.ts (v2 -
+// wm-/wj-/wr- ids each grade against their own bank; family-
+// prefixed stat domains keep all three products separate)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
