@@ -42,6 +42,13 @@ import { db } from "./queries";
 // GC access (the old plan !== "bl" test would have; no such rows
 // exist yet, so nothing changes for real users). grantForemanAccess
 // takes product "wm" and merges it into whatever is owned.
+// v5 - the JOURNEYMAN and RESIDENTIAL electrical add-ons join the
+// same set, still no schema change: "+wj" and "+wr" suffix parts
+// (standalone "wj" / "wr" also decode). A wj- or wr-only row
+// grants nothing else - not GC, not B&L, not the Master product.
+// grantForemanAccess takes products "wj" and "wr" and merges
+// exactly like the rest; every value that exists in the table
+// today decodes exactly as it did under v4.
 
 export const foremanAccess = pgTable("foreman_access", {
   userId: uuid("user_id").primaryKey(),
@@ -99,16 +106,18 @@ async function getAccessRow(userId: string): Promise<ForemanAccess | null> {
 // The plan column stays a single text value; these two functions
 // are the only places that know how to read and write it.
 
-type Owned = { gc: boolean; bl: boolean; wm: boolean };
+type Owned = { gc: boolean; bl: boolean; wm: boolean; wj: boolean; wr: boolean };
 
 function decodePlan(plan: string): Owned {
-  const owned: Owned = { gc: false, bl: false, wm: false };
+  const owned: Owned = { gc: false, bl: false, wm: false, wj: false, wr: false };
   for (const part of plan.split("+")) {
     if (part === "bl") owned.bl = true;
     else if (part === "bundle") {
       owned.gc = true;
       owned.bl = true;
     } else if (part === "wm") owned.wm = true;
+    else if (part === "wj") owned.wj = true;
+    else if (part === "wr") owned.wr = true;
     else owned.gc = true; // "full" and any legacy value = GC access
   }
   return owned;
@@ -120,8 +129,11 @@ function encodePlan(owned: Owned): string {
   else if (owned.bl) base = "bl";
   else if (owned.gc) base = "full";
   else base = "";
-  if (owned.wm) return base ? base + "+wm" : "wm";
-  return base || "full";
+  const parts = base ? [base] : [];
+  if (owned.wm) parts.push("wm");
+  if (owned.wj) parts.push("wj");
+  if (owned.wr) parts.push("wr");
+  return parts.length > 0 ? parts.join("+") : "full";
 }
 
 // GC exam product (Full Access). "full", "bundle", their +wm
@@ -146,10 +158,24 @@ export async function hasWiremanAccess(userId: string): Promise<boolean> {
   return decodePlan(row.plan).wm;
 }
 
+// WiremanPrep Journeyman add-on.
+export async function hasWiremanJourneymanAccess(userId: string): Promise<boolean> {
+  const row = await getAccessRow(userId);
+  if (!row) return false;
+  return decodePlan(row.plan).wj;
+}
+
+// WiremanPrep Residential add-on.
+export async function hasWiremanResidentialAccess(userId: string): Promise<boolean> {
+  const row = await getAccessRow(userId);
+  if (!row) return false;
+  return decodePlan(row.plan).wr;
+}
+
 export async function grantForemanAccess(params: {
   userId: string;
   source?: string;
-  product?: "gc" | "bl" | "bundle" | "wm";
+  product?: "gc" | "bl" | "bundle" | "wm" | "wj" | "wr";
   expiresAt?: Date | null;
 }) {
   const source = params.source ?? "stripe";
@@ -162,7 +188,7 @@ export async function grantForemanAccess(params: {
   const existing = await getAccessRow(params.userId);
   const owned: Owned = existing
     ? decodePlan(existing.plan)
-    : { gc: false, bl: false, wm: false };
+    : { gc: false, bl: false, wm: false, wj: false, wr: false };
   if (product === "bundle") {
     owned.gc = true;
     owned.bl = true;
@@ -170,8 +196,12 @@ export async function grantForemanAccess(params: {
     owned.gc = true;
   } else if (product === "bl") {
     owned.bl = true;
-  } else {
+  } else if (product === "wm") {
     owned.wm = true;
+  } else if (product === "wj") {
+    owned.wj = true;
+  } else {
+    owned.wr = true;
   }
   const plan = encodePlan(owned);
 
@@ -269,7 +299,7 @@ export async function getForemanDomainStats(userId: string): Promise<DomainStat[
 }
 
 // ============================================================
-// END OF FILE - lib/db/foreman.ts (v4 - WiremanPrep ownership
-// joins the plan column as a decoded set; +wm suffix, no SQL)
+// END OF FILE - lib/db/foreman.ts (v5 - Journeyman + Residential
+// join the ownership set; +wj / +wr suffixes, still no SQL)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
