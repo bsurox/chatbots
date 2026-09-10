@@ -12,12 +12,25 @@ import { WM_STATES } from "@/lib/wiremanprep/states";
 // SEO library: /guides + the five articles, /states + the 17
 // board pages - 28 URLs total, compiled from the same data files
 // the pages render from, so a new guide or state joins the
-// sitemap by itself on the next deploy.
+// sitemap by itself on the next deploy. v3 adds the Journeyman
+// and Residential rooms (/journeyman, /journeyman-exam,
+// /residential, /residential-exam) - 32 URLs total.
 
 const BASE = "https://wiremanprep.com";
 
 export function GET(): Response {
-  const staticPaths = ["/", "/practice", "/exam", "/buy", "/guides", "/states"];
+  const staticPaths = [
+    "/",
+    "/practice",
+    "/exam",
+    "/buy",
+    "/guides",
+    "/states",
+    "/journeyman",
+    "/journeyman-exam",
+    "/residential",
+    "/residential-exam",
+  ];
   const urls = [
     ...staticPaths.map((p) => BASE + (p === "/" ? "" : p)),
     ...WM_GUIDES.map((g) => `${BASE}/guides/${g.slug}`),
@@ -40,8 +53,8 @@ export function GET(): Response {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/wiremanprep/sitemap.xml/route.ts (v2 -
-// + guides and state pages, 28 URLs)
+// END OF FILE - app/wiremanprep/sitemap.xml/route.ts (v3 -
+// + Journeyman and Residential rooms, 32 URLs)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
