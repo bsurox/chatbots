@@ -26,6 +26,11 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 // discipline and lands as product "wm" (lib/db/foreman.ts v4
 // merges it into whatever the account already owns - "full+wm",
 // "bundle+wm", or plain "wm").
+// v7: WiremanPrep now sells three levels. Checkout v2 adds the
+// wmProduct metadata key ("wm" | "wj" | "wr"); an absent or
+// unknown value means "wm", so any session created before this
+// deploy still grants the Master product. lib/db/foreman.ts v5
+// merges wj/wr into the plan set exactly like everything else.
 
 async function claimSession(sessionId: string, userId: string, credits: number): Promise<boolean> {
   const res = await db.execute(sql`INSERT INTO stripe_events (session_id, user_id, credits) VALUES (${sessionId}, ${userId}, ${credits}) ON CONFLICT (session_id) DO NOTHING RETURNING session_id`);
@@ -56,6 +61,9 @@ export async function POST(request: Request) {
     const isForemanBl = session.metadata?.foremanprep_bl === "1";
     const isBundle = session.metadata?.foremanprep_bundle === "1";
     const isWireman = session.metadata?.wiremanprep === "1";
+    const wmMeta = session.metadata?.wmProduct;
+    const wmProduct: "wm" | "wj" | "wr" =
+      wmMeta === "wj" || wmMeta === "wr" ? wmMeta : "wm";
     const credits = Number(session.metadata?.credits ?? 0);
 
     if (userId && (isForemanPrep || isForemanBl || isBundle || isWireman) && session.payment_status === "paid") {
@@ -70,7 +78,7 @@ export async function POST(request: Request) {
             userId,
             source: "stripe",
             product: isWireman
-              ? "wm"
+              ? wmProduct
               : isBundle
                 ? "bundle"
                 : isForemanBl
@@ -103,7 +111,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/webhook/route.ts (v6 - WiremanPrep
-// purchases grant product "wm" through the same claim discipline)
+// END OF FILE - app/(chat)/api/webhook/route.ts (v7 - wmProduct
+// metadata picks wm/wj/wr; absent still means the Master grant)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
