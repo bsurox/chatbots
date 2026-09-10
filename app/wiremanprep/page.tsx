@@ -4,7 +4,15 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// WiremanPrep landing page (v6 - BADGE WORDING + CLUSTER DRESS,
+// WiremanPrep landing page (v7 - LEVEL PICKER: a compact
+// "Testing at a different level?" strip sits at the bottom of
+// the hero with two ghost doors into the new Journeyman ($99)
+// and Residential ($79) rooms - both free to try. The hero badge
+// already scopes this page to Master/Unlimited, so the strip is
+// the router for the other two audiences without stealing the
+// Master CTA. Inline-styled like the badge cluster so no css
+// file changes ride along.)
+// (v6 - BADGE WORDING + CLUSTER DRESS,
 // his final calls: the orange pill reads "NASCLA GC prep" instead
 // of ForemanPrep - short but obvious to someone who has never
 // heard the brand name; hovering any pill spells out the full
@@ -257,6 +265,41 @@ export default function WiremanPrepPage() {
         {paid ? null : (
           <p className="fp-tryhint">Free to try right now - no sign-up needed.</p>
         )}
+        <div
+          style={{
+            marginTop: "18px",
+            padding: "12px 14px",
+            border: "1px solid #333",
+            borderRadius: "12px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#9ca3af",
+            }}
+          >
+            Testing at a different level?
+          </span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <Link className="fp-try-btn ghost" href="/wiremanprep/journeyman">
+              Journeyman prep - $99
+            </Link>
+            <Link className="fp-try-btn ghost" href="/wiremanprep/residential">
+              Residential prep - $79
+            </Link>
+          </div>
+          <span style={{ fontSize: "12px", color: "#9ca3af" }}>
+            Same NASCLA program, different exams - your state board decides
+            which one you need. Both free to try, 10 questions, no sign-up.
+          </span>
+        </div>
       </div>
 
       <div className="fp-stats">
@@ -336,7 +379,7 @@ export default function WiremanPrepPage() {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/page.tsx (v6 - NASCLA GC prep
-// wording, hover titles, white label above the pills)
+// END OF FILE - app/wiremanprep/page.tsx (v7 - hero level
+// picker: Journeyman $99 and Residential $79 doors)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
