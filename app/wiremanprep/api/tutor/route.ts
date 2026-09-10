@@ -4,10 +4,25 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { auth } from "@/app/(auth)/auth";
 import { guestRegex } from "@/lib/constants";
-import { hasWiremanAccess } from "@/lib/db/foreman";
+import {
+  hasWiremanAccess,
+  hasWiremanJourneymanAccess,
+  hasWiremanResidentialAccess,
+} from "@/lib/db/foreman";
+import { getWjQuestion } from "@/lib/wiremanprep/jquestions";
 import { getWmQuestion } from "@/lib/wiremanprep/questions";
+import { getWrQuestion } from "@/lib/wiremanprep/rquestions";
 
-// WiremanPrep tutor (v3 - THE TUTOR SEES YOUR PICK: the practice
+// WiremanPrep tutor (v4 - ALL THREE BANKS: wm- ids resolve from
+// the Master bank, wj- from the Journeyman bank, wr- from the
+// Residential bank - the 10th-lesson "Unknown question" bug
+// cannot recur here because the lookup tries all three
+// namespaces. The paid tier is per-product: a Journeyman owner
+// gets the 25/day allowance on wj- questions, and the persona
+// names the exam that question belongs to. The 25/day pool is
+// SHARED per account across all three electrical products, like
+// the FP tutor shares GC+B&L.)
+// (v3 - THE TUTOR SEES YOUR PICK: the practice
 // page now sends which choice the student selected, and the
 // system prompt tells the model "the student answered B, which is
 // wrong" before it reads their message - so a bare "why" gets a
@@ -72,10 +87,21 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const qid = typeof body?.questionId === "string" ? body.questionId : "";
-    const q = getWmQuestion(qid);
+    const q = getWmQuestion(qid) ?? getWjQuestion(qid) ?? getWrQuestion(qid);
     if (!q) {
       return Response.json({ error: "Unknown question." }, { status: 400 });
     }
+    const family: "wm" | "wj" | "wr" = qid.startsWith("wj-")
+      ? "wj"
+      : qid.startsWith("wr-")
+        ? "wr"
+        : "wm";
+    const examName =
+      family === "wj"
+        ? "NASCLA Journeyman Electricians exam"
+        : family === "wr"
+          ? "NASCLA Residential Electrical Contractor exam"
+          : "NASCLA Master/Unlimited Electrical Contractor exam";
     const picked = typeof body?.picked === "number" ? Math.trunc(body.picked) : null;
     const pickedLine =
       picked !== null && picked >= 0 && picked < q.choices.length
@@ -93,7 +119,14 @@ export async function POST(request: Request) {
     const userId = session?.user?.id;
     const email = session?.user?.email ?? "";
     const realUser = Boolean(userId) && !guestRegex.test(email);
-    const paid = realUser && userId ? await hasWiremanAccess(userId) : false;
+    const paid =
+      realUser && userId
+        ? family === "wj"
+          ? await hasWiremanJourneymanAccess(userId)
+          : family === "wr"
+            ? await hasWiremanResidentialAccess(userId)
+            : await hasWiremanAccess(userId)
+        : false;
 
     if (paid && userId) {
       if (isCapped(`u:${userId}`, PAID_DAILY_CAP)) {
@@ -108,7 +141,7 @@ export async function POST(request: Request) {
         return Response.json(
           {
             error:
-              "That's the free tutor limit for today. Full Access includes 25 tutor messages a day.",
+              "That's the free tutor limit for today. The full course includes 25 tutor messages a day.",
           },
           { status: 429 }
         );
@@ -130,7 +163,7 @@ export async function POST(request: Request) {
     }
 
     const system = [
-      "You are the WiremanPrep tutor: a plain-spoken master-electrician coach helping a working electrician pass the NASCLA Master/Unlimited Electrical Contractor exam.",
+      `You are the WiremanPrep tutor: a plain-spoken master-electrician coach helping a working electrician pass the ${examName}.`,
       "The student is looking at this practice question:",
       `QUESTION: ${q.q}`,
       `CHOICES: ${q.choices.map((c, i) => `${"ABCD"[i]}) ${c}`).join(" | ")}`,
@@ -163,7 +196,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/wiremanprep/api/tutor/route.ts (v3 - the
-// tutor knows which choice the student picked)
+// END OF FILE - app/wiremanprep/api/tutor/route.ts (v4 - serves
+// all three banks; per-product paid tier; exam-aware persona)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
