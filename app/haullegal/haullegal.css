@@ -1,6 +1,8 @@
 /* FILE: app/haullegal/haullegal.css */
 
-/* HaulLegal wardrobe (v1 - CLEARED GREEN). HaulLegal is the fourth
+/* HaulLegal wardrobe (v2 - guide pages: the shared guides.css CTA
+   card carries one hardcoded orange border; caught below in green.)
+   v1 notes - CLEARED GREEN. HaulLegal is the fourth
    brand on the shared ForemanPrep wardrobe: pages import
    app/foremanprep/foremanprep.css and wrap themselves in .hl-zone,
    which swaps the brand variables to cleared green (#22c55e) so
@@ -25,6 +27,7 @@
 .hl-zone .fp-gate { border-color: rgba(34, 197, 94, 0.45); }
 .hl-zone .fp-signup { border-color: rgba(34, 197, 94, 0.4); }
 .hl-zone .fp-stat:focus { outline-color: #22c55e; }
+.hl-zone .fg-cta { border-color: rgba(34, 197, 94, 0.45); }
 
 /* ---- Walkthrough (the step list) ------------------------------ */
 .hl-phase { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fp); margin: 30px 0 10px; }
@@ -84,9 +87,9 @@
 }
 
 /* -----------------------------------------------------------
-   END OF FILE - app/haullegal/haullegal.css (v1 - CLEARED GREEN
-   #22c55e variable swap, catch rules, hl- walkthrough + calendar
-   family)
+   END OF FILE - app/haullegal/haullegal.css (v2 - guides CTA
+   catch; CLEARED GREEN #22c55e variable swap, catch rules, hl-
+   walkthrough + calendar family)
    If you can see these lines after pasting, the whole file
    made it. Safe to commit.
    ----------------------------------------------------------- */
