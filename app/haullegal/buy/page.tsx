@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// The HaulLegal storefront (v2 - THE FREE MONTH IS IN THE CARD, his
+// The HaulLegal storefront (v3 - his spec: the "Includes your first
+// 30 days of Stay Legal free" line moves out of the bullet list and
+// sits as a green chip right beside the $249, wrapping under it on
+// narrow phones; the price-tag line no longer repeats it.)
+// v2 notes - THE FREE MONTH IS IN THE CARD, his
 // spec: the walkthrough card now says outright that it includes the
 // first 30 days of Stay Legal, then $39 a month until canceled, and
 // the fine print under the button repeats it. Checkout v2 charges
@@ -25,7 +29,6 @@ type Access = { loggedIn: boolean; paid: boolean; sub: boolean };
 type Product = "walkthrough" | "staylegal";
 
 const WALK_FEATURES = [
-  "Includes your first 30 days of Stay Legal free - the deadline calendar with email reminders",
   "All 23 steps, in order, from forming the business to your first paid load",
   "The real government fee beside every step - USDOT $0, authority $300, UCR $46",
   "Motus walkthrough: Login.gov, the phone ID check, what every Pending status means",
@@ -125,14 +128,18 @@ export default function HaulLegalBuyPage() {
           happens, at the real government prices - built for the Motus
           system FMCSA switched to in May 2026.
         </p>
-        <div className="fp-pricebig">
+        <div className="fp-pricebig" style={{ flexWrap: "wrap", rowGap: "8px" }}>
           <span className="fp-pricenow">$249</span>
+          <span className="fp-chip" style={{ whiteSpace: "normal", lineHeight: 1.4 }}>
+            Includes your first 30 days of Stay Legal free - the deadline
+            calendar with email reminders
+          </span>
         </div>
         <p className="fp-pricetag">
-          One-time payment, plus your first month of Stay Legal free (then
-          $39 a month, cancel any time). Filing services charge $300 to $995
-          to do these same clicks for you - and since Motus, you still have
-          to do the ID check yourself.
+          One-time payment. After the free month, Stay Legal is $39 a month
+          - cancel any time. Filing services charge $300 to $995 to do these
+          same clicks for you - and since Motus, you still have to do the ID
+          check yourself.
         </p>
         <div className="fp-feats">
           {WALK_FEATURES.map((f) => (
@@ -245,9 +252,9 @@ export default function HaulLegalBuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/buy/page.tsx (v2 - walkthrough card
-// carries the free first month + auto-renew fine print; Stay Legal
-// alone card; auth doors; owned states)
+// END OF FILE - app/haullegal/buy/page.tsx (v3 - free-month chip
+// beside the $249; auto-renew fine print; Stay Legal alone card;
+// auth doors; owned states)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
