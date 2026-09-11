@@ -1,20 +1,26 @@
 // FILE: app/haullegal/sitemap.xml/route.ts
 
-// HaulLegal sitemap (v1). Served at /haullegal/sitemap.xml, which
+import { HL_GUIDES } from "@/lib/haullegal/guides";
+
+// HaulLegal sitemap (v2). Served at /haullegal/sitemap.xml, which
 // on haullegal.com is the address to submit to Google Search
 // Console (the root /sitemap.xml path is excluded from the proxy by
 // the app-wide matcher, so the island carries its own - same
 // doctrine as the ForemanPrep and WiremanPrep sitemaps). Lists the
 // CLEAN public URLs the proxy host block rewrites onto the island.
-// v1 = the launch surfaces only; the SEO library (/guides, the
-// per-state authority pages) joins in a later version, compiled
-// from its data files the way WiremanPrep's does.
+// v2 adds the guide library: /guides plus one URL per article,
+// compiled from lib/haullegal/guides.ts so a new guide joins the
+// sitemap by itself on the next deploy. The per-state authority
+// pages join in v3 the same way.
 
 const BASE = "https://haullegal.com";
 
 export function GET(): Response {
-  const staticPaths = ["/", "/start", "/calendar", "/buy"];
-  const urls = staticPaths.map((p) => BASE + (p === "/" ? "" : p));
+  const staticPaths = ["/", "/start", "/calendar", "/buy", "/guides"];
+  const urls = [
+    ...staticPaths.map((p) => BASE + (p === "/" ? "" : p)),
+    ...HL_GUIDES.map((g) => `${BASE}/guides/${g.slug}`),
+  ];
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -32,8 +38,8 @@ export function GET(): Response {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/sitemap.xml/route.ts (v1 - four
-// launch URLs)
+// END OF FILE - app/haullegal/sitemap.xml/route.ts (v2 - five
+// launch URLs plus the guide library)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
