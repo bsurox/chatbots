@@ -13,7 +13,13 @@ import { db } from "@/lib/db/queries";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 const webhookSecret = process.env.HAUL_STRIPE_WEBHOOK_SECRET ?? "";
 
-// HaulLegal's OWN Stripe webhook endpoint (v1). Registered in the
+// HaulLegal's OWN Stripe webhook endpoint (v2 - the BUNDLE: checkout
+// v2 sells the walkthrough and the Stay Legal trial in one session
+// with hlProduct "bundle"; on completion this grants the walkthrough
+// AND records the trialing subscription under the same claim. The
+// old "walkthrough" and "staylegal" branches stay for the
+// walkthrough-alone and calendar-alone sessions.)
+// v1 notes: Registered in the
 // Stripe dashboard as a second endpoint (https://haullegal.com/
 // haullegal/api/webhook) with its own signing secret in the
 // HAUL_STRIPE_WEBHOOK_SECRET env var, subscribed to:
@@ -104,7 +110,29 @@ export async function POST(request: Request) {
       const product = session.metadata?.hlProduct;
       if (!userId || !isHaul) return new Response("ok", { status: 200 });
 
-      if (product === "walkthrough" && session.payment_status === "paid") {
+      if (product === "bundle" && session.payment_status === "paid") {
+        const firstDelivery = await claimSession(session.id, userId);
+        if (firstDelivery) {
+          try {
+            await grantHaulWalkthrough({ userId, customerId: idOf(session.customer) });
+            const subId = idOf(session.subscription);
+            if (subId) {
+              const sub = await stripe.subscriptions.retrieve(subId);
+              await upsertHaulSubscription({
+                userId,
+                customerId: idOf(session.customer) ?? idOf(sub.customer),
+                subscriptionId: sub.id,
+                status: sub.status,
+                periodEnd: periodEndOf(sub),
+              });
+            }
+          } catch (grantErr) {
+            console.error("HaulLegal bundle grant failed, releasing claim:", grantErr);
+            await releaseClaim(session.id);
+            return new Response("Access grant failed, retry", { status: 500 });
+          }
+        }
+      } else if (product === "walkthrough" && session.payment_status === "paid") {
         const firstDelivery = await claimSession(session.id, userId);
         if (firstDelivery) {
           try {
@@ -159,8 +187,8 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/api/webhook/route.ts (v1 - own
-// endpoint + secret; walkthrough grant, subscription sync on
-// checkout / invoice.paid / subscription updated+deleted)
+// END OF FILE - app/haullegal/api/webhook/route.ts (v2 - bundle
+// branch grants walkthrough + trial subscription in one claim;
+// own endpoint + secret; subscription sync on renewals/cancels)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
