@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 
-// HaulLegal walkthrough room (v1) - the product itself. Renders the
+// HaulLegal walkthrough room (v2 - TIGHTER PREVIEW, his call: locked
+// steps now show ONLY their title and a Locked tag - no summary, no
+// fee chip - so the free view is a table of contents, not the
+// content. The four "Before you apply" steps stay fully open as the
+// free sample; the gate card spells out what the paid 19 contain.)
+// v1 notes: the product itself. Renders the
 // 23 verified steps in their four phases as a checklist the owner
 // works through on his phone: number, title, plain summary, the
 // official fee chip and the typical time, and an expandable detail
@@ -146,10 +151,12 @@ export default function HaulLegalStartPage() {
                 <div key={step.id}>
                   {!unlocked && step.id === firstLockedId ? (
                     <div className="fp-gate" style={{ margin: "0 0 10px" }}>
-                      <p className="fp-gateh">The rest of the walkthrough is part of the launch purchase.</p>
+                      <p className="fp-gateh">The next 19 steps are the walkthrough.</p>
                       <p className="fp-gated">
-                        19 more steps with the fee, the link, the prerequisites and the
-                        FMCSA-flagged mistakes for each - federal registration on Motus,
+                        For every one of them: exactly where the click happens and the
+                        official link, the real fee, what has to be done first, the
+                        mistakes FMCSA itself warns about, the rule it comes from, and a
+                        check-off that saves your place. Federal registration on Motus,
                         taxes and plates, and staying legal on the road. One payment,
                         $249, plus a free first month of Stay Legal reminders.
                       </p>
@@ -161,10 +168,10 @@ export default function HaulLegalStartPage() {
                   <div className={cls}>
                     <div className="hl-num">{isDone ? "\u2713" : number}</div>
                     <p className="hl-steph">{step.title}</p>
-                    <p className="hl-stepd">{step.summary}</p>
+                    {unlocked ? <p className="hl-stepd">{step.summary}</p> : null}
                     <div className="hl-meta">
-                      <span className="hl-fee">{step.fee}</span>
-                      {unlocked ? <span className="hl-tag">{step.time}</span> : <span className="hl-tag">Locked</span>}
+                      {unlocked ? <span className="hl-fee">{step.fee}</span> : null}
+                      {unlocked ? <span className="hl-tag">{step.time}</span> : <span className="hl-tag">Locked - part of the walkthrough</span>}
                     </div>
                     {unlocked ? (
                       <>
@@ -265,8 +272,8 @@ export default function HaulLegalStartPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v1 - 23-step
-// checklist, free "Before you apply" phase, gate card, local
-// progress)
+// END OF FILE - app/haullegal/start/page.tsx (v2 - locked steps
+// show title only; 23-step checklist, free "Before you apply"
+// phase, gate card, local progress)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
