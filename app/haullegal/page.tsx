@@ -5,7 +5,9 @@ import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { HL_GOV_FEES, HL_MARKET } from "@/lib/haullegal/steps";
 
-// HaulLegal landing page (v1) - the front door of haullegal.com,
+// HaulLegal landing page (v2 - footer gains the "Guides" link, the
+// crawl door from the front page into the SEO library.)
+// v1 notes - the front door of haullegal.com,
 // modeled on the WiremanPrep landing but speaking to a different
 // customer: a brand-new owner-operator who needs a USDOT number,
 // operating authority, and then has to stay legal every quarter.
@@ -226,6 +228,9 @@ export default function HaulLegalPage() {
 
       <div className="fp-foot">
         <div className="fp-links">
+          <Link className="fp-link" href="/haullegal/guides">
+            Guides
+          </Link>
           <Link className="fp-link" href="/haullegal/terms">
             Terms
           </Link>
@@ -249,7 +254,7 @@ export default function HaulLegalPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/page.tsx (v1 - $249 walkthrough +
-// $39/mo Stay Legal, verified government fee table, honesty footer)
+// END OF FILE - app/haullegal/page.tsx (v2 - footer Guides link;
+// $249 walkthrough + $39/mo Stay Legal, fee table, honesty footer)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
