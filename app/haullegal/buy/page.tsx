@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// The HaulLegal storefront (v1) - two cards, both flat, no clock.
-// Card 1: the launch walkthrough, $249 one time. Card 2: Stay Legal,
-// $39 a month, cancel any time, first 30 days free when the account
-// owns the walkthrough (the checkout route decides the trial from
-// the account, so the card copy and the charge always agree).
+// The HaulLegal storefront (v2 - THE FREE MONTH IS IN THE CARD, his
+// spec: the walkthrough card now says outright that it includes the
+// first 30 days of Stay Legal, then $39 a month until canceled, and
+// the fine print under the button repeats it. Checkout v2 charges
+// exactly that in one Stripe session. Card 2 (Stay Legal alone, $39
+// a month, no trial) stays for people who only want the calendar or
+// who canceled and want back in.)
+// v1 notes: two cards, both flat, no clock.
 // Doctrine carried over from the prep storefronts: signed-out
 // visitors get the auth doors first (a purchase must attach to a
 // real account), the checkout route is the charge authority and
@@ -22,6 +25,7 @@ type Access = { loggedIn: boolean; paid: boolean; sub: boolean };
 type Product = "walkthrough" | "staylegal";
 
 const WALK_FEATURES = [
+  "Includes your first 30 days of Stay Legal free - the deadline calendar with email reminders",
   "All 23 steps, in order, from forming the business to your first paid load",
   "The real government fee beside every step - USDOT $0, authority $300, UCR $46",
   "Motus walkthrough: Login.gov, the phone ID check, what every Pending status means",
@@ -125,9 +129,10 @@ export default function HaulLegalBuyPage() {
           <span className="fp-pricenow">$249</span>
         </div>
         <p className="fp-pricetag">
-          One-time payment. Filing services charge $300 to $995 to do these
-          same clicks for you - and since Motus, you still have to do the ID
-          check yourself.
+          One-time payment, plus your first month of Stay Legal free (then
+          $39 a month, cancel any time). Filing services charge $300 to $995
+          to do these same clicks for you - and since Motus, you still have
+          to do the ID check yourself.
         </p>
         <div className="fp-feats">
           {WALK_FEATURES.map((f) => (
@@ -151,9 +156,16 @@ export default function HaulLegalBuyPage() {
             </div>
           </div>
         ) : access.loggedIn ? (
-          <button className="fp-buybtn" disabled={buying !== null} onClick={() => buy("walkthrough")} type="button">
-            {buying === "walkthrough" ? "Opening secure checkout..." : "Get the walkthrough - $249"}
-          </button>
+          <>
+            <button className="fp-buybtn" disabled={buying !== null} onClick={() => buy("walkthrough")} type="button">
+              {buying === "walkthrough" ? "Opening secure checkout..." : "Get the walkthrough - $249"}
+            </button>
+            <p className="fp-buynote">
+              {access.sub
+                ? "Stay Legal is already running on your account, so this charges the $249 walkthrough only."
+                : "$249 today. Stay Legal starts free and bills $39 a month after 30 days until you cancel - one click from your account page, any time before then and you pay nothing more."}
+            </p>
+          </>
         ) : (
           doors
         )}
@@ -170,9 +182,9 @@ export default function HaulLegalBuyPage() {
           <span className="fp-pricewas" style={{ textDecoration: "none" }}>/ month</span>
         </div>
         <p className="fp-pricetag">
-          {access?.paid
-            ? "Your first 30 days are free - you own the walkthrough. Cancel any time."
-            : "First 30 days free with the walkthrough. Cancel any time. Monthly compliance services charge $49.50 to $247."}
+          Cancel any time. Included free for 30 days with the walkthrough
+          above; on its own it starts today. Monthly compliance services
+          charge $49.50 to $247.
         </p>
         <div className="fp-feats">
           {STAY_FEATURES.map((f) => (
@@ -200,20 +212,16 @@ export default function HaulLegalBuyPage() {
           </div>
         ) : access.loggedIn ? (
           <button className="fp-buybtn" disabled={buying !== null} onClick={() => buy("staylegal")} type="button">
-            {buying === "staylegal"
-              ? "Opening secure checkout..."
-              : access.paid
-                ? "Start my free 30 days"
-                : "Get Stay Legal - $39 / month"}
+            {buying === "staylegal" ? "Opening secure checkout..." : "Get Stay Legal - $39 / month"}
           </button>
         ) : (
           doors
         )}
         {err ? <p className="fp-buyerr">{err}</p> : null}
         <p className="fp-buynote">
-          Secure checkout by Stripe - the walkthrough charge reads ASKEVO*
-          HAULLEGAL on your statement. Purchases attach to your account, so
-          you can use them from any device. Questions: support@askevo.ai
+          Secure checkout by Stripe - charges read ASKEVO on your card
+          statement. Purchases attach to your account, so you can use them
+          from any device. Questions: support@askevo.ai
         </p>
       </div>
 
@@ -237,9 +245,9 @@ export default function HaulLegalBuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/buy/page.tsx (v1 - two cards:
-// walkthrough $249 one-time, Stay Legal $39/mo w/ free first
-// month for owners; auth doors; owned states)
+// END OF FILE - app/haullegal/buy/page.tsx (v2 - walkthrough card
+// carries the free first month + auto-renew fine print; Stay Legal
+// alone card; auth doors; owned states)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
