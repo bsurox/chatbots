@@ -1,0 +1,92 @@
+/* FILE: app/haullegal/haullegal.css */
+
+/* HaulLegal wardrobe (v1 - CLEARED GREEN). HaulLegal is the fourth
+   brand on the shared ForemanPrep wardrobe: pages import
+   app/foremanprep/foremanprep.css and wrap themselves in .hl-zone,
+   which swaps the brand variables to cleared green (#22c55e) so
+   every var(--fp) component - fp- furniture, price table, buy
+   card, gate card - recolors by itself. Orange = ForemanPrep, sky
+   blue = B&L, volt = WiremanPrep, green = HaulLegal ("you're
+   legal" reads green everywhere else in life too).
+   Below the variable swap sit the same explicit catch rules the
+   blzone and wm-zone needed for components that hardcode their
+   color at fixed alphas (strips, chips, gate cards), translated to
+   green, plus the hl- family this island adds: the walkthrough
+   step cards, official-fee chips, gotcha boxes, the progress bar,
+   and the deadline calendar rows.
+   ForemanPrep, B&L and WiremanPrep pages never wear .hl-zone -
+   nothing on the existing sites changes. */
+
+.hl-zone { --fp: #22c55e; --fp-soft: rgba(34, 197, 94, 0.12); }
+
+/* Strip family and chips - hardcoded orange in the shared css. */
+.hl-zone.fp-strip, .hl-zone .fp-strip { border-color: rgba(34, 197, 94, 0.35); background: linear-gradient(180deg, rgba(34, 197, 94, 0.09), rgba(34, 197, 94, 0.03)); }
+.hl-zone .fp-chip { border-color: rgba(34, 197, 94, 0.45); }
+.hl-zone .fp-gate { border-color: rgba(34, 197, 94, 0.45); }
+.hl-zone .fp-signup { border-color: rgba(34, 197, 94, 0.4); }
+.hl-zone .fp-stat:focus { outline-color: #22c55e; }
+
+/* ---- Walkthrough (the step list) ------------------------------ */
+.hl-phase { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fp); margin: 30px 0 10px; }
+.hl-steps { display: grid; gap: 10px; }
+.hl-step { position: relative; background: #111; border: 1px solid #262626; border-radius: 14px; padding: 16px 16px 14px 58px; }
+.hl-step.done { border-color: rgba(34, 197, 94, 0.5); }
+.hl-step.locked { opacity: 0.55; }
+.hl-num { position: absolute; left: 14px; top: 16px; width: 32px; height: 32px; border-radius: 50%; background: #1a1a1a; border: 1px solid #333; color: #ccc; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.hl-step.done .hl-num { background: var(--fp); border-color: var(--fp); color: #000; }
+.hl-steph { font-size: 15.5px; font-weight: 700; color: #fff; margin: 0 0 5px; }
+.hl-stepd { font-size: 13.5px; line-height: 1.55; color: #aaa; margin: 0; }
+.hl-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.hl-fee { font-size: 12px; font-weight: 800; color: var(--fp); border: 1px solid rgba(34, 197, 94, 0.45); background: var(--fp-soft); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.hl-tag { font-size: 12px; font-weight: 700; color: #999; border: 1px solid #2a2a2a; background: #161616; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.hl-detail { margin: 12px 0 0; border-top: 1px solid #1e1e1e; padding-top: 12px; }
+.hl-label { font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #777; margin: 10px 0 4px; }
+.hl-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.55; color: #bbb; }
+.hl-list li { margin: 0 0 4px; }
+.hl-gotcha { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: #161616; border-left: 3px solid var(--fp); font-size: 13px; line-height: 1.5; color: #ccc; }
+.hl-cite { font-size: 12px; color: #666; margin: 10px 0 0; line-height: 1.5; }
+.hl-cite b { color: #888; font-weight: 700; }
+.hl-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.hl-go { display: inline-block; font-size: 13px; font-weight: 800; color: #000; background: var(--fp); border: 1px solid var(--fp); border-radius: 999px; padding: 8px 14px; text-decoration: none; cursor: pointer; font-family: inherit; }
+.hl-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #ccc; background: transparent; border: 1px solid #333; border-radius: 999px; padding: 8px 14px; cursor: pointer; font-family: inherit; }
+.hl-check.on { color: var(--fp); border-color: var(--fp); background: var(--fp-soft); }
+.hl-more { background: none; border: none; padding: 0; margin: 10px 0 0; font-size: 13px; font-weight: 700; color: var(--fp); cursor: pointer; font-family: inherit; }
+
+/* Progress bar under the walkthrough header. */
+.hl-prog { margin: 14px 0 0; }
+.hl-progrow { display: flex; justify-content: space-between; font-size: 12.5px; color: #999; margin: 0 0 6px; }
+.hl-progrow b { color: #fff; }
+.hl-bar { height: 8px; border-radius: 999px; background: #1c1c1c; overflow: hidden; }
+.hl-fill { height: 100%; background: var(--fp); border-radius: 999px; transition: width 0.3s ease; }
+
+/* ---- Deadline calendar ---------------------------------------- */
+.hl-form { display: grid; gap: 12px; margin: 18px 0 0; }
+.hl-field { display: grid; gap: 5px; }
+.hl-fl { font-size: 12.5px; font-weight: 700; color: #bbb; }
+.hl-fh { font-size: 12px; color: #666; line-height: 1.45; }
+.hl-toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+.hl-tog { font-size: 13px; font-weight: 700; color: #bbb; background: #111; border: 1px solid #333; border-radius: 999px; padding: 8px 14px; cursor: pointer; font-family: inherit; }
+.hl-tog.on { color: #000; background: var(--fp); border-color: var(--fp); }
+.hl-due { display: grid; grid-template-columns: 92px 1fr; gap: 12px; background: #111; border: 1px solid #262626; border-radius: 14px; padding: 14px; }
+.hl-due.soon { border-color: rgba(249, 115, 22, 0.6); }
+.hl-due.late { border-color: rgba(248, 113, 113, 0.6); }
+.hl-date { font-size: 13px; font-weight: 800; color: #fff; line-height: 1.3; }
+.hl-date small { display: block; font-size: 11.5px; font-weight: 700; color: #777; margin-top: 3px; }
+.hl-due.soon .hl-date small { color: #f97316; }
+.hl-due.late .hl-date small { color: #f87171; }
+.hl-dueh { font-size: 14.5px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+.hl-dued { font-size: 13px; line-height: 1.5; color: #999; margin: 0; }
+.hl-empty { font-size: 13.5px; color: #777; line-height: 1.55; margin: 14px 0 0; }
+
+@media (min-width: 640px) {
+  .hl-form { grid-template-columns: 1fr 1fr; }
+  .hl-form .hl-wide { grid-column: 1 / -1; }
+}
+
+/* -----------------------------------------------------------
+   END OF FILE - app/haullegal/haullegal.css (v1 - CLEARED GREEN
+   #22c55e variable swap, catch rules, hl- walkthrough + calendar
+   family)
+   If you can see these lines after pasting, the whole file
+   made it. Safe to commit.
+   ----------------------------------------------------------- */
