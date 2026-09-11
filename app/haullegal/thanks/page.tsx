@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// Where HaulLegal buyers land after Stripe says yes (v1). Same
+// Where HaulLegal buyers land after Stripe says yes (v2 - the BUNDLE:
+// checkout v2 sends ?product=bundle when the walkthrough came with
+// the free month attached; that lands as "You're in" plus "Stay
+// Legal is on, free for 30 days" with doors to the walkthrough and
+// the calendar - no trial button needed. ?product=walkthrough (the
+// walkthrough alone, only for accounts already subscribed) and
+// ?product=staylegal keep their v1 screens.)
+// v1 notes: Same
 // doctrine as the prep thanks pages: the webhook usually records
 // the purchase before this page finishes loading, so we poll the
 // access API a few times and the status line flips to confirmed
@@ -18,10 +25,10 @@ import { useEffect, useState } from "react";
 // The product is read from the URL inside useEffect, never during
 // render (Next 16 prerender rule). No pixels yet.
 
-type Product = "walkthrough" | "staylegal";
+type Product = "bundle" | "walkthrough" | "staylegal";
 
 export default function HaulLegalThanksPage() {
-  const [product, setProduct] = useState<Product>("walkthrough");
+  const [product, setProduct] = useState<Product>("bundle");
   const [confirmed, setConfirmed] = useState(false);
   const [alreadySub, setAlreadySub] = useState(false);
   const [checks, setChecks] = useState(0);
@@ -32,6 +39,7 @@ export default function HaulLegalThanksPage() {
     try {
       const p = new URLSearchParams(window.location.search).get("product");
       if (p === "staylegal") setProduct("staylegal");
+      else if (p === "walkthrough") setProduct("walkthrough");
     } catch {
       // no query string - default is the walkthrough
     }
@@ -81,6 +89,7 @@ export default function HaulLegalThanksPage() {
   }
 
   const isStay = product === "staylegal";
+  const isBundle = product === "bundle";
 
   return (
     <div className="fp-wrap">
@@ -96,7 +105,9 @@ export default function HaulLegalThanksPage() {
           {confirmed
             ? isStay
               ? "Stay Legal is active on your account. Put your dates in and the calendar takes it from here."
-              : "The full walkthrough is unlocked on your account. Time to get legal."
+              : isBundle
+                ? "The full walkthrough is unlocked, and Stay Legal is on - free for 30 days, then $39 a month unless you cancel from your account page."
+                : "The full walkthrough is unlocked on your account. Time to get legal."
             : "Payment received - your access is activating now. If things still look locked in a minute, refresh this page."}
         </p>
         <div className="fp-authrow">
@@ -114,7 +125,7 @@ export default function HaulLegalThanksPage() {
               <Link className="fp-authbtn" href="/haullegal/start">
                 Open the walkthrough
               </Link>
-              {alreadySub ? (
+              {alreadySub || isBundle ? (
                 <Link className="fp-authbtn exam" href="/haullegal/calendar">
                   Open my calendar
                 </Link>
@@ -128,8 +139,8 @@ export default function HaulLegalThanksPage() {
         </div>
         {err ? <p className="fp-buyerr">{err}</p> : null}
         <p className="fp-buynote">
-          {isStay
-            ? "A receipt is on its way to your email. Manage or cancel any time from your account page."
+          {isStay || isBundle
+            ? "A receipt is on its way to your email. Manage or cancel Stay Legal any time from your account page."
             : "A receipt is on its way to your email. The free 30 days needs a card on file and bills $39 a month after - cancel any time from your account page."}
         </p>
       </div>
@@ -138,8 +149,8 @@ export default function HaulLegalThanksPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/thanks/page.tsx (v1 - product-
-// aware confirmation, free-trial door for walkthrough buyers)
+// END OF FILE - app/haullegal/thanks/page.tsx (v2 - bundle
+// screen: walkthrough + Stay Legal trial confirmed together)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
