@@ -177,6 +177,43 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // HaulLegal island (v22). haullegal.com serves the trucking
+  // authority walkthrough and nothing else - same shape as the two
+  // prep blocks above: "/" is a REWRITE so the address bar stays
+  // clean, /terms and /privacy land on HaulLegal's own legal pages,
+  // the clean marketing URLs rewrite onto /haullegal/*, the auth
+  // doors are open on this host (buyers need accounts), and
+  // anything else bounces home. The island's own Stripe webhook and
+  // cron job live under /haullegal/api/* and are covered by the
+  // public /haullegal pass further down (both verify their own
+  // secrets), so Stripe and Vercel Cron never hit the guest dance.
+  if (hostname === "haullegal.com" || hostname.endsWith(".haullegal.com")) {
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/haullegal", request.url));
+    }
+    if (pathname === "/terms" || pathname.startsWith("/terms/")) {
+      return NextResponse.rewrite(new URL("/haullegal/terms", request.url));
+    }
+    if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
+      return NextResponse.rewrite(new URL("/haullegal/privacy", request.url));
+    }
+    const cleanHl = ["/start", "/calendar", "/buy", "/thanks", "/account"];
+    if (cleanHl.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+      return NextResponse.rewrite(
+        new URL("/haullegal" + pathname, request.url)
+      );
+    }
+    const hlAllowed =
+      pathname.startsWith("/haullegal") ||
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname.startsWith("/api/") ||
+      pathname.includes(".");
+    if (!hlAllowed) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -240,6 +277,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // v22: same doctrine for the HaulLegal surface - public
+  // marketing, no guest row per visit; the paid routes gate
+  // themselves server-side, and the island's webhook + cron routes
+  // check their own Stripe / CRON_SECRET signatures.
+  if (pathname.startsWith("/haullegal")) {
+    return NextResponse.next();
+  }
+
   // v12: requests for real files - any dotted path (/fp-icon.png,
   // images, fonts) - never enter the auth dance below. Cookie-less
   // fetchers (Chrome's favicon fetcher, Google's favicon crawler)
@@ -288,8 +333,8 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v21 - clean URLs for the Journeyman
-// and Residential rooms on wiremanprep.com)
+// END OF FILE - proxy.ts (v22 - haullegal.com host block + public
+// pass for the HaulLegal island)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
