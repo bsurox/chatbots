@@ -1,6 +1,7 @@
 // FILE: lib/haullegal/deadlines.ts
 
-// HaulLegal "Stay Legal" calendar rules (v1). Every recurring
+// HaulLegal "Stay Legal" calendar rules (v2 - blank defaults: no
+// switch is pre-selected; see HL_EMPTY_PROFILE). Every recurring
 // obligation a one-truck interstate for-hire carrier keeps up with
 // after the authority is active, with the exact frequency and
 // due-date RULE (verified September 10, 2026 against eCFR, FMCSA,
@@ -294,11 +295,14 @@ export type HlProfile = {
   or: boolean;
 };
 
+// v2: every switch starts OFF. Nothing is assumed about the
+// carrier's operation - the calendar page asks him to select all
+// that apply, and a saved profile always carries explicit values.
 export const HL_EMPTY_PROFILE: HlProfile = {
-  hvut: true,
-  ifta: true,
-  irp: true,
-  eld: true,
+  hvut: false,
+  ifta: false,
+  irp: false,
+  eld: false,
   ky: false,
   nm: false,
   ny: false,
@@ -505,7 +509,7 @@ export function buildCalendar(profile: HlProfile, from: Date): { dues: HlDue[]; 
 }
 
 // ============================================================
-// END OF FILE - lib/haullegal/deadlines.ts (v1 - 19 verified
-// obligations, pure date helpers, buildCalendar)
+// END OF FILE - lib/haullegal/deadlines.ts (v2 - blank profile
+// defaults; 19 verified obligations, date helpers, buildCalendar)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
