@@ -177,7 +177,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // HaulLegal island (v22). haullegal.com serves the trucking
+  // HaulLegal island (v22; v23 adds the SEO doors). haullegal.com serves the trucking
   // authority walkthrough and nothing else - same shape as the two
   // prep blocks above: "/" is a REWRITE so the address bar stays
   // clean, /terms and /privacy land on HaulLegal's own legal pages,
@@ -197,7 +197,9 @@ export async function proxy(request: NextRequest) {
     if (pathname === "/privacy" || pathname.startsWith("/privacy/")) {
       return NextResponse.rewrite(new URL("/haullegal/privacy", request.url));
     }
-    const cleanHl = ["/start", "/calendar", "/buy", "/thanks", "/account"];
+    // v23: /guides and /states join the clean URLs - the SEO library
+    // and the per-state authority pages.
+    const cleanHl = ["/start", "/calendar", "/buy", "/thanks", "/account", "/guides", "/states"];
     if (cleanHl.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       return NextResponse.rewrite(
         new URL("/haullegal" + pathname, request.url)
@@ -333,8 +335,8 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v22 - haullegal.com host block + public
-// pass for the HaulLegal island)
+// END OF FILE - proxy.ts (v23 - /guides and /states clean URLs on
+// haullegal.com)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
