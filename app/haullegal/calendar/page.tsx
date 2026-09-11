@@ -12,7 +12,11 @@ import {
   type HlProfile,
 } from "@/lib/haullegal/deadlines";
 
-// HaulLegal Stay Legal calendar (v1) - the deadline engine, free to
+// HaulLegal Stay Legal calendar (v2 - BLANK BY DEFAULT, his spec:
+// no switch is pre-selected; a "select all that apply" header sits
+// above the switches so the owner fills it in accurately. The
+// defaults live in lib/haullegal/deadlines.ts v2.)
+// v1 notes: the deadline engine, free to
 // use as a calculator. The owner types his USDOT number, flips the
 // switches that describe his operation (55,000+ lb, IFTA, IRP, ELD,
 // and the four by-the-mile states) and enters the dates he knows;
@@ -154,7 +158,8 @@ export default function HaulLegalCalendarPage() {
         </div>
 
         <div className="hl-field hl-wide">
-          <p className="hl-fl">Your operation</p>
+          <p className="hl-fl">Your operation - select all that apply</p>
+          <p className="hl-fh">Nothing is picked for you. Tap each one that is true for your truck; leave the rest alone.</p>
           <div className="hl-toggles">
             {TOGGLES.map((t) => {
               const on = Boolean(profile[t.k]);
@@ -169,6 +174,19 @@ export default function HaulLegalCalendarPage() {
                 </button>
               );
             })}
+          </div>
+          <div className="hl-actions">
+            <button
+              className="hl-check"
+              onClick={() => {
+                const cleared: HlProfile = { ...HL_EMPTY_PROFILE };
+                setProfile(cleared);
+                saveProfile(cleared);
+              }}
+              type="button"
+            >
+              Clear everything
+            </button>
           </div>
         </div>
 
@@ -326,8 +344,8 @@ export default function HaulLegalCalendarPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/calendar/page.tsx (v1 - profile
-// form, computed due-date list with soon/late badges, rules
-// reference, Stay Legal pitch)
+// END OF FILE - app/haullegal/calendar/page.tsx (v2 - blank
+// switches + select-all-that-apply header; profile form, due-date
+// list, rules reference, Stay Legal pitch)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
