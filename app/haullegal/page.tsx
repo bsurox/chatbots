@@ -6,7 +6,12 @@ import { useEffect, useState } from "react";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
 import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal landing page (v4 - SPANISH: every string now comes from
+// HaulLegal landing page (v5 - the ACCOUNT door: a logged-in owner
+// sees an "Account" pill beside Log out in the top bar, and the
+// footer of every product page now carries an "Account" link, so
+// the page that manages or cancels Stay Legal is reachable from
+// anywhere on the site - it was not linked from anywhere before.)
+// v4 notes - SPANISH: every string now comes from
 // lib/haullegal/i18n.ts through the hl-lang switch, and the EN / ES
 // pill sits in the top bar beside Log in. The English copy is the
 // exact v3 copy; the fee and market tables are read from the same
@@ -75,6 +80,11 @@ export default function HaulLegalPage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <HlLangToggle />
+          {loggedIn ? (
+            <Link href="/haullegal/account" style={pill}>
+              {ui.common.account}
+            </Link>
+          ) : null}
           {loggedIn ? (
             <button
               disabled={signingOut}
@@ -181,6 +191,9 @@ export default function HaulLegalPage() {
           <Link className="fp-link" href="/haullegal/states">
             {ui.common.stateGuides}
           </Link>
+          <Link className="fp-link" href="/haullegal/account">
+            {ui.common.account}
+          </Link>
           <Link className="fp-link" href="/haullegal/terms">
             {ui.common.terms}
           </Link>
@@ -195,8 +208,9 @@ export default function HaulLegalPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/page.tsx (v4 - Spanish switch via
-// i18n.ts, EN / ES pill; five by-the-mile states; $249 walkthrough
-// + $39/mo Stay Legal, fee table, honesty footer)
+// END OF FILE - app/haullegal/page.tsx (v5 - Account pill + footer
+// link; Spanish switch via i18n.ts, EN / ES pill; five by-the-mile
+// states; $249 walkthrough + $39/mo Stay Legal, fee table, honesty
+// footer)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
