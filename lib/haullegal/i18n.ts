@@ -1,7 +1,10 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v1). One switch, stored on the device
+// HaulLegal language layer (v2 - adds the "Account" link label and
+// the thank-you page's account button, so the account page - the
+// place to manage or cancel - is reachable from every page.)
+// v1 notes - one switch, stored on the device
 // (localStorage key hl-lang, "en" or "es"), read by every page
 // that speaks to the owner: landing, walkthrough, calendar, buy,
 // thanks and account. English strings here are the exact copy the
@@ -80,6 +83,7 @@ const EN = {
     guides: "Guides",
     stateGuides: "State guides",
     loading: "Loading...",
+    account: "Account",
     langToggleTitle: "Cambiar a espa\u00f1ol",
   },
   landing: {
@@ -438,6 +442,7 @@ const EN = {
     err: "Could not open checkout - try again from the buy page.",
     receiptStay: "A receipt is on its way to your email. Manage or cancel Stay Legal any time from your account page.",
     receiptWalk: "A receipt is on its way to your email. The free 30 days needs a card on file and bills $39 a month after - cancel any time from your account page.",
+    accountBtn: "Your account (manage or cancel)",
   },
 };
 
@@ -454,6 +459,7 @@ const ES: HlUi = {
     guides: "Gu\u00edas",
     stateGuides: "Gu\u00edas por estado",
     loading: "Cargando...",
+    account: "Cuenta",
     langToggleTitle: "Switch to English",
   },
   landing: {
@@ -812,14 +818,15 @@ const ES: HlUi = {
     err: "No se pudo abrir el pago - int\u00e9ntalo de nuevo desde la p\u00e1gina de compra.",
     receiptStay: "Un recibo va en camino a tu correo. Administra o cancela Stay Legal cuando quieras desde tu p\u00e1gina de cuenta.",
     receiptWalk: "Un recibo va en camino a tu correo. Los 30 d\u00edas gratis necesitan una tarjeta registrada y cobran $39 al mes despu\u00e9s - cancela cuando quieras desde tu p\u00e1gina de cuenta.",
+    accountBtn: "Tu cuenta (administrar o cancelar)",
   },
 };
 
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v1 - EN/ES page strings,
-// the hl-lang hook, fill())
+// END OF FILE - lib/haullegal/i18n.ts (v2 - Account label; EN/ES
+// page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
