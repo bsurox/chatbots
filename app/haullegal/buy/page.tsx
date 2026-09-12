@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
 import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// The HaulLegal storefront (v4 - SPANISH: every string comes from
+// The HaulLegal storefront (v5 - footer gains the "Account" link,
+// the door to managing or canceling Stay Legal.)
+// v4 notes - SPANISH: every string comes from
 // lib/haullegal/i18n.ts through the hl-lang switch, the EN / ES
 // pill sits in the top bar, and the checkout request now carries
 // the language so Stripe's hosted page opens in Spanish too
@@ -198,6 +200,9 @@ export default function HaulLegalBuyPage() {
 
       <div className="fp-foot">
         <div className="fp-links">
+          <Link className="fp-link" href="/haullegal/account">
+            {ui.common.account}
+          </Link>
           <Link className="fp-link" href="/haullegal/terms">
             {ui.common.terms}
           </Link>
@@ -212,8 +217,9 @@ export default function HaulLegalBuyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/buy/page.tsx (v4 - Spanish switch,
-// language passed to checkout; free-month chip beside the $249;
+// END OF FILE - app/haullegal/buy/page.tsx (v5 - footer Account
+// link; Spanish switch, language passed to checkout; free-month
+// chip beside the $249;
 // auto-renew fine print; Stay Legal alone card; auth doors; owned
 // states)
 // If you can see these lines after pasting, the whole file
