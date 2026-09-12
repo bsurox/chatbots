@@ -2,11 +2,14 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import HlAccountButton from "@/app/haullegal/account-button";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
 import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// The HaulLegal storefront (v5 - footer gains the "Account" link,
-// the door to managing or canceling Stay Legal.)
+// The HaulLegal storefront (v6 - the floating bottom-left account
+// circle (account-button.tsx) joins the page.)
+// v5 notes - footer gains the "Account" link, the door to managing
+// Stay Legal.
 // v4 notes - SPANISH: every string comes from
 // lib/haullegal/i18n.ts through the hl-lang switch, the EN / ES
 // pill sits in the top bar, and the checkout request now carries
@@ -212,13 +215,14 @@ export default function HaulLegalBuyPage() {
         </div>
         <p className="fp-legal">{t.legal}</p>
       </div>
+      <HlAccountButton />
     </div>
   );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/buy/page.tsx (v5 - footer Account
-// link; Spanish switch, language passed to checkout; free-month
+// END OF FILE - app/haullegal/buy/page.tsx (v6 - account circle,
+// footer Account link; Spanish switch, language passed to checkout; free-month
 // chip beside the $249;
 // auto-renew fine print; Stay Legal alone card; auth doors; owned
 // states)
