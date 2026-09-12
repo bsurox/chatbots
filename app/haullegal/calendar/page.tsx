@@ -16,7 +16,9 @@ import {
 import { HL_DUE_DETAILS_ES, HL_DUE_TITLES_ES, HL_FREQ_ES, HL_MISSING_ES, HL_OBLIGATIONS_ES } from "@/lib/haullegal/deadlines-es";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal Stay Legal calendar (v3 - three things:
+// HaulLegal Stay Legal calendar (v4 - footer gains the "Account"
+// link, the door to managing or canceling Stay Legal.)
+// v3 notes - three things:
 // 1. ACCOUNT SYNC - the reminder-job fix. Until now the profile
 //    lived only in this browser (hl-profile), so the daily reminder
 //    job at /haullegal/api/remind had no profiles to read and no
@@ -443,6 +445,9 @@ export default function HaulLegalCalendarPage() {
           <Link className="fp-link" href="/haullegal/start">
             {t.walkLink}
           </Link>
+          <Link className="fp-link" href="/haullegal/account">
+            {ui.common.account}
+          </Link>
           <Link className="fp-link" href="/haullegal/terms">
             {ui.common.terms}
           </Link>
@@ -457,8 +462,9 @@ export default function HaulLegalCalendarPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/calendar/page.tsx (v3 - account
-// sync + reminders switch, Connecticut switch, Spanish switch;
-// profile form, due-date list, rules reference, Stay Legal pitch)
+// END OF FILE - app/haullegal/calendar/page.tsx (v4 - footer
+// Account link; account sync + reminders switch, Connecticut
+// switch, Spanish switch; profile form, due-date list, rules
+// reference, Stay Legal pitch)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
