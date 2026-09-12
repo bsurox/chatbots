@@ -13,7 +13,15 @@ import { db } from "@/lib/db/queries";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 const webhookSecret = process.env.HAUL_STRIPE_WEBHOOK_SECRET ?? "";
 
-// HaulLegal's OWN Stripe webhook endpoint (v2 - the BUNDLE: checkout
+// HaulLegal's OWN Stripe webhook endpoint (v3 - a checkout whose
+// total came to $0 - a 100%-off promotion code on the bundle or the
+// walkthrough - completes with payment_status "no_payment_required"
+// instead of "paid"; v2 treated that as "not paid" and granted
+// nothing, so a fully discounted test purchase left the account
+// locked. Both branches now accept either value. Real purchases
+// always arrive as "paid"; "unpaid" (a delayed bank-debit payment)
+// is still refused until Stripe reports it paid.)
+// v2 notes - the BUNDLE: checkout
 // v2 sells the walkthrough and the Stay Legal trial in one session
 // with hlProduct "bundle"; on completion this grants the walkthrough
 // AND records the trialing subscription under the same claim. The
@@ -109,8 +117,9 @@ export async function POST(request: Request) {
       const isHaul = session.metadata?.haullegal === "1";
       const product = session.metadata?.hlProduct;
       if (!userId || !isHaul) return new Response("ok", { status: 200 });
+      const settled = session.payment_status === "paid" || session.payment_status === "no_payment_required";
 
-      if (product === "bundle" && session.payment_status === "paid") {
+      if (product === "bundle" && settled) {
         const firstDelivery = await claimSession(session.id, userId);
         if (firstDelivery) {
           try {
@@ -132,7 +141,7 @@ export async function POST(request: Request) {
             return new Response("Access grant failed, retry", { status: 500 });
           }
         }
-      } else if (product === "walkthrough" && session.payment_status === "paid") {
+      } else if (product === "walkthrough" && settled) {
         const firstDelivery = await claimSession(session.id, userId);
         if (firstDelivery) {
           try {
@@ -187,8 +196,9 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/api/webhook/route.ts (v2 - bundle
-// branch grants walkthrough + trial subscription in one claim;
+// END OF FILE - app/haullegal/api/webhook/route.ts (v3 - $0
+// promo-code checkouts grant too; bundle branch grants walkthrough
+// + trial subscription in one claim;
 // own endpoint + secret; subscription sync on renewals/cancels)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
