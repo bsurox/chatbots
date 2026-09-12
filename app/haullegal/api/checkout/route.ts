@@ -7,7 +7,11 @@ import { getHaulAccess } from "@/lib/db/haul";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
-// HaulLegal checkout (v2 - THE FREE MONTH IS AUTOMATIC, his call):
+// HaulLegal checkout (v3 - the request may carry {"lang":"es"} from
+// the buy or thanks page; Stripe's hosted checkout then opens in
+// Spanish (locale "es"). Anything else leaves Stripe on "auto",
+// its browser-detected default, exactly as before.)
+// v2 notes - THE FREE MONTH IS AUTOMATIC, his call:
 //   {"product":"walkthrough"}  ONE checkout: $249 charged today as a
 //                              one-time line item PLUS Stay Legal
 //                              attached on the same card with a
@@ -62,11 +66,13 @@ export async function POST(request: Request) {
   }
 
   let product: HlProduct = "walkthrough";
+  let locale: "auto" | "es" = "auto";
   try {
     const body = await request.json();
     if (body?.product === "staylegal") product = "staylegal";
+    if (body?.lang === "es") locale = "es";
   } catch {
-    // no body = walkthrough
+    // no body = walkthrough, Stripe's own language detection
   }
 
   const access = await getHaulAccess(session.user.id);
@@ -117,6 +123,7 @@ export async function POST(request: Request) {
       },
       customer: access.customerId ?? undefined,
       customer_email: access.customerId ? undefined : email,
+      locale,
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: meta,
@@ -142,6 +149,7 @@ export async function POST(request: Request) {
       allow_promotion_codes: true,
       payment_intent_data: { statement_descriptor_suffix: "HAULLEGAL" },
       customer_email: email,
+      locale,
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: meta,
@@ -170,6 +178,7 @@ export async function POST(request: Request) {
     },
     customer: access.customerId ?? undefined,
     customer_email: access.customerId ? undefined : email,
+    locale,
     success_url: successUrl,
     cancel_url: cancelUrl,
     metadata: meta,
@@ -178,8 +187,9 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/api/checkout/route.ts (v2 - ONE
-// checkout: $249 walkthrough + Stay Legal on a 30-day free trial;
+// END OF FILE - app/haullegal/api/checkout/route.ts (v3 - Stripe
+// page in Spanish when asked; ONE checkout: $249 walkthrough + Stay
+// Legal on a 30-day free trial;
 // walkthrough alone if Stay Legal already runs; Stay Legal alone
 // with no trial)
 // If you can see these lines after pasting, the whole file
