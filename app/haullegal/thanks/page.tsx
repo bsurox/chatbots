@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// Where HaulLegal buyers land after Stripe says yes (v3 - SPANISH:
+// Where HaulLegal buyers land after Stripe says yes (v4 - a "Your
+// account (manage or cancel)" button under the receipt line, so the
+// buyer sees where to cancel the moment the trial starts.)
+// v3 notes - SPANISH:
 // every string comes from lib/haullegal/i18n.ts through the
 // hl-lang switch the buyer set before checkout; no pill here, the
 // page is a receipt screen.)
@@ -135,15 +138,20 @@ export default function HaulLegalThanksPage() {
         </div>
         {err ? <p className="fp-buyerr">{err}</p> : null}
         <p className="fp-buynote">{isStay || isBundle ? t.receiptStay : t.receiptWalk}</p>
+        <div className="fp-authrow">
+          <Link className="fp-authbtn ghost" href="/haullegal/account">
+            {t.accountBtn}
+          </Link>
+        </div>
       </div>
     </div>
   );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/thanks/page.tsx (v3 - Spanish
-// switch; bundle screen: walkthrough + Stay Legal trial confirmed
-// together)
+// END OF FILE - app/haullegal/thanks/page.tsx (v4 - account
+// button; Spanish switch; bundle screen: walkthrough + Stay Legal
+// trial confirmed together)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
