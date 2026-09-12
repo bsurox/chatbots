@@ -5,8 +5,10 @@ import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { HL_GOV_FEES, HL_MARKET } from "@/lib/haullegal/steps";
 
-// HaulLegal landing page (v2 - footer gains the "Guides" link, the
-// crawl door from the front page into the SEO library.)
+// HaulLegal landing page (v3 - footer gains the "State guides" link,
+// the crawl door into the 50 state pages.)
+// v2 notes - footer gains the "Guides" link, the
+// crawl door from the front page into the SEO library.
 // v1 notes - the front door of haullegal.com,
 // modeled on the WiremanPrep landing but speaking to a different
 // customer: a brand-new owner-operator who needs a USDOT number,
@@ -231,6 +233,9 @@ export default function HaulLegalPage() {
           <Link className="fp-link" href="/haullegal/guides">
             Guides
           </Link>
+          <Link className="fp-link" href="/haullegal/states">
+            State guides
+          </Link>
           <Link className="fp-link" href="/haullegal/terms">
             Terms
           </Link>
@@ -254,7 +259,8 @@ export default function HaulLegalPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/page.tsx (v2 - footer Guides link;
-// $249 walkthrough + $39/mo Stay Legal, fee table, honesty footer)
+// END OF FILE - app/haullegal/page.tsx (v3 - footer State guides
+// link; $249 walkthrough + $39/mo Stay Legal, fee table, honesty
+// footer)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
