@@ -1,7 +1,12 @@
 // FILE: app/haullegal/privacy/page.tsx
 import Link from "next/link";
 
-// HaulLegal Privacy Policy (v1) - adapted from the WiremanPrep
+// HaulLegal Privacy Policy (v2 - the language choice (English or
+// Spanish) is stored on your device, disclosed under Information We
+// Collect; the walkthrough progress and calendar profile now also
+// save to the account when you are signed in, which section 2
+// already covered.)
+// v1 notes - adapted from the WiremanPrep
 // privacy pattern (same legal entity, AskEvo LLC). HaulLegal
 // specifics: the walkthrough and calendar store BUSINESS details
 // you type in (USDOT number, company name, dates, states you run),
@@ -15,7 +20,7 @@ import Link from "next/link";
 // Public page - the haullegal layout wraps it; the proxy host block
 // rewrites haullegal.com/privacy here.
 
-const UPDATED = "September 11, 2026";
+const UPDATED = "September 12, 2026";
 
 const SECTIONS: Array<{ t: string; b: string }> = [
   {
@@ -28,7 +33,9 @@ const SECTIONS: Array<{ t: string; b: string }> = [
 
 Walkthrough and calendar details: the business information you choose to enter so the service can work - for example your company name, USDOT number, the dates of your filings, inspections and medical certificate, the states you operate in, and which steps you have marked complete. Enter only information about a business you are authorized to represent.
 
-Reminder settings: the email address reminders go to and which reminders you have turned on.
+Reminder settings: the email address reminders go to and whether reminders are turned on.
+
+Preferences stored on your device: your language choice (English or Spanish) and, until you sign in, your walkthrough progress and calendar entries are kept in your browser's storage on the device you used. Clearing the browser's site data removes them.
 
 Payment information: payments are processed by Stripe. We receive transaction confirmations and record that your account purchased the walkthrough and whether your Stay Legal subscription is active. We never receive or store your full card number.
 
@@ -113,7 +120,8 @@ export default function HaulLegalPrivacyPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/privacy/page.tsx (v1 - business
-// details + reminder emails disclosed; essential cookies only)
+// END OF FILE - app/haullegal/privacy/page.tsx (v2 - language
+// preference + on-device storage disclosed; business details,
+// reminder emails; essential cookies only)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
