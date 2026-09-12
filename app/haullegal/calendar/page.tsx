@@ -2,6 +2,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import HlAccountButton from "@/app/haullegal/account-button";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
 import {
   buildCalendar,
@@ -16,8 +17,10 @@ import {
 import { HL_DUE_DETAILS_ES, HL_DUE_TITLES_ES, HL_FREQ_ES, HL_MISSING_ES, HL_OBLIGATIONS_ES } from "@/lib/haullegal/deadlines-es";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal Stay Legal calendar (v4 - footer gains the "Account"
-// link, the door to managing or canceling Stay Legal.)
+// HaulLegal Stay Legal calendar (v5 - the floating bottom-left
+// account circle (account-button.tsx) joins the page.)
+// v4 notes - footer gains the "Account" link, the door to managing
+// Stay Legal.
 // v3 notes - three things:
 // 1. ACCOUNT SYNC - the reminder-job fix. Until now the profile
 //    lived only in this browser (hl-profile), so the daily reminder
@@ -457,13 +460,14 @@ export default function HaulLegalCalendarPage() {
         </div>
         <p className="fp-legal">{t.legal}</p>
       </div>
+      <HlAccountButton />
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/calendar/page.tsx (v4 - footer
-// Account link; account sync + reminders switch, Connecticut
+// END OF FILE - app/haullegal/calendar/page.tsx (v5 - account
+// circle, footer Account link; account sync + reminders switch, Connecticut
 // switch, Spanish switch; profile form, due-date list, rules
 // reference, Stay Legal pitch)
 // If you can see this comment, the paste was not truncated.
