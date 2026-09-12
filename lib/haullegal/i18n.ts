@@ -1,7 +1,9 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v2 - adds the "Account" link label and
+// HaulLegal language layer (v3 - the account page button reads
+// "Manage", his call.)
+// v2 notes - adds the "Account" link label and
 // the thank-you page's account button, so the account page - the
 // place to manage or cancel - is reachable from every page.)
 // v1 notes - one switch, stored on the device
@@ -420,7 +422,7 @@ const EN = {
     unpaid: "Unpaid - update your card to restart reminders.",
     none: "Not subscribed.",
     openCal: "Open the calendar",
-    manageCancel: "Manage or cancel",
+    manageCancel: "Manage",
     opening: "Opening...",
     startTrial: "Start my free 30 days",
     buyStay: "Get Stay Legal - $39 / month",
@@ -796,7 +798,7 @@ const ES: HlUi = {
     unpaid: "Sin pagar - actualiza tu tarjeta para reactivar los recordatorios.",
     none: "Sin suscripci\u00f3n.",
     openCal: "Abrir el calendario",
-    manageCancel: "Administrar o cancelar",
+    manageCancel: "Administrar",
     opening: "Abriendo...",
     startTrial: "Empezar mis 30 d\u00edas gratis",
     buyStay: "Obtener Stay Legal - $39 / mes",
@@ -825,7 +827,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v2 - Account label; EN/ES
+// END OF FILE - lib/haullegal/i18n.ts (v3 - "Manage"; Account
+// label; EN/ES
 // page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
