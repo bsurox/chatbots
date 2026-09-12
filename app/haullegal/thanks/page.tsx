@@ -2,28 +2,28 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// Where HaulLegal buyers land after Stripe says yes (v2 - the BUNDLE:
-// checkout v2 sends ?product=bundle when the walkthrough came with
-// the free month attached; that lands as "You're in" plus "Stay
-// Legal is on, free for 30 days" with doors to the walkthrough and
-// the calendar - no trial button needed. ?product=walkthrough (the
-// walkthrough alone, only for accounts already subscribed) and
-// ?product=staylegal keep their v1 screens.)
-// v1 notes: Same
-// doctrine as the prep thanks pages: the webhook usually records
-// the purchase before this page finishes loading, so we poll the
-// access API a few times and the status line flips to confirmed
-// without the buyer doing anything; if Stripe's webhook is having
-// a slow minute, the copy says so instead of looking broken.
-// PRODUCT-AWARE: the checkout route sends ?product=walkthrough or
-// ?product=staylegal. A walkthrough buyer is confirmed by "paid",
-// sent to the walkthrough, and offered the free 30 days of Stay
-// Legal right here (one click into the subscription checkout with
-// the trial the checkout route grants to walkthrough owners). A
-// Stay Legal buyer is confirmed by "sub" and sent to the calendar.
-// The product is read from the URL inside useEffect, never during
-// render (Next 16 prerender rule). No pixels yet.
+// Where HaulLegal buyers land after Stripe says yes (v3 - SPANISH:
+// every string comes from lib/haullegal/i18n.ts through the
+// hl-lang switch the buyer set before checkout; no pill here, the
+// page is a receipt screen.)
+// v2 notes - the BUNDLE: checkout v2 sends ?product=bundle when the
+// walkthrough came with the free month attached; that lands as
+// "You're in" plus "Stay Legal is on, free for 30 days" with doors
+// to the walkthrough and the calendar - no trial button needed.
+// ?product=walkthrough (the walkthrough alone, only for accounts
+// already subscribed) and ?product=staylegal keep their v1 screens.
+// v1 notes - same doctrine as the prep thanks pages: the webhook
+// usually records the purchase before this page finishes loading,
+// so we poll the access API a few times and the status line flips
+// to confirmed without the buyer doing anything; if Stripe's
+// webhook is having a slow minute, the copy says so instead of
+// looking broken. PRODUCT-AWARE: a walkthrough buyer is confirmed
+// by "paid" and offered the free 30 days of Stay Legal right here;
+// a Stay Legal buyer is confirmed by "sub" and sent to the
+// calendar. The product is read from the URL inside useEffect,
+// never during render (Next 16 prerender rule). No pixels yet.
 
 type Product = "bundle" | "walkthrough" | "staylegal";
 
@@ -34,6 +34,8 @@ export default function HaulLegalThanksPage() {
   const [checks, setChecks] = useState(0);
   const [starting, setStarting] = useState(false);
   const [err, setErr] = useState("");
+  const [lang] = useHlLang();
+  const t = HL_UI[lang].thanks;
 
   useEffect(() => {
     try {
@@ -41,13 +43,13 @@ export default function HaulLegalThanksPage() {
       if (p === "staylegal") setProduct("staylegal");
       else if (p === "walkthrough") setProduct("walkthrough");
     } catch {
-      // no query string - default is the walkthrough
+      // no query string - default is the bundle
     }
   }, []);
 
   useEffect(() => {
     if (confirmed || checks >= 5) return;
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       fetch("/haullegal/api/access")
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
@@ -57,7 +59,7 @@ export default function HaulLegalThanksPage() {
         })
         .catch(() => setChecks((c) => c + 1));
     }, checks === 0 ? 400 : 1600);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [checks, confirmed, product]);
 
   async function startTrial() {
@@ -68,7 +70,7 @@ export default function HaulLegalThanksPage() {
       const res = await fetch("/haullegal/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: "staylegal" }),
+        body: JSON.stringify({ product: "staylegal", lang }),
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.url) {
@@ -80,10 +82,10 @@ export default function HaulLegalThanksPage() {
         setStarting(false);
         return;
       }
-      setErr("Could not open checkout - try again from the buy page.");
+      setErr(t.err);
       setStarting(false);
     } catch {
-      setErr("Could not open checkout - try again from the buy page.");
+      setErr(t.err);
       setStarting(false);
     }
   }
@@ -100,57 +102,48 @@ export default function HaulLegalThanksPage() {
             <path className="draw c2" d="M29 52 L45 67 L73 35" pathLength={100} />
           </svg>
         </div>
-        <p className="fp-thanksh">{isStay ? "Reminders are on." : "You're in."}</p>
+        <p className="fp-thanksh">{isStay ? t.remindersOn : t.youreIn}</p>
         <p className="fp-thankssub">
-          {confirmed
-            ? isStay
-              ? "Stay Legal is active on your account. Put your dates in and the calendar takes it from here."
-              : isBundle
-                ? "The full walkthrough is unlocked, and Stay Legal is on - free for 30 days, then $39 a month unless you cancel from your account page."
-                : "The full walkthrough is unlocked on your account. Time to get legal."
-            : "Payment received - your access is activating now. If things still look locked in a minute, refresh this page."}
+          {confirmed ? (isStay ? t.subActive : isBundle ? t.bundleActive : t.walkUnlocked) : t.activating}
         </p>
         <div className="fp-authrow">
           {isStay ? (
             <>
               <Link className="fp-authbtn" href="/haullegal/calendar">
-                Open my calendar
+                {t.openMyCal}
               </Link>
               <Link className="fp-authbtn ghost" href="/haullegal/start">
-                Back to the walkthrough
+                {t.backToWalk}
               </Link>
             </>
           ) : (
             <>
               <Link className="fp-authbtn" href="/haullegal/start">
-                Open the walkthrough
+                {t.openWalk}
               </Link>
               {alreadySub || isBundle ? (
                 <Link className="fp-authbtn exam" href="/haullegal/calendar">
-                  Open my calendar
+                  {t.openMyCal}
                 </Link>
               ) : (
                 <button className="fp-authbtn exam" disabled={starting} onClick={startTrial} type="button">
-                  {starting ? "Opening secure checkout..." : "Start my free 30 days of Stay Legal"}
+                  {starting ? t.openingCheckout : t.startTrial}
                 </button>
               )}
             </>
           )}
         </div>
         {err ? <p className="fp-buyerr">{err}</p> : null}
-        <p className="fp-buynote">
-          {isStay || isBundle
-            ? "A receipt is on its way to your email. Manage or cancel Stay Legal any time from your account page."
-            : "A receipt is on its way to your email. The free 30 days needs a card on file and bills $39 a month after - cancel any time from your account page."}
-        </p>
+        <p className="fp-buynote">{isStay || isBundle ? t.receiptStay : t.receiptWalk}</p>
       </div>
     </div>
   );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/thanks/page.tsx (v2 - bundle
-// screen: walkthrough + Stay Legal trial confirmed together)
+// END OF FILE - app/haullegal/thanks/page.tsx (v3 - Spanish
+// switch; bundle screen: walkthrough + Stay Legal trial confirmed
+// together)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
