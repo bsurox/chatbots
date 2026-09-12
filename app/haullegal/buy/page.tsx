@@ -2,54 +2,42 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import HlLangToggle from "@/app/haullegal/lang-toggle";
+import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// The HaulLegal storefront (v3 - his spec: the "Includes your first
-// 30 days of Stay Legal free" line moves out of the bullet list and
-// sits as a green chip right beside the $249, wrapping under it on
-// narrow phones; the price-tag line no longer repeats it.)
-// v2 notes - THE FREE MONTH IS IN THE CARD, his
-// spec: the walkthrough card now says outright that it includes the
-// first 30 days of Stay Legal, then $39 a month until canceled, and
-// the fine print under the button repeats it. Checkout v2 charges
-// exactly that in one Stripe session. Card 2 (Stay Legal alone, $39
-// a month, no trial) stays for people who only want the calendar or
-// who canceled and want back in.)
-// v1 notes: two cards, both flat, no clock.
-// Doctrine carried over from the prep storefronts: signed-out
-// visitors get the auth doors first (a purchase must attach to a
-// real account), the checkout route is the charge authority and
-// guards double-buying, owners see their doors instead of a buy
-// button. No ad-pixel call - there is no HaulLegal analytics
-// island yet. ?product=staylegal in the URL scrolls nothing and
-// changes nothing in v1 except which button the thanks page points
-// people to - kept simple on purpose.
+// The HaulLegal storefront (v4 - SPANISH: every string comes from
+// lib/haullegal/i18n.ts through the hl-lang switch, the EN / ES
+// pill sits in the top bar, and the checkout request now carries
+// the language so Stripe's hosted page opens in Spanish too
+// (checkout v3 reads it). The Stay Legal card lists Connecticut
+// among the by-the-mile states. Prices, products and the
+// already-owned logic are unchanged.)
+// v3 notes - his spec: the "Includes your first 30 days of Stay
+// Legal free" line moves out of the bullet list and sits as a green
+// chip right beside the $249, wrapping under it on narrow phones.
+// v2 notes - THE FREE MONTH IS IN THE CARD, his spec: the
+// walkthrough card says outright that it includes the first 30
+// days of Stay Legal, then $39 a month until canceled. Checkout v2
+// charges exactly that in one Stripe session. Card 2 (Stay Legal
+// alone, $39 a month, no trial) stays for people who only want the
+// calendar or who canceled and want back in.
+// v1 notes - two cards, both flat, no clock. Doctrine carried over
+// from the prep storefronts: signed-out visitors get the auth doors
+// first (a purchase must attach to a real account), the checkout
+// route is the charge authority and guards double-buying, owners
+// see their doors instead of a buy button. No ad-pixel call.
 // No Date.now()/Math.random() in render (Next 16 prerender rule).
 
 type Access = { loggedIn: boolean; paid: boolean; sub: boolean };
 type Product = "walkthrough" | "staylegal";
 
-const WALK_FEATURES = [
-  "All 23 steps, in order, from forming the business to your first paid load",
-  "The real government fee beside every step - USDOT $0, authority $300, UCR $46",
-  "Motus walkthrough: Login.gov, the phone ID check, what every Pending status means",
-  "The mistakes FMCSA itself warns about, and the citation for every rule",
-  "One-click links to the official page for each step - you do every filing yourself",
-  "Check-off progress that follows you between your phone and your laptop",
-];
-
-const STAY_FEATURES = [
-  "Your biennial update month, worked out from your USDOT number",
-  "IFTA quarters, UCR, Form 2290, medical card, annual inspections, the New Entrant audit",
-  "Kentucky, New Mexico, New York and Oregon by-the-mile filings when you run there",
-  "Email reminders 30 days, 7 days and 1 day before every deadline",
-  "Saved to your account - update a date once, the calendar moves with it",
-  "Cancel any time from your account page",
-];
-
 export default function HaulLegalBuyPage() {
   const [access, setAccess] = useState<Access | null>(null);
   const [buying, setBuying] = useState<Product | null>(null);
   const [err, setErr] = useState("");
+  const [lang] = useHlLang();
+  const ui = HL_UI[lang];
+  const t = ui.buy;
 
   useEffect(() => {
     fetch("/haullegal/api/access")
@@ -72,7 +60,7 @@ export default function HaulLegalBuyPage() {
       const res = await fetch("/haullegal/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product }),
+        body: JSON.stringify({ product, lang }),
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.url) {
@@ -91,10 +79,10 @@ export default function HaulLegalBuyPage() {
         setBuying(null);
         return;
       }
-      setErr("Could not start checkout - please try again.");
+      setErr(t.err);
       setBuying(null);
     } catch {
-      setErr("Could not start checkout - please try again.");
+      setErr(t.err);
       setBuying(null);
     }
   }
@@ -102,47 +90,38 @@ export default function HaulLegalBuyPage() {
   const doors = (
     <div className="fp-authrow">
       <Link className="fp-authbtn" href="/register">
-        Create your account to buy
+        {t.doorCreate}
       </Link>
       <Link className="fp-authbtn ghost" href="/login">
-        I already have an account
+        {t.doorHave}
       </Link>
     </div>
   );
 
   return (
     <div className="fp-wrap">
-      <div className="fp-top">
+      <div className="fp-top" style={{ flexWrap: "wrap", gap: "8px" }}>
         <Link className="fp-backpill" href="/haullegal">
-          Back to{" "}
+          {ui.common.backTo}{" "}
           <span className="fp-wordmark">
             Haul<span>Legal</span>
           </span>
         </Link>
+        <HlLangToggle />
       </div>
 
       <div className="fp-buycard">
-        <p className="fp-buyh">Launch walkthrough</p>
-        <p className="fp-buysub">
-          Every registration a new trucking company needs, in the order it
-          happens, at the real government prices - built for the Motus
-          system FMCSA switched to in May 2026.
-        </p>
+        <p className="fp-buyh">{t.walkH}</p>
+        <p className="fp-buysub">{t.walkSub}</p>
         <div className="fp-pricebig" style={{ flexWrap: "wrap", rowGap: "8px" }}>
           <span className="fp-pricenow">$249</span>
           <span className="fp-chip" style={{ whiteSpace: "normal", lineHeight: 1.4 }}>
-            Includes your first 30 days of Stay Legal free - the deadline
-            calendar with email reminders
+            {t.chip}
           </span>
         </div>
-        <p className="fp-pricetag">
-          One-time payment. After the free month, Stay Legal is $39 a month
-          - cancel any time. Filing services charge $300 to $995 to do these
-          same clicks for you - and since Motus, you still have to do the ID
-          check yourself.
-        </p>
+        <p className="fp-pricetag">{t.walkTag}</p>
         <div className="fp-feats">
-          {WALK_FEATURES.map((f) => (
+          {t.walkFeatures.map((f) => (
             <div className="fp-feat" key={f}>
               <b>+</b>
               <span>{f}</span>
@@ -151,27 +130,23 @@ export default function HaulLegalBuyPage() {
         </div>
         {access === null ? (
           <button className="fp-buybtn" disabled type="button">
-            Loading...
+            {ui.common.loading}
           </button>
         ) : access.paid ? (
           <div className="fp-owned">
-            <p className="fp-ownedh">You own the walkthrough.</p>
+            <p className="fp-ownedh">{t.ownWalk}</p>
             <div className="fp-authrow">
               <Link className="fp-authbtn" href="/haullegal/start">
-                Open the walkthrough
+                {t.openWalk}
               </Link>
             </div>
           </div>
         ) : access.loggedIn ? (
           <>
             <button className="fp-buybtn" disabled={buying !== null} onClick={() => buy("walkthrough")} type="button">
-              {buying === "walkthrough" ? "Opening secure checkout..." : "Get the walkthrough - $249"}
+              {buying === "walkthrough" ? t.openingCheckout : t.buyWalk}
             </button>
-            <p className="fp-buynote">
-              {access.sub
-                ? "Stay Legal is already running on your account, so this charges the $249 walkthrough only."
-                : "$249 today. Stay Legal starts free and bills $39 a month after 30 days until you cancel - one click from your account page, any time before then and you pay nothing more."}
-            </p>
+            <p className="fp-buynote">{access.sub ? t.noteSubRunning : t.noteBundle}</p>
           </>
         ) : (
           doors
@@ -179,22 +154,15 @@ export default function HaulLegalBuyPage() {
       </div>
 
       <div className="fp-buycard" style={{ marginTop: "18px" }}>
-        <p className="fp-buyh">Stay Legal</p>
-        <p className="fp-buysub">
-          The deadline calendar that remembers everything after your authority
-          goes active - and emails you before each date.
-        </p>
+        <p className="fp-buyh">{t.stayH}</p>
+        <p className="fp-buysub">{t.staySub}</p>
         <div className="fp-pricebig">
           <span className="fp-pricenow">$39</span>
-          <span className="fp-pricewas" style={{ textDecoration: "none" }}>/ month</span>
+          <span className="fp-pricewas" style={{ textDecoration: "none" }}>{t.perMonth}</span>
         </div>
-        <p className="fp-pricetag">
-          Cancel any time. Included free for 30 days with the walkthrough
-          above; on its own it starts today. Monthly compliance services
-          charge $49.50 to $247.
-        </p>
+        <p className="fp-pricetag">{t.stayTag}</p>
         <div className="fp-feats">
-          {STAY_FEATURES.map((f) => (
+          {t.stayFeatures.map((f) => (
             <div className="fp-feat" key={f}>
               <b>+</b>
               <span>{f}</span>
@@ -203,58 +171,51 @@ export default function HaulLegalBuyPage() {
         </div>
         {access === null ? (
           <button className="fp-buybtn" disabled type="button">
-            Loading...
+            {ui.common.loading}
           </button>
         ) : access.sub ? (
           <div className="fp-owned">
-            <p className="fp-ownedh">Stay Legal is on.</p>
+            <p className="fp-ownedh">{t.stayOn}</p>
             <div className="fp-authrow">
               <Link className="fp-authbtn" href="/haullegal/calendar">
-                Open the calendar
+                {t.openCal}
               </Link>
               <Link className="fp-authbtn ghost" href="/haullegal/account">
-                Manage subscription
+                {t.manageSub}
               </Link>
             </div>
           </div>
         ) : access.loggedIn ? (
           <button className="fp-buybtn" disabled={buying !== null} onClick={() => buy("staylegal")} type="button">
-            {buying === "staylegal" ? "Opening secure checkout..." : "Get Stay Legal - $39 / month"}
+            {buying === "staylegal" ? t.openingCheckout : t.buyStay}
           </button>
         ) : (
           doors
         )}
         {err ? <p className="fp-buyerr">{err}</p> : null}
-        <p className="fp-buynote">
-          Secure checkout by Stripe - charges read ASKEVO on your card
-          statement. Purchases attach to your account, so you can use them
-          from any device. Questions: support@askevo.ai
-        </p>
+        <p className="fp-buynote">{t.secure}</p>
       </div>
 
       <div className="fp-foot">
         <div className="fp-links">
           <Link className="fp-link" href="/haullegal/terms">
-            Terms
+            {ui.common.terms}
           </Link>
           <Link className="fp-link" href="/haullegal/privacy">
-            Privacy
+            {ui.common.privacy}
           </Link>
         </div>
-        <p className="fp-legal">
-          HaulLegal is a product of AskEvo LLC, Boise, Idaho. Not a government
-          agency, not a law firm. We never file on your behalf. Questions:
-          support@askevo.ai
-        </p>
+        <p className="fp-legal">{t.legal}</p>
       </div>
     </div>
   );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/buy/page.tsx (v3 - free-month chip
-// beside the $249; auto-renew fine print; Stay Legal alone card;
-// auth doors; owned states)
+// END OF FILE - app/haullegal/buy/page.tsx (v4 - Spanish switch,
+// language passed to checkout; free-month chip beside the $249;
+// auto-renew fine print; Stay Legal alone card; auth doors; owned
+// states)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
