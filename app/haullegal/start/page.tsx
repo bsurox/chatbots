@@ -2,13 +2,16 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import HlAccountButton from "@/app/haullegal/account-button";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v4 - footer gains the "Account" link,
-// the door to managing or canceling Stay Legal.)
+// HaulLegal walkthrough room (v5 - the floating bottom-left account
+// circle (account-button.tsx) joins the page.)
+// v4 notes - footer gains the "Account" link, the door to managing
+// Stay Legal.
 // v3 notes - three things:
 // 1. SPANISH: the EN / ES pill in the top bar; page furniture comes
 //    from lib/haullegal/i18n.ts and the step content is overlaid
@@ -352,13 +355,14 @@ export default function HaulLegalStartPage() {
         </div>
         <p className="fp-legal">{t.legal}</p>
       </div>
+      <HlAccountButton />
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v4 - footer Account
-// link; Spanish switch, account progress sync, partner buttons;
+// END OF FILE - app/haullegal/start/page.tsx (v5 - account circle,
+// footer Account link; Spanish switch, account progress sync, partner buttons;
 // 23-step checklist, free "Before you apply" phase, gate card)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
