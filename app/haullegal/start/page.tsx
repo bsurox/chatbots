@@ -7,7 +7,9 @@ import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v3 - three things:
+// HaulLegal walkthrough room (v4 - footer gains the "Account" link,
+// the door to managing or canceling Stay Legal.)
+// v3 notes - three things:
 // 1. SPANISH: the EN / ES pill in the top bar; page furniture comes
 //    from lib/haullegal/i18n.ts and the step content is overlaid
 //    from lib/haullegal/steps-es.ts by step id. Fees, links, order
@@ -338,6 +340,9 @@ export default function HaulLegalStartPage() {
           <button className="fp-link" onClick={resetAll} type="button">
             {t.reset}
           </button>
+          <Link className="fp-link" href="/haullegal/account">
+            {ui.common.account}
+          </Link>
           <Link className="fp-link" href="/haullegal/terms">
             {ui.common.terms}
           </Link>
@@ -352,8 +357,8 @@ export default function HaulLegalStartPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v3 - Spanish switch,
-// account progress sync, partner buttons; 23-step checklist, free
-// "Before you apply" phase, gate card)
+// END OF FILE - app/haullegal/start/page.tsx (v4 - footer Account
+// link; Spanish switch, account progress sync, partner buttons;
+// 23-step checklist, free "Before you apply" phase, gate card)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
