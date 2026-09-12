@@ -1,6 +1,12 @@
 // FILE: lib/haullegal/steps.ts
 
-// HaulLegal walkthrough content (v1). This is the spine of the
+// HaulLegal walkthrough content (v2 - Connecticut's Highway Use Fee
+// joins the by-the-mile step as the fifth state, and the partner
+// link table HL_PARTNER_LINKS ships EMPTY: each walkthrough step
+// with a partner slot shows a partner button only once its entry
+// here carries a real tracked URL, so wiring an affiliate link is a
+// one-line data edit in this file.)
+// v1 notes - this is the spine of the
 // product: every step a brand-new one-truck, interstate, for-hire
 // carrier (general freight, no hazmat) takes to get legal to haul,
 // in the order they happen, with the REAL official fee, where the
@@ -63,7 +69,7 @@ export const HL_PHASES: Array<{ id: HlPhase; title: string; blurb: string }> = [
   {
     id: "state",
     title: "Taxes, plates and fuel",
-    blurb: "The heavy-truck tax, apportioned plates, the fuel-tax license, and the four states that charge by the mile.",
+    blurb: "The heavy-truck tax, apportioned plates, the fuel-tax license, and the five states that charge by the mile.",
   },
   {
     id: "operate",
@@ -408,9 +414,9 @@ export const HL_STEPS: HlStep[] = [
   {
     id: "state-extra",
     phase: "state",
-    title: "Four states charge by the mile - register before you enter them",
+    title: "Five states charge by the mile - register before you enter them",
     summary:
-      "Kentucky (KYU, trucks over 59,999 lbs, $0.0285 per mile, quarterly), New Mexico (weight-distance permit for trucks over 26,000 lbs, renewed yearly, quarterly returns), New York (highway use tax certificate and decal for trucks over 18,000 lbs, returns usually quarterly) and Oregon (weight-mile tax over 26,000 lbs, monthly reports, bond required) each want their own registration and their own returns - and all four want a return even for a period with no miles.",
+      "Kentucky (KYU, trucks over 59,999 lbs, $0.0285 per mile, quarterly), New Mexico (weight-distance permit for trucks over 26,000 lbs, renewed yearly, quarterly returns), New York (highway use tax certificate and decal for trucks over 18,000 lbs, returns usually quarterly), Oregon (weight-mile tax over 26,000 lbs, monthly reports, bond required) and Connecticut (Highway Use Fee on trucks of 26,000 lbs and up, 2.5 to 17.5 cents a mile by weight, quarterly through myconneCT) each want their own registration and their own returns - and all five want a return even for a period with no miles.",
     fee: "Small registration fees plus per-mile tax when you run there",
     where: "Each state's motor carrier or tax site",
     url: "https://drive.ky.gov/motor-carriers/Pages/KYU.aspx",
@@ -420,8 +426,9 @@ export const HL_STEPS: HlStep[] = [
       "Kentucky revokes a KYU license for skipped zero-mile returns and charges a $500 reinstatement fee.",
       "New York fines $500 to $2,000 for a first offense of running without the HUT certificate; a $25 trip certificate covers a one-off (max 10 a year).",
       "Oregon sells a temporary pass ($9 plus the mileage tax) if you rarely go there.",
+      "Connecticut's fee applies to any truck of 26,000 lbs or more on its highways, based there or not; a missed return costs 10% of the fee or $50, whichever is greater.",
     ],
-    citeLabel: "KY KYU / NM WDT / NY HUT / OR weight-mile pages",
+    citeLabel: "KY KYU / NM WDT / NY HUT / OR weight-mile / CT HUF pages",
     cite: "https://www.tax.ny.gov/bus/hut/huidx.htm",
     free: false,
   },
@@ -548,6 +555,13 @@ export const HL_MARKET: Array<{ label: string; value: string; ours?: boolean }> 
   { label: "HaulLegal Stay Legal calendar", value: "$39 / mo, first month free", ours: true },
 ];
 
+// Partner links (v2). One optional entry per partner slot. EMPTY at
+// launch on purpose: the walkthrough shows a partner button on a
+// step only when the step's partner slot has an entry here with a
+// real tracked URL. When an affiliate approval lands, add the line
+// - nothing else changes. The label is what the button says.
+export const HL_PARTNER_LINKS: Partial<Record<HlPartner, { label: string; url: string }>> = {};
+
 export const HL_FREE_STEP_IDS: string[] = HL_STEPS.filter((s) => s.free).map((s) => s.id);
 
 export function getHlStep(id: string): HlStep | undefined {
@@ -559,7 +573,8 @@ export function stepsForPhase(phase: HlPhase): HlStep[] {
 }
 
 // ============================================================
-// END OF FILE - lib/haullegal/steps.ts (v1 - 23 verified steps in
-// 4 phases, real government fee table, market price table)
+// END OF FILE - lib/haullegal/steps.ts (v2 - Connecticut HUF in
+// the by-the-mile step, empty HL_PARTNER_LINKS table; 23 verified
+// steps in 4 phases, government fee table, market price table)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
