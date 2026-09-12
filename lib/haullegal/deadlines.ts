@@ -1,11 +1,19 @@
 // FILE: lib/haullegal/deadlines.ts
 
-// HaulLegal "Stay Legal" calendar rules (v2 - blank defaults: no
-// switch is pre-selected; see HL_EMPTY_PROFILE). Every recurring
+// HaulLegal "Stay Legal" calendar rules (v3 - Connecticut joins:
+// the Highway Use Fee is a fifth by-the-mile charge, quarterly
+// through myconneCT on trucks of 26,000 lbs and up; new "ct"
+// switch, obligation and calendar row. buildCalendar also returns
+// missingKeys - stable ids beside the English "missing" strings -
+// so the Spanish calendar can label them without touching the
+// reminder job.)
+// v2 notes - blank defaults: no
+// switch is pre-selected; see HL_EMPTY_PROFILE. Every recurring
 // obligation a one-truck interstate for-hire carrier keeps up with
 // after the authority is active, with the exact frequency and
 // due-date RULE (verified September 10, 2026 against eCFR, FMCSA,
-// IRS, IFTA, UCR and the four weight-distance states), plus pure
+// IRS, IFTA, UCR, the four weight-distance states and Connecticut's
+// Highway Use Fee), plus pure
 // date helpers that turn a carrier's profile into a sorted list of
 // upcoming due dates. The helpers take the "from" date as an
 // argument on purpose: nothing here reads the clock, so the
@@ -24,7 +32,7 @@ export type HlFreq =
   | "ongoing";
 
 // "always" applies to every carrier; the rest switch on the profile.
-export type HlWhen = "always" | "hvut" | "ifta" | "irp" | "eld" | "ky" | "nm" | "ny" | "or";
+export type HlWhen = "always" | "hvut" | "ifta" | "irp" | "eld" | "ky" | "nm" | "ny" | "or" | "ct";
 
 export type HlObligation = {
   id: string;
@@ -233,6 +241,18 @@ export const HL_OBLIGATIONS: HlObligation[] = [
     cite: "https://www.oregon.gov/odot/MCT/Pages/File-Tax-Reports.aspx",
   },
   {
+    id: "ct",
+    title: "Connecticut Highway Use Fee return",
+    summary: "Trucks of 26,000 lbs or more (FHWA Class 8-13) that run Connecticut highways pay a per-mile fee - 2.5 cents a mile at 26,000-28,000 lbs, rising to 17.5 cents at 80,001 lbs and over - and file quarterly through myconneCT, including quarters with no Connecticut miles.",
+    freq: "quarterly",
+    rule: "Last day of the month after the quarter: April 30, July 31, October 31 and January 31 (quarterly since the October 2023 period; register in myconneCT before the first Connecticut mile).",
+    when: "ct",
+    cost: "2.5 to 17.5 cents per Connecticut mile, by weight",
+    missed: "10% of the fee due or $50, whichever is greater, plus interest - and the return is required even for a quarter with no Connecticut miles.",
+    citeLabel: "Connecticut DRS - Highway Use Fee",
+    cite: "https://portal.ct.gov/drs/businesses/highway-use-fee/huf",
+  },
+  {
     id: "audit",
     title: "New Entrant safety audit",
     summary: "FMCSA monitors you for 18 months and audits you inside the first 12. It can come after only 3 months of operation.",
@@ -293,6 +313,7 @@ export type HlProfile = {
   nm: boolean;
   ny: boolean;
   or: boolean;
+  ct: boolean;
 };
 
 // v2: every switch starts OFF. Nothing is assumed about the
@@ -307,6 +328,7 @@ export const HL_EMPTY_PROFILE: HlProfile = {
   nm: false,
   ny: false,
   or: false,
+  ct: false,
 };
 
 export type HlDue = {
@@ -434,16 +456,21 @@ function title(id: string): string {
 
 // ---- The calendar --------------------------------------------------
 
-export function buildCalendar(profile: HlProfile, from: Date): { dues: HlDue[]; missing: string[] } {
+export function buildCalendar(profile: HlProfile, from: Date): { dues: HlDue[]; missing: string[]; missingKeys: string[] } {
   const dues: HlDue[] = [];
   const missing: string[] = [];
+  const missingKeys: string[] = [];
+  const miss = (key: string, text: string) => {
+    missing.push(text);
+    missingKeys.push(key);
+  };
 
   const mcs = nextMcs150Due(profile.usdot, from);
   if (mcs) {
     const slot = mcs150Slot(profile.usdot);
     dues.push({ id: "mcs150", obligationId: "mcs150", title: title("mcs150"), due: mcs, detail: `Your USDOT number puts you in month ${slot?.month} of ${slot?.parity}-numbered years. Free, in Motus.` });
   } else {
-    missing.push("USDOT number (sets your biennial update month)");
+    miss("usdot", "USDOT number (sets your biennial update month)");
   }
 
   dues.push({ id: "ucr", obligationId: "ucr", title: title("ucr"), due: nextUcrDue(from), detail: "Register for next year at ucr.gov before January 1." });
@@ -459,39 +486,40 @@ export function buildCalendar(profile: HlProfile, from: Date): { dues: HlDue[]; 
   if (profile.nm) dues.push({ id: "nm", obligationId: "nm", title: title("nm"), due: nextQuarterlyDue(from), detail: "Return required even with no New Mexico miles; permit renews yearly." });
   if (profile.ny) dues.push({ id: "ny", obligationId: "ny", title: title("ny"), due: nextQuarterlyDue(from), detail: "File even when no tax is due." });
   if (profile.or) dues.push({ id: "or", obligationId: "or", title: title("or"), due: nextMonthlyDue(from), detail: "Monthly report for last month's Oregon miles." });
+  if (profile.ct) dues.push({ id: "ct", obligationId: "ct", title: title("ct"), due: nextQuarterlyDue(from), detail: "File through myconneCT even for a quarter with no Connecticut miles." });
 
   const med = nextAnniversary(parseYmd(profile.medCardIssued), 24, from);
   if (med) dues.push({ id: "medcard", obligationId: "medcard", title: title("medcard"), due: med, detail: "Latest possible date - use the expiration printed on your card if it is sooner." });
-  else missing.push("Date of your last DOT physical (medical card)");
+  else miss("medCardIssued", "Date of your last DOT physical (medical card)");
 
   const mvr = nextAnniversary(parseYmd(profile.lastMvr), 12, from);
   if (mvr) dues.push({ id: "mvr", obligationId: "mvr", title: title("mvr"), due: mvr, detail: "Pull, review, and date-stamp it into your qualification file." });
-  else missing.push("Date of your last driving-record (MVR) review");
+  else miss("lastMvr", "Date of your last driving-record (MVR) review");
 
   const q = nextAnniversary(parseYmd(profile.lastQuery), 12, from);
   if (q) dues.push({ id: "query", obligationId: "query", title: title("query"), due: q, detail: "$1.25 in the Clearinghouse. A limited query is enough." });
-  else missing.push("Date of your last Clearinghouse query");
+  else miss("lastQuery", "Date of your last Clearinghouse query");
 
   const con = nextAnniversary(parseYmd(profile.consortiumEnrolled), 12, from);
   if (con) dues.push({ id: "consortium", obligationId: "consortium", title: title("consortium"), due: con, detail: "Renew before it lapses - there is no grace period on a random pool." });
-  else missing.push("Date you enrolled in your drug and alcohol consortium");
+  else miss("consortiumEnrolled", "Date you enrolled in your drug and alcohol consortium");
 
   const tr = nextAnniversary(parseYmd(profile.tractorInspected), 12, from);
   if (tr) dues.push({ id: "inspection-tractor", obligationId: "inspection", title: "Annual inspection - tractor", due: tr, detail: "Full Appendix A inspection; proof stays on the truck." });
-  else missing.push("Date of the tractor's last annual inspection");
+  else miss("tractorInspected", "Date of the tractor's last annual inspection");
 
   const tl = nextAnniversary(parseYmd(profile.trailerInspected), 12, from);
   if (tl) dues.push({ id: "inspection-trailer", obligationId: "inspection", title: "Annual inspection - trailer", due: tl, detail: "The trailer is its own commercial motor vehicle - it needs its own inspection." });
-  else missing.push("Date of the trailer's last annual inspection");
+  else miss("trailerInspected", "Date of the trailer's last annual inspection");
 
   const ins = nextAnniversary(parseYmd(profile.insuranceRenews), 12, from);
   if (ins) dues.push({ id: "insurance", obligationId: "insurance", title: title("insurance"), due: ins, detail: "No gap, ever - a lapse cancels your federal filing." });
-  else missing.push("Your insurance policy renewal date");
+  else miss("insuranceRenews", "Your insurance policy renewal date");
 
   if (profile.irp) {
     const irp = nextAnniversary(parseYmd(profile.irpRenews), 12, from);
     if (irp) dues.push({ id: "irp", obligationId: "irp", title: title("irp"), due: irp, detail: "Bring the current stamped Schedule 1." });
-    else missing.push("Your IRP plate renewal date");
+    else miss("irpRenews", "Your IRP plate renewal date");
   }
 
   const active = parseYmd(profile.authorityActive);
@@ -501,15 +529,16 @@ export function buildCalendar(profile: HlProfile, from: Date): { dues: HlDue[]; 
       dues.push({ id: "audit", obligationId: "audit", title: title("audit"), due: audit, detail: "Latest date for the New Entrant audit - it can come as early as month 3." });
     }
   } else {
-    missing.push("The date your authority went active (starts the New Entrant clock)");
+    miss("authorityActive", "The date your authority went active (starts the New Entrant clock)");
   }
 
   dues.sort((a, b) => a.due.getTime() - b.due.getTime());
-  return { dues, missing };
+  return { dues, missing, missingKeys };
 }
 
 // ============================================================
-// END OF FILE - lib/haullegal/deadlines.ts (v2 - blank profile
-// defaults; 19 verified obligations, date helpers, buildCalendar)
+// END OF FILE - lib/haullegal/deadlines.ts (v3 - Connecticut
+// Highway Use Fee switch; 20 verified obligations, date helpers,
+// buildCalendar with missingKeys)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
