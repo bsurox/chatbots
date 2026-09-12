@@ -1,11 +1,14 @@
 // FILE: lib/haullegal/guides.ts
 import "server-only";
 
-// HaulLegal guide library (v1) - ten SEO articles targeting the
+// HaulLegal guide library (v2 - the by-the-mile guide gains
+// Connecticut's Highway Use Fee as the fifth state; same slug so
+// nothing already indexed moves.)
+// v1 notes - ten SEO articles targeting the
 // searches a brand-new owner-operator actually types: how to get
 // trucking authority, what it costs, USDOT vs MC number, the
 // BOC-3, Motus and the ID check, the New Entrant audit, IFTA, the
-// four by-the-mile states, Form 2290, and the MCS-150 update.
+// five by-the-mile states, Form 2290, and the MCS-150 update.
 // Every fact is the same primary-source-verified fact set the
 // walkthrough runs on (FMCSA, eCFR, IRS, UCR, IFTA and the state
 // tax pages, September 2026) - government fees appear because they
@@ -366,13 +369,13 @@ export const HL_GUIDES: HlGuide[] = [
   },
   {
     slug: "weight-distance-tax-states",
-    metaTitle: "The Four States That Charge Trucks by the Mile: Kentucky, New Mexico, New York, Oregon",
-    metaDescription: "KYU, New Mexico weight-distance tax, New York HUT and Oregon weight-mile tax: thresholds, rates, filing frequency, and the penalties for skipping a zero-mile return.",
+    metaTitle: "The Five States That Charge Trucks by the Mile: Kentucky, New Mexico, New York, Oregon, Connecticut",
+    metaDescription: "KYU, New Mexico weight-distance tax, New York HUT, Oregon weight-mile tax and Connecticut's Highway Use Fee: thresholds, rates, filing frequency, and the penalties for skipping a zero-mile return.",
     eyebrow: "State taxes",
-    h1: "The Four States That Charge by the Mile",
+    h1: "The Five States That Charge by the Mile",
     updated: UPDATED,
     intro: [
-      "IFTA covers fuel tax. Four states also charge a separate tax on the miles you run inside them, with their own registration and their own returns - and all four want a return even for a period with no miles.",
+      "IFTA covers fuel tax. Five states also charge a separate fee on the miles you run inside them, with their own registration and their own returns - and all five want a return even for a period with no miles. Four are the classic weight-distance taxes; the fifth, Connecticut, added a per-mile Highway Use Fee in 2023 that most guides still leave out.",
     ],
     sections: [
       {
@@ -399,9 +402,15 @@ export const HL_GUIDES: HlGuide[] = [
           "Trucks over 26,000 lbs pay by the mile - *$0.2512 per mile* at 78,001 to 80,000 lbs - and report *monthly*, postmarked by the last day of the month for the previous month, unless the state approves quarterly filing. A bond is required to enroll. If you rarely go, a temporary pass costs $9 plus the mileage tax.",
         ],
       },
+      {
+        h: "Connecticut (Highway Use Fee)",
+        p: [
+          "Since January 1, 2023 any truck of *26,000 lbs or more* (FHWA Class 8 through 13) that runs Connecticut highways owes a per-mile fee, whether or not the carrier is based there: *2.5 cents a mile* at 26,000-28,000 lbs, stepping up by weight to *17.5 cents a mile* at 80,001 lbs and over. You register in myconneCT before the first Connecticut mile and file *quarterly* (since the October 2023 period), by the last day of the month after the quarter - the same four dates as IFTA - and the return is required even for a quarter with no Connecticut miles. A late or short return costs 10% of the fee or $50, whichever is greater, plus interest.",
+        ],
+      },
     ],
     ctaH: "Tell the calendar which states you run.",
-    ctaP: "Flip Kentucky, New Mexico, New York or Oregon on and their returns join your deadline list automatically.",
+    ctaP: "Flip Kentucky, New Mexico, New York, Oregon or Connecticut on and their returns join your deadline list automatically.",
     ctas: [
       { label: "Try the deadline calendar", href: "/haullegal/calendar" },
       { label: "See the walkthrough", href: "/haullegal/start", ghost: true },
@@ -498,7 +507,7 @@ export function getHlGuide(slug: string): HlGuide | null {
 }
 
 // ============================================================
-// END OF FILE - lib/haullegal/guides.ts (v1 - ten verified SEO
-// guides for new owner-operators)
+// END OF FILE - lib/haullegal/guides.ts (v2 - Connecticut joins
+// the by-the-mile guide; ten verified SEO guides)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
