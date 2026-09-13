@@ -14,7 +14,18 @@ import {
 } from "drizzle-orm/pg-core";
 import { db } from "./queries";
 
-// HaulLegal data layer (v1). Same pattern as lib/db/foreman.ts: the
+// HaulLegal data layer (v2 - TEXT REMINDERS: haul_profiles gains
+// phone (E.164, +1XXXXXXXXXX), sms (the owner's current text opt-in)
+// and sms_consent_at (when the consent box was first checked - the
+// record the carriers expect us to keep). saveHaulProfile leaves
+// phone / sms untouched when a caller does not send them (the
+// walkthrough page only saves progress). setSmsByPhone flips the
+// opt-in for every profile carrying a number - the inbound STOP /
+// START webhook and a carrier "unsubscribed" send error use it;
+// START only re-enables a number that consented on the web form.
+// listReminderCandidates now returns phone / sms / reminders and
+// includes owners with either channel on.)
+// v1 notes - same pattern as lib/db/foreman.ts: the
 // tables are created directly in Postgres via setup SQL (one
 // CREATE TABLE IF NOT EXISTS per Prisma Console run), these
 // definitions let us query them type-safely, and every helper the
@@ -50,6 +61,9 @@ export const haulProfiles = pgTable("haul_profiles", {
   profile: jsonb("profile").notNull().default({}),
   progress: jsonb("progress").notNull().default([]),
   reminders: boolean("reminders").notNull().default(true),
+  phone: text("phone"),
+  sms: boolean("sms").notNull().default(false),
+  smsConsentAt: timestamp("sms_consent_at", { withTimezone: true }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -183,12 +197,18 @@ export async function getHaulProfile(userId: string): Promise<HaulProfileRow | n
   return rows[0] ?? null;
 }
 
+// phone / sms undefined = leave what is stored; phone null = clear
+// the number (and the opt-in with it). The consent timestamp is set
+// the first time sms turns on and kept from then on.
 export async function saveHaulProfile(params: {
   userId: string;
   profile: unknown;
   progress: unknown;
   reminders: boolean;
+  phone?: string | null;
+  sms?: boolean;
 }) {
+  const sms = params.phone === null ? false : params.sms;
   await db
     .insert(haulProfiles)
     .values({
@@ -196,6 +216,9 @@ export async function saveHaulProfile(params: {
       profile: params.profile,
       progress: params.progress,
       reminders: params.reminders,
+      phone: params.phone ?? null,
+      sms: sms ?? false,
+      smsConsentAt: sms ? new Date() : null,
     })
     .onConflictDoUpdate({
       target: haulProfiles.userId,
@@ -203,26 +226,53 @@ export async function saveHaulProfile(params: {
         profile: params.profile,
         progress: params.progress,
         reminders: params.reminders,
+        phone: params.phone === undefined ? sql`${haulProfiles.phone}` : params.phone,
+        sms: sms === undefined ? sql`${haulProfiles.sms}` : sms,
+        smsConsentAt: sms ? sql`coalesce(${haulProfiles.smsConsentAt}, now())` : sql`${haulProfiles.smsConsentAt}`,
         updatedAt: sql`now()`,
       },
     });
 }
 
+// Inbound STOP / START (and a carrier "unsubscribed" bounce). START
+// only re-enables numbers that consented on the web form. Returns
+// how many profiles changed.
+export async function setSmsByPhone(phone: string, on: boolean): Promise<number> {
+  const rows = await db
+    .update(haulProfiles)
+    .set({ sms: on, updatedAt: sql`now()` })
+    .where(on ? and(eq(haulProfiles.phone, phone), sql`${haulProfiles.smsConsentAt} is not null`) : eq(haulProfiles.phone, phone))
+    .returning({ userId: haulProfiles.userId });
+  return rows.length;
+}
+
 // ---- Reminder job support -----------------------------------------
 
-export type ReminderCandidate = { userId: string; profile: unknown };
+export type ReminderCandidate = { userId: string; profile: unknown; reminders: boolean; sms: boolean; phone: string | null };
 
-// Everyone with reminders switched on whose Stay Legal is live
-// (trialing / active, or paid through a future date).
+// Everyone with email reminders or text reminders switched on whose
+// Stay Legal is live (trialing / active, or paid through a future
+// date).
 export async function listReminderCandidates(limit = 500): Promise<ReminderCandidate[]> {
   const now = new Date();
   const rows = await db
-    .select({ userId: haulProfiles.userId, profile: haulProfiles.profile, subStatus: haulAccess.subStatus, periodEnd: haulAccess.currentPeriodEnd })
+    .select({
+      userId: haulProfiles.userId,
+      profile: haulProfiles.profile,
+      reminders: haulProfiles.reminders,
+      sms: haulProfiles.sms,
+      phone: haulProfiles.phone,
+    })
     .from(haulProfiles)
     .innerJoin(haulAccess, eq(haulAccess.userId, haulProfiles.userId))
-    .where(and(eq(haulProfiles.reminders, true), sql`(${haulAccess.subStatus} in ('trialing','active') or ${haulAccess.currentPeriodEnd} > ${now})`))
+    .where(
+      and(
+        sql`(${haulProfiles.reminders} = true or ${haulProfiles.sms} = true)`,
+        sql`(${haulAccess.subStatus} in ('trialing','active') or ${haulAccess.currentPeriodEnd} > ${now})`
+      )
+    )
     .limit(limit);
-  return rows.map((r) => ({ userId: r.userId, profile: r.profile }));
+  return rows.map((r) => ({ userId: r.userId, profile: r.profile, reminders: r.reminders, sms: r.sms, phone: r.phone ?? null }));
 }
 
 // Returns true only for the first attempt to send a given reminder -
@@ -243,7 +293,8 @@ export async function sweepReminderLedger() {
 }
 
 // ============================================================
-// END OF FILE - lib/db/haul.ts (v1 - haul_access / haul_profiles /
+// END OF FILE - lib/db/haul.ts (v2 - phone / sms / sms_consent_at
+// on haul_profiles, setSmsByPhone; haul_access / haul_profiles /
 // haul_reminders_sent definitions and helpers)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
