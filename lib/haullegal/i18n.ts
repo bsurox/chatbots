@@ -1,8 +1,10 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v6 - the help chat widget and the
-// per-step tutor get their own string groups, chat and tutor.)
+// HaulLegal language layer (v7 - the tutor's free-limit line says
+// 50 messages a day, matching the tutor route v2.)
+// v6 notes - the help chat widget and the per-step tutor get their
+// own string groups, chat and tutor.
 // v5 notes - the calendar's text-reminder
 // block: mobile number field, the consent checkbox wording (the
 // exact text registered with the carriers - change it here and in
@@ -482,7 +484,7 @@ const EN = {
     typing: "Typing...",
     err: "Something went wrong - try again.",
     limit: "That's the tutor limit for today. Come back tomorrow.",
-    limitFree: "That's the free tutor limit for today. The walkthrough includes 25 tutor messages a day.",
+    limitFree: "That's the free tutor limit for today. The walkthrough includes 50 tutor messages a day.",
   },
   thanks: {
     remindersOn: "Reminders are on.",
@@ -905,7 +907,7 @@ const ES: HlUi = {
     typing: "Escribiendo...",
     err: "Algo sali\u00f3 mal - int\u00e9ntalo de nuevo.",
     limit: "Ese es el l\u00edmite del tutor por hoy. Vuelve ma\u00f1ana.",
-    limitFree: "Ese es el l\u00edmite gratuito del tutor por hoy. La gu\u00eda incluye 25 mensajes del tutor al d\u00eda.",
+    limitFree: "Ese es el l\u00edmite gratuito del tutor por hoy. La gu\u00eda incluye 50 mensajes del tutor al d\u00eda.",
   },
   thanks: {
     remindersOn: "Los recordatorios est\u00e1n activados.",
@@ -929,8 +931,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v6 - chat + tutor
-// strings; text-reminder strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
+// END OF FILE - lib/haullegal/i18n.ts (v7 - tutor 50/day line;
+// chat + tutor strings; text-reminder strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
 // page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
