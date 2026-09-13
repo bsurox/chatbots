@@ -4,17 +4,25 @@ import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
 import HlAccountButton from "@/app/haullegal/account-button";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
+import HlStepTutor from "@/app/haullegal/step-tutor";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v11 - his call after trying the
-// column stacks: back to the plain grid where an OPEN card spans
-// the full row (as v7 did) - the closed cards tile across the
-// screen, and the one you open stretches edge to edge so its
-// walkthrough reads at full width. Wide screens: auto-fill columns
-// at least 270px; phone grid: 2 columns + the full-screen sheet.
-// The gate card sits above the grid of its phase.)
+// HaulLegal walkthrough room (v12 - STEP TUTOR, his spec: every
+// open (unlocked) card carries a small "?" button beside its
+// title, and the phone sheet has one in its header; tapping it
+// opens the step tutor panel (step-tutor.tsx, bottom-right) scoped
+// to that step - "talk to somebody specifically about a step".
+// One tutor open at a time; tapping another card's "?" switches
+// it. Locked cards have no "?" (the tutor route refuses paid steps
+// for non-owners anyway). The phone sheet sits below the tutor
+// panel so the two can be used together.)
+// v11 notes - back to the plain grid where an OPEN card spans the
+// full row: the closed cards tile across the screen, the one you
+// open stretches edge to edge. Wide screens: auto-fill columns at
+// least 270px; phone grid: 2 columns + the full-screen sheet. The
+// gate card sits above the grid of its phase.
 // v10 notes - tried dealing cards into independent column stacks
 // so an open card only grew downward; dropped.
 // v9 notes - MOBILE GRID, his spec: on a
@@ -161,7 +169,7 @@ const sheetWrap: React.CSSProperties = {
   right: 0,
   bottom: 0,
   left: 0,
-  zIndex: 60,
+  zIndex: 48,
   background: "#0a0a0a",
   overflowY: "auto",
   padding: "calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 24px)",
@@ -191,6 +199,7 @@ export default function HaulLegalStartPage() {
   const [viewMode, setViewMode] = useState<View>("list");
   const [narrow, setNarrow] = useState(false);
   const [sheet, setSheet] = useState<string | null>(null);
+  const [tutor, setTutor] = useState<string | null>(null);
   const [lang] = useHlLang();
   const ui = HL_UI[lang];
   const t = ui.start;
@@ -378,6 +387,9 @@ export default function HaulLegalStartPage() {
   const sheetRaw = sheet ? HL_STEPS.find((s) => s.id === sheet) : undefined;
   const sheetStep = sheetRaw ? view(sheetRaw) : undefined;
   const sheetNumber = sheetRaw ? HL_STEPS.indexOf(sheetRaw) + 1 : 0;
+  const tutorRaw = tutor ? HL_STEPS.find((s) => s.id === tutor) : undefined;
+  const tutorStep = tutorRaw ? view(tutorRaw) : undefined;
+  const tutorNumber = tutorRaw ? HL_STEPS.indexOf(tutorRaw) + 1 : 0;
 
   return (
     <div className="fp-wrap" style={grid ? { maxWidth: "none" } : undefined}>
@@ -454,19 +466,24 @@ export default function HaulLegalStartPage() {
             <div className={cls} key={step.id} style={phoneGrid ? phoneCard : grid && isOpen ? fullRow : undefined}>
               <div className="hl-num">{isDone ? "\u2713" : n}</div>
               {unlocked ? (
-                <button
-                  aria-expanded={isOpen}
-                  onClick={() => (phoneGrid ? setSheet(step.id) : toggleOpen(step.id))}
-                  style={headBtn}
-                  type="button"
-                >
-                  <span className="hl-steph" style={{ margin: 0 }}>
-                    {step.title}
-                  </span>
-                  <span style={{ color: "var(--fp)", fontSize: "12px", fontWeight: 800, flexShrink: 0, paddingTop: "3px" }}>
-                    {isOpen ? "\u25B4" : "\u25BE"}
-                  </span>
-                </button>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                  <button
+                    aria-expanded={isOpen}
+                    onClick={() => (phoneGrid ? setSheet(step.id) : toggleOpen(step.id))}
+                    style={{ ...headBtn, flex: 1 }}
+                    type="button"
+                  >
+                    <span className="hl-steph" style={{ margin: 0 }}>
+                      {step.title}
+                    </span>
+                    <span style={{ color: "var(--fp)", fontSize: "12px", fontWeight: 800, flexShrink: 0, paddingTop: "3px" }}>
+                      {isOpen ? "\u25B4" : "\u25BE"}
+                    </span>
+                  </button>
+                  <button aria-label={ui.tutor.btn} className="hl-ask" onClick={() => setTutor(step.id)} title={ui.tutor.btn} type="button">
+                    ?
+                  </button>
+                </div>
               ) : (
                 <p className="hl-steph" style={{ margin: 0 }}>
                   {step.title}
@@ -551,9 +568,14 @@ export default function HaulLegalStartPage() {
                 {sheetStep.title}
               </p>
             </div>
-            <button aria-label={t.hideDetails} onClick={() => setSheet(null)} style={sheetClose} type="button">
-              {"\u2715"}
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+              <button aria-label={ui.tutor.btn} className="hl-ask" onClick={() => setTutor(sheetStep.id)} style={{ width: "38px", height: "38px", fontSize: "16px" }} title={ui.tutor.btn} type="button">
+                ?
+              </button>
+              <button aria-label={t.hideDetails} onClick={() => setSheet(null)} style={sheetClose} type="button">
+                {"\u2715"}
+              </button>
+            </div>
           </div>
           <div style={{ marginTop: "8px" }}>{renderDetail(sheetStep, done.includes(sheetStep.id))}</div>
           <div className="hl-actions" style={{ marginTop: "20px" }}>
@@ -563,13 +585,21 @@ export default function HaulLegalStartPage() {
           </div>
         </div>
       ) : null}
+
+      <HlStepTutor
+        lang={lang}
+        number={tutorNumber}
+        onClose={() => setTutor(null)}
+        stepId={tutorStep ? tutorStep.id : null}
+        title={tutorStep ? tutorStep.title : ""}
+      />
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v11 - open grid card
-// spans the full row; phone grid = two columns + full-screen step
+// END OF FILE - app/haullegal/start/page.tsx (v12 - "?" step
+// tutor on every open card; open grid card spans the full row; phone grid = two columns + full-screen step
 // sheet; Grid view runs full width edge to
 // edge; steps start closed, tap the title to open; List / Grid
 // view switch kept on the device; account circle, footer Account link; Spanish switch,
