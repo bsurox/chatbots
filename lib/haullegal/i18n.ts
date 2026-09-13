@@ -1,9 +1,13 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v4 - the walkthrough's List / Grid
-// view switch and the "every step starts closed" hint; the account
-// circle's "View account" menu button.)
+// HaulLegal language layer (v5 - the calendar's text-reminder
+// block: mobile number field, the consent checkbox wording (the
+// exact text registered with the carriers - change it here and in
+// the campaign together), the ON / OFF switch and its help line.)
+// v4 notes - the walkthrough's List / Grid view switch and the
+// "every step starts closed" hint; the account circle's "View
+// account" menu button.
 // v3 notes - the account page button reads "Manage", his call.
 // v2 notes - adds the "Account" link label and
 // the thank-you page's account button, so the account page - the
@@ -362,6 +366,16 @@ const EN = {
     remindersOn: "Email reminders: ON",
     remindersOff: "Email reminders: OFF",
     remindersHelp: "Stay Legal emails you 30, 7 and 1 days before each date on this list. Tap to turn them off or on.",
+    smsT: "Text reminders",
+    phoneLabel: "Mobile number",
+    phonePh: "10-digit US number",
+    phoneHelp: "The number your reminder texts go to. US mobile numbers only.",
+    phoneBad: "Enter a 10-digit US mobile number to turn on texts.",
+    smsConsent: "Text me my deadline reminders. Message and data rates may apply. Message frequency varies. Reply STOP to cancel, HELP for help.",
+    smsOn: "Text reminders: ON",
+    smsOff: "Text reminders: OFF",
+    smsHelp: "Texts go out 30, 7 and 1 days before each date, alongside the email. Uncheck the box or reply STOP to any text to stop them.",
+    smsLegal: "See our {privacy} and {terms}.",
     legal: "Dates are computed from the information you enter and the rules as verified in September 2026. They are a convenience, not a guarantee - keep your own record and confirm with the agency.",
     walkLink: "The walkthrough",
   },
@@ -743,6 +757,16 @@ const ES: HlUi = {
     remindersOn: "Recordatorios por correo: ACTIVADOS",
     remindersOff: "Recordatorios por correo: APAGADOS",
     remindersHelp: "Stay Legal te manda un correo 30, 7 y 1 d\u00edas antes de cada fecha de esta lista. Toca para apagarlos o encenderlos.",
+    smsT: "Recordatorios por mensaje de texto",
+    phoneLabel: "N\u00famero de celular",
+    phonePh: "N\u00famero de EE. UU. de 10 d\u00edgitos",
+    phoneHelp: "El n\u00famero al que llegan tus recordatorios por texto. Solo celulares de EE. UU.",
+    phoneBad: "Escribe un n\u00famero de celular de EE. UU. de 10 d\u00edgitos para activar los textos.",
+    smsConsent: "Env\u00edame mis recordatorios de fechas l\u00edmite por texto. Pueden aplicar tarifas de mensajes y datos. La frecuencia de mensajes var\u00eda. Responde STOP para cancelar, HELP para ayuda.",
+    smsOn: "Recordatorios por texto: ACTIVADOS",
+    smsOff: "Recordatorios por texto: APAGADOS",
+    smsHelp: "Los textos salen 30, 7 y 1 d\u00edas antes de cada fecha, junto con el correo. Desmarca la casilla o responde STOP a cualquier texto para detenerlos.",
+    smsLegal: "Consulta nuestra {privacy} y nuestros {terms}.",
     legal: "Las fechas se calculan con la informaci\u00f3n que escribes y las reglas tal como las verificamos en septiembre de 2026. Son una ayuda, no una garant\u00eda - lleva tu propio registro y confirma con la agencia.",
     walkLink: "La gu\u00eda",
   },
@@ -839,8 +863,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v4 - List / Grid view
-// strings, "View account"; "Manage"; Account label; EN/ES
+// END OF FILE - lib/haullegal/i18n.ts (v5 - text-reminder
+// strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
 // page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
