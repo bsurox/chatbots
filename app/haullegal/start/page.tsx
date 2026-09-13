@@ -1,44 +1,44 @@
 // FILE: app/haullegal/start/page.tsx
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import HlAccountButton from "@/app/haullegal/account-button";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v5 - the floating bottom-left account
-// circle (account-button.tsx) joins the page.)
+// HaulLegal walkthrough room (v6 - COLLAPSED STEPS + LIST / GRID
+// VIEW, his spec:
+// - Every step now starts CLOSED: the card shows only its number
+//   and title (locked steps add the Locked tag). Tapping the title
+//   opens the whole walkthrough for that step - summary, fee and
+//   time chips, where, do-first, watch-out, source, the official
+//   buttons, the partner button and Mark done - and tapping it
+//   again (or "Hide details" at the bottom) closes it. The old
+//   "Show details" button is gone; the title is the switch.
+// - A View switch (List / Grid) sits above the first phase. List
+//   is the stacked layout as before. Grid lays the closed cards
+//   side by side in rows (as many as fit the screen, one column on
+//   a narrow phone) so the whole list is visible with far less
+//   scrolling; an opened card stretches across the full row so
+//   its walkthrough reads at full width, and the gate card does
+//   the same. The choice is kept on the device (localStorage key
+//   hl-view) and read after mount, hydration-safe. The grid is
+//   inline styles on the existing .hl-steps grid, so haullegal.css
+//   is untouched.)
+// v5 notes - the floating account circle
+// (account-button.tsx) joins the page.
 // v4 notes - footer gains the "Account" link, the door to managing
 // Stay Legal.
-// v3 notes - three things:
-// 1. SPANISH: the EN / ES pill in the top bar; page furniture comes
-//    from lib/haullegal/i18n.ts and the step content is overlaid
-//    from lib/haullegal/steps-es.ts by step id. Fees, links, order
-//    and the free/paid split still come from steps.ts.
-// 2. ACCOUNT SYNC (the reminder-job fix): when the owner is logged
-//    in, progress loads from /haullegal/api/profile and every
-//    check-off saves back to it (debounced), carrying the saved
-//    calendar profile and reminder flag along untouched so this
-//    page never blanks what the calendar wrote. Signed-out owners
-//    keep the on-device copy exactly as before. A status line under
-//    the progress bar says which one is in effect.
-// 3. PARTNER BUTTONS: a step whose partner slot has an entry in
-//    HL_PARTNER_LINKS (steps.ts) shows that link in its detail
-//    block with the referral disclosure; the table ships empty, so
-//    nothing shows until a tracked link is added there.)
-// v2 notes - TIGHTER PREVIEW, his call: locked steps show ONLY
-// their title and a Locked tag - the free view is a table of
-// contents, not the content. The four "Before you apply" steps
-// stay fully open as the free sample; the gate card spells out what
-// the paid 19 contain.
-// v1 notes - the product itself: the 23 verified steps in their
-// four phases as a checklist worked through on a phone: number,
-// title, plain summary, the official fee chip and the typical
-// time, and an expandable detail block with what to do first, the
-// FMCSA-flagged mistakes, the citation, and a button to the
-// official page. Access comes from /haullegal/api/access.
+// v3 notes - SPANISH via i18n.ts and steps-es.ts; ACCOUNT SYNC
+// (progress loads from and saves to /haullegal/api/profile when
+// logged in, debounced, carrying the calendar profile and reminder
+// flag along untouched); PARTNER BUTTONS from HL_PARTNER_LINKS.
+// v2 notes - locked steps show only their title and a Locked tag;
+// the four "Before you apply" steps are the free sample; the gate
+// card spells out what the paid 19 contain.
+// v1 notes - the 23 verified steps in four phases as a checklist.
 // All storage reads happen in useEffect (hydration rule); no
 // Date.now()/Math.random() in render (Next 16 prerender rule).
 // External official links use real anchors with rel=noopener -
@@ -46,8 +46,10 @@ import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
 const STORE_KEY = "hl-progress";
 const PROFILE_KEY = "hl-profile";
+const VIEW_KEY = "hl-view";
 
 type Saved = { profile: Record<string, unknown>; progress: string[]; reminders: boolean };
+type View = "list" | "grid";
 
 function loadDone(): string[] {
   try {
@@ -78,6 +80,45 @@ function loadLocalProfile(): Record<string, unknown> {
   }
 }
 
+function loadView(): View {
+  try {
+    return window.localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list";
+  } catch {
+    return "list";
+  }
+}
+
+function saveView(v: View) {
+  try {
+    window.localStorage.setItem(VIEW_KEY, v);
+  } catch {
+    // storage unavailable - the choice lasts for this page view only
+  }
+}
+
+const headBtn: React.CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: "10px",
+  width: "100%",
+  background: "none",
+  border: "none",
+  padding: 0,
+  margin: 0,
+  textAlign: "left",
+  cursor: "pointer",
+  fontFamily: "inherit",
+  color: "inherit",
+};
+
+const gridStyle: React.CSSProperties = {
+  gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
+  alignItems: "start",
+};
+
+const fullRow: React.CSSProperties = { gridColumn: "1 / -1" };
+
 export default function HaulLegalStartPage() {
   const [paid, setPaid] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -85,6 +126,7 @@ export default function HaulLegalStartPage() {
   const [done, setDone] = useState<string[]>([]);
   const [open, setOpen] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [viewMode, setViewMode] = useState<View>("list");
   const [lang] = useHlLang();
   const ui = HL_UI[lang];
   const t = ui.start;
@@ -96,6 +138,7 @@ export default function HaulLegalStartPage() {
   useEffect(() => {
     const local = loadDone();
     setDone(local);
+    setViewMode(loadView());
     setLoaded(true);
     fetch("/haullegal/api/access")
       .then((res) => (res.ok ? res.json() : null))
@@ -153,6 +196,11 @@ export default function HaulLegalStartPage() {
     setOpen((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
+  function pickView(v: View) {
+    setViewMode(v);
+    saveView(v);
+  }
+
   function resetAll() {
     if (!window.confirm(t.resetConfirm)) return;
     setDone([]);
@@ -175,6 +223,7 @@ export default function HaulLegalStartPage() {
   const doneCount = HL_STEPS.filter((s) => done.includes(s.id)).length;
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
   const firstLockedId = paid ? null : HL_STEPS.find((s) => !s.free)?.id ?? null;
+  const grid = viewMode === "grid";
   let number = 0;
 
   return (
@@ -225,6 +274,19 @@ export default function HaulLegalStartPage() {
         ) : null}
       </div>
 
+      <div className="hl-toggles" style={{ alignItems: "center", marginTop: "18px" }}>
+        <span className="hl-fl">{t.viewLabel}</span>
+        <button className={"hl-tog" + (grid ? "" : " on")} onClick={() => pickView("list")} type="button">
+          {t.viewList}
+        </button>
+        <button className={"hl-tog" + (grid ? " on" : "")} onClick={() => pickView("grid")} type="button">
+          {t.viewGrid}
+        </button>
+      </div>
+      <p className="hl-fh" style={{ marginTop: "8px" }}>
+        {t.viewHint}
+      </p>
+
       {HL_PHASES.map((phase) => {
         const ph = lang === "es" ? HL_PHASES_ES[phase.id] : phase;
         return (
@@ -233,81 +295,98 @@ export default function HaulLegalStartPage() {
             <p className="fp-cd" style={{ margin: "0 0 12px" }}>
               {ph.blurb}
             </p>
-            <div className="hl-steps">
+            <div className="hl-steps" style={grid ? gridStyle : undefined}>
               {HL_STEPS.filter((s) => s.phase === phase.id).map((raw: HlStep) => {
                 const step = view(raw);
                 number += 1;
                 const unlocked = step.free || paid;
                 const isDone = done.includes(step.id);
-                const isOpen = open.includes(step.id);
+                const isOpen = unlocked && open.includes(step.id);
                 const cls = "hl-step" + (isDone ? " done" : "") + (unlocked ? "" : " locked");
                 const partner = step.partner ? HL_PARTNER_LINKS[step.partner] : undefined;
+                const gate =
+                  !unlocked && step.id === firstLockedId ? (
+                    <div className="fp-gate" style={grid ? { ...fullRow, margin: 0 } : { margin: 0 }}>
+                      <p className="fp-gateh">{t.gateH}</p>
+                      <p className="fp-gated">{t.gateP}</p>
+                      <Link className="fp-gatebtn" href="/haullegal/buy">
+                        {t.gateBtn}
+                      </Link>
+                    </div>
+                  ) : null;
                 return (
-                  <div key={step.id}>
-                    {!unlocked && step.id === firstLockedId ? (
-                      <div className="fp-gate" style={{ margin: "0 0 10px" }}>
-                        <p className="fp-gateh">{t.gateH}</p>
-                        <p className="fp-gated">{t.gateP}</p>
-                        <Link className="fp-gatebtn" href="/haullegal/buy">
-                          {t.gateBtn}
-                        </Link>
-                      </div>
-                    ) : null}
-                    <div className={cls}>
+                  <Fragment key={step.id}>
+                    {gate}
+                    <div className={cls} style={grid && isOpen ? fullRow : undefined}>
                       <div className="hl-num">{isDone ? "\u2713" : number}</div>
-                      <p className="hl-steph">{step.title}</p>
-                      {unlocked ? <p className="hl-stepd">{step.summary}</p> : null}
-                      <div className="hl-meta">
-                        {unlocked ? <span className="hl-fee">{step.fee}</span> : null}
-                        {unlocked ? <span className="hl-tag">{step.time}</span> : <span className="hl-tag">{t.locked}</span>}
-                      </div>
                       {unlocked ? (
+                        <button aria-expanded={isOpen} onClick={() => toggleOpen(step.id)} style={headBtn} type="button">
+                          <span className="hl-steph" style={{ margin: 0 }}>
+                            {step.title}
+                          </span>
+                          <span style={{ color: "var(--fp)", fontSize: "12px", fontWeight: 800, flexShrink: 0, paddingTop: "3px" }}>
+                            {isOpen ? "\u25B4" : "\u25BE"}
+                          </span>
+                        </button>
+                      ) : (
+                        <p className="hl-steph" style={{ margin: 0 }}>
+                          {step.title}
+                        </p>
+                      )}
+                      {!unlocked ? (
+                        <div className="hl-meta">
+                          <span className="hl-tag">{t.locked}</span>
+                        </div>
+                      ) : null}
+                      {isOpen ? (
                         <>
-                          <button className="hl-more" onClick={() => toggleOpen(step.id)} type="button">
-                            {isOpen ? t.hideDetails : t.showDetails}
-                          </button>
-                          {isOpen ? (
-                            <div className="hl-detail">
-                              <p className="hl-label">{t.where}</p>
-                              <p className="hl-stepd">{step.where}</p>
-                              {step.needs.length > 0 ? (
-                                <>
-                                  <p className="hl-label">{t.doFirst}</p>
-                                  <ul className="hl-list">
-                                    {step.needs.map((n) => (
-                                      <li key={n}>
-                                        {titleOf(n)}
-                                        {done.includes(n) ? t.doneMark : ""}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </>
-                              ) : null}
-                              <p className="hl-label">{t.watchOut}</p>
-                              {step.gotchas.map((g) => (
-                                <div className="hl-gotcha" key={g}>
-                                  {g}
-                                </div>
-                              ))}
-                              <p className="hl-cite">
-                                <b>{t.source}</b> {step.citeLabel}
-                              </p>
-                              <div className="hl-actions">
-                                <a className="hl-go" href={step.url} rel="noopener noreferrer" target="_blank">
-                                  {t.openOfficial}
-                                </a>
-                                <a className="hl-check" href={step.cite} rel="noopener noreferrer" target="_blank">
-                                  {t.readRule}
-                                </a>
-                                {partner ? (
-                                  <a className="hl-check" href={partner.url} rel="noopener noreferrer sponsored" target="_blank">
-                                    {partner.label}
-                                  </a>
-                                ) : null}
+                          <p className="hl-stepd" style={{ marginTop: "6px" }}>
+                            {step.summary}
+                          </p>
+                          <div className="hl-meta">
+                            <span className="hl-fee">{step.fee}</span>
+                            <span className="hl-tag">{step.time}</span>
+                          </div>
+                          <div className="hl-detail">
+                            <p className="hl-label">{t.where}</p>
+                            <p className="hl-stepd">{step.where}</p>
+                            {step.needs.length > 0 ? (
+                              <>
+                                <p className="hl-label">{t.doFirst}</p>
+                                <ul className="hl-list">
+                                  {step.needs.map((n) => (
+                                    <li key={n}>
+                                      {titleOf(n)}
+                                      {done.includes(n) ? t.doneMark : ""}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </>
+                            ) : null}
+                            <p className="hl-label">{t.watchOut}</p>
+                            {step.gotchas.map((g) => (
+                              <div className="hl-gotcha" key={g}>
+                                {g}
                               </div>
-                              {partner ? <p className="hl-cite">{t.partnerNote}</p> : null}
+                            ))}
+                            <p className="hl-cite">
+                              <b>{t.source}</b> {step.citeLabel}
+                            </p>
+                            <div className="hl-actions">
+                              <a className="hl-go" href={step.url} rel="noopener noreferrer" target="_blank">
+                                {t.openOfficial}
+                              </a>
+                              <a className="hl-check" href={step.cite} rel="noopener noreferrer" target="_blank">
+                                {t.readRule}
+                              </a>
+                              {partner ? (
+                                <a className="hl-check" href={partner.url} rel="noopener noreferrer sponsored" target="_blank">
+                                  {partner.label}
+                                </a>
+                              ) : null}
                             </div>
-                          ) : null}
+                            {partner ? <p className="hl-cite">{t.partnerNote}</p> : null}
+                          </div>
                           <div className="hl-actions">
                             <button
                               className={"hl-check" + (isDone ? " on" : "")}
@@ -317,10 +396,13 @@ export default function HaulLegalStartPage() {
                               {isDone ? t.done : t.markDone}
                             </button>
                           </div>
+                          <button className="hl-more" onClick={() => toggleOpen(step.id)} type="button">
+                            {t.hideDetails}
+                          </button>
                         </>
                       ) : null}
                     </div>
-                  </div>
+                  </Fragment>
                 );
               })}
             </div>
@@ -361,8 +443,10 @@ export default function HaulLegalStartPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v5 - account circle,
-// footer Account link; Spanish switch, account progress sync, partner buttons;
-// 23-step checklist, free "Before you apply" phase, gate card)
+// END OF FILE - app/haullegal/start/page.tsx (v6 - steps start
+// closed, tap the title to open; List / Grid view switch kept on
+// the device; account circle, footer Account link; Spanish switch,
+// account progress sync, partner buttons; 23-step checklist, free
+// "Before you apply" phase, gate card)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
