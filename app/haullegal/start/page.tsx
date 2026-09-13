@@ -8,12 +8,16 @@ import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v7 - FULL-WIDTH GRID, his spec: in
-// Grid view the page drops the 660px centered column every other
-// page uses (inline maxWidth none on .fp-wrap) and runs edge to
-// edge, so the rows of cards use the whole screen left to right
-// and far more of the walkthrough is visible at once. Card columns
-// are at least 260px wide. List view keeps the centered column.)
+// HaulLegal walkthrough room (v8 - his spec: an opened card in Grid
+// view stays in its own column and grows DOWNWARD (the grid aligns
+// rows to the top, so neighbors do not stretch), instead of
+// jumping to the full row - several cards can be open side by side.
+// Only the gate card spans the row.)
+// v7 notes - FULL-WIDTH GRID: in Grid view the page drops the 660px
+// centered column every other page uses (inline maxWidth none on
+// .fp-wrap) and runs edge to edge, so the rows of cards use the
+// whole screen left to right. Card columns are at least 260px wide.
+// List view keeps the centered column.
 // v6 notes - COLLAPSED STEPS + LIST / GRID VIEW, his spec:
 // - Every step now starts CLOSED: the card shows only its number
 //   and title (locked steps add the Locked tag). Tapping the title
@@ -26,9 +30,8 @@ import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 //   is the stacked layout as before. Grid lays the closed cards
 //   side by side in rows (as many as fit the screen, one column on
 //   a narrow phone) so the whole list is visible with far less
-//   scrolling; an opened card stretches across the full row so
-//   its walkthrough reads at full width, and the gate card does
-//   the same. The choice is kept on the device (localStorage key
+//   scrolling; the gate card spans the full row. The choice is
+//   kept on the device (localStorage key
 //   hl-view) and read after mount, hydration-safe. The grid is
 //   inline styles on the existing .hl-steps grid, so haullegal.css
 //   is untouched.)
@@ -322,7 +325,7 @@ export default function HaulLegalStartPage() {
                 return (
                   <Fragment key={step.id}>
                     {gate}
-                    <div className={cls} style={grid && isOpen ? fullRow : undefined}>
+                    <div className={cls}>
                       <div className="hl-num">{isDone ? "\u2713" : number}</div>
                       {unlocked ? (
                         <button aria-expanded={isOpen} onClick={() => toggleOpen(step.id)} style={headBtn} type="button">
@@ -448,9 +451,10 @@ export default function HaulLegalStartPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v7 - Grid view runs
-// full width edge to edge; steps start closed, tap the title to
-// open; List / Grid view switch kept on the device; account circle, footer Account link; Spanish switch,
+// END OF FILE - app/haullegal/start/page.tsx (v8 - opened grid
+// cards grow downward in place; Grid view runs full width edge to
+// edge; steps start closed, tap the title to open; List / Grid
+// view switch kept on the device; account circle, footer Account link; Spanish switch,
 // account progress sync, partner buttons; 23-step checklist, free
 // "Before you apply" phase, gate card)
 // If you can see this comment, the paste was not truncated.
