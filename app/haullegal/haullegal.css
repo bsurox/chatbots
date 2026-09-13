@@ -1,11 +1,12 @@
 /* FILE: app/haullegal/haullegal.css */
 
-/* HaulLegal wardrobe (v3 - AI CHAT: the shared chat.css widget
-   (fc- family, orange by default) is caught in green under
-   .hl-zone, and the .hl-left modifier pins the help chat's button
-   and panel to the bottom-LEFT corner - the account circle owns
-   the bottom-right here. The step tutor panel keeps the default
-   right-side position.)
+/* HaulLegal wardrobe (v4 - his call: the help chat button moves
+   to the bottom-RIGHT, docked beside the account circle - same
+   46px size, same 16px baseline, 10px gap (.hl-dock). Its panel
+   opens above them on the right like the tutor panel.)
+   v3 notes - AI CHAT: the shared chat.css widget (fc- family,
+   orange by default) is caught in green under .hl-zone; the step
+   tutor panel keeps the default right-side position.
    v2 notes - guide pages: the shared guides.css CTA
    card carries one hardcoded orange border; caught below in green.
    v1 notes - CLEARED GREEN. HaulLegal is the fourth
@@ -98,14 +99,16 @@
 .hl-zone .fc-panel .fc-msg.me { background: rgba(34, 197, 94, 0.16); border-color: rgba(34, 197, 94, 0.4); }
 .hl-zone .fc-panel .fc-in:focus, .hl-zone .fc-panel .fc-fin:focus { border-color: rgba(34, 197, 94, 0.55); }
 .hl-zone .fc-panel .fc-send, .hl-zone .fc-panel .fc-fsend { background: #22c55e; }
-.hl-zone .fc-fab.hl-left { left: 16px; right: auto; }
-.hl-zone .fc-panel.hl-left { left: 12px; right: auto; }
+.hl-zone .fc-fab.hl-dock { left: auto; right: 72px; bottom: 16px; width: 46px; height: 46px; }
+.hl-zone .fc-fab.hl-dock svg { width: 22px; height: 22px; }
+.hl-zone .fc-panel.hl-dock { right: 12px; left: auto; }
 .hl-ask { width: 26px; height: 26px; border-radius: 50%; border: 1px solid #333; background: #1a1a1a; color: var(--fp); font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; }
 .hl-ask:hover { border-color: var(--fp); }
 
 /* -----------------------------------------------------------
-   END OF FILE - app/haullegal/haullegal.css (v3 - chat + tutor
-   dressed green, help chat bottom-left, .hl-ask button; guides CTA
+   END OF FILE - app/haullegal/haullegal.css (v4 - help chat
+   docked beside the account circle; chat + tutor dressed green,
+   .hl-ask button; guides CTA
    catch; CLEARED GREEN #22c55e variable swap, catch rules, hl-
    walkthrough + calendar family)
    If you can see these lines after pasting, the whole file
