@@ -8,7 +8,19 @@ import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v9 - MOBILE GRID, his spec: on a
+// HaulLegal walkthrough room (v10 - INDEPENDENT COLUMNS, his spec:
+// an open card in Grid view must stay exactly as wide as it was
+// and only grow downward, without moving anything beside it. A
+// plain CSS grid cannot do that (every card in a row shares the
+// row's height, so one open card drops the whole next row). Now
+// each phase deals its cards round-robin into separate column
+// stacks - card i goes to column i mod cols - so reading order
+// still runs left to right along the rows, while each column
+// stacks on its own and an open card pushes down only the cards
+// under it. Column count = floor((window width - 40) / 270), at
+// least 2, re-read on resize; the phone grid uses 2. The gate card
+// sits above the columns of its phase.)
+// v9 notes - MOBILE GRID, his spec: on a
 // narrow screen (under 640px, read through matchMedia after mount)
 // Grid view is a real two-column grid of closed cards, and tapping
 // a card opens that one step as a full-screen sheet (fixed panel,
@@ -129,19 +141,12 @@ const headBtn: React.CSSProperties = {
   color: "inherit",
 };
 
-const gridStyle: React.CSSProperties = {
-  gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-  alignItems: "start",
-};
+// Wide-screen grid columns are at least this wide; the page padding
+// is 20px a side (.fp-wrap).
+const COL_MIN = 270;
 
 // Phone grid: two columns, tighter cards (the number circle sits at
 // left 14px and is 32px wide, so 50px of left padding clears it).
-const phoneGridStyle: React.CSSProperties = {
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "8px",
-  alignItems: "start",
-};
-
 const phoneCard: React.CSSProperties = { padding: "14px 10px 12px 50px" };
 
 const sheetWrap: React.CSSProperties = {
@@ -170,8 +175,6 @@ const sheetClose: React.CSSProperties = {
   flexShrink: 0,
 };
 
-const fullRow: React.CSSProperties = { gridColumn: "1 / -1" };
-
 export default function HaulLegalStartPage() {
   const [paid, setPaid] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -181,6 +184,7 @@ export default function HaulLegalStartPage() {
   const [loaded, setLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<View>("list");
   const [narrow, setNarrow] = useState(false);
+  const [width, setWidth] = useState(0);
   const [sheet, setSheet] = useState<string | null>(null);
   const [lang] = useHlLang();
   const ui = HL_UI[lang];
@@ -224,9 +228,15 @@ export default function HaulLegalStartPage() {
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     setNarrow(mq.matches);
+    setWidth(window.innerWidth);
     const on = (e: MediaQueryListEvent) => setNarrow(e.matches);
+    const onResize = () => setWidth(window.innerWidth);
     mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
+    window.addEventListener("resize", onResize);
+    return () => {
+      mq.removeEventListener("change", on);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -302,6 +312,7 @@ export default function HaulLegalStartPage() {
   const firstLockedId = paid ? null : HL_STEPS.find((s) => !s.free)?.id ?? null;
   const grid = viewMode === "grid";
   const phoneGrid = grid && narrow;
+  const cols = phoneGrid ? 2 : Math.max(2, Math.floor((width - 40) / COL_MIN));
   let number = 0;
 
   // The full walkthrough for one step - the same block inside an
@@ -433,76 +444,93 @@ export default function HaulLegalStartPage() {
 
       {HL_PHASES.map((phase) => {
         const ph = lang === "es" ? HL_PHASES_ES[phase.id] : phase;
+        const cards = HL_STEPS.filter((s) => s.phase === phase.id).map((raw: HlStep) => {
+          const step = view(raw);
+          number += 1;
+          const unlocked = step.free || paid;
+          const isDone = done.includes(step.id);
+          const isOpen = unlocked && !phoneGrid && open.includes(step.id);
+          const cls = "hl-step" + (isDone ? " done" : "") + (unlocked ? "" : " locked");
+          const n = number;
+          return (
+            <div className={cls} key={step.id} style={phoneGrid ? phoneCard : undefined}>
+              <div className="hl-num">{isDone ? "\u2713" : n}</div>
+              {unlocked ? (
+                <button
+                  aria-expanded={isOpen}
+                  onClick={() => (phoneGrid ? setSheet(step.id) : toggleOpen(step.id))}
+                  style={headBtn}
+                  type="button"
+                >
+                  <span className="hl-steph" style={{ margin: 0 }}>
+                    {step.title}
+                  </span>
+                  <span style={{ color: "var(--fp)", fontSize: "12px", fontWeight: 800, flexShrink: 0, paddingTop: "3px" }}>
+                    {isOpen ? "\u25B4" : "\u25BE"}
+                  </span>
+                </button>
+              ) : (
+                <p className="hl-steph" style={{ margin: 0 }}>
+                  {step.title}
+                </p>
+              )}
+              {!unlocked ? (
+                <div className="hl-meta">
+                  <span className="hl-tag">{t.locked}</span>
+                </div>
+              ) : null}
+              {isOpen ? (
+                <>
+                  {renderDetail(step, isDone)}
+                  <button className="hl-more" onClick={() => toggleOpen(step.id)} type="button">
+                    {t.hideDetails}
+                  </button>
+                </>
+              ) : null}
+            </div>
+          );
+        });
+        const gateHere = firstLockedId !== null && HL_STEPS.some((s) => s.phase === phase.id && s.id === firstLockedId);
+        const gate = gateHere ? (
+          <div className="fp-gate" style={{ margin: "0 0 10px" }}>
+            <p className="fp-gateh">{t.gateH}</p>
+            <p className="fp-gated">{t.gateP}</p>
+            <Link className="fp-gatebtn" href="/haullegal/buy">
+              {t.gateBtn}
+            </Link>
+          </div>
+        ) : null;
+        // Grid: the cards are dealt round-robin into independent
+        // columns (card i goes to column i mod cols), so reading
+        // order still runs left to right along the rows, but each
+        // column stacks on its own - an open card pushes down only
+        // the cards beneath it in its column, never the whole row.
+        const stacks: Array<Array<React.ReactElement>> = [];
+        if (grid) {
+          for (let c = 0; c < cols; c += 1) stacks.push([]);
+          cards.forEach((card, i) => stacks[i % cols].push(card));
+        }
         return (
           <div key={phase.id}>
             <p className="hl-phase">{ph.title}</p>
             <p className="fp-cd" style={{ margin: "0 0 12px" }}>
               {ph.blurb}
             </p>
-            <div className="hl-steps" style={phoneGrid ? phoneGridStyle : grid ? gridStyle : undefined}>
-              {HL_STEPS.filter((s) => s.phase === phase.id).map((raw: HlStep) => {
-                const step = view(raw);
-                number += 1;
-                const unlocked = step.free || paid;
-                const isDone = done.includes(step.id);
-                const isOpen = unlocked && !phoneGrid && open.includes(step.id);
-                const cls = "hl-step" + (isDone ? " done" : "") + (unlocked ? "" : " locked");
-                const gate =
-                  !unlocked && step.id === firstLockedId ? (
-                    <div className="fp-gate" style={grid ? { ...fullRow, margin: 0 } : { margin: 0 }}>
-                      <p className="fp-gateh">{t.gateH}</p>
-                      <p className="fp-gated">{t.gateP}</p>
-                      <Link className="fp-gatebtn" href="/haullegal/buy">
-                        {t.gateBtn}
-                      </Link>
-                    </div>
-                  ) : null;
-                return (
-                  <Fragment key={step.id}>
-                    {gate}
-                    <div className={cls} style={phoneGrid ? phoneCard : undefined}>
-                      <div className="hl-num">{isDone ? "\u2713" : number}</div>
-                      {unlocked ? (
-                        <button
-                          aria-expanded={isOpen}
-                          onClick={() => (phoneGrid ? setSheet(step.id) : toggleOpen(step.id))}
-                          style={headBtn}
-                          type="button"
-                        >
-                          <span className="hl-steph" style={{ margin: 0 }}>
-                            {step.title}
-                          </span>
-                          <span style={{ color: "var(--fp)", fontSize: "12px", fontWeight: 800, flexShrink: 0, paddingTop: "3px" }}>
-                            {isOpen ? "\u25B4" : "\u25BE"}
-                          </span>
-                        </button>
-                      ) : (
-                        <p className="hl-steph" style={{ margin: 0 }}>
-                          {step.title}
-                        </p>
-                      )}
-                      {!unlocked ? (
-                        <div className="hl-meta">
-                          <span className="hl-tag">{t.locked}</span>
-                        </div>
-                      ) : null}
-                      {isOpen ? (
-                        <>
-                          {renderDetail(step, isDone)}
-                          <button className="hl-more" onClick={() => toggleOpen(step.id)} type="button">
-                            {t.hideDetails}
-                          </button>
-                        </>
-                      ) : null}
-                    </div>
-                  </Fragment>
-                );
-              })}
-            </div>
+            {gate}
+            {grid ? (
+              <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: phoneGrid ? "8px" : "10px", alignItems: "start" }}>
+                {stacks.map((stack, c) => (
+                  <div key={c} style={{ display: "grid", gap: phoneGrid ? "8px" : "10px", alignContent: "start" }}>
+                    {stack}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="hl-steps">{cards}</div>
+            )}
           </div>
         );
       })}
-
       <div className="fp-strip" style={{ marginTop: "36px" }}>
         <p className="fp-st">{t.nextT}</p>
         <p className="fp-sd">{t.nextP}</p>
@@ -560,9 +588,9 @@ export default function HaulLegalStartPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v9 - phone grid =
-// two columns + full-screen step sheet; opened grid
-// cards grow downward in place on wide screens; Grid view runs full width edge to
+// END OF FILE - app/haullegal/start/page.tsx (v10 - grid = dealt
+// column stacks, open cards grow down in place; phone grid = two
+// columns + full-screen step sheet; Grid view runs full width edge to
 // edge; steps start closed, tap the title to open; List / Grid
 // view switch kept on the device; account circle, footer Account link; Spanish switch,
 // account progress sync, partner buttons; 23-step checklist, free
