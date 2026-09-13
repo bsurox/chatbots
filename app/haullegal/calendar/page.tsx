@@ -17,8 +17,20 @@ import {
 import { HL_DUE_DETAILS_ES, HL_DUE_TITLES_ES, HL_FREQ_ES, HL_MISSING_ES, HL_OBLIGATIONS_ES } from "@/lib/haullegal/deadlines-es";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal Stay Legal calendar (v5 - the floating bottom-left
-// account circle (account-button.tsx) joins the page.)
+// HaulLegal Stay Legal calendar (v6 - TEXT REMINDERS, his call:
+// subscribers get a "Text reminders" block under the email switch -
+// a mobile-number field and an UNCHECKED consent box carrying the
+// exact wording registered with the carriers (i18n calendar.
+// smsConsent). Checking the box needs a 10-digit US number; it
+// saves phone + sms:true to the account (profile route v2), which
+// stamps the consent time. Unchecking, clearing the number, or
+// replying STOP to any text turns texts off. The status pill reads
+// ON / OFF, the help line says when texts go out, and the legal
+// line links Privacy and Terms. Profile pushes never carry the
+// phone (the server leaves it alone), so typing dates cannot touch
+// the opt-in; only the text block sends phone / sms.)
+// v5 notes - the floating account circle (account-button.tsx)
+// joins the page.
 // v4 notes - footer gains the "Account" link, the door to managing
 // Stay Legal.
 // v3 notes - three things:
@@ -84,6 +96,18 @@ const TOGGLE_KEYS: ToggleKey[] = ["hvut", "ifta", "irp", "eld", "ky", "nm", "ny"
 
 type Access = { loggedIn: boolean; sub: boolean };
 
+function digitsOf(raw: string): string {
+  let d = raw.replace(/\D/g, "");
+  if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+  return d.slice(0, 10);
+}
+
+function prettyPhone(d: string): string {
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return d.slice(0, 3) + "-" + d.slice(3);
+  return d.slice(0, 3) + "-" + d.slice(3, 6) + "-" + d.slice(6);
+}
+
 function loadProfile(): HlProfile {
   try {
     const raw = window.localStorage.getItem(STORE_KEY);
@@ -124,6 +148,9 @@ export default function HaulLegalCalendarPage() {
   const [access, setAccess] = useState<Access>({ loggedIn: false, sub: false });
   const [synced, setSynced] = useState(false);
   const [reminders, setReminders] = useState(true);
+  const [phone, setPhone] = useState("");
+  const [sms, setSms] = useState(false);
+  const [phoneErr, setPhoneErr] = useState("");
   const [lang] = useHlLang();
   const ui = HL_UI[lang];
   const t = ui.calendar;
@@ -150,6 +177,8 @@ export default function HaulLegalCalendarPage() {
               progress.current = saved.progress.filter((x: unknown) => typeof x === "string");
             }
             if (saved?.reminders !== undefined) setReminders(Boolean(saved.reminders));
+            if (typeof saved?.phone === "string") setPhone(digitsOf(saved.phone));
+            if (saved?.sms !== undefined) setSms(Boolean(saved.sms));
             ready.current = true;
             setSynced(true);
             if (saved?.profile && typeof saved.profile === "object") {
@@ -199,6 +228,45 @@ export default function HaulLegalCalendarPage() {
     const next = !reminders;
     setReminders(next);
     push(profile, next);
+  }
+
+  // The only call that sends the number and the consent flag.
+  function pushSms(nextPhone: string, nextSms: boolean) {
+    if (!ready.current) return;
+    fetch("/haullegal/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile, progress: progress.current, reminders, phone: nextPhone, sms: nextSms }),
+    }).catch(() => {});
+  }
+
+  function changePhone(raw: string) {
+    const d = digitsOf(raw);
+    setPhone(d);
+    setPhoneErr("");
+    if (d.length === 0 && sms) {
+      setSms(false);
+      pushSms("", false);
+    }
+  }
+
+  function blurPhone() {
+    if (sms && phone.length === 10) pushSms(phone, true);
+  }
+
+  function toggleSms() {
+    if (sms) {
+      setSms(false);
+      pushSms(phone.length === 10 ? phone : "", false);
+      return;
+    }
+    if (phone.length !== 10) {
+      setPhoneErr(t.phoneBad);
+      return;
+    }
+    setPhoneErr("");
+    setSms(true);
+    pushSms(phone, true);
   }
 
   const result = today ? buildCalendar(profile, today) : { dues: [] as HlDue[], missing: [] as string[], missingKeys: [] as string[] };
@@ -356,6 +424,48 @@ export default function HaulLegalCalendarPage() {
             </div>
           ) : null}
         </div>
+
+        {access.sub && synced ? (
+          <div className="hl-field hl-wide">
+            <p className="hl-fl">{t.smsT}</p>
+            <label className="hl-fh" htmlFor="hl-phone">{t.phoneLabel}</label>
+            <input
+              autoComplete="tel-national"
+              className="fp-in"
+              id="hl-phone"
+              inputMode="tel"
+              onBlur={blurPhone}
+              onChange={(e) => changePhone(e.target.value)}
+              placeholder={t.phonePh}
+              value={prettyPhone(phone)}
+            />
+            <p className="hl-fh">{t.phoneHelp}</p>
+            <label htmlFor="hl-sms" style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", marginTop: "6px" }}>
+              <input checked={sms} id="hl-sms" onChange={toggleSms} style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "var(--fp)", flexShrink: 0 }} type="checkbox" />
+              <span className="hl-stepd" style={{ color: "#ddd" }}>{t.smsConsent}</span>
+            </label>
+            {phoneErr ? <p className="fp-buyerr">{phoneErr}</p> : null}
+            <div className="hl-meta">
+              <span className={sms ? "hl-fee" : "hl-tag"}>{sms ? t.smsOn : t.smsOff}</span>
+            </div>
+            <p className="hl-fh">{t.smsHelp}</p>
+            <p className="hl-fh">
+              {t.smsLegal.split(/\{(privacy|terms)\}/).map((part, i) =>
+                part === "privacy" ? (
+                  <Link href="/haullegal/privacy" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
+                    {ui.common.privacy}
+                  </Link>
+                ) : part === "terms" ? (
+                  <Link href="/haullegal/terms" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
+                    {ui.common.terms}
+                  </Link>
+                ) : (
+                  <span key={i}>{part}</span>
+                )
+              )}
+            </p>
+          </div>
+        ) : null}
       </div>
 
       <h2 className="fp-h2">{t.coming}</h2>
@@ -466,7 +576,8 @@ export default function HaulLegalCalendarPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/calendar/page.tsx (v5 - account
+// END OF FILE - app/haullegal/calendar/page.tsx (v6 - text
+// reminders: number field + consent box + ON/OFF; account
 // circle, footer Account link; account sync + reminders switch, Connecticut
 // switch, Spanish switch; profile form, due-date list, rules
 // reference, Stay Legal pitch)
