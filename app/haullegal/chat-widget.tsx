@@ -5,11 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal help chat (v1) - the green sibling of the ForemanPrep
-// and WiremanPrep widgets, sharing chat.css; haullegal.css (v3)
-// recolors the accents green under .hl-zone and pins THIS widget
-// to the bottom-LEFT corner (class hl-left) because the account
-// circle owns the bottom-right on this site. Mounted once in the
+// HaulLegal help chat (v2 - his call: the button sits bottom-RIGHT
+// beside the account circle (class hl-dock, placed by
+// haullegal.css v4), not bottom-left.)
+// v1 notes - the green sibling of the ForemanPrep and WiremanPrep
+// widgets, sharing chat.css; haullegal.css recolors the accents
+// green under .hl-zone. Mounted once in the
 // HaulLegal layout and decides for itself where to appear: the
 // landing page, the walkthrough, the calendar, the guides and the
 // state pages - both the clean haullegal.com URLs and the island
@@ -171,7 +172,7 @@ export default function HlChatWidget() {
   return (
     <>
       {open ? (
-        <div className="fc-panel hl-left">
+        <div className="fc-panel hl-dock">
           <div className="fc-head">
             <p className="fc-title">
               Haul<span>Legal</span> {t.titleTail}
@@ -231,7 +232,7 @@ export default function HlChatWidget() {
           )}
         </div>
       ) : null}
-      <button aria-label={open ? t.close : t.openLabel} className="fc-fab hl-left" onClick={() => setOpen((o) => !o)} type="button">
+      <button aria-label={open ? t.close : t.openLabel} className="fc-fab hl-dock" onClick={() => setOpen((o) => !o)} type="button">
         {CHAT_ICON}
       </button>
     </>
@@ -239,7 +240,8 @@ export default function HlChatWidget() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/chat-widget.tsx (v1 - green chat,
-// bottom-left, EN/ES, 10/day meter, support handoff)
+// END OF FILE - app/haullegal/chat-widget.tsx (v2 - green chat
+// docked beside the account circle, EN/ES, 10/day meter, support
+// handoff)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
