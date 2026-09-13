@@ -1,11 +1,18 @@
 // FILE: app/haullegal/privacy/page.tsx
 import Link from "next/link";
 
-// HaulLegal Privacy Policy (v2 - the language choice (English or
-// Spanish) is stored on your device, disclosed under Information We
-// Collect; the walkthrough progress and calendar profile now also
-// save to the account when you are signed in, which section 2
-// already covered.)
+// HaulLegal Privacy Policy (v3 - TEXT-MESSAGE REMINDERS: section 2
+// lists the mobile number and the consent record, section 4 names
+// Twilio as the messaging provider, and the new section 8 is the
+// carrier-required disclosure: opt-in on the web form only,
+// message frequency, rates, STOP / HELP, and the promise that
+// numbers and consent are never sold or shared with third parties
+// for their marketing. Cookies moves to 9 and the rest renumber.
+// The campaign registered with the carriers points at this page.)
+// v2 notes - the language choice (English or Spanish) is stored on
+// your device, disclosed under Information We Collect; the
+// walkthrough progress and calendar profile also save to the
+// account when you are signed in.
 // v1 notes - adapted from the WiremanPrep
 // privacy pattern (same legal entity, AskEvo LLC). HaulLegal
 // specifics: the walkthrough and calendar store BUSINESS details
@@ -14,13 +21,11 @@ import Link from "next/link";
 // is recorded from Stripe. No ad pixels yet - haullegal.com carries
 // NO Google Ads tag or Meta pixel today, so the cookies section
 // honestly says essential cookies only; the disclosure and the
-// pixels ship the same day, never apart. Text-message reminders
-// are NOT offered yet; when they ship, this file gains a consent /
-// STOP / message-rates section the same day.
+// pixels ship the same day, never apart.
 // Public page - the haullegal layout wraps it; the proxy host block
 // rewrites haullegal.com/privacy here.
 
-const UPDATED = "September 12, 2026";
+const UPDATED = "September 13, 2026";
 
 const SECTIONS: Array<{ t: string; b: string }> = [
   {
@@ -33,7 +38,7 @@ const SECTIONS: Array<{ t: string; b: string }> = [
 
 Walkthrough and calendar details: the business information you choose to enter so the service can work - for example your company name, USDOT number, the dates of your filings, inspections and medical certificate, the states you operate in, and which steps you have marked complete. Enter only information about a business you are authorized to represent.
 
-Reminder settings: the email address reminders go to and whether reminders are turned on.
+Reminder settings: the email address reminders go to and whether email reminders are turned on. If you turn on text-message reminders, we also store the mobile number you enter, the fact that you checked the consent box, and the date and time you did so.
 
 Preferences stored on your device: your language choice (English or Spanish) and, until you sign in, your walkthrough progress and calendar entries are kept in your browser's storage on the device you used. Clearing the browser's site data removes them.
 
@@ -49,7 +54,7 @@ Usage data: basic technical information such as IP address, browser type, and ti
   },
   {
     t: "4. Service Providers and AI Processing",
-    b: `We use Stripe (payment processing and subscription billing), Resend (transactional and reminder email), and cloud hosting and database providers such as Vercel to run the service. If and when the service includes an AI assistant, the questions you type to it are processed by Anthropic, the AI provider, acting on our behalf, and are not used to train the AI model under our provider agreement.
+    b: `We use Stripe (payment processing and subscription billing), Resend (transactional and reminder email), Twilio (text-message delivery, only if you turn on text reminders), and cloud hosting and database providers such as Vercel to run the service. If and when the service includes an AI assistant, the questions you type to it are processed by Anthropic, the AI provider, acting on our behalf, and are not used to train the AI model under our provider agreement.
 
 Your HaulLegal account is an AskEvo LLC account; if you use other AskEvo products, those products' providers apply as described in their policies.
 
@@ -68,23 +73,33 @@ We do not sell your personal information, and we do not show third-party adverti
     b: `Reminder emails are part of the Stay Legal service and go only to the address on your account. You can turn individual reminders off in your calendar settings, and canceling the subscription stops reminder emails. Service emails about your account or purchases (receipts, security notices, material changes) are sent as needed regardless of reminder settings.`,
   },
   {
-    t: "8. Cookies",
+    t: "8. Text-Message (SMS) Reminders",
+    b: `Text reminders are optional and off by default. You turn them on yourself, on the Stay Legal calendar page at haullegal.com/calendar, by entering a US mobile number and checking a box that reads: "Text me my deadline reminders. Message and data rates may apply. Message frequency varies. Reply STOP to cancel, HELP for help." The box is never pre-checked, and we do not enroll numbers any other way - not by phone, paper, or purchased lists.
+
+What we send: reminders that a deadline you entered on your calendar is coming up (30, 7 and 1 days ahead), and replies to STOP, START and HELP. We do not send marketing texts. Message frequency varies with the deadlines on your calendar - typically a few messages per month. Message and data rates may apply according to your mobile plan. Carriers are not liable for delayed or undelivered messages.
+
+How to stop: reply STOP to any message, uncheck the box on your calendar page, or email support@askevo.ai. Reply HELP to any message, or email support@askevo.ai, for help. Replying START to our number turns reminders back on for a number that previously consented.
+
+Your mobile number and your consent record are used only to send the reminders you asked for and to keep the record carriers require. We do not sell them, and we do not share them with third parties or affiliates for their marketing. Twilio processes messages on our behalf under its own privacy terms.`,
+  },
+  {
+    t: "9. Cookies",
     b: `We use essential cookies to keep you signed in and to operate the service. We do not currently use advertising or analytics pixels on haullegal.com. If that changes, we will update this policy with a clear description of the tools involved before or at the time they are introduced.`,
   },
   {
-    t: "9. Children",
+    t: "10. Children",
     b: `Our services are not directed to children under 18 and are intended for people operating a business. Do not use the services if you are under 18.`,
   },
   {
-    t: "10. Security",
+    t: "11. Security",
     b: `We use reasonable technical and organizational measures to protect your information, including encryption in transit and hashed password storage. No method of transmission or storage is 100% secure, so we cannot guarantee absolute security.`,
   },
   {
-    t: "11. Changes to This Policy",
+    t: "12. Changes to This Policy",
     b: `We may update this policy from time to time. When we do, we will post the updated version on this page with a new "Last updated" date. Your continued use of the services after an update means you accept the revised policy.`,
   },
   {
-    t: "12. Contact",
+    t: "13. Contact",
     b: `Questions about this policy or your data? Email support@askevo.ai. AskEvo LLC, Boise, Idaho, USA.`,
   },
 ];
@@ -120,8 +135,9 @@ export default function HaulLegalPrivacyPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/privacy/page.tsx (v2 - language
-// preference + on-device storage disclosed; business details,
-// reminder emails; essential cookies only)
+// END OF FILE - app/haullegal/privacy/page.tsx (v3 - SMS reminder
+// disclosure (opt-in, STOP / HELP, rates, no sharing); language
+// preference + on-device storage; business details, reminder
+// emails; essential cookies only)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
