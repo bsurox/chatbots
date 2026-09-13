@@ -1,7 +1,12 @@
 // FILE: app/haullegal/privacy/page.tsx
 import Link from "next/link";
 
-// HaulLegal Privacy Policy (v3 - TEXT-MESSAGE REMINDERS: section 2
+// HaulLegal Privacy Policy (v4 - the AI help chat and step tutor
+// are live: section 4 now says so in the present tense, and lists
+// what is sent to the AI provider (the question, the step content,
+// and the visitor's own recent messages in that chat), plus the
+// daily-limit counting by IP address.)
+// v3 notes - TEXT-MESSAGE REMINDERS: section 2
 // lists the mobile number and the consent record, section 4 names
 // Twilio as the messaging provider, and the new section 8 is the
 // carrier-required disclosure: opt-in on the web form only,
@@ -25,7 +30,7 @@ import Link from "next/link";
 // Public page - the haullegal layout wraps it; the proxy host block
 // rewrites haullegal.com/privacy here.
 
-const UPDATED = "September 13, 2026";
+const UPDATED = "September 14, 2026";
 
 const SECTIONS: Array<{ t: string; b: string }> = [
   {
@@ -54,7 +59,7 @@ Usage data: basic technical information such as IP address, browser type, and ti
   },
   {
     t: "4. Service Providers and AI Processing",
-    b: `We use Stripe (payment processing and subscription billing), Resend (transactional and reminder email), Twilio (text-message delivery, only if you turn on text reminders), and cloud hosting and database providers such as Vercel to run the service. If and when the service includes an AI assistant, the questions you type to it are processed by Anthropic, the AI provider, acting on our behalf, and are not used to train the AI model under our provider agreement.
+    b: `We use Stripe (payment processing and subscription billing), Resend (transactional and reminder email), Twilio (text-message delivery, only if you turn on text reminders), and cloud hosting and database providers such as Vercel to run the service. The help chat and the step tutor are AI features: what you type to them, the recent messages in that chat, and (for the tutor) the text of the step you are asking about are sent to Anthropic, the AI provider, acting on our behalf, and are not used to train the AI model under our provider agreement. Chats are not tied to your name unless you include it; daily message limits are counted by IP address (and, for walkthrough owners, by account). If you use the support form inside the chat, your name, email, message and the tail of that chat go to support@askevo.ai.
 
 Your HaulLegal account is an AskEvo LLC account; if you use other AskEvo products, those products' providers apply as described in their policies.
 
@@ -135,7 +140,8 @@ export default function HaulLegalPrivacyPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/privacy/page.tsx (v3 - SMS reminder
+// END OF FILE - app/haullegal/privacy/page.tsx (v4 - AI chat +
+// tutor disclosure; SMS reminder
 // disclosure (opt-in, STOP / HELP, rates, no sharing); language
 // preference + on-device storage; business details, reminder
 // emails; essential cookies only)
