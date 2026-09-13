@@ -3,11 +3,24 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { buildCalendar, daysUntil, formatYmd, HL_EMPTY_PROFILE, type HlProfile } from "@/lib/haullegal/deadlines";
-import { claimReminder, listReminderCandidates, sweepReminderLedger } from "@/lib/db/haul";
+import { claimReminder, listReminderCandidates, setSmsByPhone, sweepReminderLedger } from "@/lib/db/haul";
 import { db } from "@/lib/db/queries";
 import { user } from "@/lib/db/schema";
+import { isUnsubscribedError, sendSms, twilioConfigured } from "@/lib/haullegal/twilio";
 
-// The Stay Legal reminder job (v1). Vercel Cron calls this once a
+// The Stay Legal reminder job (v2 - TEXT REMINDERS: an account with
+// the text switch on and a saved number also gets ONE short text
+// per tick, bundling the same 30 / 7 / 1-day items as the email
+// (the ledger claim is shared, so email and text can never drift
+// apart). Texts are plain words, no link - the reminder itself is
+// the value. Every text ends with the STOP / HELP line the carriers
+// require. Sending is skipped, and counted as "off", until the
+// three TWILIO_* env vars exist (lib/haullegal/twilio.ts); a
+// carrier "unsubscribed" error switches that number's texts off so
+// the job never retries a blocked number. Email reminders now honor
+// the email switch on its own: someone with texts on and emails
+// off gets texts only.)
+// v1 notes - Vercel Cron calls this once a
 // day (vercel.json: path /haullegal/api/remind, schedule 0 14 * * *
 // = 8am Mountain) with "Authorization: Bearer <CRON_SECRET>", the
 // header Vercel adds automatically when the CRON_SECRET env var
@@ -31,9 +44,29 @@ const FROM = "HaulLegal <noreply@askevo.ai>";
 
 type Item = { date: string; days: number; title: string; detail: string };
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 function label(days: number): string {
   if (days === 1) return "due tomorrow";
   return `due in ${days} days`;
+}
+
+// "2026-10-31" -> "Oct 31"
+function shortDate(ymd: string): string {
+  const m = Number(ymd.slice(5, 7));
+  const d = Number(ymd.slice(8, 10));
+  return `${MONTHS[m - 1] ?? ""} ${d}`;
+}
+
+function renderSms(items: Item[]): string {
+  const tail = " Reply STOP to opt out, HELP for help.";
+  if (items.length === 1) {
+    const it = items[0];
+    return `HaulLegal: ${it.title} is ${label(it.days)} (${shortDate(it.date)}).${tail}`;
+  }
+  const shown = items.slice(0, 2).map((it) => `${it.title} (${shortDate(it.date)}, ${label(it.days)})`);
+  const more = items.length > 2 ? `; and ${items.length - 2} more` : "";
+  return `HaulLegal: ${items.length} deadlines coming up - ${shown.join("; ")}${more}. Details in your Stay Legal calendar.${tail}`;
 }
 
 function renderEmail(items: Item[]): { subject: string; html: string; text: string } {
@@ -64,9 +97,12 @@ export async function GET(request: Request) {
     return Response.json({ error: "no-resend-key" }, { status: 500 });
   }
   const resend = new Resend(apiKey);
+  const texting = twilioConfigured();
   const today = new Date();
   const candidates = await listReminderCandidates(500);
   let emails = 0;
+  let texts = 0;
+  let textsOff = 0;
   let itemsSent = 0;
   let failures = 0;
 
@@ -83,17 +119,38 @@ export async function GET(request: Request) {
       if (first) items.push({ date: dueDate, days, title: d.title, detail: d.detail });
     }
     if (items.length === 0) continue;
-    const rows = await db.select({ email: user.email, isAnonymous: user.isAnonymous }).from(user).where(eq(user.id, c.userId));
-    const to = rows[0]?.email;
-    if (!to || rows[0]?.isAnonymous || !to.includes("@")) continue;
-    const mail = renderEmail(items);
-    try {
-      await resend.emails.send({ from: FROM, to, replyTo: "support@askevo.ai", subject: mail.subject, html: mail.html, text: mail.text });
-      emails += 1;
-      itemsSent += items.length;
-    } catch (err) {
-      failures += 1;
-      console.error("HaulLegal reminder send failed:", err);
+    itemsSent += items.length;
+
+    if (c.reminders) {
+      const rows = await db.select({ email: user.email, isAnonymous: user.isAnonymous }).from(user).where(eq(user.id, c.userId));
+      const to = rows[0]?.email;
+      if (to && !rows[0]?.isAnonymous && to.includes("@")) {
+        const mail = renderEmail(items);
+        try {
+          await resend.emails.send({ from: FROM, to, replyTo: "support@askevo.ai", subject: mail.subject, html: mail.html, text: mail.text });
+          emails += 1;
+        } catch (err) {
+          failures += 1;
+          console.error("HaulLegal reminder send failed:", err);
+        }
+      }
+    }
+
+    if (c.sms && c.phone) {
+      if (!texting) {
+        textsOff += 1;
+      } else {
+        const r = await sendSms(c.phone, renderSms(items));
+        if (r.ok) {
+          texts += 1;
+        } else if (isUnsubscribedError(r.code)) {
+          await setSmsByPhone(c.phone, false).catch(() => 0);
+          textsOff += 1;
+        } else {
+          failures += 1;
+          console.error("HaulLegal reminder text failed:", r.code ?? "network");
+        }
+      }
     }
   }
 
@@ -103,12 +160,13 @@ export async function GET(request: Request) {
     console.error("HaulLegal reminder ledger sweep failed:", err);
   }
 
-  return Response.json({ accounts: candidates.length, emails, items: itemsSent, failures });
+  return Response.json({ accounts: candidates.length, emails, texts, textsOff, texting, items: itemsSent, failures });
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/api/remind/route.ts (v1 - daily
-// cron, 30/7/1-day bundled reminder emails, exactly-once ledger)
+// END OF FILE - app/haullegal/api/remind/route.ts (v2 - texts via
+// Twilio beside the emails; daily cron, 30/7/1-day bundled
+// reminders, exactly-once ledger)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
