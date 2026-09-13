@@ -7,15 +7,17 @@ import { guestRegex } from "@/lib/constants";
 import { hasHaulWalkthrough } from "@/lib/db/haul";
 import { HL_STEPS } from "@/lib/haullegal/steps";
 
-// HaulLegal step tutor (v1) - the trucking sibling of the prep
-// tutors. Step-scoped: the client sends a step id from
+// HaulLegal step tutor (v2 - his call: walkthrough owners get 50
+// tutor messages a day, about two per step; visitors stay at 3 a
+// day on the free steps.)
+// v1 notes - the trucking sibling of the prep tutors. Step-scoped: the client sends a step id from
 // lib/haullegal/steps.ts plus the short back-and-forth so far, and
 // the model answers as a plain-spoken compliance coach who knows
 // ONLY that step - its summary, where the click happens, the fee,
 // the wait, the FMCSA-flagged mistakes and the rule it comes from -
 // and always points back at the official page. Haiku keeps the
 // cost to fractions of a cent per message.
-// Tiers: walkthrough owners get 25 messages a day keyed to their
+// Tiers: walkthrough owners get 50 messages a day keyed to their
 // account; everyone else gets 3 a day per IP, and only on the four
 // free steps - a locked step answers 403 so the tutor can never
 // leak the paid content. The body may carry lang "es" - the model
@@ -28,7 +30,7 @@ const MODEL_ID = "claude-haiku-4-5";
 const MAX_TURNS = 12;
 const MAX_CHARS_PER_MSG = 1200;
 const MAX_OUTPUT_TOKENS = 400;
-const PAID_DAILY_CAP = 25;
+const PAID_DAILY_CAP = 50;
 const FREE_DAILY_CAP = 3;
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -81,7 +83,7 @@ export async function POST(request: Request) {
       const ip = (request.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
       if (isCapped(`ip:${ip}`, FREE_DAILY_CAP)) {
         return Response.json(
-          { error: "That's the free tutor limit for today. The walkthrough includes 25 tutor messages a day.", free: true },
+          { error: "That's the free tutor limit for today. The walkthrough includes 50 tutor messages a day.", free: true },
           { status: 429 }
         );
       }
@@ -133,7 +135,7 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/api/tutor/route.ts (v1 - step-scoped
-// tutor, paid 25/day per account, free 3/day on free steps, EN/ES)
+// END OF FILE - app/haullegal/api/tutor/route.ts (v2 - step-scoped
+// tutor, paid 50/day per account, free 3/day on free steps, EN/ES)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
