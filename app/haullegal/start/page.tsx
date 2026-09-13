@@ -8,8 +8,13 @@ import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v6 - COLLAPSED STEPS + LIST / GRID
-// VIEW, his spec:
+// HaulLegal walkthrough room (v7 - FULL-WIDTH GRID, his spec: in
+// Grid view the page drops the 660px centered column every other
+// page uses (inline maxWidth none on .fp-wrap) and runs edge to
+// edge, so the rows of cards use the whole screen left to right
+// and far more of the walkthrough is visible at once. Card columns
+// are at least 260px wide. List view keeps the centered column.)
+// v6 notes - COLLAPSED STEPS + LIST / GRID VIEW, his spec:
 // - Every step now starts CLOSED: the card shows only its number
 //   and title (locked steps add the Locked tag). Tapping the title
 //   opens the whole walkthrough for that step - summary, fee and
@@ -113,7 +118,7 @@ const headBtn: React.CSSProperties = {
 };
 
 const gridStyle: React.CSSProperties = {
-  gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
   alignItems: "start",
 };
 
@@ -227,7 +232,7 @@ export default function HaulLegalStartPage() {
   let number = 0;
 
   return (
-    <div className="fp-wrap">
+    <div className="fp-wrap" style={grid ? { maxWidth: "none" } : undefined}>
       <div className="fp-top" style={{ flexWrap: "wrap", gap: "8px" }}>
         <div className="fp-brand">
           Haul<span>Legal</span>
@@ -443,9 +448,9 @@ export default function HaulLegalStartPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v6 - steps start
-// closed, tap the title to open; List / Grid view switch kept on
-// the device; account circle, footer Account link; Spanish switch,
+// END OF FILE - app/haullegal/start/page.tsx (v7 - Grid view runs
+// full width edge to edge; steps start closed, tap the title to
+// open; List / Grid view switch kept on the device; account circle, footer Account link; Spanish switch,
 // account progress sync, partner buttons; 23-step checklist, free
 // "Before you apply" phase, gate card)
 // If you can see this comment, the paste was not truncated.
