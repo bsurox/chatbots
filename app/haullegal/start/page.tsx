@@ -8,11 +8,20 @@ import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v8 - his spec: an opened card in Grid
-// view stays in its own column and grows DOWNWARD (the grid aligns
-// rows to the top, so neighbors do not stretch), instead of
-// jumping to the full row - several cards can be open side by side.
-// Only the gate card spans the row.)
+// HaulLegal walkthrough room (v9 - MOBILE GRID, his spec: on a
+// narrow screen (under 640px, read through matchMedia after mount)
+// Grid view is a real two-column grid of closed cards, and tapping
+// a card opens that one step as a full-screen sheet (fixed panel,
+// its own scroll, close button top-right and at the bottom) instead
+// of expanding in place - there is no room for several open cards
+// on a phone. Wide screens keep v8 behavior: open cards grow
+// downward in their column, several at a time. List view is
+// unchanged on both. The detail block is one shared render used by
+// the inline card and the sheet, so the two can never drift.)
+// v8 notes - an opened card in Grid view stays in its own column
+// and grows DOWNWARD (the grid aligns rows to the top, so neighbors
+// do not stretch), instead of jumping to the full row. Only the
+// gate card spans the row.
 // v7 notes - FULL-WIDTH GRID: in Grid view the page drops the 660px
 // centered column every other page uses (inline maxWidth none on
 // .fp-wrap) and runs edge to edge, so the rows of cards use the
@@ -125,6 +134,42 @@ const gridStyle: React.CSSProperties = {
   alignItems: "start",
 };
 
+// Phone grid: two columns, tighter cards (the number circle sits at
+// left 14px and is 32px wide, so 50px of left padding clears it).
+const phoneGridStyle: React.CSSProperties = {
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "8px",
+  alignItems: "start",
+};
+
+const phoneCard: React.CSSProperties = { padding: "14px 10px 12px 50px" };
+
+const sheetWrap: React.CSSProperties = {
+  position: "fixed",
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+  zIndex: 60,
+  background: "#0a0a0a",
+  overflowY: "auto",
+  padding: "calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 24px)",
+};
+
+const sheetClose: React.CSSProperties = {
+  width: "38px",
+  height: "38px",
+  borderRadius: "50%",
+  background: "#161616",
+  border: "1px solid #333",
+  color: "#fff",
+  fontSize: "18px",
+  fontWeight: 800,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  flexShrink: 0,
+};
+
 const fullRow: React.CSSProperties = { gridColumn: "1 / -1" };
 
 export default function HaulLegalStartPage() {
@@ -135,6 +180,8 @@ export default function HaulLegalStartPage() {
   const [open, setOpen] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<View>("list");
+  const [narrow, setNarrow] = useState(false);
+  const [sheet, setSheet] = useState<string | null>(null);
   const [lang] = useHlLang();
   const ui = HL_UI[lang];
   const t = ui.start;
@@ -173,6 +220,28 @@ export default function HaulLegalStartPage() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    setNarrow(mq.matches);
+    const on = (e: MediaQueryListEvent) => setNarrow(e.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+
+  useEffect(() => {
+    if (!sheet) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSheet(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [sheet]);
 
   function push(ids: string[]) {
     const s = server.current;
@@ -232,7 +301,74 @@ export default function HaulLegalStartPage() {
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
   const firstLockedId = paid ? null : HL_STEPS.find((s) => !s.free)?.id ?? null;
   const grid = viewMode === "grid";
+  const phoneGrid = grid && narrow;
   let number = 0;
+
+  // The full walkthrough for one step - the same block inside an
+  // open card (wide screens, List view) and inside the phone sheet.
+  function renderDetail(step: HlStep, isDone: boolean) {
+    const partner = step.partner ? HL_PARTNER_LINKS[step.partner] : undefined;
+    return (
+      <>
+        <p className="hl-stepd" style={{ marginTop: "6px" }}>
+          {step.summary}
+        </p>
+        <div className="hl-meta">
+          <span className="hl-fee">{step.fee}</span>
+          <span className="hl-tag">{step.time}</span>
+        </div>
+        <div className="hl-detail">
+          <p className="hl-label">{t.where}</p>
+          <p className="hl-stepd">{step.where}</p>
+          {step.needs.length > 0 ? (
+            <>
+              <p className="hl-label">{t.doFirst}</p>
+              <ul className="hl-list">
+                {step.needs.map((n) => (
+                  <li key={n}>
+                    {titleOf(n)}
+                    {done.includes(n) ? t.doneMark : ""}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+          <p className="hl-label">{t.watchOut}</p>
+          {step.gotchas.map((g) => (
+            <div className="hl-gotcha" key={g}>
+              {g}
+            </div>
+          ))}
+          <p className="hl-cite">
+            <b>{t.source}</b> {step.citeLabel}
+          </p>
+          <div className="hl-actions">
+            <a className="hl-go" href={step.url} rel="noopener noreferrer" target="_blank">
+              {t.openOfficial}
+            </a>
+            <a className="hl-check" href={step.cite} rel="noopener noreferrer" target="_blank">
+              {t.readRule}
+            </a>
+            {partner ? (
+              <a className="hl-check" href={partner.url} rel="noopener noreferrer sponsored" target="_blank">
+                {partner.label}
+              </a>
+            ) : null}
+          </div>
+          {partner ? <p className="hl-cite">{t.partnerNote}</p> : null}
+        </div>
+        <div className="hl-actions">
+          <button className={"hl-check" + (isDone ? " on" : "")} onClick={() => toggleDone(step.id)} type="button">
+            {isDone ? t.done : t.markDone}
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  const sheetRaw = sheet ? HL_STEPS.find((s) => s.id === sheet) : undefined;
+  const sheetStep = sheetRaw ? view(sheetRaw) : undefined;
+  const sheetNumber = sheetRaw ? HL_STEPS.indexOf(sheetRaw) + 1 : 0;
 
   return (
     <div className="fp-wrap" style={grid ? { maxWidth: "none" } : undefined}>
@@ -303,15 +439,14 @@ export default function HaulLegalStartPage() {
             <p className="fp-cd" style={{ margin: "0 0 12px" }}>
               {ph.blurb}
             </p>
-            <div className="hl-steps" style={grid ? gridStyle : undefined}>
+            <div className="hl-steps" style={phoneGrid ? phoneGridStyle : grid ? gridStyle : undefined}>
               {HL_STEPS.filter((s) => s.phase === phase.id).map((raw: HlStep) => {
                 const step = view(raw);
                 number += 1;
                 const unlocked = step.free || paid;
                 const isDone = done.includes(step.id);
-                const isOpen = unlocked && open.includes(step.id);
+                const isOpen = unlocked && !phoneGrid && open.includes(step.id);
                 const cls = "hl-step" + (isDone ? " done" : "") + (unlocked ? "" : " locked");
-                const partner = step.partner ? HL_PARTNER_LINKS[step.partner] : undefined;
                 const gate =
                   !unlocked && step.id === firstLockedId ? (
                     <div className="fp-gate" style={grid ? { ...fullRow, margin: 0 } : { margin: 0 }}>
@@ -325,10 +460,15 @@ export default function HaulLegalStartPage() {
                 return (
                   <Fragment key={step.id}>
                     {gate}
-                    <div className={cls}>
+                    <div className={cls} style={phoneGrid ? phoneCard : undefined}>
                       <div className="hl-num">{isDone ? "\u2713" : number}</div>
                       {unlocked ? (
-                        <button aria-expanded={isOpen} onClick={() => toggleOpen(step.id)} style={headBtn} type="button">
+                        <button
+                          aria-expanded={isOpen}
+                          onClick={() => (phoneGrid ? setSheet(step.id) : toggleOpen(step.id))}
+                          style={headBtn}
+                          type="button"
+                        >
                           <span className="hl-steph" style={{ margin: 0 }}>
                             {step.title}
                           </span>
@@ -348,62 +488,7 @@ export default function HaulLegalStartPage() {
                       ) : null}
                       {isOpen ? (
                         <>
-                          <p className="hl-stepd" style={{ marginTop: "6px" }}>
-                            {step.summary}
-                          </p>
-                          <div className="hl-meta">
-                            <span className="hl-fee">{step.fee}</span>
-                            <span className="hl-tag">{step.time}</span>
-                          </div>
-                          <div className="hl-detail">
-                            <p className="hl-label">{t.where}</p>
-                            <p className="hl-stepd">{step.where}</p>
-                            {step.needs.length > 0 ? (
-                              <>
-                                <p className="hl-label">{t.doFirst}</p>
-                                <ul className="hl-list">
-                                  {step.needs.map((n) => (
-                                    <li key={n}>
-                                      {titleOf(n)}
-                                      {done.includes(n) ? t.doneMark : ""}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </>
-                            ) : null}
-                            <p className="hl-label">{t.watchOut}</p>
-                            {step.gotchas.map((g) => (
-                              <div className="hl-gotcha" key={g}>
-                                {g}
-                              </div>
-                            ))}
-                            <p className="hl-cite">
-                              <b>{t.source}</b> {step.citeLabel}
-                            </p>
-                            <div className="hl-actions">
-                              <a className="hl-go" href={step.url} rel="noopener noreferrer" target="_blank">
-                                {t.openOfficial}
-                              </a>
-                              <a className="hl-check" href={step.cite} rel="noopener noreferrer" target="_blank">
-                                {t.readRule}
-                              </a>
-                              {partner ? (
-                                <a className="hl-check" href={partner.url} rel="noopener noreferrer sponsored" target="_blank">
-                                  {partner.label}
-                                </a>
-                              ) : null}
-                            </div>
-                            {partner ? <p className="hl-cite">{t.partnerNote}</p> : null}
-                          </div>
-                          <div className="hl-actions">
-                            <button
-                              className={"hl-check" + (isDone ? " on" : "")}
-                              onClick={() => toggleDone(step.id)}
-                              type="button"
-                            >
-                              {isDone ? t.done : t.markDone}
-                            </button>
-                          </div>
+                          {renderDetail(step, isDone)}
                           <button className="hl-more" onClick={() => toggleOpen(step.id)} type="button">
                             {t.hideDetails}
                           </button>
@@ -446,13 +531,38 @@ export default function HaulLegalStartPage() {
         <p className="fp-legal">{t.legal}</p>
       </div>
       <HlAccountButton />
+
+      {sheetStep ? (
+        <div aria-modal="true" role="dialog" style={sheetWrap}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+              <div className="hl-num" style={{ position: "static", flexShrink: 0 }}>
+                {done.includes(sheetStep.id) ? "\u2713" : sheetNumber}
+              </div>
+              <p className="hl-steph" style={{ margin: "5px 0 0" }}>
+                {sheetStep.title}
+              </p>
+            </div>
+            <button aria-label={t.hideDetails} onClick={() => setSheet(null)} style={sheetClose} type="button">
+              {"\u2715"}
+            </button>
+          </div>
+          <div style={{ marginTop: "8px" }}>{renderDetail(sheetStep, done.includes(sheetStep.id))}</div>
+          <div className="hl-actions" style={{ marginTop: "20px" }}>
+            <button className="hl-check" onClick={() => setSheet(null)} type="button">
+              {t.hideDetails}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v8 - opened grid
-// cards grow downward in place; Grid view runs full width edge to
+// END OF FILE - app/haullegal/start/page.tsx (v9 - phone grid =
+// two columns + full-screen step sheet; opened grid
+// cards grow downward in place on wide screens; Grid view runs full width edge to
 // edge; steps start closed, tap the title to open; List / Grid
 // view switch kept on the device; account circle, footer Account link; Spanish switch,
 // account progress sync, partner buttons; 23-step checklist, free
