@@ -1,7 +1,10 @@
 // FILE: app/haullegal/privacy/page.tsx
 import Link from "next/link";
 
-// HaulLegal Privacy Policy (v4 - the AI help chat and step tutor
+// HaulLegal Privacy Policy (v5 - section 8 quotes the full
+// carrier-compliant consent wording the calendar box now carries
+// (i18n v8) and links the public program page at /haullegal/sms.)
+// v4 notes - the AI help chat and step tutor
 // are live: section 4 now says so in the present tense, and lists
 // what is sent to the AI provider (the question, the step content,
 // and the visitor's own recent messages in that chat), plus the
@@ -79,7 +82,7 @@ We do not sell your personal information, and we do not show third-party adverti
   },
   {
     t: "8. Text-Message (SMS) Reminders",
-    b: `Text reminders are optional and off by default. You turn them on yourself, on the Stay Legal calendar page at haullegal.com/calendar, by entering a US mobile number and checking a box that reads: "Text me my deadline reminders. Message and data rates may apply. Message frequency varies. Reply STOP to cancel, HELP for help." The box is never pre-checked, and we do not enroll numbers any other way - not by phone, paper, or purchased lists.
+    b: `Text reminders are optional and off by default. You turn them on yourself, on the Stay Legal calendar page at haullegal.com/calendar, by entering a US mobile number and checking a box that reads: "By checking this box I agree to receive deadline reminder text messages from HaulLegal at the mobile number above. Message frequency varies (about 2-6 messages a month). Message and data rates may apply. Reply STOP to cancel or HELP for help. Consent is not a condition of purchase." The box is never pre-checked, and we do not enroll numbers any other way - not by phone, paper, or purchased lists. The full program terms, with a copy of that form, are at haullegal.com/haullegal/sms.
 
 What we send: reminders that a deadline you entered on your calendar is coming up (30, 7 and 1 days ahead), and replies to STOP, START and HELP. We do not send marketing texts. Message frequency varies with the deadlines on your calendar - typically a few messages per month. Message and data rates may apply according to your mobile plan. Carriers are not liable for delayed or undelivered messages.
 
@@ -140,8 +143,8 @@ export default function HaulLegalPrivacyPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/privacy/page.tsx (v4 - AI chat +
-// tutor disclosure; SMS reminder
+// END OF FILE - app/haullegal/privacy/page.tsx (v5 - full SMS
+// consent wording + program page link; AI chat + tutor disclosure; SMS reminder
 // disclosure (opt-in, STOP / HELP, rates, no sharing); language
 // preference + on-device storage; business details, reminder
 // emails; essential cookies only)
