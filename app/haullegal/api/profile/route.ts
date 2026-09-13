@@ -3,8 +3,18 @@ import "server-only";
 import { auth } from "@/app/(auth)/auth";
 import { guestRegex } from "@/lib/constants";
 import { getHaulProfile, saveHaulProfile } from "@/lib/db/haul";
+import { normalizeUsPhone } from "@/lib/haullegal/twilio";
 
-// Saved Stay Legal profile + walkthrough progress (v1). GET returns
+// Saved Stay Legal profile + walkthrough progress (v2 - TEXT
+// REMINDERS: the body may carry phone (a US mobile number, any
+// punctuation) and sms (the consent box). Rules: phone absent =
+// leave the stored number alone (the walkthrough page never sends
+// it); phone "" = clear the number and switch texts off; a number
+// that is not ten US digits is rejected with 400 bad-phone; sms
+// true without a valid number is rejected the same way. GET now
+// returns phone (digits only) and sms so the calendar can show the
+// saved state.)
+// v1 notes - GET returns
 // what the account has saved (or null); POST saves it. Any real,
 // signed-in account may save - the data is tiny and it is what
 // makes reminders and cross-device progress possible - while the
@@ -33,7 +43,14 @@ export async function GET() {
     const row = await getHaulProfile(userId);
     if (!row) return Response.json({ saved: null });
     return Response.json({
-      saved: { profile: row.profile, progress: row.progress, reminders: row.reminders, updatedAt: row.updatedAt.toISOString() },
+      saved: {
+        profile: row.profile,
+        progress: row.progress,
+        reminders: row.reminders,
+        phone: row.phone ? row.phone.replace(/^\+1/, "") : "",
+        sms: row.sms,
+        updatedAt: row.updatedAt.toISOString(),
+      },
     });
   } catch (err) {
     console.error("HaulLegal profile read error:", err);
@@ -46,7 +63,7 @@ export async function POST(request: Request) {
   if (!userId) {
     return Response.json({ error: "signin-required" }, { status: 401 });
   }
-  let body: { profile?: unknown; progress?: unknown; reminders?: unknown };
+  let body: { profile?: unknown; progress?: unknown; reminders?: unknown; phone?: unknown; sms?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -64,13 +81,35 @@ export async function POST(request: Request) {
     return Response.json({ error: "bad-progress" }, { status: 400 });
   }
   const reminders = body.reminders === undefined ? true : Boolean(body.reminders);
-  await saveHaulProfile({ userId, profile, progress, reminders });
+  let phone: string | null | undefined;
+  let sms: boolean | undefined;
+  if (body.phone !== undefined) {
+    if (typeof body.phone !== "string") {
+      return Response.json({ error: "bad-phone" }, { status: 400 });
+    }
+    if (body.phone.trim() === "") {
+      phone = null;
+      sms = false;
+    } else {
+      phone = normalizeUsPhone(body.phone);
+      if (!phone) return Response.json({ error: "bad-phone" }, { status: 400 });
+      sms = body.sms === undefined ? undefined : Boolean(body.sms);
+    }
+  } else if (body.sms !== undefined) {
+    sms = Boolean(body.sms);
+    if (sms) {
+      const row = await getHaulProfile(userId);
+      if (!row?.phone) return Response.json({ error: "bad-phone" }, { status: 400 });
+    }
+  }
+  await saveHaulProfile({ userId, profile, progress, reminders, phone, sms });
   return Response.json({ ok: true });
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/api/profile/route.ts (v1 - saved
-// calendar profile + walkthrough progress, size-guarded)
+// END OF FILE - app/haullegal/api/profile/route.ts (v2 - phone +
+// text opt-in; saved calendar profile + walkthrough progress,
+// size-guarded)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
