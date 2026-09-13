@@ -1,8 +1,10 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v3 - the account page button reads
-// "Manage", his call.)
+// HaulLegal language layer (v4 - the walkthrough's List / Grid
+// view switch and the "every step starts closed" hint; the account
+// circle's "View account" menu button.)
+// v3 notes - the account page button reads "Manage", his call.
 // v2 notes - adds the "Account" link label and
 // the thank-you page's account button, so the account page - the
 // place to manage or cancel - is reachable from every page.)
@@ -86,6 +88,7 @@ const EN = {
     stateGuides: "State guides",
     loading: "Loading...",
     account: "Account",
+    viewAccount: "View account",
     langToggleTitle: "Cambiar a espa\u00f1ol",
   },
   landing: {
@@ -233,6 +236,10 @@ const EN = {
     locked: "Locked - part of the walkthrough",
     showDetails: "Show details",
     hideDetails: "Hide details",
+    viewLabel: "View",
+    viewList: "List",
+    viewGrid: "Grid",
+    viewHint: "Every step starts closed. Tap a step to open its full walkthrough; tap the title again to close it.",
     where: "Where",
     doFirst: "Do first",
     doneMark: " (done)",
@@ -462,6 +469,7 @@ const ES: HlUi = {
     stateGuides: "Gu\u00edas por estado",
     loading: "Cargando...",
     account: "Cuenta",
+    viewAccount: "Ver cuenta",
     langToggleTitle: "Switch to English",
   },
   landing: {
@@ -609,6 +617,10 @@ const ES: HlUi = {
     locked: "Bloqueado - parte de la gu\u00eda",
     showDetails: "Ver detalles",
     hideDetails: "Ocultar detalles",
+    viewLabel: "Vista",
+    viewList: "Lista",
+    viewGrid: "Cuadr\u00edcula",
+    viewHint: "Cada paso empieza cerrado. Toca un paso para abrir su gu\u00eda completa; toca el t\u00edtulo otra vez para cerrarlo.",
     where: "D\u00f3nde",
     doFirst: "Haz primero",
     doneMark: " (listo)",
@@ -827,8 +839,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v3 - "Manage"; Account
-// label; EN/ES
+// END OF FILE - lib/haullegal/i18n.ts (v4 - List / Grid view
+// strings, "View account"; "Manage"; Account label; EN/ES
 // page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
