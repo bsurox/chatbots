@@ -1,7 +1,9 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v5 - the calendar's text-reminder
+// HaulLegal language layer (v6 - the help chat widget and the
+// per-step tutor get their own string groups, chat and tutor.)
+// v5 notes - the calendar's text-reminder
 // block: mobile number field, the consent checkbox wording (the
 // exact text registered with the carriers - change it here and in
 // the campaign together), the ON / OFF switch and its help line.)
@@ -450,6 +452,38 @@ const EN = {
     portalErr: "The billing page is not available right now - email support@askevo.ai and we will handle it the same day.",
     legal: "Billing questions: support@askevo.ai. Card statements read ASKEVO* HAULLEGAL.",
   },
+  chat: {
+    titleTail: "help",
+    greeting: "Hey - questions about getting your USDOT number and authority, the fees, the deadlines, or HaulLegal itself? Ask away.",
+    placeholder: "Ask about authority, fees, deadlines...",
+    send: "Send",
+    close: "Close chat",
+    openLabel: "Open help chat",
+    typing: "Typing...",
+    left: "{n} of {cap} messages left today",
+    err: "Something went wrong - try again.",
+    limitH: "That's the chat limit for today.",
+    limitD: "Leave your name, email, and question - it goes straight to a real person at support@askevo.ai.",
+    formName: "Your name",
+    formEmail: "Your email",
+    formMsg: "Your question",
+    formErr: "Check the fields and try again - all three are needed.",
+    formSend: "Send to support",
+    formSending: "Sending...",
+    formOk: "Got it - your message went straight to our support desk. We'll reply to your email.",
+  },
+  tutor: {
+    title: "Step {n} tutor",
+    btn: "Ask about this step",
+    greeting: "Ask me anything about this step - what a term means, what to click, what happens if you skip it, or what it costs. I only know this walkthrough and the official rules behind it.",
+    placeholder: "Ask about this step...",
+    send: "Send",
+    close: "Close tutor",
+    typing: "Typing...",
+    err: "Something went wrong - try again.",
+    limit: "That's the tutor limit for today. Come back tomorrow.",
+    limitFree: "That's the free tutor limit for today. The walkthrough includes 25 tutor messages a day.",
+  },
   thanks: {
     remindersOn: "Reminders are on.",
     youreIn: "You're in.",
@@ -841,6 +875,38 @@ const ES: HlUi = {
     portalErr: "La p\u00e1gina de facturaci\u00f3n no est\u00e1 disponible ahora mismo - escribe a support@askevo.ai y lo resolvemos el mismo d\u00eda.",
     legal: "Preguntas de facturaci\u00f3n: support@askevo.ai. Los estados de cuenta muestran ASKEVO* HAULLEGAL.",
   },
+  chat: {
+    titleTail: "ayuda",
+    greeting: "Hola - \u00bfpreguntas sobre c\u00f3mo obtener tu n\u00famero USDOT y tu autoridad, las cuotas, las fechas l\u00edmite o sobre HaulLegal? Pregunta lo que quieras.",
+    placeholder: "Pregunta sobre la autoridad, cuotas, fechas...",
+    send: "Enviar",
+    close: "Cerrar chat",
+    openLabel: "Abrir chat de ayuda",
+    typing: "Escribiendo...",
+    left: "Te quedan {n} de {cap} mensajes hoy",
+    err: "Algo sali\u00f3 mal - int\u00e9ntalo de nuevo.",
+    limitH: "Ese es el l\u00edmite del chat por hoy.",
+    limitD: "Deja tu nombre, correo y pregunta - le llega directo a una persona real en support@askevo.ai.",
+    formName: "Tu nombre",
+    formEmail: "Tu correo",
+    formMsg: "Tu pregunta",
+    formErr: "Revisa los campos e int\u00e9ntalo de nuevo - los tres son necesarios.",
+    formSend: "Enviar a soporte",
+    formSending: "Enviando...",
+    formOk: "Listo - tu mensaje lleg\u00f3 directo a nuestro equipo de soporte. Te responderemos a tu correo.",
+  },
+  tutor: {
+    title: "Tutor del paso {n}",
+    btn: "Preguntar sobre este paso",
+    greeting: "Preg\u00fantame lo que quieras sobre este paso - qu\u00e9 significa un t\u00e9rmino, d\u00f3nde hacer clic, qu\u00e9 pasa si lo saltas o cu\u00e1nto cuesta. Solo conozco esta gu\u00eda y las reglas oficiales detr\u00e1s de ella.",
+    placeholder: "Pregunta sobre este paso...",
+    send: "Enviar",
+    close: "Cerrar tutor",
+    typing: "Escribiendo...",
+    err: "Algo sali\u00f3 mal - int\u00e9ntalo de nuevo.",
+    limit: "Ese es el l\u00edmite del tutor por hoy. Vuelve ma\u00f1ana.",
+    limitFree: "Ese es el l\u00edmite gratuito del tutor por hoy. La gu\u00eda incluye 25 mensajes del tutor al d\u00eda.",
+  },
   thanks: {
     remindersOn: "Los recordatorios est\u00e1n activados.",
     youreIn: "Ya est\u00e1s dentro.",
@@ -863,8 +929,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v5 - text-reminder
-// strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
+// END OF FILE - lib/haullegal/i18n.ts (v6 - chat + tutor
+// strings; text-reminder strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
 // page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
