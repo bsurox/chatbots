@@ -8,18 +8,15 @@ import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 import { HL_PARTNER_LINKS, HL_PHASES, HL_STEPS, type HlStep } from "@/lib/haullegal/steps";
 import { HL_PHASES_ES, HL_STEPS_ES } from "@/lib/haullegal/steps-es";
 
-// HaulLegal walkthrough room (v10 - INDEPENDENT COLUMNS, his spec:
-// an open card in Grid view must stay exactly as wide as it was
-// and only grow downward, without moving anything beside it. A
-// plain CSS grid cannot do that (every card in a row shares the
-// row's height, so one open card drops the whole next row). Now
-// each phase deals its cards round-robin into separate column
-// stacks - card i goes to column i mod cols - so reading order
-// still runs left to right along the rows, while each column
-// stacks on its own and an open card pushes down only the cards
-// under it. Column count = floor((window width - 40) / 270), at
-// least 2, re-read on resize; the phone grid uses 2. The gate card
-// sits above the columns of its phase.)
+// HaulLegal walkthrough room (v11 - his call after trying the
+// column stacks: back to the plain grid where an OPEN card spans
+// the full row (as v7 did) - the closed cards tile across the
+// screen, and the one you open stretches edge to edge so its
+// walkthrough reads at full width. Wide screens: auto-fill columns
+// at least 270px; phone grid: 2 columns + the full-screen sheet.
+// The gate card sits above the grid of its phase.)
+// v10 notes - tried dealing cards into independent column stacks
+// so an open card only grew downward; dropped.
 // v9 notes - MOBILE GRID, his spec: on a
 // narrow screen (under 640px, read through matchMedia after mount)
 // Grid view is a real two-column grid of closed cards, and tapping
@@ -141,9 +138,18 @@ const headBtn: React.CSSProperties = {
   color: "inherit",
 };
 
-// Wide-screen grid columns are at least this wide; the page padding
-// is 20px a side (.fp-wrap).
-const COL_MIN = 270;
+const gridStyle: React.CSSProperties = {
+  gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))",
+  alignItems: "start",
+};
+
+const phoneGridStyle: React.CSSProperties = {
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "8px",
+  alignItems: "start",
+};
+
+const fullRow: React.CSSProperties = { gridColumn: "1 / -1" };
 
 // Phone grid: two columns, tighter cards (the number circle sits at
 // left 14px and is 32px wide, so 50px of left padding clears it).
@@ -184,7 +190,6 @@ export default function HaulLegalStartPage() {
   const [loaded, setLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<View>("list");
   const [narrow, setNarrow] = useState(false);
-  const [width, setWidth] = useState(0);
   const [sheet, setSheet] = useState<string | null>(null);
   const [lang] = useHlLang();
   const ui = HL_UI[lang];
@@ -228,15 +233,9 @@ export default function HaulLegalStartPage() {
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     setNarrow(mq.matches);
-    setWidth(window.innerWidth);
     const on = (e: MediaQueryListEvent) => setNarrow(e.matches);
-    const onResize = () => setWidth(window.innerWidth);
     mq.addEventListener("change", on);
-    window.addEventListener("resize", onResize);
-    return () => {
-      mq.removeEventListener("change", on);
-      window.removeEventListener("resize", onResize);
-    };
+    return () => mq.removeEventListener("change", on);
   }, []);
 
   useEffect(() => {
@@ -312,7 +311,6 @@ export default function HaulLegalStartPage() {
   const firstLockedId = paid ? null : HL_STEPS.find((s) => !s.free)?.id ?? null;
   const grid = viewMode === "grid";
   const phoneGrid = grid && narrow;
-  const cols = phoneGrid ? 2 : Math.max(2, Math.floor((width - 40) / COL_MIN));
   let number = 0;
 
   // The full walkthrough for one step - the same block inside an
@@ -453,7 +451,7 @@ export default function HaulLegalStartPage() {
           const cls = "hl-step" + (isDone ? " done" : "") + (unlocked ? "" : " locked");
           const n = number;
           return (
-            <div className={cls} key={step.id} style={phoneGrid ? phoneCard : undefined}>
+            <div className={cls} key={step.id} style={phoneGrid ? phoneCard : grid && isOpen ? fullRow : undefined}>
               <div className="hl-num">{isDone ? "\u2713" : n}</div>
               {unlocked ? (
                 <button
@@ -500,16 +498,6 @@ export default function HaulLegalStartPage() {
             </Link>
           </div>
         ) : null;
-        // Grid: the cards are dealt round-robin into independent
-        // columns (card i goes to column i mod cols), so reading
-        // order still runs left to right along the rows, but each
-        // column stacks on its own - an open card pushes down only
-        // the cards beneath it in its column, never the whole row.
-        const stacks: Array<Array<React.ReactElement>> = [];
-        if (grid) {
-          for (let c = 0; c < cols; c += 1) stacks.push([]);
-          cards.forEach((card, i) => stacks[i % cols].push(card));
-        }
         return (
           <div key={phase.id}>
             <p className="hl-phase">{ph.title}</p>
@@ -517,17 +505,9 @@ export default function HaulLegalStartPage() {
               {ph.blurb}
             </p>
             {gate}
-            {grid ? (
-              <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: phoneGrid ? "8px" : "10px", alignItems: "start" }}>
-                {stacks.map((stack, c) => (
-                  <div key={c} style={{ display: "grid", gap: phoneGrid ? "8px" : "10px", alignContent: "start" }}>
-                    {stack}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="hl-steps">{cards}</div>
-            )}
+            <div className="hl-steps" style={phoneGrid ? phoneGridStyle : grid ? gridStyle : undefined}>
+              {cards}
+            </div>
           </div>
         );
       })}
@@ -588,9 +568,9 @@ export default function HaulLegalStartPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/start/page.tsx (v10 - grid = dealt
-// column stacks, open cards grow down in place; phone grid = two
-// columns + full-screen step sheet; Grid view runs full width edge to
+// END OF FILE - app/haullegal/start/page.tsx (v11 - open grid card
+// spans the full row; phone grid = two columns + full-screen step
+// sheet; Grid view runs full width edge to
 // edge; steps start closed, tap the title to open; List / Grid
 // view switch kept on the device; account circle, footer Account link; Spanish switch,
 // account progress sync, partner buttons; 23-step checklist, free
