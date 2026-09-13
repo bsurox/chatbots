@@ -5,12 +5,20 @@ import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import HlAccountButton from "@/app/haullegal/account-button";
 import HlLangToggle from "@/app/haullegal/lang-toggle";
+import HlTruckBg from "@/app/haullegal/truck-bg";
 import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal landing page (v6 - his spec: the account door is a
-// small circle pinned bottom-left with a person icon (the shared
-// account-button.tsx), not a pill in the top bar; the footer
-// "Account" link stays.)
+// HaulLegal landing page (v7 - THE TRUCK, his idea: a real semi
+// photo, black and white and faded into the dark theme
+// (truck-bg.tsx + public/hl-truck.jpg), runs edge to edge behind
+// the hero at the top of the page. The page now
+// wraps itself in a full-width relative box (isolation: isolate)
+// so the backdrop can sit at z-index -1 under the text and above
+// the black canvas; the centered .fp-wrap column is unchanged
+// inside it. Landing only for now.)
+// v6 notes - the account door is a small circle pinned in a corner
+// with a person icon (the shared account-button.tsx), not a pill
+// in the top bar; the footer "Account" link stays.
 // v5 notes - the ACCOUNT door: the footer of every product page
 // carries an "Account" link, so the page that manages Stay Legal
 // is reachable from anywhere - it was not linked from anywhere.
@@ -76,7 +84,9 @@ export default function HaulLegalPage() {
   }, []);
 
   return (
-    <div className="fp-wrap">
+    <div style={{ position: "relative", isolation: "isolate" }}>
+      <HlTruckBg />
+      <div className="fp-wrap">
       <div className="fp-top" style={{ flexWrap: "wrap", gap: "8px" }}>
         <div className="fp-brand">
           Haul<span>Legal</span>
@@ -202,13 +212,14 @@ export default function HaulLegalPage() {
         <p className="fp-legal">{t.legal}</p>
       </div>
       <HlAccountButton />
+      </div>
     </div>
   );
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/page.tsx (v6 - floating account
-// circle + footer link; Spanish switch via i18n.ts, EN / ES pill; five by-the-mile
+// END OF FILE - app/haullegal/page.tsx (v7 - semi truck photo
+// backdrop; floating account circle + footer link; Spanish switch via i18n.ts, EN / ES pill; five by-the-mile
 // states; $249 walkthrough + $39/mo Stay Legal, fee table, honesty
 // footer)
 // If you can see this comment, the paste was not truncated.
