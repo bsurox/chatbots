@@ -6,7 +6,7 @@ import "./pages.css";
 import { ASKEVO_FB, ASKEVO_IG } from "./brands";
 import { FacebookIcon, InstagramIcon } from "./icons";
 
-// Server-side wrapper for the AskEvo LLC parent-company hub (v4).
+// Server-side wrapper for the AskEvo LLC parent-company hub (v5).
 // Owns the css import and the metadata, so browser tabs and share
 // cards describe the company - not the retired chat tool the root
 // layout still describes. proxy.ts rewrites askevo.ai "/" onto
@@ -25,6 +25,9 @@ import { FacebookIcon, InstagramIcon } from "./icons";
 // Instagram glyph sits up here in the header, and each brand's
 // own accounts ride its card and its section on /businesses.
 // v4: the company's Facebook page joins Instagram up here.
+// v5 (his call): both company glyphs moved to the LEFT, beside the
+// AskEvo LLC wordmark, so they read as the company's own accounts
+// instead of blending into the three nav buttons on the right.
 // v2: the hub's own favicon, public/ae-icon.png - the AE wordmark
 // in the same five-brand gradient the page's AskEvo LLC text
 // wears. Scoped to this segment; the legacy AskEvo pages (credits,
@@ -48,13 +51,10 @@ export default function CompanyLayout({
     <div className="ae-page">
       <div className="ae-wrap">
         <div className="ae-top">
-          <Link className="ae-wordmark ae-grad" href="/" prefetch={false}>
-            AskEvo LLC
-          </Link>
-          <div className="ae-nav">
-            <Link className="ae-navbtn" href="/businesses" prefetch={false}>Businesses</Link>
-            <Link className="ae-navbtn" href="/#about" prefetch={false}>About</Link>
-            <Link className="ae-navbtn" href="/contact" prefetch={false}>Contact</Link>
+          <div className="ae-brandside">
+            <Link className="ae-wordmark ae-grad" href="/" prefetch={false}>
+              AskEvo LLC
+            </Link>
             <Link
               aria-label="AskEvo LLC on Instagram"
               className="ae-soc top"
@@ -78,6 +78,11 @@ export default function CompanyLayout({
               <FacebookIcon />
             </Link>
           </div>
+          <div className="ae-nav">
+            <Link className="ae-navbtn" href="/businesses" prefetch={false}>Businesses</Link>
+            <Link className="ae-navbtn" href="/#about" prefetch={false}>About</Link>
+            <Link className="ae-navbtn" href="/contact" prefetch={false}>Contact</Link>
+          </div>
         </div>
         <div className="ae-rule" />
         {children}
@@ -98,7 +103,7 @@ export default function CompanyLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/layout.tsx (v4 - facebook in header)
+// END OF FILE - app/company/layout.tsx (v5 - socials beside wordmark)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
