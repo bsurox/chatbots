@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./company.css";
 import "./pages.css";
-import { ASKEVO_IG } from "./brands";
-import { InstagramIcon } from "./icons";
+import { ASKEVO_FB, ASKEVO_IG } from "./brands";
+import { FacebookIcon, InstagramIcon } from "./icons";
 
-// Server-side wrapper for the AskEvo LLC parent-company hub (v3).
+// Server-side wrapper for the AskEvo LLC parent-company hub (v4).
 // Owns the css import and the metadata, so browser tabs and share
 // cards describe the company - not the retired chat tool the root
 // layout still describes. proxy.ts rewrites askevo.ai "/" onto
@@ -24,6 +24,7 @@ import { InstagramIcon } from "./icons";
 // call on socials: no separate socials page - the AskEvo LLC
 // Instagram glyph sits up here in the header, and each brand's
 // own accounts ride its card and its section on /businesses.
+// v4: the company's Facebook page joins Instagram up here.
 // v2: the hub's own favicon, public/ae-icon.png - the AE wordmark
 // in the same five-brand gradient the page's AskEvo LLC text
 // wears. Scoped to this segment; the legacy AskEvo pages (credits,
@@ -65,6 +66,17 @@ export default function CompanyLayout({
             >
               <InstagramIcon gid="header" />
             </Link>
+            <Link
+              aria-label="AskEvo LLC on Facebook"
+              className="ae-soc top"
+              href={ASKEVO_FB}
+              prefetch={false}
+              rel="noopener noreferrer"
+              target="_blank"
+              title="AskEvo LLC on Facebook"
+            >
+              <FacebookIcon />
+            </Link>
           </div>
         </div>
         <div className="ae-rule" />
@@ -86,7 +98,7 @@ export default function CompanyLayout({
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/layout.tsx (v3 - shared header/footer)
+// END OF FILE - app/company/layout.tsx (v4 - facebook in header)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
