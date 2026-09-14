@@ -1,11 +1,16 @@
 // FILE: lib/haullegal/steps.ts
 
-// HaulLegal walkthrough content (v2 - Connecticut's Highway Use Fee
-// joins the by-the-mile step as the fifth state, and the partner
-// link table HL_PARTNER_LINKS ships EMPTY: each walkthrough step
-// with a partner slot shows a partner button only once its entry
-// here carries a real tracked URL, so wiring an affiliate link is a
-// one-line data edit in this file.)
+// HaulLegal walkthrough content (v3 - THE FIRST PARTNER LINK IS
+// LIVE: HL_PARTNER_LINKS now carries the consortium slot (Vertical
+// Identity, approved September 2026, tracked URL), so the drug and
+// alcohol consortium step shows its partner button with the
+// referral disclosure. Nothing else changed - step text, fees,
+// citations and order are untouched.)
+// v2 notes - Connecticut's Highway Use Fee joins the by-the-mile
+// step as the fifth state, and the partner link table shipped
+// EMPTY: each step with a partner slot shows a partner button only
+// once its entry carries a real tracked URL, so wiring an affiliate
+// link is a one-line data edit in this file.
 // v1 notes - this is the spine of the
 // product: every step a brand-new one-truck, interstate, for-hire
 // carrier (general freight, no hazmat) takes to get legal to haul,
@@ -555,12 +560,26 @@ export const HL_MARKET: Array<{ label: string; value: string; ours?: boolean }> 
   { label: "HaulLegal Stay Legal calendar", value: "$39 / mo, first month free", ours: true },
 ];
 
-// Partner links (v2). One optional entry per partner slot. EMPTY at
-// launch on purpose: the walkthrough shows a partner button on a
-// step only when the step's partner slot has an entry here with a
-// real tracked URL. When an affiliate approval lands, add the line
+// Partner links (v3). One optional entry per partner slot. The
+// walkthrough shows a partner button on a step only when the step's
+// partner slot has an entry here with a real tracked URL, and it
+// always renders with rel="sponsored" plus the disclosure line
+// (start/page.tsx). When an affiliate approval lands, add the line
 // - nothing else changes. The label is what the button says.
-export const HL_PARTNER_LINKS: Partial<Record<HlPartner, { label: string; url: string }>> = {};
+// LIVE: consortium = Vertical Identity, approved September 2026.
+// $30 flat per enrolled carrier, tracked by the ref code in the
+// URL; same-day Certificate of Enrollment. Their price is $85 a
+// year, inside the $66-$85 range the step already quotes, so the
+// honest-price doctrine holds - we are not steering anyone away
+// from a cheaper official route, because there is no official
+// route: a consortium is a private service every one-truck carrier
+// must buy. Do not edit the ref code.
+export const HL_PARTNER_LINKS: Partial<Record<HlPartner, { label: string; url: string }>> = {
+  consortium: {
+    label: "Enroll with Vertical Identity - $85/yr",
+    url: "https://members.verticalidentity.com/enroll?ref=yzrhmmf",
+  },
+};
 
 export const HL_FREE_STEP_IDS: string[] = HL_STEPS.filter((s) => s.free).map((s) => s.id);
 
@@ -573,8 +592,9 @@ export function stepsForPhase(phase: HlPhase): HlStep[] {
 }
 
 // ============================================================
-// END OF FILE - lib/haullegal/steps.ts (v2 - Connecticut HUF in
-// the by-the-mile step, empty HL_PARTNER_LINKS table; 23 verified
+// END OF FILE - lib/haullegal/steps.ts (v3 - Connecticut HUF in
+// the by-the-mile step, HL_PARTNER_LINKS carrying the live
+// Vertical Identity consortium link; 23 verified
 // steps in 4 phases, government fee table, market price table)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
