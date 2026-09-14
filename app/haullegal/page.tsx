@@ -8,7 +8,10 @@ import HlLangToggle from "@/app/haullegal/lang-toggle";
 import HlTruckBg from "@/app/haullegal/truck-bg";
 import { HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal landing page (v7 - THE TRUCK, his idea: a real semi
+// HaulLegal landing page (v8 - the footer gains the "For partners"
+// link, the door for insurance agents, CDL schools, dealers and
+// vendors who talk to new carriers before we do.)
+// v7 notes - THE TRUCK, his idea: a real semi
 // photo, black and white and faded into the dark theme
 // (truck-bg.tsx + public/hl-truck.jpg), runs edge to edge behind
 // the hero at the top of the page. The page now
@@ -199,6 +202,9 @@ export default function HaulLegalPage() {
           <Link className="fp-link" href="/haullegal/states">
             {ui.common.stateGuides}
           </Link>
+          <Link className="fp-link" href="/haullegal/partners">
+            {ui.common.partners}
+          </Link>
           <Link className="fp-link" href="/haullegal/account">
             {ui.common.account}
           </Link>
@@ -218,8 +224,8 @@ export default function HaulLegalPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/page.tsx (v7 - semi truck photo
-// backdrop; floating account circle + footer link; Spanish switch via i18n.ts, EN / ES pill; five by-the-mile
+// END OF FILE - app/haullegal/page.tsx (v8 - footer partner link;
+// semi truck photo backdrop; floating account circle + footer link; Spanish switch via i18n.ts, EN / ES pill; five by-the-mile
 // states; $249 walkthrough + $39/mo Stay Legal, fee table, honesty
 // footer)
 // If you can see this comment, the paste was not truncated.
