@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type Brand, BRANDS, type Door, type Social } from "./brands";
-import { AppleIcon, InstagramIcon, PlayStoreIcon, YoutubeIcon } from "./icons";
+import { AppleIcon, PlayStoreIcon, SocialGlyph } from "./icons";
 
-// AskEvo LLC parent-company landing page (v5). The front door of
+// AskEvo LLC parent-company landing page (v6). The front door of
 // askevo.ai: who the company is, a card per business, and the
 // about section. The header and footer live in layout.tsx now.
 // v5 (his call): Contact moved off this page onto /contact, the
@@ -51,7 +51,7 @@ function SocialLink({ s, gid }: { s: Social; gid: string }) {
       target="_blank"
       title={s.label}
     >
-      {s.kind === "yt" ? <YoutubeIcon /> : <InstagramIcon gid={gid} />}
+      <SocialGlyph gid={gid} kind={s.kind} />
     </Link>
   );
 }
@@ -173,7 +173,7 @@ export default function CompanyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/page.tsx (v5 - landing, four pages)
+// END OF FILE - app/company/page.tsx (v6 - facebook glyphs)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
