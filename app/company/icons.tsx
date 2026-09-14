@@ -1,18 +1,37 @@
 // FILE: app/company/icons.tsx
-// Inline SVG glyphs for the AskEvo LLC hub (v1). Kept in their own
+// Inline SVG glyphs for the AskEvo LLC hub (v2). Kept in their own
 // file so app/company/page.tsx stays under the size ceiling.
-// Every glyph paints with currentColor, so the card's own hover
-// rules recolor it - no per-icon color plumbing.
+// v2 (his call): the social glyphs wear their own platform colors
+// instead of grey - Instagram in its yellow-orange-pink-purple
+// gradient, YouTube in YouTube red. useId keeps every Instagram
+// instance's gradient id unique, since the page paints five of them.
+// The store glyphs (Apple, Play) still ride currentColor because
+// they sit INSIDE the mint Spotmint buttons and must read black.
 // 24x24 viewBox throughout; sized by css (.ae-soc svg / .ae-btn svg).
+
+import { useId } from "react";
 
 type IconProps = { className?: string };
 
+const YOUTUBE_RED = "#ff0000";
+
 export function InstagramIcon({ className }: IconProps) {
+  const id = useId();
+  const g = "ig" + id.replace(/:/g, "");
   return (
     <svg aria-hidden="true" className={className} fill="none" focusable="false" viewBox="0 0 24 24">
-      <rect height="19" rx="5" stroke="currentColor" strokeWidth="1.9" width="19" x="2.5" y="2.5" />
-      <circle cx="12" cy="12" r="4.3" stroke="currentColor" strokeWidth="1.9" />
-      <circle cx="17.5" cy="6.6" fill="currentColor" r="1.2" />
+      <defs>
+        <linearGradient gradientUnits="userSpaceOnUse" id={g} x1="3" x2="21" y1="21" y2="3">
+          <stop offset="0%" stopColor="#feda75" />
+          <stop offset="25%" stopColor="#fa7e1e" />
+          <stop offset="55%" stopColor="#d62976" />
+          <stop offset="80%" stopColor="#962fbf" />
+          <stop offset="100%" stopColor="#4f5bd5" />
+        </linearGradient>
+      </defs>
+      <rect height="19" rx="5" stroke={"url(#" + g + ")"} strokeWidth="1.9" width="19" x="2.5" y="2.5" />
+      <circle cx="12" cy="12" r="4.3" stroke={"url(#" + g + ")"} strokeWidth="1.9" />
+      <circle cx="17.5" cy="6.6" fill={"url(#" + g + ")"} r="1.2" />
     </svg>
   );
 }
@@ -20,8 +39,8 @@ export function InstagramIcon({ className }: IconProps) {
 export function YoutubeIcon({ className }: IconProps) {
   return (
     <svg aria-hidden="true" className={className} fill="none" focusable="false" viewBox="0 0 24 24">
-      <rect height="15" rx="4.2" stroke="currentColor" strokeWidth="1.9" width="21" x="1.5" y="4.5" />
-      <path d="M10 8.8 L16 12 L10 15.2 Z" fill="currentColor" />
+      <rect fill={YOUTUBE_RED} height="15" rx="4.2" stroke={YOUTUBE_RED} strokeWidth="1.9" width="21" x="1.5" y="4.5" />
+      <path d="M10 8.8 L16 12 L10 15.2 Z" fill="#fff" />
     </svg>
   );
 }
@@ -47,7 +66,7 @@ export function PlayStoreIcon({ className }: IconProps) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/icons.tsx (v1 - social + store glyphs)
+// END OF FILE - app/company/icons.tsx (v2 - platform colors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
