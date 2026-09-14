@@ -1,7 +1,13 @@
 // FILE: lib/haullegal/guides.ts
 import "server-only";
 
-// HaulLegal guide library (v2 - the by-the-mile guide gains
+// HaulLegal guide library (v3 - PARTNER LINK: HlGuideCta gains an
+// optional ext flag for off-site buttons (the renderer draws those
+// as real anchors with rel="sponsored" and prints the disclosure),
+// and the New Entrant audit guide carries the consortium link -
+// two of the 16 automatic failures are the drug program and the
+// random pool, so that is where the button belongs.)
+// v2 notes - the by-the-mile guide gains
 // Connecticut's Highway Use Fee as the fifth state; same slug so
 // nothing already indexed moves.)
 // v1 notes - ten SEO articles targeting the
@@ -26,7 +32,10 @@ export type HlGuideSection = {
   facts?: HlGuideFact[];
 };
 
-export type HlGuideCta = { label: string; href: string; ghost?: boolean };
+// ext: an off-site link. The renderer draws those as real anchors
+// with rel="noopener noreferrer sponsored" and prints the partner
+// disclosure under the row - internal hrefs stay Next Links.
+export type HlGuideCta = { label: string; href: string; ghost?: boolean; ext?: boolean };
 
 export type HlGuide = {
   slug: string;
@@ -319,8 +328,12 @@ export const HL_GUIDES: HlGuide[] = [
       },
     ],
     ctaH: "Every item above is a step in the walkthrough.",
-    ctaP: "Check them off as you go and the audit is a formality.",
-    ctas: CTA_WALK,
+    ctaP: "Check them off as you go and the audit is a formality. Two of the automatic failures are the drug program and the random pool - a consortium fixes both the day you enroll.",
+    ctas: [
+      { label: "See the steps free", href: "/haullegal/start" },
+      { label: "Try the deadline calendar", href: "/haullegal/calendar", ghost: true },
+      { ext: true, ghost: true, label: "Enroll in a consortium - $85/yr", href: "https://members.verticalidentity.com/enroll?ref=yzrhmmf" },
+    ],
     related: ["how-to-get-trucking-authority", "ifta-for-owner-operators", "mcs-150-biennial-update"],
   },
   {
@@ -507,7 +520,8 @@ export function getHlGuide(slug: string): HlGuide | null {
 }
 
 // ============================================================
-// END OF FILE - lib/haullegal/guides.ts (v2 - Connecticut joins
+// END OF FILE - lib/haullegal/guides.ts (v3 - consortium partner
+// link on the New Entrant guide; Connecticut joins
 // the by-the-mile guide; ten verified SEO guides)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
