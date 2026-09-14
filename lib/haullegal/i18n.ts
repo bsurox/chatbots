@@ -1,8 +1,15 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v7 - the tutor's free-limit line says
-// 50 messages a day, matching the tutor route v2.)
+// HaulLegal language layer (v9 - calendar.smsNeedSub, the line
+// over the text-reminder block when it is shown to a visitor.)
+// v8 notes - the text-reminder consent box now
+// carries the full carrier-compliant wording: sender, message
+// type, frequency, rates, STOP / HELP, not a condition of
+// purchase. It is the exact text registered with the carriers -
+// change it here, on the /sms program page and in the campaign
+// together.)
+// v7 notes - the tutor's free-limit line says 50 messages a day.
 // v6 notes - the help chat widget and the per-step tutor get their
 // own string groups, chat and tutor.
 // v5 notes - the calendar's text-reminder
@@ -375,11 +382,12 @@ const EN = {
     phonePh: "10-digit US number",
     phoneHelp: "The number your reminder texts go to. US mobile numbers only.",
     phoneBad: "Enter a 10-digit US mobile number to turn on texts.",
-    smsConsent: "Text me my deadline reminders. Message and data rates may apply. Message frequency varies. Reply STOP to cancel, HELP for help.",
+    smsConsent: "By checking this box I agree to receive deadline reminder text messages from HaulLegal at the mobile number above. Message frequency varies (about 2-6 messages a month). Message and data rates may apply. Reply STOP to cancel or HELP for help. Consent is not a condition of purchase.",
     smsOn: "Text reminders: ON",
     smsOff: "Text reminders: OFF",
     smsHelp: "Texts go out 30, 7 and 1 days before each date, alongside the email. Uncheck the box or reply STOP to any text to stop them.",
     smsLegal: "See our {privacy} and {terms}.",
+    smsNeedSub: "Text reminders come with Stay Legal. Subscribe (or log in) to turn them on - the form below is what you will see.",
     legal: "Dates are computed from the information you enter and the rules as verified in September 2026. They are a convenience, not a guarantee - keep your own record and confirm with the agency.",
     walkLink: "The walkthrough",
   },
@@ -798,11 +806,12 @@ const ES: HlUi = {
     phonePh: "N\u00famero de EE. UU. de 10 d\u00edgitos",
     phoneHelp: "El n\u00famero al que llegan tus recordatorios por texto. Solo celulares de EE. UU.",
     phoneBad: "Escribe un n\u00famero de celular de EE. UU. de 10 d\u00edgitos para activar los textos.",
-    smsConsent: "Env\u00edame mis recordatorios de fechas l\u00edmite por texto. Pueden aplicar tarifas de mensajes y datos. La frecuencia de mensajes var\u00eda. Responde STOP para cancelar, HELP para ayuda.",
+    smsConsent: "Al marcar esta casilla acepto recibir mensajes de texto de recordatorio de fechas l\u00edmite de HaulLegal en el n\u00famero de celular indicado arriba. La frecuencia de mensajes var\u00eda (unos 2-6 mensajes al mes). Pueden aplicar tarifas de mensajes y datos. Responde STOP para cancelar o HELP para ayuda. El consentimiento no es condici\u00f3n de compra.",
     smsOn: "Recordatorios por texto: ACTIVADOS",
     smsOff: "Recordatorios por texto: APAGADOS",
     smsHelp: "Los textos salen 30, 7 y 1 d\u00edas antes de cada fecha, junto con el correo. Desmarca la casilla o responde STOP a cualquier texto para detenerlos.",
     smsLegal: "Consulta nuestra {privacy} y nuestros {terms}.",
+    smsNeedSub: "Los recordatorios por texto vienen con Stay Legal. Suscr\u00edbete (o inicia sesi\u00f3n) para activarlos - el formulario de abajo es el que ver\u00e1s.",
     legal: "Las fechas se calculan con la informaci\u00f3n que escribes y las reglas tal como las verificamos en septiembre de 2026. Son una ayuda, no una garant\u00eda - lleva tu propio registro y confirma con la agencia.",
     walkLink: "La gu\u00eda",
   },
@@ -931,7 +940,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v7 - tutor 50/day line;
+// END OF FILE - lib/haullegal/i18n.ts (v9 - smsNeedSub; full SMS
+// consent wording; tutor 50/day line;
 // chat + tutor strings; text-reminder strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
 // page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
