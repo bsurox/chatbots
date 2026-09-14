@@ -1,0 +1,36 @@
+/* FILE: app/company/pages.css */
+/* Furniture for the three inner pages of the AskEvo LLC hub (v1) -
+   /businesses and /contact. Split out of company.css so
+   neither file runs past the size ceiling; layout.tsx imports both,
+   so every page under app/company gets both. Everything here rides
+   var(--brand), set inline per brand from ./brands. */
+
+/* Page heads on the three inner pages. */
+.ae-pagehead { padding: 38px 0 18px; }
+.ae-h1.small { font-size: clamp(32px, 5vw, 48px); }
+.ae-jump { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.ae-jumpbtn { display: inline-block; font-size: 13px; font-weight: 800; color: var(--brand); border: 1px solid var(--brand); border-radius: 999px; padding: 7px 14px; text-decoration: none; line-height: 1.4; }
+.ae-jumpbtn:hover { background: rgba(255, 255, 255, 0.06); }
+
+/* One brand section on /businesses. scroll-margin keeps the heading
+   clear of the top edge when a landing-card click deep-links here. */
+.ae-biz { position: relative; scroll-margin-top: 22px; background: #111214; border: 1px solid #262626; border-radius: 16px; padding: 24px 24px 20px; margin-top: 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+.ae-biz::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--brand); }
+.ae-bizhead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ae-bizname { font-size: 28px; font-weight: 900; letter-spacing: -0.02em; margin: 0; color: var(--brand); }
+.ae-bizbody { display: grid; grid-template-columns: 1.5fr 1fr; gap: 22px; align-items: start; margin: 6px 0 4px; }
+.ae-gets { background: #0d0d0e; border: 1px solid #232323; border-radius: 14px; padding: 16px 18px; }
+.ae-getsk { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin: 0 0 10px; }
+.ae-getslist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.ae-getslist li { position: relative; padding-left: 16px; font-size: 14px; line-height: 1.45; color: #d4d4d4; }
+.ae-getslist li::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; border-radius: 2px; background: var(--brand); }
+
+.ae-aboutdoors { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+
+@media (max-width: 720px) {
+  .ae-bizbody { grid-template-columns: 1fr; }
+  .ae-biz { padding: 20px 18px 18px; }
+  .ae-pagehead { padding: 26px 0 14px; }
+}
+
+/* END OF FILE - app/company/pages.css (v1 - inner page furniture) */
