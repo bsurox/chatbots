@@ -177,8 +177,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // HaulLegal island (v22; v23 adds the SEO doors; v24 adds the
-  // partner and SMS-program doors). haullegal.com serves the trucking
+  // HaulLegal island (v22; v23 adds the SEO doors). haullegal.com serves the trucking
   // authority walkthrough and nothing else - same shape as the two
   // prep blocks above: "/" is a REWRITE so the address bar stays
   // clean, /terms and /privacy land on HaulLegal's own legal pages,
@@ -200,10 +199,8 @@ export async function proxy(request: NextRequest) {
     }
     // v23: /guides and /states join the clean URLs - the SEO library
     // and the per-state authority pages.
-    // v24: /partners (the door for agents, schools and vendors) and
-    // /sms (the public text-message program page the carriers vet)
-    // join, so both have a clean address to hand out. The island
-    // paths keep working either way.
+    // v24: /partners (the B2B door) and /sms (the public text-message
+    // program page) join the clean URLs.
     const cleanHl = ["/start", "/calendar", "/buy", "/thanks", "/account", "/guides", "/states", "/partners", "/sms"];
     if (cleanHl.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       return NextResponse.rewrite(
@@ -219,6 +216,28 @@ export async function proxy(request: NextRequest) {
     if (!hlAllowed) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+  }
+
+  // v25: askevo.ai is the PARENT COMPANY HUB now. The generic chat
+  // tool that used to be the front door is retired: "/" REWRITES
+  // onto /company (address bar stays askevo.ai), the hub itself is
+  // public (no session, no guest row per visit), and the old tool
+  // surfaces - chat threads, image, video, voice, transcribe -
+  // REDIRECT home. Their code stays in the repo untouched, and so
+  // does everything the sister brands lean on: /spotmint, the auth
+  // doors, /credits, /support, /updates, /api/*. Every brand host
+  // above has already claimed its own "/" by this point, and the
+  // Spotmint app fence bounces app traffic long before here, so
+  // this block only ever sees plain askevo.ai visitors.
+  if (pathname === "/") {
+    return NextResponse.rewrite(new URL("/company", request.url));
+  }
+  if (pathname.startsWith("/company")) {
+    return NextResponse.next();
+  }
+  const retired = ["/chat", "/image", "/video", "/voice", "/transcribe"];
+  if (retired.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   if (pathname.startsWith("/api/auth")) {
@@ -340,8 +359,9 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v24 - /partners and /sms join the
-// haullegal.com clean URLs; /guides and /states from v23)
+// END OF FILE - proxy.ts (v25 - askevo.ai front door is the /company
+// hub, old tool URLs redirect home; carries v24's haullegal
+// /partners + /sms doors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
