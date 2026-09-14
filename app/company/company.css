@@ -1,12 +1,19 @@
 /* FILE: app/company/company.css */
-/* AskEvo LLC parent-company hub (v4). The dark canvas is the same
+/* AskEvo LLC parent-company hub (v5). The dark canvas is the same
    near-black every brand uses (#0a0a0a). The wordmark is the one
    thing on the site with its own color: a left-to-right gradient
    built from the brand colors of the businesses AskEvo owns -
    ForemanPrep orange, WiremanPrep volt, HaulLegal green, Spotmint
    mint, Business & Law sky blue. Every button that points at a
    business wears THAT business's color, set inline from the page's
-   brand table, so this file only carries the neutral furniture. */
+   brand table, so this file only carries the neutral furniture.
+   v5: the hub grew from one page to three - landing, /businesses
+   and /contact - so this file now also dresses the page
+   heads, the long brand sections, the socials rows and the
+   clickable landing cards. Header and footer furniture is shared
+   by every page through layout.tsx. The three inner pages' own
+   furniture lives in pages.css beside this file - split out to
+   keep both under the size ceiling. */
 
 .ae-page { min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 56px; }
 .ae-page button { -webkit-tap-highlight-color: transparent; font-family: inherit; }
@@ -16,16 +23,16 @@
 .ae-rule { height: 3px; border-radius: 3px; background: linear-gradient(90deg, #f97316 0%, #ceff00 26%, #22c55e 50%, #46dba8 74%, #38bdf8 100%); }
 
 .ae-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 14px; flex-wrap: wrap; }
-.ae-wordmark { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; white-space: nowrap; }
+.ae-wordmark { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; white-space: nowrap; text-decoration: none; }
 .ae-nav { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.ae-navbtn { background: transparent; border: 1px solid #262626; color: #ddd; border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.ae-navbtn { display: inline-block; background: transparent; border: 1px solid #262626; color: #ddd; border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; line-height: 1.4; }
 .ae-navbtn:hover { border-color: #444; color: #fff; }
 
 .ae-hero { padding: 44px 0 30px; }
 .ae-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #9ca3af; margin: 0 0 14px; }
 .ae-h1 { font-size: clamp(38px, 7vw, 68px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.02; margin: 0 0 16px; }
 .ae-lead { font-size: 18px; line-height: 1.55; color: #cfcfcf; max-width: 640px; margin: 0 0 22px; }
-.ae-cta { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #000; border: 1px solid #fff; border-radius: 999px; padding: 12px 20px; font-size: 15px; font-weight: 800; cursor: pointer; }
+.ae-cta { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #000; border: 1px solid #fff; border-radius: 999px; padding: 12px 20px; font-size: 15px; font-weight: 800; cursor: pointer; text-decoration: none; }
 .ae-cta:hover { background: #e5e5e5; }
 
 .ae-section { padding: 34px 0 6px; }
@@ -35,6 +42,14 @@
 .ae-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .ae-card { position: relative; background: #111214; border: 1px solid #262626; border-radius: 16px; padding: 20px 20px 18px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
 .ae-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--brand); }
+/* v5: landing cards are themselves doors - a click anywhere that is
+   not one of the card's own links opens that brand's section on the
+   businesses page. */
+.ae-card.click { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.ae-card.click:hover { border-color: #3a3a3a; background: #141417; }
+.ae-card.click:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.ae-more { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #6f6f6f; margin: 2px 0 0; }
+.ae-card.click:hover .ae-more { color: var(--brand); }
 .ae-cardtop { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .ae-brandname { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; color: var(--brand); }
 .ae-tag { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9ca3af; border: 1px solid #2a2a2a; border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
@@ -101,4 +116,4 @@
   .ae-wordmark { font-size: 19px; }
 }
 
-/* END OF FILE - app/company/company.css (v4 - store glyph tiles) */
+/* END OF FILE - app/company/company.css (v5 - shared + landing) */
