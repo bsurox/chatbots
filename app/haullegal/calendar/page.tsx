@@ -1,648 +1,206 @@
-// FILE: app/haullegal/calendar/page.tsx
-"use client";
+// FILE: app/haullegal/guides/[slug]/page.tsx
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import HlAccountButton from "@/app/haullegal/account-button";
-import HlLangToggle from "@/app/haullegal/lang-toggle";
-import {
-  buildCalendar,
-  daysUntil,
-  formatYmd,
-  HL_EMPTY_PROFILE,
-  HL_OBLIGATIONS,
-  mcs150Slot,
-  type HlDue,
-  type HlProfile,
-} from "@/lib/haullegal/deadlines";
-import { HL_DUE_DETAILS_ES, HL_DUE_TITLES_ES, HL_FREQ_ES, HL_MISSING_ES, HL_OBLIGATIONS_ES } from "@/lib/haullegal/deadlines-es";
-import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
+import { notFound } from "next/navigation";
+import "../../../foremanprep/guides/guides.css";
+import { getHlGuide, HL_GUIDES, type HlGuideSection } from "@/lib/haullegal/guides";
 
-// HaulLegal Stay Legal calendar (v8 - ONE REMINDERS BOX, his spec:
-// email reminders and text reminders now sit together inside a
-// single green-outlined section, visible to everyone on the public
-// calendar page. A visitor or non-subscriber sees both switches and
-// the full text-consent wording (the carrier reviewers need that on
-// this URL), but tapping either one pops the "Reminders are part of
-// Stay Legal" notice with the door to /haullegal/buy instead of
-// changing anything. Subscribers get the working switches exactly
-// as in v7.)
-// v7 notes - the Text reminders block is
-// now VISIBLE TO EVERYONE, not only signed-in subscribers: the
-// carrier reviewers vetting the text campaign open this exact URL
-// and must see the number field, the unchecked box and the full
-// consent wording on the page where the number is typed. For a
-// visitor or a non-subscriber the controls are disabled and a line
-// above says texts come with Stay Legal; for a signed-in
-// subscriber it is the working form, unchanged from v6.)
-// v6 notes - TEXT REMINDERS, his call:
-// subscribers get a "Text reminders" block under the email switch -
-// a mobile-number field and an UNCHECKED consent box carrying the
-// exact wording registered with the carriers (i18n calendar.
-// smsConsent). Checking the box needs a 10-digit US number; it
-// saves phone + sms:true to the account (profile route v2), which
-// stamps the consent time. Unchecking, clearing the number, or
-// replying STOP to any text turns texts off. The status pill reads
-// ON / OFF, the help line says when texts go out, and the legal
-// line links Privacy and Terms. Profile pushes never carry the
-// phone (the server leaves it alone), so typing dates cannot touch
-// the opt-in; only the text block sends phone / sms.)
-// v5 notes - the floating account circle (account-button.tsx)
-// joins the page.
-// v4 notes - footer gains the "Account" link, the door to managing
-// Stay Legal.
-// v3 notes - three things:
-// 1. ACCOUNT SYNC - the reminder-job fix. Until now the profile
-//    lived only in this browser (hl-profile), so the daily reminder
-//    job at /haullegal/api/remind had no profiles to read and no
-//    subscriber ever got an email. Now: logged in, the page loads
-//    the account copy from /haullegal/api/profile (falling back to
-//    the device copy, which it then pushes up), and every change
-//    saves back (debounced) with the walkthrough progress and the
-//    reminder flag carried along. Signed out, everything works as
-//    before on the device, with a line inviting the owner to log
-//    in. Subscribers get an "Email reminders: ON / OFF" switch -
-//    the setting the reminder email already tells people to use.
-// 2. CONNECTICUT: a ninth switch, "Runs Connecticut (26,000 lb+)",
-//    adds the quarterly Highway Use Fee return (deadlines.ts v3).
-// 3. SPANISH: the EN / ES pill; furniture from i18n.ts, obligation
-//    text and due-date lines from deadlines-es.ts. The date math
-//    never changes language.)
-// v2 notes - BLANK BY DEFAULT, his spec: no switch is pre-selected;
-// a "select all that apply" header sits above the switches.
-// v1 notes - the deadline engine, free to use as a calculator: the
-// owner types his USDOT number, flips the switches that describe
-// his operation and enters the dates he knows; the page computes
-// every upcoming due date from the verified rules in deadlines.ts
-// and lists them soonest first, orange inside 30 days and red once
-// past. Dates not entered show up as a "to see more, add" list.
-// The clock is read ONLY inside useEffect (today state) so the
-// prerender never sees Date.now(); buildCalendar takes the date as
-// an argument. External rule links are real anchors with
-// rel=noopener - the standing no-anchor exception for off-site
-// government pages.
+// HaulLegal guide renderer (v2 - PARTNER BUTTONS: a CTA carrying
+// ext:true (guides.ts v3) renders as a real anchor with
+// rel="noopener noreferrer sponsored" opening in a new tab - the
+// standing off-site exception - and the CTA card then prints the
+// referral disclosure under the buttons. Internal CTAs are Next
+// Links exactly as before.)
+// v1 notes - the server-rendered article
+// template behind every haullegal.com/guides/<slug> SEO page,
+// adapted from the WiremanPrep renderer and sharing the
+// ForemanPrep guides.css (the layout's .hl-zone recolors the
+// var-driven fg- classes green by itself; the one hardcoded
+// orange in that file, the CTA card border, is caught in
+// haullegal.css v2). Pure server component: Google gets finished
+// HTML. Content lives in lib/haullegal/guides.ts; this file only
+// dresses it. Canonicals point at the CLEAN address
+// (haullegal.com/guides/<slug>) that proxy v23 rewrites onto this
+// island. Unknown slugs 404.
 
-const remBox: React.CSSProperties = {
-  border: "1px solid rgba(34, 197, 94, 0.45)",
-  borderRadius: "14px",
-  background: "rgba(34, 197, 94, 0.04)",
-  padding: "16px",
-};
+type Params = { params: Promise<{ slug: string }> };
 
-const remRule: React.CSSProperties = { height: "1px", background: "#1e1e1e", margin: "16px 0 2px" };
-
-const STORE_KEY = "hl-profile";
-const PROGRESS_KEY = "hl-progress";
-
-type DateKey =
-  | "authorityActive"
-  | "medCardIssued"
-  | "lastMvr"
-  | "lastQuery"
-  | "consortiumEnrolled"
-  | "tractorInspected"
-  | "trailerInspected"
-  | "insuranceRenews"
-  | "irpRenews";
-
-const DATE_KEYS: DateKey[] = [
-  "authorityActive",
-  "medCardIssued",
-  "insuranceRenews",
-  "consortiumEnrolled",
-  "lastQuery",
-  "lastMvr",
-  "tractorInspected",
-  "trailerInspected",
-  "irpRenews",
-];
-
-type ToggleKey = "hvut" | "ifta" | "irp" | "eld" | "ky" | "nm" | "ny" | "or" | "ct";
-
-const TOGGLE_KEYS: ToggleKey[] = ["hvut", "ifta", "irp", "eld", "ky", "nm", "ny", "or", "ct"];
-
-type Access = { loggedIn: boolean; sub: boolean };
-
-function digitsOf(raw: string): string {
-  let d = raw.replace(/\D/g, "");
-  if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
-  return d.slice(0, 10);
+export function generateStaticParams() {
+  return HL_GUIDES.map((g) => ({ slug: g.slug }));
 }
 
-function prettyPhone(d: string): string {
-  if (d.length <= 3) return d;
-  if (d.length <= 6) return d.slice(0, 3) + "-" + d.slice(3);
-  return d.slice(0, 3) + "-" + d.slice(3, 6) + "-" + d.slice(6);
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { slug } = await params;
+  const guide = getHlGuide(slug);
+  if (!guide) return {};
+  return {
+    title: guide.metaTitle,
+    description: guide.metaDescription,
+    alternates: { canonical: `https://haullegal.com/guides/${guide.slug}` },
+    openGraph: {
+      title: guide.metaTitle,
+      description: guide.metaDescription,
+      url: `https://haullegal.com/guides/${guide.slug}`,
+      siteName: "HaulLegal",
+      type: "article",
+    },
+  };
 }
 
-function loadProfile(): HlProfile {
-  try {
-    const raw = window.localStorage.getItem(STORE_KEY);
-    if (!raw) return HL_EMPTY_PROFILE;
-    const parsed = JSON.parse(raw);
-    return { ...HL_EMPTY_PROFILE, ...(parsed && typeof parsed === "object" ? parsed : {}) };
-  } catch {
-    return HL_EMPTY_PROFILE;
-  }
+// Text wrapped in single asterisks renders bold: "a *key* point".
+function bold(text: string): React.ReactNode[] {
+  const parts = text.split("*");
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <b key={i}>{part}</b> : <span key={i}>{part}</span>
+  );
 }
 
-function saveProfile(p: HlProfile) {
-  try {
-    window.localStorage.setItem(STORE_KEY, JSON.stringify(p));
-  } catch {
-    // storage unavailable - the calculator still works for this visit
-  }
+function Section({ s }: { s: HlGuideSection }) {
+  return (
+    <>
+      {s.h ? <h2 className="fg-h2">{s.h}</h2> : null}
+      {s.facts ? (
+        <div className="fg-facts">
+          {s.facts.map((f) => (
+            <div className="fg-frow" key={f.l}>
+              <div className="fg-fl">{f.l}</div>
+              <div className="fg-fv">{f.v}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {s.p
+        ? s.p.map((para, i) => (
+            <p className="fg-p" key={i}>
+              {bold(para)}
+            </p>
+          ))
+        : null}
+      {s.list ? (
+        <ul className="fg-list">
+          {s.list.map((item, i) => (
+            <li key={i}>{bold(item)}</li>
+          ))}
+        </ul>
+      ) : null}
+    </>
+  );
 }
 
-function loadLocalProgress(): string[] {
-  try {
-    const raw = window.localStorage.getItem(PROGRESS_KEY);
-    const parsed = raw ? JSON.parse(raw) : null;
-    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
-}
+export default async function HlGuidePage({ params }: Params) {
+  const { slug } = await params;
+  const guide = getHlGuide(slug);
+  if (!guide) notFound();
 
-function hasAnything(p: HlProfile): boolean {
-  return Object.values(p).some((v) => v === true || (typeof v === "string" && v.length > 0) || typeof v === "number");
-}
-
-export default function HaulLegalCalendarPage() {
-  const [profile, setProfile] = useState<HlProfile>(HL_EMPTY_PROFILE);
-  const [today, setToday] = useState<Date | null>(null);
-  const [showRules, setShowRules] = useState(false);
-  const [access, setAccess] = useState<Access>({ loggedIn: false, sub: false });
-  const [synced, setSynced] = useState(false);
-  const [reminders, setReminders] = useState(true);
-  const [phone, setPhone] = useState("");
-  const [sms, setSms] = useState(false);
-  const [phoneErr, setPhoneErr] = useState("");
-  const [showPaid, setShowPaid] = useState(false);
-  const [lang] = useHlLang();
-  const ui = HL_UI[lang];
-  const t = ui.calendar;
-
-  const progress = useRef<string[]>([]);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const ready = useRef(false);
-
-  useEffect(() => {
-    const local = loadProfile();
-    setProfile(local);
-    setToday(new Date());
-    progress.current = loadLocalProgress();
-    fetch("/haullegal/api/access")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!data?.loggedIn) return;
-        setAccess({ loggedIn: true, sub: Boolean(data.sub) });
-        return fetch("/haullegal/api/profile")
-          .then((res) => (res.ok ? res.json() : null))
-          .then((p) => {
-            const saved = p?.saved;
-            if (Array.isArray(saved?.progress)) {
-              progress.current = saved.progress.filter((x: unknown) => typeof x === "string");
-            }
-            if (saved?.reminders !== undefined) setReminders(Boolean(saved.reminders));
-            if (typeof saved?.phone === "string") setPhone(digitsOf(saved.phone));
-            if (saved?.sms !== undefined) setSms(Boolean(saved.sms));
-            ready.current = true;
-            setSynced(true);
-            if (saved?.profile && typeof saved.profile === "object") {
-              const merged: HlProfile = { ...HL_EMPTY_PROFILE, ...saved.profile };
-              setProfile(merged);
-              saveProfile(merged);
-            } else if (hasAnything(local)) {
-              push(local, saved?.reminders === undefined ? true : Boolean(saved.reminders));
-            }
-          });
-      })
-      .catch(() => {});
-  }, []);
-
-  function push(p: HlProfile, rem: boolean) {
-    if (!ready.current) return;
-    fetch("/haullegal/api/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile: p, progress: progress.current, reminders: rem }),
-    }).catch(() => {});
-  }
-
-  function schedulePush(p: HlProfile) {
-    if (!ready.current) return;
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => push(p, reminders), 800);
-  }
-
-  function update(patch: Partial<HlProfile>) {
-    setProfile((prev) => {
-      const next = { ...prev, ...patch };
-      saveProfile(next);
-      schedulePush(next);
-      return next;
-    });
-  }
-
-  function clearAll() {
-    const cleared: HlProfile = { ...HL_EMPTY_PROFILE };
-    setProfile(cleared);
-    saveProfile(cleared);
-    schedulePush(cleared);
-  }
-
-  function toggleReminders() {
-    const next = !reminders;
-    setReminders(next);
-    push(profile, next);
-  }
-
-  // Every reminder control routes through here: subscribers get the
-  // real action, everyone else gets the paid notice.
-  function guard(run: () => void) {
-    if (!smsLive) {
-      setShowPaid(true);
-      return;
-    }
-    run();
-  }
-
-  // The only call that sends the number and the consent flag.
-  function pushSms(nextPhone: string, nextSms: boolean) {
-    if (!ready.current) return;
-    fetch("/haullegal/api/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile, progress: progress.current, reminders, phone: nextPhone, sms: nextSms }),
-    }).catch(() => {});
-  }
-
-  function changePhone(raw: string) {
-    const d = digitsOf(raw);
-    setPhone(d);
-    setPhoneErr("");
-    if (d.length === 0 && sms) {
-      setSms(false);
-      pushSms("", false);
-    }
-  }
-
-  function blurPhone() {
-    if (sms && phone.length === 10) pushSms(phone, true);
-  }
-
-  function toggleSms() {
-    if (sms) {
-      setSms(false);
-      pushSms(phone.length === 10 ? phone : "", false);
-      return;
-    }
-    if (phone.length !== 10) {
-      setPhoneErr(t.phoneBad);
-      return;
-    }
-    setPhoneErr("");
-    setSms(true);
-    pushSms(phone, true);
-  }
-
-  const result = today ? buildCalendar(profile, today) : { dues: [] as HlDue[], missing: [] as string[], missingKeys: [] as string[] };
-
-  function badge(days: number): string {
-    if (days < 0) return fill(t.pastDue, { n: Math.abs(days) });
-    if (days === 0) return t.dueToday;
-    if (days === 1) return t.dueTomorrow;
-    return fill(t.inDays, { n: days });
-  }
-
-  function dueTitle(d: HlDue): string {
-    if (lang !== "es") return d.title;
-    return HL_DUE_TITLES_ES[d.id] ?? HL_OBLIGATIONS_ES[d.obligationId]?.title ?? d.title;
-  }
-
-  function dueDetail(d: HlDue): string {
-    if (lang !== "es") return d.detail;
-    if (d.id === "mcs150") {
-      const slot = mcs150Slot(profile.usdot);
-      return fill(t.mcsDetail, { month: slot?.month ?? "", parity: slot?.parity === "odd" ? t.odd : t.even });
-    }
-    return HL_DUE_DETAILS_ES[d.id] ?? d.detail;
-  }
-
-  const missingList = lang === "es" ? result.missingKeys.map((k) => HL_MISSING_ES[k] ?? k) : result.missing;
-  const smsLive = access.sub && synced;
+  const related = guide.related
+    .map((r) => getHlGuide(r))
+    .filter((g): g is NonNullable<typeof g> => g !== null);
 
   return (
     <div className="fp-wrap">
-      <div className="fp-top" style={{ flexWrap: "wrap", gap: "8px" }}>
-        <div className="fp-brand">
-          Haul<span>Legal</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <HlLangToggle />
-          <Link className="fp-backpill" href="/haullegal">
-            {ui.common.backTo}{" "}
-            <span className="fp-wordmark">
-              Haul<span>Legal</span>
-            </span>
-          </Link>
-        </div>
+      <div className="fp-top">
+        <Link className="fp-backpill" href="/haullegal">
+          Back to{" "}
+          <span className="fp-wordmark">
+            Haul<span>Legal</span>
+          </span>
+        </Link>
       </div>
 
-      <div className="fp-badge">{t.badge}</div>
-      <h1 className="fp-h1" style={{ fontSize: "30px" }}>
-        {t.h1a} <span>{t.h1b}</span>
-      </h1>
-      <p className="fp-sub">{t.sub}</p>
+      <article className="fg-article">
+        <p className="fg-eyebrow">{guide.eyebrow}</p>
+        <h1 className="fg-h1">{guide.h1}</h1>
+        <p className="fg-updated">{guide.updated}</p>
 
-      <div className="hl-form">
-        <div className="hl-field hl-wide">
-          <label className="hl-fl" htmlFor="hl-usdot">{t.usdotLabel}</label>
-          <input
-            className="fp-in"
-            id="hl-usdot"
-            inputMode="numeric"
-            onChange={(e) => update({ usdot: e.target.value.replace(/\D/g, "") })}
-            placeholder={t.usdotPh}
-            value={profile.usdot ?? ""}
-          />
-          <p className="hl-fh">{t.usdotHelp}</p>
-        </div>
+        {guide.intro.map((para, i) => (
+          <p className="fg-p" key={i}>
+            {bold(para)}
+          </p>
+        ))}
 
-        <div className="hl-field hl-wide">
-          <p className="hl-fl">{t.opT}</p>
-          <p className="hl-fh">{t.opHelp}</p>
-          <div className="hl-toggles">
-            {TOGGLE_KEYS.map((k) => {
-              const on = Boolean(profile[k]);
-              return (
-                <button
-                  className={"hl-tog" + (on ? " on" : "")}
-                  key={k}
-                  onClick={() => update({ [k]: !on } as Partial<HlProfile>)}
-                  type="button"
+        {guide.sections.map((s, i) => (
+          <Section key={i} s={s} />
+        ))}
+
+        <div className="fg-cta">
+          <p className="fg-ctah">{guide.ctaH}</p>
+          <p className="fg-ctap">{guide.ctaP}</p>
+          <div className="fg-ctarow">
+            {guide.ctas.map((c) =>
+              c.ext ? (
+                <a
+                  className={c.ghost ? "fg-ctabtn ghost" : "fg-ctabtn"}
+                  href={c.href}
+                  key={c.href}
+                  rel="noopener noreferrer sponsored"
+                  target="_blank"
                 >
-                  {t.toggles[k]}
-                </button>
-              );
-            })}
+                  {c.label}
+                </a>
+              ) : (
+                <Link
+                  className={c.ghost ? "fg-ctabtn ghost" : "fg-ctabtn"}
+                  href={c.href}
+                  key={c.href}
+                >
+                  {c.label}
+                </Link>
+              )
+            )}
           </div>
-          <div className="hl-actions">
-            <button className="hl-check" onClick={clearAll} type="button">
-              {t.clear}
-            </button>
-          </div>
+          {guide.ctas.some((c) => c.ext) ? (
+            <p className="fg-ctap" style={{ fontSize: "12px", marginTop: "12px" }}>
+              Partner link - if you buy through it we may earn a referral fee at no extra cost to you. We show the
+              published price and never hide a cheaper official route.
+            </p>
+          ) : null}
         </div>
 
-        {profile.hvut ? (
+        {related.length > 0 ? (
           <>
-            <div className="hl-field">
-              <label className="hl-fl" htmlFor="hl-fum">{t.fumLabel}</label>
-              <select
-                className="fp-in"
-                id="hl-fum"
-                onChange={(e) => update({ firstUseMonth: e.target.value ? Number(e.target.value) : undefined })}
-                value={profile.firstUseMonth ?? ""}
-              >
-                <option value="">{t.fumDefault}</option>
-                {t.months.map((m, i) => (
-                  <option key={m} value={i + 1}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-              <p className="hl-fh">{t.fumHelp}</p>
-            </div>
-            <div className="hl-field">
-              <label className="hl-fl" htmlFor="hl-fuy">{t.fuyLabel}</label>
-              <input
-                className="fp-in"
-                id="hl-fuy"
-                inputMode="numeric"
-                onChange={(e) => update({ firstUseYear: e.target.value ? Number(e.target.value) : undefined })}
-                placeholder={t.fuyPh}
-                value={profile.firstUseYear ?? ""}
-              />
+            <p className="fg-relh">Keep reading</p>
+            <div className="fg-rel">
+              {related.map((r) => (
+                <Link
+                  className="fg-rellink"
+                  href={`/haullegal/guides/${r.slug}`}
+                  key={r.slug}
+                >
+                  {r.h1}
+                </Link>
+              ))}
             </div>
           </>
         ) : null}
-
-        {DATE_KEYS.filter((k) => k !== "irpRenews" || profile.irp).map((k) => (
-          <div className="hl-field" key={k}>
-            <label className="hl-fl" htmlFor={`hl-${k}`}>{t.dateFields[k].label}</label>
-            <input
-              className="fp-in"
-              id={`hl-${k}`}
-              onChange={(e) => update({ [k]: e.target.value || undefined } as Partial<HlProfile>)}
-              type="date"
-              value={profile[k] ?? ""}
-            />
-            <p className="hl-fh">{t.dateFields[k].help}</p>
-          </div>
-        ))}
-
-        <div className="hl-field hl-wide">
-          <p className="hl-fh">
-            {synced ? t.savedAccount : t.savedDevice}
-            {!access.loggedIn ? (
-              <>
-                {" "}
-                <Link href="/login" style={{ color: "var(--fp)", fontWeight: 700 }}>
-                  {t.logInToSync}
-                </Link>
-              </>
-            ) : null}
-          </p>
-        </div>
-
-        <div className="hl-field hl-wide" style={remBox}>
-          <p className="hl-fl" style={{ fontSize: "14px", color: "var(--fp)" }}>{t.remT}</p>
-          <p className="hl-fh">{t.remIntro}</p>
-
-          <div className="hl-actions" style={{ margin: "10px 0 0" }}>
-            <button
-              className={"hl-check" + (smsLive && reminders ? " on" : "")}
-              onClick={() => guard(toggleReminders)}
-              type="button"
-            >
-              {smsLive && reminders ? t.remindersOn : t.remindersOff}
-            </button>
-          </div>
-          <p className="hl-fh">{t.remindersHelp}</p>
-
-          <div style={remRule} />
-
-          <p className="hl-fl">{t.smsT}</p>
-          <label className="hl-fh" htmlFor="hl-phone">{t.phoneLabel}</label>
-          <input
-            autoComplete="tel-national"
-            className="fp-in"
-            id="hl-phone"
-            inputMode="tel"
-            onBlur={blurPhone}
-            onChange={(e) => changePhone(e.target.value)}
-            onFocus={() => guard(() => {})}
-            placeholder={t.phonePh}
-            readOnly={!smsLive}
-            value={prettyPhone(phone)}
-          />
-          <p className="hl-fh">{t.phoneHelp}</p>
-          <label htmlFor="hl-sms" style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", marginTop: "6px" }}>
-            <input
-              checked={sms}
-              id="hl-sms"
-              onChange={() => guard(toggleSms)}
-              style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "var(--fp)", flexShrink: 0 }}
-              type="checkbox"
-            />
-            <span className="hl-stepd" style={{ color: "#ddd" }}>{t.smsConsent}</span>
-          </label>
-          {phoneErr ? <p className="fp-buyerr">{phoneErr}</p> : null}
-          <div className="hl-meta">
-            <span className={sms ? "hl-fee" : "hl-tag"}>{sms ? t.smsOn : t.smsOff}</span>
-          </div>
-          <p className="hl-fh">{t.smsHelp}</p>
-          <p className="hl-fh">
-            {t.smsLegal.split(/\{(privacy|terms)\}/).map((part, i) =>
-              part === "privacy" ? (
-                <Link href="/haullegal/privacy" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
-                  {ui.common.privacy}
-                </Link>
-              ) : part === "terms" ? (
-                <Link href="/haullegal/terms" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
-                  {ui.common.terms}
-                </Link>
-              ) : (
-                <span key={i}>{part}</span>
-              )
-            )}
-          </p>
-
-          {showPaid && !smsLive ? (
-            <div className="fp-gate" style={{ margin: "14px 0 0" }}>
-              <p className="fp-gateh">{t.paidH}</p>
-              <p className="fp-gated">{t.paidP}</p>
-              <Link className="fp-gatebtn" href="/haullegal/buy">
-                {t.paidBtn}
-              </Link>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <h2 className="fp-h2">{t.coming}</h2>
-      {today && result.dues.length > 0 ? (
-        <div className="hl-steps">
-          {result.dues.map((d) => {
-            const days = daysUntil(d.due, today);
-            const cls = "hl-due" + (days < 0 ? " late" : days <= 30 ? " soon" : "");
-            return (
-              <div className={cls} key={d.id}>
-                <div className="hl-date">
-                  {formatYmd(d.due)}
-                  <small>{badge(days)}</small>
-                </div>
-                <div>
-                  <p className="hl-dueh">{dueTitle(d)}</p>
-                  <p className="hl-dued">{dueDetail(d)}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <p className="hl-empty">{t.empty}</p>
-      )}
-
-      {today && missingList.length > 0 ? (
-        <div className="fp-card" style={{ marginTop: "14px" }}>
-          <p className="fp-cn">
-            <span>+</span>{t.toSeeMore}
-          </p>
-          <ul className="hl-list">
-            {missingList.map((m) => (
-              <li key={m}>{m}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {access.sub ? null : (
-        <div className="fp-strip" style={{ marginTop: "36px" }}>
-          <p className="fp-st">{t.pitchT}</p>
-          <p className="fp-sd">{t.pitchP}</p>
-          <div className="fp-try" style={{ margin: "14px 0 0" }}>
-            <Link className="fp-try-btn" href="/haullegal/buy">
-              {t.pitchBtn}
-            </Link>
-          </div>
-        </div>
-      )}
-
-      <button className="hl-more" onClick={() => setShowRules((v) => !v)} type="button">
-        {showRules ? t.hideComputed : t.howComputed}
-      </button>
-      {showRules ? (
-        <div className="hl-steps" style={{ marginTop: "12px" }}>
-          {HL_OBLIGATIONS.map((raw) => {
-            const es = lang === "es" ? HL_OBLIGATIONS_ES[raw.id] : undefined;
-            const o = es ? { ...raw, ...es } : raw;
-            return (
-              <div className="fp-card" key={o.id}>
-                <p className="fp-cn">
-                  <span>+</span>
-                  {o.title}
-                </p>
-                <p className="fp-cd">{o.summary}</p>
-                <div className="hl-meta">
-                  <span className="hl-tag">{lang === "es" ? HL_FREQ_ES[o.freq] : o.freq}</span>
-                  <span className="hl-fee">{o.cost}</span>
-                </div>
-                <p className="hl-cite" style={{ marginTop: "8px" }}>
-                  <b>{t.ruleLabel}</b> {o.rule}
-                </p>
-                <p className="hl-cite">
-                  <b>{t.missedLabel}</b> {o.missed}
-                </p>
-                <div className="hl-actions">
-                  <a className="hl-check" href={o.cite} rel="noopener noreferrer" target="_blank">
-                    {o.citeLabel}
-                  </a>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
+      </article>
 
       <div className="fp-foot">
         <div className="fp-links">
-          <Link className="fp-link" href="/haullegal/start">
-            {t.walkLink}
-          </Link>
-          <Link className="fp-link" href="/haullegal/account">
-            {ui.common.account}
+          <Link className="fp-link" href="/haullegal/guides">
+            All guides
           </Link>
           <Link className="fp-link" href="/haullegal/terms">
-            {ui.common.terms}
+            Terms
           </Link>
           <Link className="fp-link" href="/haullegal/privacy">
-            {ui.common.privacy}
+            Privacy
           </Link>
         </div>
-        <p className="fp-legal">{t.legal}</p>
+        <p className="fp-legal">
+          HaulLegal is a product of AskEvo LLC, Boise, Idaho. Not a government
+          agency; not affiliated with the U.S. DOT, FMCSA, the IRS, or any
+          state agency. Not a law firm; not legal advice. You complete every
+          filing yourself. Questions: support@askevo.ai
+        </p>
       </div>
-      <HlAccountButton />
     </div>
   );
 }
 
-// ============================================================
-// END OF FILE - app/haullegal/calendar/page.tsx (v8 - one
-// green-outlined Reminders box: email + text switches visible to
-// everyone, paid notice for non-subscribers, live for subscribers; account
-// circle, footer Account link; account sync + reminders switch, Connecticut
-// switch, Spanish switch; profile form, due-date list, rules
-// reference, Stay Legal pitch)
-// If you can see this comment, the paste was not truncated.
-// ============================================================
+// -----------------------------------------------------------
+// END OF FILE - app/haullegal/guides/[slug]/page.tsx (v2 -
+// partner buttons + disclosure; server-rendered guide article
+// template, green)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
