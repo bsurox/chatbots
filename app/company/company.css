@@ -1,5 +1,5 @@
 /* FILE: app/company/company.css */
-/* AskEvo LLC parent-company hub (v5). The dark canvas is the same
+/* AskEvo LLC parent-company hub (v6). The dark canvas is the same
    near-black every brand uses (#0a0a0a). The wordmark is the one
    thing on the site with its own color: a left-to-right gradient
    built from the brand colors of the businesses AskEvo owns -
@@ -25,6 +25,10 @@
 .ae-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 14px; flex-wrap: wrap; }
 .ae-wordmark { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; white-space: nowrap; text-decoration: none; }
 .ae-nav { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+/* v6: the company's own social glyphs live on the LEFT beside the
+   wordmark, so they read as ours rather than as two more nav
+   buttons on the right. */
+.ae-brandside { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ae-navbtn { display: inline-block; background: transparent; border: 1px solid #262626; color: #ddd; border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; line-height: 1.4; }
 .ae-navbtn:hover { border-color: #444; color: #fff; }
 
@@ -116,4 +120,4 @@
   .ae-wordmark { font-size: 19px; }
 }
 
-/* END OF FILE - app/company/company.css (v5 - shared + landing) */
+/* END OF FILE - app/company/company.css (v6 - socials beside wordmark) */
