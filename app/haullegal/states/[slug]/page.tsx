@@ -5,8 +5,18 @@ import { notFound } from "next/navigation";
 import "../../../foremanprep/guides/guides.css";
 import { getHlGuide } from "@/lib/haullegal/guides";
 import { getHlState, HL_STATES, type HlStateSection } from "@/lib/haullegal/states";
+import { HL_PARTNER_LINKS } from "@/lib/haullegal/steps";
 
-// HaulLegal state-page renderer (v1) - one server-rendered
+// HaulLegal state-page renderer (v2 - PARTNER LINK on all 50
+// pages: the CTA card carries the consortium button whenever
+// HL_PARTNER_LINKS.consortium has an entry (steps.ts), with the
+// referral disclosure under it. It belongs on every state page
+// because the drug and alcohol pool is FEDERAL - 49 CFR 382.103(b)
+// applies to a self-employed CDL driver in all fifty states, so
+// this is not a per-state claim and needs no per-state data. The
+// button disappears by itself if the table is ever emptied.
+// Nothing else changed: states.ts is untouched.)
+// v1 notes - one server-rendered
 // template behind all 50 haullegal.com/states/<slug> SEO pages,
 // adapted from the WiremanPrep state renderer and the HaulLegal
 // guide renderer. Same article dress (the shared guides.css, fully
@@ -76,6 +86,7 @@ export default async function HlStatePage({ params }: Params) {
   const guides = st.guides
     .map((g) => getHlGuide(g))
     .filter((x): x is NonNullable<typeof x> => x !== null);
+  const consortium = HL_PARTNER_LINKS.consortium;
 
   return (
     <div className="fp-wrap">
@@ -141,6 +152,13 @@ export default async function HlStatePage({ params }: Params) {
             emails you before each one. The first four steps are free, no
             signup.
           </p>
+          {consortium ? (
+            <p className="fg-ctap">
+              One thing every {st.name} carrier needs no matter which state they are based in: a self-employed CDL driver
+              has to be in a drug and alcohol random testing pool run by a consortium before the first mile, and having no
+              program and no random pool are two of the sixteen automatic failures on the New Entrant safety audit.
+            </p>
+          ) : null}
           <div className="fg-ctarow">
             <Link className="fg-ctabtn" href="/haullegal/start">
               See the steps free
@@ -148,7 +166,23 @@ export default async function HlStatePage({ params }: Params) {
             <Link className="fg-ctabtn ghost" href="/haullegal/calendar">
               Try the deadline calendar
             </Link>
+            {consortium ? (
+              <a
+                className="fg-ctabtn ghost"
+                href={consortium.url}
+                rel="noopener noreferrer sponsored"
+                target="_blank"
+              >
+                {consortium.label}
+              </a>
+            ) : null}
           </div>
+          {consortium ? (
+            <p className="fg-ctap" style={{ fontSize: "12px", marginTop: "12px" }}>
+              Partner link - if you enroll through it we may earn a referral fee at no extra cost to you. We show the
+              published price and never hide a cheaper official route.
+            </p>
+          ) : null}
         </div>
 
         {guides.length > 0 ? (
@@ -214,7 +248,8 @@ export default async function HlStatePage({ params }: Params) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/states/[slug]/page.tsx (v1 -
+// END OF FILE - app/haullegal/states/[slug]/page.tsx (v2 -
+// consortium partner button + disclosure on all 50 pages;
 // server-rendered state guide template, green)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
