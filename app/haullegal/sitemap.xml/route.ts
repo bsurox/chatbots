@@ -3,9 +3,14 @@
 import { HL_GUIDES } from "@/lib/haullegal/guides";
 import { HL_STATES } from "@/lib/haullegal/states";
 
-// HaulLegal sitemap (v3 - the 50 state pages join: /states plus
+// HaulLegal sitemap (v4 - /partners joins the static list: the
+// door for insurance agents, CDL schools, dealers and vendors who
+// send new carriers our way. The SMS program page is deliberately
+// NOT listed - it is a compliance document for carrier reviewers
+// and carries noindex.)
+// v3 notes - the 50 state pages join: /states plus
 // one URL per state, compiled from lib/haullegal/states.ts so the
-// list can never drift from the pages.)
+// list can never drift from the pages.
 // v2 notes - served at /haullegal/sitemap.xml, which
 // on haullegal.com is the address to submit to Google Search
 // Console (the root /sitemap.xml path is excluded from the proxy by
@@ -19,7 +24,7 @@ import { HL_STATES } from "@/lib/haullegal/states";
 const BASE = "https://haullegal.com";
 
 export function GET(): Response {
-  const staticPaths = ["/", "/start", "/calendar", "/buy", "/guides", "/states"];
+  const staticPaths = ["/", "/start", "/calendar", "/buy", "/guides", "/states", "/partners"];
   const urls = [
     ...staticPaths.map((p) => BASE + (p === "/" ? "" : p)),
     ...HL_GUIDES.map((g) => `${BASE}/guides/${g.slug}`),
@@ -42,7 +47,7 @@ export function GET(): Response {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/sitemap.xml/route.ts (v3 - six
+// END OF FILE - app/haullegal/sitemap.xml/route.ts (v4 - seven
 // static URLs plus the guide library and the 50 state pages)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
