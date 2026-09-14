@@ -1,5 +1,5 @@
 // FILE: app/company/icons.tsx
-// Inline SVG glyphs for the AskEvo LLC hub (v4). Kept in their own
+// Inline SVG glyphs for the AskEvo LLC hub (v5). Kept in their own
 // file so app/company/page.tsx stays under the size ceiling.
 // v2 (his call): the social glyphs wear their own platform colors
 // instead of grey - Instagram in its yellow-orange-pink-purple
@@ -12,12 +12,16 @@
 // v4: a plain gid prop replaces the useId hook, so these glyphs
 // render inside SERVER components too - the shared header in
 // layout.tsx paints one and a server component cannot call hooks.
+// v5: Facebook joins, in Facebook blue - and SocialGlyph picks the
+// mark from a kind, so adding the NEXT network is a change to this
+// file alone instead of a hunt through every page that draws one.
 // 24x24 viewBox throughout; sized by css (.ae-soc svg / .ae-btn svg).
 
 type IconProps = { className?: string };
 type InstagramProps = { className?: string; gid?: string };
 
 const YOUTUBE_RED = "#ff0000";
+const FACEBOOK_BLUE = "#1877f2";
 const PLAY_BLUE = "#00a0ff";
 const PLAY_GREEN = "#00e676";
 const PLAY_YELLOW = "#ffce00";
@@ -52,6 +56,23 @@ export function YoutubeIcon({ className }: IconProps) {
   );
 }
 
+export function FacebookIcon({ className }: IconProps) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" focusable="false" viewBox="0 0 24 24">
+      <rect fill={FACEBOOK_BLUE} height="19" rx="5" width="19" x="2.5" y="2.5" />
+      <path d="M13.5 21.5v-7.6h2.5l.4-2.9h-2.9V9.1c0-.8.2-1.4 1.4-1.4h1.6V5.1c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.1H8v2.9h2.4v7.6h3.1z" fill="#fff" />
+    </svg>
+  );
+}
+
+// One place that turns a social kind into its mark. Every page that
+// draws a social link calls this, so a new network is added once.
+export function SocialGlyph({ kind, gid }: { kind: string; gid: string }) {
+  if (kind === "yt") return <YoutubeIcon />;
+  if (kind === "fb") return <FacebookIcon />;
+  return <InstagramIcon gid={gid} />;
+}
+
 export function AppleIcon({ className }: IconProps) {
   return (
     <svg aria-hidden="true" className={className} fill="#fff" focusable="false" viewBox="0 0 24 24">
@@ -73,7 +94,7 @@ export function PlayStoreIcon({ className }: IconProps) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/icons.tsx (v4 - gid, server-safe)
+// END OF FILE - app/company/icons.tsx (v5 - facebook + SocialGlyph)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
