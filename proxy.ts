@@ -232,6 +232,16 @@ export async function proxy(request: NextRequest) {
   if (pathname === "/") {
     return NextResponse.rewrite(new URL("/company", request.url));
   }
+  // v26: the hub is three pages now, and its inner pages get clean
+  // public addresses the same way every brand island does -
+  // askevo.ai/businesses and /contact REWRITE onto
+  // /company/*, so the address bar never shows the internal folder.
+  // Only this host reaches here: each brand host above has already
+  // claimed or bounced these paths inside its own block.
+  const cleanAe = ["/businesses", "/contact"];
+  if (cleanAe.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return NextResponse.rewrite(new URL("/company" + pathname, request.url));
+  }
   if (pathname.startsWith("/company")) {
     return NextResponse.next();
   }
@@ -359,9 +369,9 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v25 - askevo.ai front door is the /company
-// hub, old tool URLs redirect home; carries v24's haullegal
-// /partners + /sms doors)
+// END OF FILE - proxy.ts (v26 - askevo.ai hub clean URLs
+// /businesses and /contact; carries v25's front-door rewrite
+// and v24's haullegal /partners + /sms doors)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
