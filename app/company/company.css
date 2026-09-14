@@ -1,5 +1,5 @@
 /* FILE: app/company/company.css */
-/* AskEvo LLC parent-company hub (v6). The dark canvas is the same
+/* AskEvo LLC parent-company hub (v7). The dark canvas is the same
    near-black every brand uses (#0a0a0a). The wordmark is the one
    thing on the site with its own color: a left-to-right gradient
    built from the brand colors of the businesses AskEvo owns -
@@ -52,7 +52,11 @@
 .ae-card.click { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
 .ae-card.click:hover { border-color: #3a3a3a; background: #141417; }
 .ae-card.click:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.ae-more { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #6f6f6f; margin: 2px 0 0; }
+/* v7: Read more stacks under the buttons INSIDE the footer row, and
+   the row bottom-aligns, so a card's social glyphs sit down in the
+   bottom-right corner instead of a line above it. */
+.ae-btnstack { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ae-more { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #6f6f6f; margin: 0; }
 .ae-card.click:hover .ae-more { color: var(--brand); }
 .ae-cardtop { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .ae-brandname { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; color: var(--brand); }
@@ -120,4 +124,4 @@
   .ae-wordmark { font-size: 19px; }
 }
 
-/* END OF FILE - app/company/company.css (v6 - socials beside wordmark) */
+/* END OF FILE - app/company/company.css (v7 - glyphs in the corner) */
