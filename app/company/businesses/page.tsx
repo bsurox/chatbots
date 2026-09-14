@@ -2,9 +2,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { type Brand, BRANDS, type Door, type Social } from "../brands";
-import { AppleIcon, InstagramIcon, PlayStoreIcon, YoutubeIcon } from "../icons";
+import { AppleIcon, PlayStoreIcon, SocialGlyph } from "../icons";
 
-// The full businesses page (v1). Every brand gets a real section -
+// The full businesses page (v2). Every brand gets a real section -
 // what it is, who it is for, what you actually get - instead of the
 // card-sized summary on the landing page. Each section's id is the
 // brand's slug, so a card click on the landing page lands straight
@@ -52,7 +52,7 @@ function SocialLink({ s, gid }: { s: Social; gid: string }) {
       target="_blank"
       title={s.label}
     >
-      {s.kind === "yt" ? <YoutubeIcon /> : <InstagramIcon gid={gid} />}
+      <SocialGlyph gid={gid} kind={s.kind} />
     </Link>
   );
 }
@@ -139,7 +139,7 @@ export default function BusinessesPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/businesses/page.tsx (v1 - full detail)
+// END OF FILE - app/company/businesses/page.tsx (v2 - facebook glyphs)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
