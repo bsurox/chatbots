@@ -1,0 +1,82 @@
+/* FILE: app/company/company.css */
+/* AskEvo LLC parent-company hub (v1). The dark canvas is the same
+   near-black every brand uses (#0a0a0a). The wordmark is the one
+   thing on the site with its own color: a left-to-right gradient
+   built from the brand colors of the businesses AskEvo owns -
+   ForemanPrep orange, WiremanPrep volt, HaulLegal green, Spotmint
+   mint, Business & Law sky blue. Every button that points at a
+   business wears THAT business's color, set inline from the page's
+   brand table, so this file only carries the neutral furniture. */
+
+.ae-page { min-height: 100vh; background: #0a0a0a; color: #fff; padding-bottom: 56px; }
+.ae-page button { -webkit-tap-highlight-color: transparent; font-family: inherit; }
+.ae-wrap { max-width: 1040px; margin: 0 auto; padding: 0 18px; }
+
+.ae-grad { background: linear-gradient(90deg, #f97316 0%, #ceff00 26%, #22c55e 50%, #46dba8 74%, #38bdf8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.ae-rule { height: 3px; border-radius: 3px; background: linear-gradient(90deg, #f97316 0%, #ceff00 26%, #22c55e 50%, #46dba8 74%, #38bdf8 100%); }
+
+.ae-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 14px; flex-wrap: wrap; }
+.ae-wordmark { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; white-space: nowrap; }
+.ae-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.ae-navbtn { background: transparent; border: 1px solid #262626; color: #ddd; border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.ae-navbtn:hover { border-color: #444; color: #fff; }
+
+.ae-hero { padding: 44px 0 30px; }
+.ae-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #9ca3af; margin: 0 0 14px; }
+.ae-h1 { font-size: clamp(38px, 7vw, 68px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.02; margin: 0 0 16px; }
+.ae-lead { font-size: 18px; line-height: 1.55; color: #cfcfcf; max-width: 640px; margin: 0 0 22px; }
+.ae-cta { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #000; border: 1px solid #fff; border-radius: 999px; padding: 12px 20px; font-size: 15px; font-weight: 800; cursor: pointer; }
+.ae-cta:hover { background: #e5e5e5; }
+
+.ae-section { padding: 34px 0 6px; }
+.ae-h2 { font-size: 26px; font-weight: 900; letter-spacing: -0.02em; margin: 0 0 6px; }
+.ae-sub { font-size: 15px; color: #9ca3af; margin: 0 0 20px; line-height: 1.5; }
+
+.ae-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ae-card { position: relative; background: #111214; border: 1px solid #262626; border-radius: 16px; padding: 20px 20px 18px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+.ae-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--brand); }
+.ae-cardtop { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ae-brandname { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; color: var(--brand); }
+.ae-tag { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9ca3af; border: 1px solid #2a2a2a; border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
+.ae-domain { font-size: 13px; color: #9ca3af; margin: -4px 0 0; }
+.ae-desc { font-size: 15px; line-height: 1.55; color: #d4d4d4; margin: 0; }
+.ae-who { font-size: 13px; color: #9ca3af; margin: 0; line-height: 1.5; }
+.ae-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.ae-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 800; color: #000; background: var(--btn); border: 1px solid var(--btn); border-radius: 999px; padding: 9px 15px; text-decoration: none; cursor: pointer; line-height: 1; }
+.ae-btn:hover { filter: brightness(1.08); }
+.ae-btn.ghost { color: var(--btn); background: transparent; }
+.ae-btn.ghost:hover { background: rgba(255, 255, 255, 0.05); }
+
+.ae-about { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: start; }
+.ae-prose p { font-size: 15.5px; line-height: 1.65; color: #d4d4d4; margin: 0 0 12px; }
+.ae-facts { display: flex; flex-direction: column; gap: 10px; }
+.ae-fact { background: #111214; border: 1px solid #262626; border-radius: 14px; padding: 14px 16px; }
+.ae-factk { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9ca3af; margin: 0 0 4px; }
+.ae-factv { font-size: 15px; font-weight: 700; color: #fff; margin: 0; line-height: 1.4; }
+
+.ae-contact { background: #111214; border: 1px solid #262626; border-radius: 16px; padding: 20px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+.ae-email { font-size: 17px; font-weight: 800; color: #fff; margin: 6px 0 0; word-break: break-all; }
+.ae-form { display: flex; flex-direction: column; gap: 8px; }
+.ae-in { width: 100%; box-sizing: border-box; background: #0a0a0a; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 11px 13px; font-size: 14.5px; font-family: inherit; }
+.ae-in:focus { outline: none; border-color: #666; }
+.ae-ta { min-height: 110px; resize: vertical; }
+.ae-send { align-self: flex-start; }
+.ae-note { font-size: 13px; color: #9ca3af; margin: 0; }
+.ae-note.ok { color: #22c55e; }
+.ae-note.err { color: #f87171; }
+
+.ae-foot { margin-top: 44px; border-top: 1px solid #1f1f1f; padding-top: 18px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: #8a8a8a; line-height: 1.5; }
+.ae-footlinks { display: flex; gap: 6px; flex-wrap: wrap; }
+.ae-footbtn { background: transparent; border: 1px solid #262626; color: #bbb; border-radius: 999px; padding: 5px 11px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.ae-footbtn:hover { color: #fff; border-color: #444; }
+
+@media (max-width: 720px) {
+  .ae-grid { grid-template-columns: 1fr; }
+  .ae-about { grid-template-columns: 1fr; }
+  .ae-contact { grid-template-columns: 1fr; }
+  .ae-hero { padding: 30px 0 22px; }
+  .ae-lead { font-size: 16.5px; }
+  .ae-wordmark { font-size: 19px; }
+}
+
+/* END OF FILE - app/company/company.css (v1 - parent-company hub) */
