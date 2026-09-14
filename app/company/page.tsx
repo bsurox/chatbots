@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { type Brand, BRANDS, type Door, type Social } from "./brands";
 import { AppleIcon, PlayStoreIcon, SocialGlyph } from "./icons";
 
-// AskEvo LLC parent-company landing page (v6). The front door of
+// AskEvo LLC parent-company landing page (v7). The front door of
 // askevo.ai: who the company is, a card per business, and the
 // about section. The header and footer live in layout.tsx now.
 // v5 (his call): Contact moved off this page onto /contact, the
@@ -16,6 +16,10 @@ import { AppleIcon, PlayStoreIcon, SocialGlyph } from "./icons";
 // "building focused software businesses." His later call: the two
 // store glyphs sit in the BOTTOM-RIGHT cluster beside Instagram,
 // so the left of the footer row only carries text buttons.
+// v7 (his call): the card's social glyphs sat a line too high. The
+// Read more line now stacks under the buttons INSIDE the footer
+// row, and the row bottom-aligns, so the glyphs drop into the
+// bottom-right corner of the card instead of floating above it.
 // Brand copy, colors and links all come from ./brands so the four
 // pages can never disagree; the glyphs come from ./icons.
 
@@ -94,10 +98,13 @@ function BrandCard({ b }: { b: Brand }) {
       <p className="ae-desc">{b.desc}</p>
       <p className="ae-who">{b.who}</p>
       <div className="ae-cardfoot">
-        <div className="ae-btns">
-          {b.doors.filter((d) => !d.icon).map((d) => (
-            <DoorButton door={d} key={d.label} />
-          ))}
+        <div className="ae-btnstack">
+          <div className="ae-btns">
+            {b.doors.filter((d) => !d.icon).map((d) => (
+              <DoorButton door={d} key={d.label} />
+            ))}
+          </div>
+          <p className="ae-more">Read more</p>
         </div>
         <div className="ae-socials">
           {b.doors.filter((d) => d.icon).map((d) => (
@@ -108,7 +115,6 @@ function BrandCard({ b }: { b: Brand }) {
           ))}
         </div>
       </div>
-      <p className="ae-more">Read more</p>
     </div>
   );
 }
@@ -173,7 +179,7 @@ export default function CompanyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/page.tsx (v6 - facebook glyphs)
+// END OF FILE - app/company/page.tsx (v7 - glyphs in the corner)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
