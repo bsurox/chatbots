@@ -17,7 +17,15 @@ import {
 import { HL_DUE_DETAILS_ES, HL_DUE_TITLES_ES, HL_FREQ_ES, HL_MISSING_ES, HL_OBLIGATIONS_ES } from "@/lib/haullegal/deadlines-es";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal Stay Legal calendar (v6 - TEXT REMINDERS, his call:
+// HaulLegal Stay Legal calendar (v7 - the Text reminders block is
+// now VISIBLE TO EVERYONE, not only signed-in subscribers: the
+// carrier reviewers vetting the text campaign open this exact URL
+// and must see the number field, the unchecked box and the full
+// consent wording on the page where the number is typed. For a
+// visitor or a non-subscriber the controls are disabled and a line
+// above says texts come with Stay Legal; for a signed-in
+// subscriber it is the working form, unchanged from v6.)
+// v6 notes - TEXT REMINDERS, his call:
 // subscribers get a "Text reminders" block under the email switch -
 // a mobile-number field and an UNCHECKED consent box carrying the
 // exact wording registered with the carriers (i18n calendar.
@@ -293,6 +301,7 @@ export default function HaulLegalCalendarPage() {
   }
 
   const missingList = lang === "es" ? result.missingKeys.map((k) => HL_MISSING_ES[k] ?? k) : result.missing;
+  const smsLive = access.sub && synced;
 
   return (
     <div className="fp-wrap">
@@ -425,47 +434,47 @@ export default function HaulLegalCalendarPage() {
           ) : null}
         </div>
 
-        {access.sub && synced ? (
-          <div className="hl-field hl-wide">
-            <p className="hl-fl">{t.smsT}</p>
-            <label className="hl-fh" htmlFor="hl-phone">{t.phoneLabel}</label>
-            <input
-              autoComplete="tel-national"
-              className="fp-in"
-              id="hl-phone"
-              inputMode="tel"
-              onBlur={blurPhone}
-              onChange={(e) => changePhone(e.target.value)}
-              placeholder={t.phonePh}
-              value={prettyPhone(phone)}
-            />
-            <p className="hl-fh">{t.phoneHelp}</p>
-            <label htmlFor="hl-sms" style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", marginTop: "6px" }}>
-              <input checked={sms} id="hl-sms" onChange={toggleSms} style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "var(--fp)", flexShrink: 0 }} type="checkbox" />
-              <span className="hl-stepd" style={{ color: "#ddd" }}>{t.smsConsent}</span>
-            </label>
-            {phoneErr ? <p className="fp-buyerr">{phoneErr}</p> : null}
-            <div className="hl-meta">
-              <span className={sms ? "hl-fee" : "hl-tag"}>{sms ? t.smsOn : t.smsOff}</span>
-            </div>
-            <p className="hl-fh">{t.smsHelp}</p>
-            <p className="hl-fh">
-              {t.smsLegal.split(/\{(privacy|terms)\}/).map((part, i) =>
-                part === "privacy" ? (
-                  <Link href="/haullegal/privacy" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
-                    {ui.common.privacy}
-                  </Link>
-                ) : part === "terms" ? (
-                  <Link href="/haullegal/terms" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
-                    {ui.common.terms}
-                  </Link>
-                ) : (
-                  <span key={i}>{part}</span>
-                )
-              )}
-            </p>
+        <div className="hl-field hl-wide" style={smsLive ? undefined : { opacity: 0.75 }}>
+          <p className="hl-fl">{t.smsT}</p>
+          {smsLive ? null : <p className="hl-fh" style={{ color: "var(--fp)" }}>{t.smsNeedSub}</p>}
+          <label className="hl-fh" htmlFor="hl-phone">{t.phoneLabel}</label>
+          <input
+            autoComplete="tel-national"
+            className="fp-in"
+            disabled={!smsLive}
+            id="hl-phone"
+            inputMode="tel"
+            onBlur={blurPhone}
+            onChange={(e) => changePhone(e.target.value)}
+            placeholder={t.phonePh}
+            value={prettyPhone(phone)}
+          />
+          <p className="hl-fh">{t.phoneHelp}</p>
+          <label htmlFor="hl-sms" style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: smsLive ? "pointer" : "default", marginTop: "6px" }}>
+            <input checked={sms} disabled={!smsLive} id="hl-sms" onChange={toggleSms} style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "var(--fp)", flexShrink: 0 }} type="checkbox" />
+            <span className="hl-stepd" style={{ color: "#ddd" }}>{t.smsConsent}</span>
+          </label>
+          {phoneErr ? <p className="fp-buyerr">{phoneErr}</p> : null}
+          <div className="hl-meta">
+            <span className={sms ? "hl-fee" : "hl-tag"}>{sms ? t.smsOn : t.smsOff}</span>
           </div>
-        ) : null}
+          <p className="hl-fh">{t.smsHelp}</p>
+          <p className="hl-fh">
+            {t.smsLegal.split(/\{(privacy|terms)\}/).map((part, i) =>
+              part === "privacy" ? (
+                <Link href="/haullegal/privacy" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
+                  {ui.common.privacy}
+                </Link>
+              ) : part === "terms" ? (
+                <Link href="/haullegal/terms" key={i} style={{ color: "var(--fp)", fontWeight: 700 }}>
+                  {ui.common.terms}
+                </Link>
+              ) : (
+                <span key={i}>{part}</span>
+              )
+            )}
+          </p>
+        </div>
       </div>
 
       <h2 className="fp-h2">{t.coming}</h2>
@@ -576,8 +585,9 @@ export default function HaulLegalCalendarPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/calendar/page.tsx (v6 - text
-// reminders: number field + consent box + ON/OFF; account
+// END OF FILE - app/haullegal/calendar/page.tsx (v7 - text
+// reminder block visible to everyone, live for subscribers: number
+// field + consent box + ON/OFF; account
 // circle, footer Account link; account sync + reminders switch, Connecticut
 // switch, Spanish switch; profile form, due-date list, rules
 // reference, Stay Legal pitch)
