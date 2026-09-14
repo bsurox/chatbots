@@ -5,7 +5,13 @@ import { notFound } from "next/navigation";
 import "../../../foremanprep/guides/guides.css";
 import { getHlGuide, HL_GUIDES, type HlGuideSection } from "@/lib/haullegal/guides";
 
-// HaulLegal guide renderer (v1) - the server-rendered article
+// HaulLegal guide renderer (v2 - PARTNER BUTTONS: a CTA carrying
+// ext:true (guides.ts v3) renders as a real anchor with
+// rel="noopener noreferrer sponsored" opening in a new tab - the
+// standing off-site exception - and the CTA card then prints the
+// referral disclosure under the buttons. Internal CTAs are Next
+// Links exactly as before.)
+// v1 notes - the server-rendered article
 // template behind every haullegal.com/guides/<slug> SEO page,
 // adapted from the WiremanPrep renderer and sharing the
 // ForemanPrep guides.css (the layout's .hl-zone recolors the
@@ -120,16 +126,34 @@ export default async function HlGuidePage({ params }: Params) {
           <p className="fg-ctah">{guide.ctaH}</p>
           <p className="fg-ctap">{guide.ctaP}</p>
           <div className="fg-ctarow">
-            {guide.ctas.map((c) => (
-              <Link
-                className={c.ghost ? "fg-ctabtn ghost" : "fg-ctabtn"}
-                href={c.href}
-                key={c.href}
-              >
-                {c.label}
-              </Link>
-            ))}
+            {guide.ctas.map((c) =>
+              c.ext ? (
+                <a
+                  className={c.ghost ? "fg-ctabtn ghost" : "fg-ctabtn"}
+                  href={c.href}
+                  key={c.href}
+                  rel="noopener noreferrer sponsored"
+                  target="_blank"
+                >
+                  {c.label}
+                </a>
+              ) : (
+                <Link
+                  className={c.ghost ? "fg-ctabtn ghost" : "fg-ctabtn"}
+                  href={c.href}
+                  key={c.href}
+                >
+                  {c.label}
+                </Link>
+              )
+            )}
           </div>
+          {guide.ctas.some((c) => c.ext) ? (
+            <p className="fg-ctap" style={{ fontSize: "12px", marginTop: "12px" }}>
+              Partner link - if you buy through it we may earn a referral fee at no extra cost to you. We show the
+              published price and never hide a cheaper official route.
+            </p>
+          ) : null}
         </div>
 
         {related.length > 0 ? (
@@ -174,8 +198,9 @@ export default async function HlGuidePage({ params }: Params) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/haullegal/guides/[slug]/page.tsx (v1 -
-// server-rendered guide article template, green)
+// END OF FILE - app/haullegal/guides/[slug]/page.tsx (v2 -
+// partner buttons + disclosure; server-rendered guide article
+// template, green)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
