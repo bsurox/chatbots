@@ -1,5 +1,5 @@
 /* FILE: app/company/company.css */
-/* AskEvo LLC parent-company hub (v1). The dark canvas is the same
+/* AskEvo LLC parent-company hub (v4). The dark canvas is the same
    near-black every brand uses (#0a0a0a). The wordmark is the one
    thing on the site with its own color: a left-to-right gradient
    built from the brand colors of the businesses AskEvo owns -
@@ -17,7 +17,7 @@
 
 .ae-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 14px; flex-wrap: wrap; }
 .ae-wordmark { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin: 0; white-space: nowrap; }
-.ae-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.ae-nav { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .ae-navbtn { background: transparent; border: 1px solid #262626; color: #ddd; border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 700; cursor: pointer; }
 .ae-navbtn:hover { border-color: #444; color: #fff; }
 
@@ -41,11 +41,33 @@
 .ae-domain { font-size: 13px; color: #9ca3af; margin: -4px 0 0; }
 .ae-desc { font-size: 15px; line-height: 1.55; color: #d4d4d4; margin: 0; }
 .ae-who { font-size: 13px; color: #9ca3af; margin: 0; line-height: 1.5; }
-.ae-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.ae-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .ae-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 800; color: #000; background: var(--btn); border: 1px solid var(--btn); border-radius: 999px; padding: 9px 15px; text-decoration: none; cursor: pointer; line-height: 1; }
 .ae-btn:hover { filter: brightness(1.08); }
 .ae-btn.ghost { color: var(--btn); background: transparent; }
 .ae-btn.ghost:hover { background: rgba(255, 255, 255, 0.05); }
+.ae-btn svg { width: 17px; height: 17px; display: block; }
+/* v4: the two Spotmint store doors are glyph tiles on the dark
+   canvas, not mint pills - the Play mark keeps its four colors and
+   the Apple mark stays white, the way both badges read everywhere
+   else. Same tile shape as the social glyphs so the card's bottom
+   row stays one visual family. */
+.ae-store { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 34px; border-radius: 10px; border: 1px solid #2a2a2a; background: #0d0d0e; text-decoration: none; cursor: pointer; }
+.ae-store:hover { border-color: #4a4a4a; background: #17171a; }
+.ae-store svg { width: 19px; height: 19px; display: block; }
+
+/* Card footer: brand doors sit bottom-left, social glyphs bottom-right.
+   margin-top auto pins the row to the bottom of the card, so footers
+   line up across a row of cards no matter how long the copy runs. */
+.ae-cardfoot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 4px; }
+.ae-socials { display: flex; gap: 7px; flex-shrink: 0; }
+.ae-soc { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #2a2a2a; background: #0d0d0e; text-decoration: none; cursor: pointer; }
+/* v3: the glyphs carry their own platform colors (Instagram gradient,
+   YouTube red) from icons.tsx, so hover lifts the tile rather than
+   recoloring the mark. */
+.ae-soc:hover { border-color: #4a4a4a; background: #17171a; }
+.ae-soc svg { width: 18px; height: 18px; display: block; }
+.ae-soc.top { width: 32px; height: 32px; }
 
 .ae-about { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: start; }
 .ae-prose p { font-size: 15.5px; line-height: 1.65; color: #d4d4d4; margin: 0 0 12px; }
@@ -79,4 +101,4 @@
   .ae-wordmark { font-size: 19px; }
 }
 
-/* END OF FILE - app/company/company.css (v1 - parent-company hub) */
+/* END OF FILE - app/company/company.css (v4 - store glyph tiles) */
