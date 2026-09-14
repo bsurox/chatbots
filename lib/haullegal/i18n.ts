@@ -1,8 +1,10 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v9 - calendar.smsNeedSub, the line
-// over the text-reminder block when it is shown to a visitor.)
+// HaulLegal language layer (v10 - the calendar's Reminders box:
+// its title and intro, and the "part of Stay Legal" notice a
+// visitor gets when they tap a reminder switch. Replaces v9's
+// smsNeedSub.)
 // v8 notes - the text-reminder consent box now
 // carries the full carrier-compliant wording: sender, message
 // type, frequency, rates, STOP / HELP, not a condition of
@@ -387,7 +389,11 @@ const EN = {
     smsOff: "Text reminders: OFF",
     smsHelp: "Texts go out 30, 7 and 1 days before each date, alongside the email. Uncheck the box or reply STOP to any text to stop them.",
     smsLegal: "See our {privacy} and {terms}.",
-    smsNeedSub: "Text reminders come with Stay Legal. Subscribe (or log in) to turn them on - the form below is what you will see.",
+    remT: "Reminders",
+    remIntro: "Stay Legal reminds you 30, 7 and 1 days before every date on this list - by email, by text, or both. Reminders are part of the subscription; the calendar itself is free to use.",
+    paidH: "Reminders are part of Stay Legal.",
+    paidP: "$39 a month, and the first 30 days are free when you get the walkthrough. Cancel any time from your account page. Your dates stay saved on this device either way.",
+    paidBtn: "See Stay Legal - $39/mo",
     legal: "Dates are computed from the information you enter and the rules as verified in September 2026. They are a convenience, not a guarantee - keep your own record and confirm with the agency.",
     walkLink: "The walkthrough",
   },
@@ -811,7 +817,11 @@ const ES: HlUi = {
     smsOff: "Recordatorios por texto: APAGADOS",
     smsHelp: "Los textos salen 30, 7 y 1 d\u00edas antes de cada fecha, junto con el correo. Desmarca la casilla o responde STOP a cualquier texto para detenerlos.",
     smsLegal: "Consulta nuestra {privacy} y nuestros {terms}.",
-    smsNeedSub: "Los recordatorios por texto vienen con Stay Legal. Suscr\u00edbete (o inicia sesi\u00f3n) para activarlos - el formulario de abajo es el que ver\u00e1s.",
+    remT: "Recordatorios",
+    remIntro: "Stay Legal te avisa 30, 7 y 1 d\u00edas antes de cada fecha de esta lista - por correo, por texto o ambos. Los recordatorios son parte de la suscripci\u00f3n; el calendario en s\u00ed es gratis.",
+    paidH: "Los recordatorios son parte de Stay Legal.",
+    paidP: "$39 al mes, y los primeros 30 d\u00edas son gratis cuando obtienes la gu\u00eda. Cancela cuando quieras desde tu p\u00e1gina de cuenta. Tus fechas quedan guardadas en este dispositivo de todas formas.",
+    paidBtn: "Ver Stay Legal - $39/mes",
     legal: "Las fechas se calculan con la informaci\u00f3n que escribes y las reglas tal como las verificamos en septiembre de 2026. Son una ayuda, no una garant\u00eda - lleva tu propio registro y confirma con la agencia.",
     walkLink: "La gu\u00eda",
   },
@@ -940,8 +950,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v9 - smsNeedSub; full SMS
-// consent wording; tutor 50/day line;
+// END OF FILE - lib/haullegal/i18n.ts (v10 - Reminders box +
+// paid notice; full SMS consent wording; tutor 50/day line;
 // chat + tutor strings; text-reminder strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
 // page strings, the hl-lang hook, fill())
 // If you can see these lines after pasting, the whole file
