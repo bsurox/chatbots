@@ -1,12 +1,15 @@
 // FILE: app/company/brands.ts
-// One source of truth for every AskEvo LLC business (v1). The
+// One source of truth for every AskEvo LLC business (v2). The
 // landing page and the businesses page both read this file, so a
 // brand's color, copy, links and social accounts are written once.
 // Each brand's slug is also its anchor on /businesses, which is how
 // a card click on the landing page deep-links into its section.
+// v2: Facebook joins the social kinds. ForemanPrep has a page and
+// AskEvo LLC has one of its own (ASKEVO_FB, drawn in the header);
+// the other brands get theirs here the day they exist.
 
 export type Door = { label: string; href: string; color: string; ghost?: boolean; external?: boolean; icon?: "play" | "apple" };
-export type Social = { kind: "ig" | "yt"; href: string; label: string };
+export type Social = { kind: "ig" | "yt" | "fb"; href: string; label: string };
 export type Brand = {
   slug: string;
   name: string;
@@ -22,6 +25,7 @@ export type Brand = {
 };
 
 export const ASKEVO_IG = "https://www.instagram.com/askevo.ai";
+export const ASKEVO_FB = "https://www.facebook.com/profile.php?id=61591921765482";
 
 const SPOTMINT_APP_STORE = "https://apps.apple.com/us/app/spotmint-ai-video-ads/id6796510023";
 const SPOTMINT_PLAY = "https://play.google.com/store/apps/details?id=com.askevo.spotmint";
@@ -55,6 +59,7 @@ export const BRANDS: Array<Brand> = [
     socials: [
       { kind: "yt", href: "https://www.youtube.com/@Foremanprep", label: "ForemanPrep on YouTube" },
       { kind: "ig", href: "https://www.instagram.com/foremanprep", label: "ForemanPrep on Instagram" },
+      { kind: "fb", href: "https://www.facebook.com/profile.php?id=61593295284880", label: "ForemanPrep on Facebook" },
     ],
   },
   {
@@ -135,7 +140,7 @@ export const BRANDS: Array<Brand> = [
 ];
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/brands.ts (v1 - shared brand table)
+// END OF FILE - app/company/brands.ts (v2 - facebook links)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
