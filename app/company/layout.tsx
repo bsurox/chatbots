@@ -1,21 +1,32 @@
 // FILE: app/company/layout.tsx
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./company.css";
+import "./pages.css";
+import { ASKEVO_IG } from "./brands";
+import { InstagramIcon } from "./icons";
 
-// Server-side wrapper for the AskEvo LLC parent-company hub (v2).
+// Server-side wrapper for the AskEvo LLC parent-company hub (v3).
 // Owns the css import and the metadata, so browser tabs and share
 // cards describe the company - not the retired chat tool the root
 // layout still describes. proxy.ts rewrites askevo.ai "/" onto
 // /company, so this segment IS the front door of askevo.ai; the
 // old app/(chat) root page stays in the repo untouched (never
 // delete a page.tsx) but is no longer served to anyone.
-// Deliberately lean: no sidebar, no chat shell, no auth call, no
-// analytics - a static company page that renders the same for
-// everyone.
-// v2: the hub gets its own favicon, public/ae-icon.png - the AE
-// wordmark in the same five-brand gradient the page's own AskEvo
-// LLC text wears. It replaces the old ae-icon.svg / logo.png pair
-// for this segment only; the legacy AskEvo pages (credits,
+// v3: the hub is three pages now - the landing page plus
+// /businesses and /contact - so the header and the
+// footer moved HERE. Every page under app/company gets them for
+// free and they can never drift apart. The nav is plain Links, so
+// this layout stays a server component. It imports BOTH
+// stylesheets - company.css for the shared furniture and the
+// landing page, pages.css for the three inner pages; About points at the
+// landing page's anchor, which works from any page. His final
+// call on socials: no separate socials page - the AskEvo LLC
+// Instagram glyph sits up here in the header, and each brand's
+// own accounts ride its card and its section on /businesses.
+// v2: the hub's own favicon, public/ae-icon.png - the AE wordmark
+// in the same five-brand gradient the page's AskEvo LLC text
+// wears. Scoped to this segment; the legacy AskEvo pages (credits,
 // support, updates) still take their icon from app/layout.tsx.
 
 export const metadata: Metadata = {
@@ -32,11 +43,50 @@ export const metadata: Metadata = {
 export default function CompanyLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return <div className="ae-page">{children}</div>;
+  return (
+    <div className="ae-page">
+      <div className="ae-wrap">
+        <div className="ae-top">
+          <Link className="ae-wordmark ae-grad" href="/" prefetch={false}>
+            AskEvo LLC
+          </Link>
+          <div className="ae-nav">
+            <Link className="ae-navbtn" href="/businesses" prefetch={false}>Businesses</Link>
+            <Link className="ae-navbtn" href="/#about" prefetch={false}>About</Link>
+            <Link className="ae-navbtn" href="/contact" prefetch={false}>Contact</Link>
+            <Link
+              aria-label="AskEvo LLC on Instagram"
+              className="ae-soc top"
+              href={ASKEVO_IG}
+              prefetch={false}
+              rel="noopener noreferrer"
+              target="_blank"
+              title="AskEvo LLC on Instagram"
+            >
+              <InstagramIcon gid="header" />
+            </Link>
+          </div>
+        </div>
+        <div className="ae-rule" />
+        {children}
+        <div className="ae-foot">
+          <div>
+            AskEvo LLC, Boise, Idaho. ForemanPrep, WiremanPrep, HaulLegal and Spotmint are trade names of AskEvo LLC.
+          </div>
+          <div className="ae-footlinks">
+            <Link className="ae-footbtn" href="/businesses" prefetch={false}>Businesses</Link>
+            <Link className="ae-footbtn" href="/contact" prefetch={false}>Contact</Link>
+            <Link className="ae-footbtn" href="/terms" prefetch={false}>Terms</Link>
+            <Link className="ae-footbtn" href="/privacy" prefetch={false}>Privacy</Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/layout.tsx (v2 - gradient favicon)
+// END OF FILE - app/company/layout.tsx (v3 - shared header/footer)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
