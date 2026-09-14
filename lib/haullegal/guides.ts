@@ -1,12 +1,19 @@
 // FILE: lib/haullegal/guides.ts
 import "server-only";
 
-// HaulLegal guide library (v3 - PARTNER LINK: HlGuideCta gains an
+// HaulLegal guide library (v4 - the consortium link joins the
+// second guide that names it: "What trucking authority costs"
+// already lists the consortium in its cost breakdown, and its CTA
+// now says plainly that it is the one line on that list which is
+// NOT a government fee. Those two guides are the only ones that
+// mention a consortium - we do not staple the link to guides where
+// it has nothing to do with the subject.)
+// v3 notes - PARTNER LINK: HlGuideCta gains an
 // optional ext flag for off-site buttons (the renderer draws those
 // as real anchors with rel="sponsored" and prints the disclosure),
 // and the New Entrant audit guide carries the consortium link -
 // two of the 16 automatic failures are the drug program and the
-// random pool, so that is where the button belongs.)
+// random pool, so that is where the button belongs.
 // v2 notes - the by-the-mile guide gains
 // Connecticut's Highway Use Fee as the fifth state; same slug so
 // nothing already indexed moves.)
@@ -161,8 +168,12 @@ export const HL_GUIDES: HlGuide[] = [
       },
     ],
     ctaH: "Every step, with the government price beside it.",
-    ctaP: "HaulLegal shows the real fee next to every click so you never pay $500 for a free form. Start with the four free steps.",
-    ctas: CTA_WALK,
+    ctaP: "HaulLegal shows the real fee next to every click so you never pay $500 for a free form. Start with the four free steps. The one line above that is not a government fee is the consortium - it is a private service every self-employed CDL driver has to buy, and here is one at the published price.",
+    ctas: [
+      { label: "See the steps free", href: "/haullegal/start" },
+      { label: "Try the deadline calendar", href: "/haullegal/calendar", ghost: true },
+      { ext: true, ghost: true, label: "Enroll in a consortium - $85/yr", href: "https://members.verticalidentity.com/enroll?ref=yzrhmmf" },
+    ],
     related: ["how-to-get-trucking-authority", "boc-3-process-agent-explained", "form-2290-heavy-vehicle-use-tax"],
   },
   {
@@ -520,8 +531,8 @@ export function getHlGuide(slug: string): HlGuide | null {
 }
 
 // ============================================================
-// END OF FILE - lib/haullegal/guides.ts (v3 - consortium partner
-// link on the New Entrant guide; Connecticut joins
+// END OF FILE - lib/haullegal/guides.ts (v4 - consortium partner
+// link on the New Entrant and cost guides; Connecticut joins
 // the by-the-mile guide; ten verified SEO guides)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
