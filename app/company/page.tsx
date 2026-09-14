@@ -2,8 +2,9 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { AppleIcon, InstagramIcon, PlayStoreIcon, YoutubeIcon } from "./icons";
 
-// AskEvo LLC parent-company hub (v2). This is what askevo.ai shows
+// AskEvo LLC parent-company hub (v4). This is what askevo.ai shows
 // now: who the company is, the businesses it owns, and how to
 // reach it. Every business button is painted in that business's
 // own brand color (the same hex its own site uses) via the table
@@ -16,12 +17,27 @@ import { useState } from "react";
 // width, the shorter "focused software businesses." sat on ONE line
 // on desktop, and he wants the line under the wordmark to break
 // across two.
+// v3 (his call): every card carries its brand's social links as
+// small glyphs pinned to the BOTTOM RIGHT of the card, and the
+// AskEvo LLC instagram sits up in the header beside the nav. The
+// two Spotmint store buttons are now glyph-only (Play, Apple) with
+// the web door left as text. Glyphs live in ./icons.
+// v4 (his call): those two store glyphs are no longer mint pills -
+// they render as dark tiles (.ae-store) carrying the store marks in
+// their own colors, matching the social tiles beside them.
 
 const SPOTMINT_APP_STORE = "https://apps.apple.com/us/app/spotmint-ai-video-ads/id6796510023";
 const SPOTMINT_PLAY = "https://play.google.com/store/apps/details?id=com.askevo.spotmint";
+const IG_ASKEVO = "https://www.instagram.com/askevo.ai";
+const IG_FOREMANPREP = "https://www.instagram.com/foremanprep";
+const IG_WIREMANPREP = "https://www.instagram.com/wiremanprep_/";
+const IG_HAULLEGAL = "https://www.instagram.com/haullegal";
+const IG_SPOTMINT = "https://www.instagram.com/spotmintvids";
+const YT_FOREMANPREP = "https://www.youtube.com/@Foremanprep";
 
-type Door = { label: string; href: string; color: string; ghost?: boolean; external?: boolean };
-type Brand = { name: string; color: string; tag: string; domain: string; desc: string; who: string; doors: Array<Door> };
+type Door = { label: string; href: string; color: string; ghost?: boolean; external?: boolean; icon?: "play" | "apple" };
+type Social = { kind: "ig" | "yt"; href: string; label: string };
+type Brand = { name: string; color: string; tag: string; domain: string; desc: string; who: string; doors: Array<Door>; socials: Array<Social> };
 
 const BRANDS: Array<Brand> = [
   {
@@ -35,6 +51,10 @@ const BRANDS: Array<Brand> = [
       { label: "Visit ForemanPrep", href: "https://foremanprep.com", color: "#f97316", external: true },
       { label: "Business & Law prep", href: "https://foremanprep.com/bl-prep", color: "#38bdf8", external: true },
     ],
+    socials: [
+      { kind: "yt", href: YT_FOREMANPREP, label: "ForemanPrep on YouTube" },
+      { kind: "ig", href: IG_FOREMANPREP, label: "ForemanPrep on Instagram" },
+    ],
   },
   {
     name: "WiremanPrep",
@@ -44,6 +64,7 @@ const BRANDS: Array<Brand> = [
     desc: "The same prep tools built for electricians: practice, a true-to-form exam simulator and an AI tutor for the NASCLA Master, Journeyman and Residential electrical exams, with per-state board guides.",
     who: "For electricians testing through NASCLA in the states that accept it.",
     doors: [{ label: "Visit WiremanPrep", href: "https://wiremanprep.com", color: "#ceff00", external: true }],
+    socials: [{ kind: "ig", href: IG_WIREMANPREP, label: "WiremanPrep on Instagram" }],
   },
   {
     name: "HaulLegal",
@@ -53,6 +74,7 @@ const BRANDS: Array<Brand> = [
     desc: "A plain-English, step-by-step walkthrough for new owner-operators getting a USDOT number and operating authority, plus Stay Legal: a calendar that tracks every filing deadline and sends reminders so the truck never gets parked over paperwork.",
     who: "For drivers going out on their own. Available in English and Spanish.",
     doors: [{ label: "Visit HaulLegal", href: "https://haullegal.com", color: "#22c55e", external: true }],
+    socials: [{ kind: "ig", href: IG_HAULLEGAL, label: "HaulLegal on Instagram" }],
   },
   {
     name: "Spotmint",
@@ -62,10 +84,11 @@ const BRANDS: Array<Brand> = [
     desc: "Turns a few sentences about a business into a finished video ad - no filming, no editing, no agency. Pick a format, pick sound on or off, and save the ad straight to your phone.",
     who: "For small business owners who need marketing video without a production budget.",
     doors: [
-      { label: "Google Play", href: SPOTMINT_PLAY, color: "#46dba8", external: true },
-      { label: "App Store", href: SPOTMINT_APP_STORE, color: "#46dba8", external: true },
+      { label: "Spotmint on Google Play", href: SPOTMINT_PLAY, color: "#46dba8", external: true, icon: "play" },
+      { label: "Spotmint on the App Store", href: SPOTMINT_APP_STORE, color: "#46dba8", external: true, icon: "apple" },
       { label: "Use it on the web", href: "/spotmint", color: "#46dba8", ghost: true },
     ],
+    socials: [{ kind: "ig", href: IG_SPOTMINT, label: "Spotmint on Instagram" }],
   },
 ];
 
@@ -77,16 +100,36 @@ function scrollTo(id: string) {
 function DoorButton({ door }: { door: Door }) {
   if (!door.href) return null;
   const style = { ["--btn" as string]: door.color } as React.CSSProperties;
+  const glyph = door.icon === "play" ? <PlayStoreIcon /> : door.icon === "apple" ? <AppleIcon /> : null;
+  const cls = glyph ? "ae-store" : door.ghost ? "ae-btn ghost" : "ae-btn";
   return (
     <Link
-      className={door.ghost ? "ae-btn ghost" : "ae-btn"}
+      aria-label={glyph ? door.label : undefined}
+      className={cls}
       href={door.href}
       prefetch={false}
       style={style}
       target={door.external ? "_blank" : undefined}
+      title={glyph ? door.label : undefined}
       rel={door.external ? "noopener noreferrer" : undefined}
     >
-      {door.label}
+      {glyph || door.label}
+    </Link>
+  );
+}
+
+function SocialLink({ s, className }: { s: Social; className?: string }) {
+  return (
+    <Link
+      aria-label={s.label}
+      className={className ? "ae-soc " + className : "ae-soc"}
+      href={s.href}
+      prefetch={false}
+      rel="noopener noreferrer"
+      target="_blank"
+      title={s.label}
+    >
+      {s.kind === "yt" ? <YoutubeIcon /> : <InstagramIcon />}
     </Link>
   );
 }
@@ -102,10 +145,17 @@ function BrandCard({ b }: { b: Brand }) {
       <p className="ae-domain">{b.domain}</p>
       <p className="ae-desc">{b.desc}</p>
       <p className="ae-who">{b.who}</p>
-      <div className="ae-btns">
-        {b.doors.map((d) => (
-          <DoorButton door={d} key={d.label} />
-        ))}
+      <div className="ae-cardfoot">
+        <div className="ae-btns">
+          {b.doors.map((d) => (
+            <DoorButton door={d} key={d.label} />
+          ))}
+        </div>
+        <div className="ae-socials">
+          {b.socials.map((s) => (
+            <SocialLink key={s.label} s={s} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -167,6 +217,7 @@ export default function CompanyPage() {
           <button className="ae-navbtn" onClick={() => scrollTo("businesses")} type="button">Businesses</button>
           <button className="ae-navbtn" onClick={() => scrollTo("about")} type="button">About</button>
           <button className="ae-navbtn" onClick={() => scrollTo("contact")} type="button">Contact</button>
+          <SocialLink className="top" s={{ kind: "ig", href: IG_ASKEVO, label: "AskEvo LLC on Instagram" }} />
         </div>
       </div>
       <div className="ae-rule" />
@@ -247,7 +298,7 @@ export default function CompanyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/page.tsx (v2 - hero headline)
+// END OF FILE - app/company/page.tsx (v4 - store glyph tiles)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
