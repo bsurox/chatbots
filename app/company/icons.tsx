@@ -1,19 +1,21 @@
 // FILE: app/company/icons.tsx
-// Inline SVG glyphs for the AskEvo LLC hub (v3). Kept in their own
+// Inline SVG glyphs for the AskEvo LLC hub (v4). Kept in their own
 // file so app/company/page.tsx stays under the size ceiling.
 // v2 (his call): the social glyphs wear their own platform colors
 // instead of grey - Instagram in its yellow-orange-pink-purple
-// gradient, YouTube in YouTube red. useId keeps every Instagram
-// instance's gradient id unique, since the page paints five of them.
+// gradient, YouTube in YouTube red. Each Instagram instance takes a
+// gid so its gradient id stays unique on a page painting several.
 // v3 (his call): the store glyphs get their familiar store colors
 // too - the Play mark in its four segments (blue spine, green,
 // yellow, red) and the Apple mark in white - so they read the way
 // the badges do everywhere else instead of black-on-mint.
+// v4: a plain gid prop replaces the useId hook, so these glyphs
+// render inside SERVER components too - the shared header in
+// layout.tsx paints one and a server component cannot call hooks.
 // 24x24 viewBox throughout; sized by css (.ae-soc svg / .ae-btn svg).
 
-import { useId } from "react";
-
 type IconProps = { className?: string };
+type InstagramProps = { className?: string; gid?: string };
 
 const YOUTUBE_RED = "#ff0000";
 const PLAY_BLUE = "#00a0ff";
@@ -21,9 +23,8 @@ const PLAY_GREEN = "#00e676";
 const PLAY_YELLOW = "#ffce00";
 const PLAY_RED = "#ff3a44";
 
-export function InstagramIcon({ className }: IconProps) {
-  const id = useId();
-  const g = "ig" + id.replace(/:/g, "");
+export function InstagramIcon({ className, gid }: InstagramProps) {
+  const g = "aeig-" + (gid || "default");
   return (
     <svg aria-hidden="true" className={className} fill="none" focusable="false" viewBox="0 0 24 24">
       <defs>
@@ -72,7 +73,7 @@ export function PlayStoreIcon({ className }: IconProps) {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/icons.tsx (v3 - store colors too)
+// END OF FILE - app/company/icons.tsx (v4 - gid, server-safe)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
