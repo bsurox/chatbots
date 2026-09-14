@@ -1,7 +1,9 @@
 // FILE: lib/haullegal/i18n.ts
 import { useCallback, useEffect, useState } from "react";
 
-// HaulLegal language layer (v10 - the calendar's Reminders box:
+// HaulLegal language layer (v11 - common.partners, the footer link
+// to the partner page.)
+// v10 notes - the calendar's Reminders box:
 // its title and intro, and the "part of Stay Legal" notice a
 // visitor gets when they tap a reminder switch. Replaces v9's
 // smsNeedSub.)
@@ -106,6 +108,7 @@ const EN = {
     loading: "Loading...",
     account: "Account",
     viewAccount: "View account",
+    partners: "For partners",
     langToggleTitle: "Cambiar a espa\u00f1ol",
   },
   landing: {
@@ -534,6 +537,7 @@ const ES: HlUi = {
     loading: "Cargando...",
     account: "Cuenta",
     viewAccount: "Ver cuenta",
+    partners: "Para socios",
     langToggleTitle: "Switch to English",
   },
   landing: {
@@ -950,7 +954,8 @@ const ES: HlUi = {
 export const HL_UI: Record<HlLang, HlUi> = { en: EN, es: ES };
 
 // -----------------------------------------------------------
-// END OF FILE - lib/haullegal/i18n.ts (v10 - Reminders box +
+// END OF FILE - lib/haullegal/i18n.ts (v11 - partners link;
+// Reminders box +
 // paid notice; full SMS consent wording; tutor 50/day line;
 // chat + tutor strings; text-reminder strings; List / Grid view strings, "View account"; "Manage"; Account label; EN/ES
 // page strings, the hl-lang hook, fill())
