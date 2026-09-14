@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-// AskEvo LLC parent-company hub (v1). This is what askevo.ai shows
+// AskEvo LLC parent-company hub (v2). This is what askevo.ai shows
 // now: who the company is, the businesses it owns, and how to
 // reach it. Every business button is painted in that business's
 // own brand color (the same hex its own site uses) via the table
@@ -11,6 +11,11 @@ import { useState } from "react";
 // Both Spotmint store links are live: the App Store listing is
 // named "Spotmint - AI Video Ads" (the name collision forced the
 // longer store name), the Play listing is plain Spotmint.
+// v2 (his call): the hero headline reads "we build focused software
+// businesses." - measured against the real Inter face at every
+// width, the shorter "focused software businesses." sat on ONE line
+// on desktop, and he wants the line under the wordmark to break
+// across two.
 
 const SPOTMINT_APP_STORE = "https://apps.apple.com/us/app/spotmint-ai-video-ads/id6796510023";
 const SPOTMINT_PLAY = "https://play.google.com/store/apps/details?id=com.askevo.spotmint";
@@ -171,7 +176,7 @@ export default function CompanyPage() {
         <h2 className="ae-h1">
           <span className="ae-grad">AskEvo LLC</span>
           <br />
-          builds focused software businesses.
+          we build focused software businesses.
         </h2>
         <p className="ae-lead">
           One company, several brands. Each one solves a single problem for a single group of people - contractors getting licensed, electricians testing, truckers going independent, small businesses that need a video ad - and does it end to end.
@@ -242,7 +247,7 @@ export default function CompanyPage() {
 }
 
 // -----------------------------------------------------------
-// END OF FILE - app/company/page.tsx (v1 - parent-company hub)
+// END OF FILE - app/company/page.tsx (v2 - hero headline)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
