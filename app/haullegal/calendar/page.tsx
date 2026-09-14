@@ -17,7 +17,16 @@ import {
 import { HL_DUE_DETAILS_ES, HL_DUE_TITLES_ES, HL_FREQ_ES, HL_MISSING_ES, HL_OBLIGATIONS_ES } from "@/lib/haullegal/deadlines-es";
 import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 
-// HaulLegal Stay Legal calendar (v7 - the Text reminders block is
+// HaulLegal Stay Legal calendar (v8 - ONE REMINDERS BOX, his spec:
+// email reminders and text reminders now sit together inside a
+// single green-outlined section, visible to everyone on the public
+// calendar page. A visitor or non-subscriber sees both switches and
+// the full text-consent wording (the carrier reviewers need that on
+// this URL), but tapping either one pops the "Reminders are part of
+// Stay Legal" notice with the door to /haullegal/buy instead of
+// changing anything. Subscribers get the working switches exactly
+// as in v7.)
+// v7 notes - the Text reminders block is
 // now VISIBLE TO EVERYONE, not only signed-in subscribers: the
 // carrier reviewers vetting the text campaign open this exact URL
 // and must see the number field, the unchecked box and the full
@@ -71,6 +80,15 @@ import { fill, HL_UI, useHlLang } from "@/lib/haullegal/i18n";
 // an argument. External rule links are real anchors with
 // rel=noopener - the standing no-anchor exception for off-site
 // government pages.
+
+const remBox: React.CSSProperties = {
+  border: "1px solid rgba(34, 197, 94, 0.45)",
+  borderRadius: "14px",
+  background: "rgba(34, 197, 94, 0.04)",
+  padding: "16px",
+};
+
+const remRule: React.CSSProperties = { height: "1px", background: "#1e1e1e", margin: "16px 0 2px" };
 
 const STORE_KEY = "hl-profile";
 const PROGRESS_KEY = "hl-progress";
@@ -159,6 +177,7 @@ export default function HaulLegalCalendarPage() {
   const [phone, setPhone] = useState("");
   const [sms, setSms] = useState(false);
   const [phoneErr, setPhoneErr] = useState("");
+  const [showPaid, setShowPaid] = useState(false);
   const [lang] = useHlLang();
   const ui = HL_UI[lang];
   const t = ui.calendar;
@@ -236,6 +255,16 @@ export default function HaulLegalCalendarPage() {
     const next = !reminders;
     setReminders(next);
     push(profile, next);
+  }
+
+  // Every reminder control routes through here: subscribers get the
+  // real action, everyone else gets the paid notice.
+  function guard(run: () => void) {
+    if (!smsLive) {
+      setShowPaid(true);
+      return;
+    }
+    run();
   }
 
   // The only call that sends the number and the consent flag.
@@ -424,34 +453,48 @@ export default function HaulLegalCalendarPage() {
               </>
             ) : null}
           </p>
-          {access.sub && synced ? (
-            <div className="hl-actions">
-              <button className={"hl-check" + (reminders ? " on" : "")} onClick={toggleReminders} type="button">
-                {reminders ? t.remindersOn : t.remindersOff}
-              </button>
-              <p className="hl-fh" style={{ margin: "6px 0 0" }}>{t.remindersHelp}</p>
-            </div>
-          ) : null}
         </div>
 
-        <div className="hl-field hl-wide" style={smsLive ? undefined : { opacity: 0.75 }}>
+        <div className="hl-field hl-wide" style={remBox}>
+          <p className="hl-fl" style={{ fontSize: "14px", color: "var(--fp)" }}>{t.remT}</p>
+          <p className="hl-fh">{t.remIntro}</p>
+
+          <div className="hl-actions" style={{ margin: "10px 0 0" }}>
+            <button
+              className={"hl-check" + (smsLive && reminders ? " on" : "")}
+              onClick={() => guard(toggleReminders)}
+              type="button"
+            >
+              {smsLive && reminders ? t.remindersOn : t.remindersOff}
+            </button>
+          </div>
+          <p className="hl-fh">{t.remindersHelp}</p>
+
+          <div style={remRule} />
+
           <p className="hl-fl">{t.smsT}</p>
-          {smsLive ? null : <p className="hl-fh" style={{ color: "var(--fp)" }}>{t.smsNeedSub}</p>}
           <label className="hl-fh" htmlFor="hl-phone">{t.phoneLabel}</label>
           <input
             autoComplete="tel-national"
             className="fp-in"
-            disabled={!smsLive}
             id="hl-phone"
             inputMode="tel"
             onBlur={blurPhone}
             onChange={(e) => changePhone(e.target.value)}
+            onFocus={() => guard(() => {})}
             placeholder={t.phonePh}
+            readOnly={!smsLive}
             value={prettyPhone(phone)}
           />
           <p className="hl-fh">{t.phoneHelp}</p>
-          <label htmlFor="hl-sms" style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: smsLive ? "pointer" : "default", marginTop: "6px" }}>
-            <input checked={sms} disabled={!smsLive} id="hl-sms" onChange={toggleSms} style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "var(--fp)", flexShrink: 0 }} type="checkbox" />
+          <label htmlFor="hl-sms" style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", marginTop: "6px" }}>
+            <input
+              checked={sms}
+              id="hl-sms"
+              onChange={() => guard(toggleSms)}
+              style={{ marginTop: "3px", width: "18px", height: "18px", accentColor: "var(--fp)", flexShrink: 0 }}
+              type="checkbox"
+            />
             <span className="hl-stepd" style={{ color: "#ddd" }}>{t.smsConsent}</span>
           </label>
           {phoneErr ? <p className="fp-buyerr">{phoneErr}</p> : null}
@@ -474,6 +517,16 @@ export default function HaulLegalCalendarPage() {
               )
             )}
           </p>
+
+          {showPaid && !smsLive ? (
+            <div className="fp-gate" style={{ margin: "14px 0 0" }}>
+              <p className="fp-gateh">{t.paidH}</p>
+              <p className="fp-gated">{t.paidP}</p>
+              <Link className="fp-gatebtn" href="/haullegal/buy">
+                {t.paidBtn}
+              </Link>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -585,9 +638,9 @@ export default function HaulLegalCalendarPage() {
 }
 
 // ============================================================
-// END OF FILE - app/haullegal/calendar/page.tsx (v7 - text
-// reminder block visible to everyone, live for subscribers: number
-// field + consent box + ON/OFF; account
+// END OF FILE - app/haullegal/calendar/page.tsx (v8 - one
+// green-outlined Reminders box: email + text switches visible to
+// everyone, paid notice for non-subscribers, live for subscribers; account
 // circle, footer Account link; account sync + reminders switch, Connecticut
 // switch, Spanish switch; profile form, due-date list, rules
 // reference, Stay Legal pitch)
