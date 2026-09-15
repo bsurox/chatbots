@@ -4,6 +4,7 @@ import "./practice.css";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { buildBookSet, FP_BOOKS } from "@/lib/foremanprep/books";
 import {
   buildDemoSet,
   buildPracticeSet,
@@ -15,6 +16,14 @@ import {
 import { AUDIO_BASE, audioUrl } from "@/lib/foremanprep/audio-config";
 
 // Practice player v23:
+// v24 STUDY BY THE BOOK (customer suggestion): a second picker
+// grid under the subjects lists the approved reference books, each
+// tile carrying how many questions cite it. Picking a book clears
+// the subject pick and vice versa - one round drills one thing.
+// The mapping lives in lib/foremanprep/books.ts, built from the
+// cite field every bank question already carries. Free tier is
+// unchanged: any start without Full Access serves the fixed demo
+// round, so the bank still cannot be walked ten at a time.
 // PICKER LAYOUT (his spec): the Start practice button now sits
 // directly under the All subjects tile - no scrolling past the
 // grid to launch - and an "Individual subjects" header labels the
@@ -165,6 +174,7 @@ export default function PracticePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"pick" | "quiz">("pick");
   const [sel, setSel] = useState<Sel | null>(null);
+  const [selBook, setSelBook] = useState<string | null>(null);
   const [roundLen, setRoundLen] = useState<Len | null>(null);
   const [lenErr, setLenErr] = useState(false);
   const [domErr, setDomErr] = useState(false);
@@ -378,13 +388,23 @@ export default function PracticePage() {
   // Start practice button actually begins a round.
   function pickDomain(key: Sel) {
     setSel(key);
+    setSelBook(null);
+    setDomErr(false);
+  }
+
+  // Tapping a book tile works the same way: it selects, Start
+  // launches. A book pick and a subject pick are mutually
+  // exclusive - whichever was tapped last is the round.
+  function pickBook(key: string) {
+    setSelBook(key);
+    setSel(null);
     setDomErr(false);
   }
 
   function startRound() {
-    if (roundLen === null || sel === null) {
+    if (roundLen === null || (sel === null && selBook === null)) {
       setLenErr(roundLen === null);
-      setDomErr(sel === null);
+      setDomErr(sel === null && selBook === null);
       return;
     }
     let set: ForemanQuestion[];
@@ -395,7 +415,9 @@ export default function PracticePage() {
       set = buildDemoSet();
     } else {
       const count = roundLen === "all" ? Number.MAX_SAFE_INTEGER : roundLen;
-      set = buildPracticeSet(sel === "all" ? "all" : sel, count);
+      // sel can only be null here if a book is picked, so the "all"
+      // arm of this fallback is dead code that keeps the types honest.
+      set = selBook !== null ? buildBookSet(selBook, count) : buildPracticeSet(sel === null || sel === "all" ? "all" : sel, count);
     }
     setQs(set);
     setTimeLeft(timerOn && access?.paid ? QUESTION_SECONDS : null);
@@ -560,7 +582,7 @@ export default function PracticePage() {
           <span className="fq-sn">All subjects</span>
           <span className="fq-sw">A mixed round, the way the exam feels</span>
         </button>
-        {domErr ? <p className="fq-lenerr">Select a subject first.</p> : null}
+        {domErr ? <p className="fq-lenerr">Select a subject or a book first.</p> : null}
         <button className="fq-startbtn" onClick={startRound} type="button">
           Start practice
         </button>
@@ -577,6 +599,23 @@ export default function PracticePage() {
             >
               <span className="fq-sn">{d.name}</span>
               <span className="fq-sw">{d.examCount} of 115 on the exam</span>
+            </button>
+          ))}
+        </div>
+        <span className="fq-lenlabel" style={{ display: "block", margin: "18px 0 8px" }}>
+          Study by the book
+        </span>
+        <div className="fq-pick">
+          {FP_BOOKS.map((b) => (
+            <button
+              className={selBook === b.key ? "fq-sub sel" : "fq-sub"}
+              key={b.key}
+              onClick={() => pickBook(b.key)}
+              title={b.title}
+              type="button"
+            >
+              <span className="fq-sn">{b.short}</span>
+              <span className="fq-sw">{b.count} questions cite this book</span>
             </button>
           ))}
         </div>
@@ -820,7 +859,6 @@ export default function PracticePage() {
 }
 
 // ============================================================
-// END OF FILE - app/foremanprep/practice/page.tsx (v23 - Start
-// button above the subject grid + Individual subjects header)
+// END OF FILE - app/foremanprep/practice/page.tsx (v24 - study by the book)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
