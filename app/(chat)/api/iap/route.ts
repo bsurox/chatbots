@@ -40,7 +40,10 @@ async function releaseClaim(transactionId: string) {
 }
 
 async function findUserIdByEmail(email: string): Promise<string | null> {
-  const res = await db.execute(sql`SELECT id FROM "User" WHERE email = ${email} LIMIT 1`);
+  // v3: capital letters in the RevenueCat app_user_id (the buyer's
+  // email) must not matter - same case-insensitive rule as login.
+  const normalized = email.trim().toLowerCase();
+  const res = await db.execute(sql`SELECT id FROM "User" WHERE lower(email) = ${normalized} LIMIT 1`);
   const rows = (Array.isArray(res) ? res : (res as { rows: { id: string }[] }).rows) as { id: string }[];
   return rows.length > 0 ? rows[0].id : null;
 }
@@ -104,6 +107,6 @@ export async function POST(request: Request) {
 }
 
 // ============================================================
-// END OF FILE - app/(chat)/api/iap/route.ts (v2 - self-diagnosing auth)
+// END OF FILE - app/(chat)/api/iap/route.ts (v3 - case-insensitive email)
 // If you can see this comment, the paste was not truncated.
 // ============================================================
