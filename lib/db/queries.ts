@@ -1,3 +1,4 @@
+// FILE: lib/db/queries.ts
 import "server-only";
 
 import {
@@ -11,6 +12,7 @@ import {
   inArray,
   lt,
   type SQL,
+  sql,
 } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -37,8 +39,19 @@ const client = postgres(process.env.POSTGRES_URL ?? "");
 export const db = drizzle(client);
 
 export async function getUser(email: string): Promise<User[]> {
+  // v2 MONEY-BUG FIX: capital letters in an email must not matter.
+  // The old exact match meant a customer whose phone auto-capitalized
+  // their address at signup could never log in typing it lowercase
+  // on another device - and forgot-password silently sent nothing for
+  // the wrong-case spelling. Both sides are lowercased here, so every
+  // spelling of the same address finds the same account, whatever
+  // casing the stored row still has.
+  const normalized = email.trim().toLowerCase();
   try {
-    return await db.select().from(user).where(eq(user.email, email));
+    return await db
+      .select()
+      .from(user)
+      .where(sql`lower(${user.email}) = ${normalized}`);
   } catch (_error) {
     throw new ChatbotError(
       "bad_request:database",
@@ -53,11 +66,14 @@ export async function createUser(
   name?: string
 ) {
   const hashedPassword = generateHashedPassword(password);
+  // v2: store every new email lowercased and trimmed, so the table
+  // converges on one canonical spelling per address going forward.
+  const normalizedEmail = email.trim().toLowerCase();
 
   try {
     return await db
       .insert(user)
-      .values({ email, password: hashedPassword, name: name ?? null });
+      .values({ email: normalizedEmail, password: hashedPassword, name: name ?? null });
   } catch (_error) {
     throw new ChatbotError("bad_request:database", "Failed to create user");
   }
@@ -636,3 +652,9 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     );
   }
 }
+
+// -----------------------------------------------------------
+// END OF FILE - lib/db/queries.ts (v2 - case-insensitive email)
+// If you can see these lines after pasting, the whole file
+// made it. Safe to commit.
+// -----------------------------------------------------------
