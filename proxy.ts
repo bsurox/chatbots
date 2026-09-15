@@ -33,6 +33,8 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/spotmint") ||
       pathname === "/login" ||
       pathname === "/register" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password" ||
       pathname.startsWith("/api/") ||
       pathname.startsWith("/privacy") ||
       pathname.startsWith("/terms") ||
@@ -54,6 +56,8 @@ export async function proxy(request: NextRequest) {
     const storeAllowed =
       pathname === "/login" ||
       pathname === "/register" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password" ||
       pathname.startsWith("/api/") ||
       pathname.startsWith("/privacy") ||
       pathname.startsWith("/terms") ||
@@ -120,6 +124,8 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/foremanprep") ||
       pathname === "/login" ||
       pathname === "/register" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password" ||
       pathname.startsWith("/api/") ||
       pathname.startsWith("/privacy") ||
       pathname.startsWith("/terms") ||
@@ -170,6 +176,8 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/wiremanprep") ||
       pathname === "/login" ||
       pathname === "/register" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password" ||
       pathname.startsWith("/api/") ||
       pathname.includes(".");
     if (!wmAllowed) {
@@ -211,6 +219,8 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/haullegal") ||
       pathname === "/login" ||
       pathname === "/register" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password" ||
       pathname.startsWith("/api/") ||
       pathname.includes(".");
     if (!hlAllowed) {
@@ -295,6 +305,23 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // v27 MONEY-BUG FIX: password recovery is PUBLIC. These two pages
+  // are used precisely by visitors with no session - a locked-out
+  // customer on a new device - and the guest-auth dance below
+  // rebuilt the URL from its pathname alone, which threw away the
+  // ?token= that reset links carry. Result: every reset link read
+  // "invalid" on any device the customer had not used before, and
+  // the brand hosts did not even let /forgot-password through
+  // (each host allowlist above now does). Neither page needs a
+  // session: the reset page reads its token from the query string
+  // and the forgot page just posts an email address.
+  if (
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password"
+  ) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/updates")) {
     return NextResponse.next();
   }
@@ -342,7 +369,12 @@ export async function proxy(request: NextRequest) {
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
   if (!token) {
-    const redirectUrl = encodeURIComponent(new URL(request.url).pathname);
+    // v27: carry the QUERY STRING through the guest dance, not just
+    // the pathname - rebuilding from pathname alone silently dropped
+    // parameters (the reset-token loss above was one casualty; any
+    // future ?x= link would be the next).
+    const reqUrl = new URL(request.url);
+    const redirectUrl = encodeURIComponent(reqUrl.pathname + reqUrl.search);
     return NextResponse.redirect(
       new URL(`${base}/api/auth/guest?redirectUrl=${redirectUrl}`, request.url)
     );
@@ -369,9 +401,9 @@ export const config = {
 };
 
 // -----------------------------------------------------------
-// END OF FILE - proxy.ts (v26 - askevo.ai hub clean URLs
-// /businesses and /contact; carries v25's front-door rewrite
-// and v24's haullegal /partners + /sms doors)
+// END OF FILE - proxy.ts (v27 - password recovery unbroken:
+// /forgot-password + /reset-password public on every host, and the
+// guest dance keeps query strings; carries v26/v25/v24)
 // If you can see these lines after pasting, the whole file
 // made it. Safe to commit.
 // -----------------------------------------------------------
